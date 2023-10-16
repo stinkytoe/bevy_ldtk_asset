@@ -14,7 +14,7 @@ pub struct World {
 }
 
 impl World {
-    pub fn new_from_ldtk_json(value: &ldtk_json::LdtkJson, load_context: &mut LoadContext) -> Self {
+    pub fn new_from_ldtk_json(value: &ldtk_json::LdtkJson, load_context: &LoadContext) -> Self {
         World {
             identifier: { "(root)".to_owned() },
             iid: value.iid.clone(),
@@ -48,7 +48,7 @@ impl World {
         }
     }
 
-    pub fn new_from_ldtk_world(value: &ldtk_json::World, _load_context: &mut LoadContext) -> Self {
+    pub fn new_from_ldtk_world(value: &ldtk_json::World, _load_context: &LoadContext) -> Self {
         World {
             identifier: value.identifier.clone(),
             iid: value.iid.clone(),

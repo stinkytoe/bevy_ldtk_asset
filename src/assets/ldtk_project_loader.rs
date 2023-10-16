@@ -1,4 +1,5 @@
 use crate::assets::ldtk_project::LdtkProject;
+use crate::assets::util::ldtk_file_to_asset_path;
 use crate::util;
 use crate::{ldtk_json, world};
 use anyhow::Result;
@@ -7,6 +8,7 @@ use bevy::{
     prelude::*,
 };
 use std::collections::HashMap;
+use std::path::Path;
 
 pub struct LdtkRootLoader;
 
@@ -23,6 +25,8 @@ impl AssetLoader for LdtkRootLoader {
             );
 
             let value: ldtk_json::LdtkJson = serde_json::from_slice(bytes)?;
+
+            let ldtk_file_path = load_context.path().parent().unwrap_or(Path::new(""));
 
             let worlds = if value.worlds.is_empty() {
                 let new_world = world::World::new_from_ldtk_json(&value, load_context);
@@ -48,16 +52,24 @@ impl AssetLoader for LdtkRootLoader {
 
             let level_backgrounds = worlds
                 .values()
-                .filter_map(|world| {
-                    world
-                        .levels
-                        .values()
-                        .map(|level| level.bg_rel_path.clone())
-                        .collect::<Option<String>>()
+                .flat_map(|world| {
+                    world.levels.values().filter_map(|level| {
+                        level.bg_rel_path.as_ref().map(|bg_rel_path| {
+                            (
+                                level.iid.clone(),
+                                load_context.get_handle(ldtk_file_to_asset_path(
+                                    bg_rel_path,
+                                    ldtk_file_path,
+                                )),
+                            )
+                        })
+                    })
                 })
-                .collect::<Vec<String>>();
+                .collect::<HashMap<_, Handle<Image>>>();
 
             debug!("level_backgrounds: {level_backgrounds:?}");
+
+            // let layer_images = value.defs.layers.iter().map(|layer| ());
 
             let ldtk_project = LdtkProject {
                 bg_color: util::get_bevy_color_from_ldtk(&value.bg_color)?,
@@ -66,13 +78,8 @@ impl AssetLoader for LdtkRootLoader {
                 iid: value.iid,
                 json_version: value.json_version,
                 worlds,
-                level_backgrounds: HashMap::default(),
+                level_backgrounds,
             };
-
-            // let _x: Handle<Image> = load_context.get_handle(AssetPath::new(
-            //     load_context.path().parent().unwrap().join(""),
-            //     None,
-            // ));
 
             load_context.set_default_asset(LoadedAsset::new(ldtk_project));
 
