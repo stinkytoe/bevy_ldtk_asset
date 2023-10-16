@@ -56,7 +56,7 @@ impl World {
             world_grid_height: value.world_grid_height,
             world_grid_width: value.world_grid_width,
             world_layout: value.world_layout.as_ref().unwrap_or_else(|| {
-                debug!("Got None for worldLayout? Weird, if we're a multuworld this should be something. Using 'Free'");
+                debug!("Got None for worldLayout? Weird, if this is a multuworld this should be something. Using 'Free'");
                 &ldtk_json::WorldLayout::Free}).clone(),
         }
     }
