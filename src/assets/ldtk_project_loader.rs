@@ -1,5 +1,6 @@
+use crate::assets::ldtk_project::LdtkProject;
 use crate::util;
-use crate::{ldtk_json, ldtk_project::LdtkProject, world};
+use crate::{ldtk_json, world};
 use anyhow::Result;
 use bevy::{
     asset::{AssetLoader, LoadedAsset},
@@ -44,6 +45,19 @@ impl AssetLoader for LdtkRootLoader {
                     })
                     .collect()
             };
+
+            let level_backgrounds = worlds
+                .values()
+                .filter_map(|world| {
+                    world
+                        .levels
+                        .values()
+                        .map(|level| level.bg_rel_path.clone())
+                        .collect::<Option<String>>()
+                })
+                .collect::<Vec<String>>();
+
+            debug!("level_backgrounds: {level_backgrounds:?}");
 
             let ldtk_project = LdtkProject {
                 bg_color: util::get_bevy_color_from_ldtk(&value.bg_color)?,

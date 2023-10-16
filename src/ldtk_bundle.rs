@@ -4,7 +4,7 @@ use std::collections::HashMap;
 
 #[derive(Component, Default)]
 pub struct LdtkRoot {
-    pub root: Handle<LdtkProject>,
+    pub project: Handle<LdtkProject>,
 }
 
 #[derive(Component, Default)]

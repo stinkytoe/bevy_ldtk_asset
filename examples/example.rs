@@ -2,9 +2,7 @@ const LDTK_EXAMPLE: &str = "ldtk/example.ldtk";
 
 use bevy::log::LogPlugin;
 use bevy::prelude::*;
-use ldtk_bevy_loader::LdtkBevyLoaderPlugin;
-use ldtk_bevy_loader::LdtkBundle;
-use ldtk_bevy_loader::LdtkRoot;
+use ldtk_bevy_loader::prelude::*;
 
 fn main() {
     App::new()
@@ -24,7 +22,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(Camera2dBundle::default());
     commands.spawn(LdtkBundle {
         root: LdtkRoot {
-            root: asset_server.load(LDTK_EXAMPLE),
+            project: asset_server.load(LDTK_EXAMPLE),
         },
         ..default()
     });
