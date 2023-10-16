@@ -24,7 +24,7 @@ impl AssetLoader for LdtkRootLoader {
             let value: ldtk_json::LdtkJson = serde_json::from_slice(bytes)?;
 
             let worlds = if value.worlds.is_empty() {
-                let new_world = world::World::from(&value);
+                let new_world = world::World::new_from_ldtk_json(&value, load_context);
                 debug!("Loading world data from project root.");
                 debug!("Since we're constructing from the old style, one world representation,");
                 debug!("we'll use (root) as the identifier since one isn't supplied.");
@@ -37,7 +37,7 @@ impl AssetLoader for LdtkRootLoader {
                     .worlds
                     .iter()
                     .map(|value| {
-                        let new_world = world::World::from(value);
+                        let new_world = world::World::new_from_ldtk_world(value, load_context);
                         debug!("Loaded world: {}", new_world.identifier);
                         debug!("    with iid: {}", new_world.iid);
                         (value.iid.clone(), new_world)
@@ -52,6 +52,7 @@ impl AssetLoader for LdtkRootLoader {
                 iid: value.iid,
                 json_version: value.json_version,
                 worlds,
+                level_backgrounds: HashMap::default(),
             };
 
             // let _x: Handle<Image> = load_context.get_handle(AssetPath::new(

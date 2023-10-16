@@ -5,10 +5,10 @@ use bevy::{
     prelude::*,
     reflect::{TypePath, TypeUuid},
 };
-use serde::Deserialize;
+// use serde::Deserialize;
 use std::collections::HashMap;
 
-#[derive(Debug, Deserialize, TypePath, TypeUuid)]
+#[derive(Debug, TypePath, TypeUuid)]
 #[uuid = "e131e69d-f619-4fec-9fa5-71fef82f9c81"]
 pub struct LdtkProject {
     pub bg_color: Color,
@@ -17,4 +17,5 @@ pub struct LdtkProject {
     pub iid: String,
     pub json_version: String,
     pub worlds: HashMap<String, World>,
+    pub level_backgrounds: HashMap<String, Handle<Image>>,
 }

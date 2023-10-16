@@ -1,5 +1,5 @@
 use crate::{ldtk_json, level::Level};
-use bevy::prelude::*;
+use bevy::{asset::LoadContext, prelude::*};
 use serde::Deserialize;
 use std::collections::HashMap;
 
@@ -13,8 +13,8 @@ pub struct World {
     pub world_layout: ldtk_json::WorldLayout,
 }
 
-impl From<&ldtk_json::LdtkJson> for World {
-    fn from(value: &ldtk_json::LdtkJson) -> Self {
+impl World {
+    pub fn new_from_ldtk_json(value: &ldtk_json::LdtkJson, load_context: &mut LoadContext) -> Self {
         World {
             identifier: { "(root)".to_owned() },
             iid: value.iid.clone(),
@@ -22,7 +22,8 @@ impl From<&ldtk_json::LdtkJson> for World {
                 .levels
                 .iter()
                 .map(|value| {
-                    let new_level = Level::from(value);
+                    // let new_level = Level::from(value);
+                    let new_level = Level::new(value, load_context);
                     debug!("Loaded level: {}", new_level.identifier);
                     debug!("    with iid: {}", new_level.iid);
                     (new_level.iid.clone(), new_level)
@@ -46,10 +47,8 @@ impl From<&ldtk_json::LdtkJson> for World {
                 .clone(),
         }
     }
-}
 
-impl From<&ldtk_json::World> for World {
-    fn from(value: &ldtk_json::World) -> Self {
+    pub fn new_from_ldtk_world(value: &ldtk_json::World, _load_context: &mut LoadContext) -> Self {
         World {
             identifier: value.identifier.clone(),
             iid: value.iid.clone(),

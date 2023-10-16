@@ -25,7 +25,7 @@ impl AssetLoader for LdtkLevelLoader {
             let value: ldtk_json::Level = serde_json::from_slice(bytes)?;
 
             load_context.set_default_asset(LoadedAsset::new(LdtkLevel {
-                level: Level::from(&value),
+                level: Level::new(&value, load_context),
             }));
 
             Ok(())

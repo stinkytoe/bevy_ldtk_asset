@@ -1,5 +1,5 @@
 use crate::{ldtk_json, util};
-use bevy::prelude::*;
+use bevy::{asset::LoadContext, prelude::*};
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
@@ -12,8 +12,10 @@ pub struct Level {
     pub neighbors: Vec<ldtk_json::NeighbourLevel>,
 }
 
-impl From<&ldtk_json::Level> for Level {
-    fn from(value: &ldtk_json::Level) -> Self {
+// impl From<&ldtk_json::Level> for Level {
+//     fn from(value: &ldtk_json::Level) -> Self {
+impl Level {
+    pub fn new(value: &ldtk_json::Level, _load_context: &LoadContext) -> Self {
         Level {
             bg_color: util::get_bevy_color_from_ldtk(&value.bg_color).unwrap_or_else(|e| {
                 debug!("Failed to parse level's bg_color: {e}");
