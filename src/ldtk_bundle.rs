@@ -1,8 +1,6 @@
-use std::collections::HashMap;
-
-use bevy::prelude::*;
-
 use crate::assets::ldtk_project::LdtkProject;
+use bevy::prelude::*;
+use std::collections::HashMap;
 
 #[derive(Component, Default)]
 pub struct LdtkRoot {
