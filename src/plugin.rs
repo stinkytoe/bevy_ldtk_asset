@@ -2,7 +2,6 @@ use crate::assets::ldtk_level::LdtkLevel;
 use crate::assets::ldtk_level_loader::LdtkLevelLoader;
 use crate::assets::ldtk_project::LdtkProject;
 use crate::assets::ldtk_project_loader::LdtkRootLoader;
-use crate::systems;
 use bevy::prelude::*;
 
 pub struct LdtkBevyLoaderPlugin;
@@ -14,6 +13,7 @@ impl Plugin for LdtkBevyLoaderPlugin {
             .add_asset_loader(LdtkRootLoader)
             .add_asset::<LdtkLevel>()
             .add_asset_loader(LdtkLevelLoader)
-            .add_systems(Update, (systems::promote_ldtkl_files::promote_ldtkl_files,));
+            // .add_systems(Update, (systems::promote_ldtkl_files::promote_ldtkl_files,))
+        ;
     }
 }

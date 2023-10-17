@@ -78,7 +78,7 @@ impl AssetLoader for LdtkRootLoader {
             })
             .collect::<Vec<(String, AssetPath, Handle<LdtkLevel>)>>();
 
-            let tilesets = value
+            let tilesets_meta = value
                 .defs
                 .tilesets
                 .iter()
@@ -90,6 +90,7 @@ impl AssetLoader for LdtkRootLoader {
                             debug!("Adding tileset to set: {ldtk_tileset_asset_path:?}");
                             (
                                 tileset.uid,
+                                ldtk_tileset_asset_path.clone(),
                                 load_context.get_handle(ldtk_tileset_asset_path),
                             )
                         })
@@ -97,15 +98,10 @@ impl AssetLoader for LdtkRootLoader {
                         None
                     }
                 })
-                .collect::<HashMap<_, Handle<Image>>>();
+                .collect::<Vec<(i64, AssetPath, Handle<Image>)>>();
 
             let worlds = if value.worlds.is_empty() {
                 let new_world = world::World::new_from_ldtk_json(&value, load_context);
-                debug!("Loading world data from project root.");
-                debug!("Since we're constructing from the old style, one world representation,");
-                debug!("we'll use (root) as the identifier since one isn't supplied.");
-                debug!("Loaded world: {}", new_world.identifier);
-                debug!("    with iid: {}", new_world.iid);
                 HashMap::from([(value.iid.clone(), new_world)])
             } else {
                 debug!("Multi world file found! Will load all levels.");
@@ -114,8 +110,6 @@ impl AssetLoader for LdtkRootLoader {
                     .iter()
                     .map(|value| {
                         let new_world = world::World::new_from_ldtk_world(value, load_context);
-                        debug!("Loaded world: {}", new_world.identifier);
-                        debug!("    with iid: {}", new_world.iid);
                         (value.iid.clone(), new_world)
                     })
                     .collect()
@@ -131,7 +125,10 @@ impl AssetLoader for LdtkRootLoader {
                     .iter()
                     .map(|(id, _, handle)| (id.clone(), handle.clone()))
                     .collect(),
-                tilesets,
+                tilesets: tilesets_meta
+                    .iter()
+                    .map(|(id, _, handle)| (*id, handle.clone()))
+                    .collect(),
                 value,
                 worlds,
             };
@@ -146,6 +143,12 @@ impl AssetLoader for LdtkRootLoader {
                     )
                     .with_dependencies(
                         level_file_handles_meta
+                            .iter()
+                            .map(|(_, asset_path, _)| asset_path.clone())
+                            .collect(),
+                    )
+                    .with_dependencies(
+                        tilesets_meta
                             .iter()
                             .map(|(_, asset_path, _)| asset_path.clone())
                             .collect(),

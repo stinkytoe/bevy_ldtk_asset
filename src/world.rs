@@ -15,8 +15,13 @@ pub struct World {
 
 impl World {
     pub fn new_from_ldtk_json(value: &ldtk_json::LdtkJson, load_context: &LoadContext) -> Self {
+        debug!("Loading world data from project root.");
+        debug!("Since we're constructing from the old style, one world representation,");
+        debug!("we'll use (root) as the identifier since one isn't supplied.");
+        debug!("Loading world: (root)");
+        debug!("     with iid: {}", value.iid);
         World {
-            identifier: { "(root)".to_owned() },
+            identifier: "(root)".to_owned(),
             iid: value.iid.clone(),
             levels: value
                 .levels
@@ -24,8 +29,6 @@ impl World {
                 .map(|value| {
                     // let new_level = Level::from(value);
                     let new_level = Level::new(value, load_context);
-                    debug!("Loaded level: {}", new_level.identifier);
-                    debug!("    with iid: {}", new_level.iid);
                     (new_level.iid.clone(), new_level)
                 })
                 .collect(),
@@ -49,6 +52,8 @@ impl World {
     }
 
     pub fn new_from_ldtk_world(value: &ldtk_json::World, _load_context: &LoadContext) -> Self {
+        debug!("Loading world: {}", value.identifier);
+        debug!("     with iid: {}", value.iid);
         World {
             identifier: value.identifier.clone(),
             iid: value.iid.clone(),

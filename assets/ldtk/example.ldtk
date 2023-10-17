@@ -14,16 +14,16 @@
 	"nextUid": 7,
 	"identifierStyle": "Capitalize",
 	"toc": [],
-	"worldLayout": "Free",
-	"worldGridWidth": 256,
-	"worldGridHeight": 256,
-	"defaultLevelWidth": 256,
-	"defaultLevelHeight": 256,
+	"worldLayout": null,
+	"worldGridWidth": null,
+	"worldGridHeight": null,
+	"defaultLevelWidth": null,
+	"defaultLevelHeight": null,
 	"defaultPivotX": 0,
 	"defaultPivotY": 0,
 	"defaultGridSize": 16,
-	"defaultEntityWidth": null,
-	"defaultEntityHeight": null,
+	"defaultEntityWidth": 16,
+	"defaultEntityHeight": 16,
 	"bgColor": "#40465B",
 	"defaultLevelBgColor": "#696A79",
 	"minifyJson": false,
@@ -39,7 +39,7 @@
 	"levelNamePattern": "Level_%idx",
 	"tutorialDesc": null,
 	"customCommands": [],
-	"flags": [],
+	"flags": ["MultiWorlds"],
 	"defs": { "layers": [
 		{
 			"__type": "Entities",
@@ -180,7 +180,8 @@
 			}
 		}
 	], "enums": [], "externalEnums": [], "levelFields": [] },
-	"levels": [
+	"levels": [],
+	"worlds": [{ "iid": "de3a6961-6280-11ee-bf57-5feb994c0ac0", "identifier": "World", "defaultLevelWidth": 256, "defaultLevelHeight": 256, "worldGridWidth": 256, "worldGridHeight": 256, "worldLayout": "Free", "levels": [
 		{
 			"identifier": "Level_0",
 			"iid": "de3a9070-6280-11ee-bf57-4b9ea4e8cebb",
@@ -227,7 +228,6 @@
 			"layerInstances": null,
 			"__neighbours": [{ "levelIid": "de3a9070-6280-11ee-bf57-4b9ea4e8cebb", "dir": "w" }]
 		}
-	],
-	"worlds": [],
+	] }],
 	"dummyWorldIid": "de3a6961-6280-11ee-bf57-5feb994c0ac0"
 }

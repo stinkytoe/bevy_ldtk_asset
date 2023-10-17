@@ -16,6 +16,8 @@ pub struct Level {
 //     fn from(value: &ldtk_json::Level) -> Self {
 impl Level {
     pub fn new(value: &ldtk_json::Level, _load_context: &LoadContext) -> Self {
+        debug!("Loading level: {}", value.identifier);
+        debug!("     with iid: {}", value.iid);
         Level {
             bg_color: util::get_bevy_color_from_ldtk(&value.bg_color).unwrap_or_else(|e| {
                 debug!("Failed to parse level's bg_color: {e}");
