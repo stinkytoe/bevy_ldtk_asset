@@ -28,6 +28,11 @@ impl AssetLoader for LdtkLevelLoader {
                 level: Level::new(&value, load_context),
             }));
 
+            debug!(
+                "Loading LDtk level file: {} success!",
+                load_context.path().to_str().unwrap_or_default()
+            );
+
             Ok(())
         })
     }

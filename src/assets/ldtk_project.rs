@@ -8,14 +8,15 @@ use bevy::{
 // use serde::Deserialize;
 use std::collections::HashMap;
 
+use super::ldtk_level::LdtkLevel;
+
 #[derive(Debug, TypePath, TypeUuid)]
 #[uuid = "e131e69d-f619-4fec-9fa5-71fef82f9c81"]
 pub struct LdtkProject {
     pub bg_color: Color,
-    pub defs: ldtk_json::Definitions,
-    pub external_levels: bool,
-    pub iid: String,
-    pub json_version: String,
-    pub worlds: HashMap<String, World>,
     pub level_backgrounds: HashMap<String, Handle<Image>>,
+    pub level_file_handles: HashMap<String, Handle<LdtkLevel>>,
+    pub tilesets: HashMap<i64, Handle<Image>>,
+    pub value: ldtk_json::LdtkJson,
+    pub worlds: HashMap<String, World>,
 }
