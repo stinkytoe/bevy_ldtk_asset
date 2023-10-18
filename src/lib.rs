@@ -1,17 +1,19 @@
 mod assets;
+mod bundles;
+mod components;
 mod events;
-mod ldtk_bundle;
 mod ldtk_json;
-pub(crate) mod level;
+mod level;
 mod plugin;
 mod systems;
 mod util;
 mod world;
 
 pub mod prelude {
-    // pub use crate::ldtk_bundle::LdtkBundle;
+    pub use crate::assets::ldtk_project::LdtkProject;
+    pub use crate::bundles::LdtkBundle;
+    pub use crate::components::*;
     pub use crate::events::LdtkEvent;
-    pub use crate::ldtk_bundle::LdtkRoot;
     pub use crate::plugin::LdtkBevyLoaderPlugin;
     pub use crate::systems::LdtkSet;
 }

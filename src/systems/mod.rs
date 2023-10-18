@@ -1,4 +1,5 @@
 pub(crate) mod load_world_event;
+pub(crate) mod world_set_changed;
 
 use bevy::prelude::*;
 

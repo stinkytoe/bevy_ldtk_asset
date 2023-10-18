@@ -1,4 +1,4 @@
-const _LDTK_EXAMPLE: &str = "ldtk/example.ldtk";
+const LDTK_EXAMPLE: &str = "ldtk/example.ldtk";
 
 use bevy::log::LogPlugin;
 use bevy::prelude::*;
@@ -18,12 +18,15 @@ fn main() {
         .run();
 }
 
-fn setup(mut commands: Commands, _asset_server: Res<AssetServer>) {
+fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(Camera2dBundle::default());
-    // commands.spawn(LdtkBundle {
-    //     root: LdtkRoot {
-    //         project: asset_server.load(LDTK_EXAMPLE),
-    //     },
-    //     ..default()
-    // });
+
+    commands.spawn(LdtkBundle {
+        root: LdtkRoot {
+            project: asset_server.load(LDTK_EXAMPLE),
+        },
+        world_set: IidSet::All,
+        level_set: IidSet::All,
+        ..default()
+    });
 }
