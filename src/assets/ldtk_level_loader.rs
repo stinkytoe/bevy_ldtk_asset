@@ -8,7 +8,7 @@ use crate::{ldtk_json, level::Level};
 
 use super::ldtk_level::LdtkLevel;
 
-pub struct LdtkLevelLoader;
+pub(crate) struct LdtkLevelLoader;
 
 impl AssetLoader for LdtkLevelLoader {
     fn load<'a>(
@@ -25,7 +25,7 @@ impl AssetLoader for LdtkLevelLoader {
             let value: ldtk_json::Level = serde_json::from_slice(bytes)?;
 
             load_context.set_default_asset(LoadedAsset::new(LdtkLevel {
-                level: Level::new(&value, load_context),
+                _level: Level::new(&value, load_context),
             }));
 
             debug!(

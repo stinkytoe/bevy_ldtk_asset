@@ -3,11 +3,11 @@ use bevy::prelude::*;
 
 #[derive(Component, Default)]
 pub struct LdtkRoot {
-    pub project: Handle<LdtkProject>,
+    pub(crate) _project: Handle<LdtkProject>,
 }
 
 #[derive(Bundle, Default)]
-pub struct LdtkBundle {
-    pub root: LdtkRoot,
-    pub spatial_bundle: SpatialBundle,
+pub(crate) struct LdtkBundle {
+    pub(crate) root: LdtkRoot,
+    pub(crate) spatial_bundle: SpatialBundle,
 }

@@ -4,26 +4,29 @@ use serde::Deserialize;
 use std::collections::HashMap;
 
 #[derive(Debug, Deserialize)]
-pub struct World {
-    pub identifier: String,
-    pub iid: String,
-    pub levels: HashMap<String, Level>,
-    pub world_grid_height: i64,
-    pub world_grid_width: i64,
-    pub world_layout: ldtk_json::WorldLayout,
+pub(crate) struct World {
+    pub(crate) _identifier: String,
+    pub(crate) _iid: String,
+    pub(crate) _levels: HashMap<String, Level>,
+    pub(crate) _world_grid_height: i64,
+    pub(crate) _world_grid_width: i64,
+    pub(crate) _world_layout: ldtk_json::WorldLayout,
 }
 
 impl World {
-    pub fn new_from_ldtk_json(value: &ldtk_json::LdtkJson, load_context: &LoadContext) -> Self {
+    pub(crate) fn new_from_ldtk_json(
+        value: &ldtk_json::LdtkJson,
+        load_context: &LoadContext,
+    ) -> Self {
         debug!("Loading world data from project root.");
         debug!("Since we're constructing from the old style, one world representation,");
         debug!("we'll use (root) as the identifier since one isn't supplied.");
         debug!("Loading world: (root)");
         debug!("     with iid: {}", value.iid);
         World {
-            identifier: "(root)".to_owned(),
-            iid: value.iid.clone(),
-            levels: value
+            _identifier: "(root)".to_owned(),
+            _iid: value.iid.clone(),
+            _levels: value
                 .levels
                 .iter()
                 .map(|value| {
@@ -32,15 +35,15 @@ impl World {
                     (new_level.iid.clone(), new_level)
                 })
                 .collect(),
-            world_grid_height: value.world_grid_height.unwrap_or_else(|| {
+            _world_grid_height: value.world_grid_height.unwrap_or_else(|| {
                 debug!("Got None for worldGridHeight? Is this a multiworld? Using 256");
                 256
             }),
-            world_grid_width: value.world_grid_width.unwrap_or_else(|| {
+            _world_grid_width: value.world_grid_width.unwrap_or_else(|| {
                 debug!("Got None for worldGridWidth? Is this a multiworld? Using 256");
                 256
             }),
-            world_layout: value
+            _world_layout: value
                 .world_layout
                 .as_ref()
                 .unwrap_or_else(|| {
@@ -51,16 +54,19 @@ impl World {
         }
     }
 
-    pub fn new_from_ldtk_world(value: &ldtk_json::World, _load_context: &LoadContext) -> Self {
+    pub(crate) fn new_from_ldtk_world(
+        value: &ldtk_json::World,
+        _load_context: &LoadContext,
+    ) -> Self {
         debug!("Loading world: {}", value.identifier);
         debug!("     with iid: {}", value.iid);
         World {
-            identifier: value.identifier.clone(),
-            iid: value.iid.clone(),
-            levels: HashMap::default(),
-            world_grid_height: value.world_grid_height,
-            world_grid_width: value.world_grid_width,
-            world_layout: value.world_layout.as_ref().unwrap_or_else(|| {
+            _identifier: value.identifier.clone(),
+            _iid: value.iid.clone(),
+            _levels: HashMap::default(),
+            _world_grid_height: value.world_grid_height,
+            _world_grid_width: value.world_grid_width,
+            _world_layout: value.world_layout.as_ref().unwrap_or_else(|| {
                 debug!("Got None for worldLayout? Weird, if this is a multuworld this should be something. Using 'Free'");
                 &ldtk_json::WorldLayout::Free}).clone(),
         }

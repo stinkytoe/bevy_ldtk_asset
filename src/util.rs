@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use hex::FromHex;
 
 #[derive(Debug)]
-pub struct ColorParseError {
+pub(crate) struct ColorParseError {
     value: String,
 }
 
@@ -19,7 +19,7 @@ impl std::fmt::Display for ColorParseError {
 
 // Format should be: Hex color "#rrggbb"
 // from: https://ldtk.io/json-2/#ldtk-ProjectJson;bgColor
-pub fn get_bevy_color_from_ldtk(color: &str) -> Result<Color> {
+pub(crate) fn get_bevy_color_from_ldtk(color: &str) -> Result<Color> {
     if color.len() != 7 {
         bail!(ColorParseError {
             value: color.to_owned()

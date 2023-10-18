@@ -12,7 +12,7 @@ use bevy::{
 use std::collections::HashMap;
 use std::path::Path;
 
-pub struct LdtkRootLoader;
+pub(crate) struct LdtkRootLoader;
 
 impl AssetLoader for LdtkRootLoader {
     fn load<'a>(
@@ -116,21 +116,21 @@ impl AssetLoader for LdtkRootLoader {
             };
 
             let ldtk_project = LdtkProject {
-                bg_color: util::get_bevy_color_from_ldtk(&value.bg_color)?,
-                level_backgrounds: level_backgrounds_meta
+                _bg_color: util::get_bevy_color_from_ldtk(&value.bg_color)?,
+                _level_backgrounds: level_backgrounds_meta
                     .iter()
                     .map(|(id, _, handle)| (id.clone(), handle.clone()))
                     .collect(),
-                level_file_handles: level_file_handles_meta
+                _level_file_handles: level_file_handles_meta
                     .iter()
                     .map(|(id, _, handle)| (id.clone(), handle.clone()))
                     .collect(),
-                tilesets: tilesets_meta
+                _tilesets: tilesets_meta
                     .iter()
                     .map(|(id, _, handle)| (*id, handle.clone()))
                     .collect(),
-                value,
-                worlds,
+                _value: value,
+                _worlds: worlds,
             };
 
             load_context.set_default_asset(

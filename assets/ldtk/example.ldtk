@@ -216,7 +216,7 @@
 			"pxHei": 256,
 			"__bgColor": "#696A79",
 			"bgColor": null,
-			"useAutoIdentifier": true,
+			"useAutoIdentifier": false,
 			"bgRelPath": "../basic_tileset_and_assets_standard/water_and_island_tiles_v2.png",
 			"bgPos": "Cover",
 			"bgPivotX": 0.5,
