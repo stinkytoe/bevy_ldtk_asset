@@ -1,7 +1,6 @@
 mod assets;
 mod bundles;
 mod components;
-mod events;
 mod ldtk_json;
 mod level;
 mod plugin;
@@ -13,7 +12,6 @@ pub mod prelude {
     pub use crate::assets::ldtk_project::LdtkProject;
     pub use crate::bundles::LdtkBundle;
     pub use crate::components::*;
-    pub use crate::events::LdtkEvent;
     pub use crate::plugin::LdtkBevyLoaderPlugin;
     pub use crate::systems::LdtkSet;
 }
