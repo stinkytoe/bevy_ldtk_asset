@@ -12,9 +12,15 @@ use std::collections::HashMap;
 #[uuid = "e131e69d-f619-4fec-9fa5-71fef82f9c81"]
 pub struct LdtkProject {
     pub(crate) _bg_color: Color,
-    pub(crate) _level_backgrounds: HashMap<String, Handle<Image>>,
+    pub(crate) level_backgrounds: HashMap<String, Handle<Image>>,
     pub(crate) _level_file_handles: HashMap<String, Handle<LdtkLevel>>,
     pub(crate) _tilesets: HashMap<i64, Handle<Image>>,
     pub(crate) _value: ldtk_json::LdtkJson,
     pub(crate) _worlds: HashMap<String, World>,
+}
+
+impl LdtkProject {
+    pub fn json(&self) -> &ldtk_json::LdtkJson {
+        &self._value
+    }
 }

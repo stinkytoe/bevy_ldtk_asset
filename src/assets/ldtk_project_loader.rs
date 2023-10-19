@@ -117,7 +117,7 @@ impl AssetLoader for LdtkRootLoader {
 
             let ldtk_project = LdtkProject {
                 _bg_color: util::get_bevy_color_from_ldtk(&value.bg_color)?,
-                _level_backgrounds: level_backgrounds_meta
+                level_backgrounds: level_backgrounds_meta
                     .iter()
                     .map(|(id, _, handle)| (id.clone(), handle.clone()))
                     .collect(),

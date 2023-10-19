@@ -25,8 +25,8 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         root: LdtkRoot {
             project: asset_server.load(LDTK_EXAMPLE),
         },
-        world_set: IidSet::All,
-        level_set: IidSet::All,
+        world_set: WorldSet::All,
+        level_set: LevelSet::All,
         ..default()
     });
 }

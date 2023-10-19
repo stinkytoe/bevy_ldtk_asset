@@ -7,8 +7,15 @@ pub struct LdtkRoot {
 }
 
 #[derive(Component, Debug, Default)]
-pub enum IidSet {
+pub enum LevelSet {
     #[default]
     All,
-    _Only(Vec<String>),
+    Only(Vec<String>),
+}
+
+#[derive(Component, Debug, Default)]
+pub enum WorldSet {
+    #[default]
+    All,
+    Only(Vec<String>),
 }
