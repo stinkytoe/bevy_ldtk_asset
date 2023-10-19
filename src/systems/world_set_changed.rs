@@ -5,7 +5,7 @@ use crate::{
     prelude::{LdtkProject, LdtkRoot},
 };
 
-pub(crate) fn world_set_changed(
+pub(crate) fn _world_set_changed(
     ldtk_root: Query<(Entity, &LdtkRoot, &WorldSet), Changed<WorldSet>>,
     ldtk_project_assets: Res<Assets<LdtkProject>>,
     image_assets: Res<Assets<Image>>,
@@ -16,11 +16,6 @@ pub(crate) fn world_set_changed(
             WorldSet::All => (),
             WorldSet::Only(_) => (),
         };
-
-        // match ldtk_project_assets.get(&root.project) {
-        //     Some(project) => debug!("got a project! {:#?}", project.json()),
-        //     None => debug!("No project, still loading?"),
-        // };
 
         let Some(project) = ldtk_project_assets.get(&root.project) else {
             debug!("No project, still loading?");

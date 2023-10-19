@@ -9,7 +9,7 @@ fn main() {
         // Bevy
         .add_plugins((
             DefaultPlugins.set(LogPlugin {
-                filter: "ldtk_bevy_loader=debug".to_string(),
+                filter: "ldtk_bevy_loader=trace".to_string(),
                 ..default()
             }),
             LdtkBevyLoaderPlugin,

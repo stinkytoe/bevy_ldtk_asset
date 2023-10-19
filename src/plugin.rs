@@ -2,7 +2,7 @@ use crate::assets::ldtk_level::LdtkLevel;
 use crate::assets::ldtk_level_loader::LdtkLevelLoader;
 use crate::assets::ldtk_project::LdtkProject;
 use crate::assets::ldtk_project_loader::LdtkRootLoader;
-use crate::systems::world_set_changed::world_set_changed;
+use crate::systems::render_set_from_images::render_set_from_images;
 use crate::systems::LdtkSet;
 use bevy::prelude::*;
 
@@ -15,6 +15,6 @@ impl Plugin for LdtkBevyLoaderPlugin {
             .add_asset_loader(LdtkRootLoader)
             .add_asset::<LdtkLevel>()
             .add_asset_loader(LdtkLevelLoader)
-            .add_systems(Update, (world_set_changed).in_set(LdtkSet));
+            .add_systems(Update, (render_set_from_images).in_set(LdtkSet));
     }
 }
