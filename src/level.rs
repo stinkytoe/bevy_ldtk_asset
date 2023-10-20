@@ -8,7 +8,7 @@ pub(crate) struct Level {
     pub(crate) _bg_pos: Option<ldtk_json::LevelBackgroundPosition>,
     pub(crate) _bg_rel_path: Option<String>,
     pub(crate) _identifier: String,
-    pub(crate) iid: String,
+    pub(crate) _iid: String,
     pub(crate) _neighbors: Vec<ldtk_json::NeighbourLevel>,
 }
 
@@ -27,7 +27,7 @@ impl Level {
             _bg_pos: value.bg_pos.clone(),
             _bg_rel_path: value.bg_rel_path.clone(),
             _identifier: value.identifier.clone(),
-            iid: value.iid.clone(),
+            _iid: value.iid.clone(),
             _neighbors: value.neighbours.clone(),
         }
     }

@@ -5,8 +5,7 @@ use bevy::prelude::*;
 use ldtk_bevy_loader::prelude::*;
 
 fn main() {
-    App::new()
-        // Bevy
+    App::new() //
         .add_plugins((
             DefaultPlugins.set(LogPlugin {
                 filter: "ldtk_bevy_loader=trace".to_string(),

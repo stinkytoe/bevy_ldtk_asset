@@ -1,8 +1,8 @@
 use crate::assets::ldtk_level::LdtkLevel;
 use crate::assets::ldtk_project::LdtkProject;
 use crate::assets::util::ldtk_file_to_asset_path;
+use crate::ldtk_json;
 use crate::util;
-use crate::{ldtk_json, world};
 use anyhow::Result;
 use bevy::asset::AssetPath;
 use bevy::{
@@ -100,17 +100,35 @@ impl AssetLoader for LdtkRootLoader {
                 })
                 .collect::<Vec<(i64, AssetPath, Handle<Image>)>>();
 
-            let worlds = if value.worlds.is_empty() {
-                let new_world = world::World::new_from_ldtk_json(&value, load_context);
-                HashMap::from([(value.iid.clone(), new_world)])
+            // let worlds = if value.worlds.is_empty() {
+            //     let new_world = world::World::new_from_ldtk_json(&value, load_context);
+            //     HashMap::from([(value.iid.clone(), new_world)])
+            // } else {
+            //     debug!("Multi world file found! Will load all levels.");
+            //     value
+            //         .worlds
+            //         .iter()
+            //         .map(|value| {
+            //             let new_world = world::World::new_from_ldtk_world(value, load_context);
+            //             (value.iid.clone(), new_world)
+            //         })
+            //         .collect()
+            // };
+
+            let _world_level_map = if value.worlds.is_empty() {
+                HashMap::from([(
+                    value.iid.clone(),
+                    value.levels.iter().map(|value| value.iid.clone()).collect(),
+                )])
             } else {
-                debug!("Multi world file found! Will load all levels.");
                 value
                     .worlds
                     .iter()
                     .map(|value| {
-                        let new_world = world::World::new_from_ldtk_world(value, load_context);
-                        (value.iid.clone(), new_world)
+                        (
+                            value.iid.clone(),
+                            value.levels.iter().map(|value| value.iid.clone()).collect(),
+                        )
                     })
                     .collect()
             };
@@ -121,16 +139,16 @@ impl AssetLoader for LdtkRootLoader {
                     .iter()
                     .map(|(id, _, handle)| (id.clone(), handle.clone()))
                     .collect(),
-                _level_file_handles: level_file_handles_meta
+                level_file_handles: level_file_handles_meta
                     .iter()
                     .map(|(id, _, handle)| (id.clone(), handle.clone()))
                     .collect(),
-                _tilesets: tilesets_meta
+                tilesets: tilesets_meta
                     .iter()
                     .map(|(id, _, handle)| (*id, handle.clone()))
                     .collect(),
                 _value: value,
-                _worlds: worlds,
+                world_level_map: _world_level_map, // _worlds: worlds,
             };
 
             load_context.set_default_asset(

@@ -14,7 +14,7 @@ pub(crate) struct World {
 }
 
 impl World {
-    pub(crate) fn new_from_ldtk_json(
+    pub(crate) fn _new_from_ldtk_json(
         value: &ldtk_json::LdtkJson,
         load_context: &LoadContext,
     ) -> Self {
@@ -32,7 +32,7 @@ impl World {
                 .map(|value| {
                     // let new_level = Level::from(value);
                     let new_level = Level::new(value, load_context);
-                    (new_level.iid.clone(), new_level)
+                    (new_level._iid.clone(), new_level)
                 })
                 .collect(),
             _world_grid_height: value.world_grid_height.unwrap_or_else(|| {
@@ -54,7 +54,7 @@ impl World {
         }
     }
 
-    pub(crate) fn new_from_ldtk_world(
+    pub(crate) fn _new_from_ldtk_world(
         value: &ldtk_json::World,
         _load_context: &LoadContext,
     ) -> Self {

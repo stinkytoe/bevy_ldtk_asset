@@ -22,4 +22,4 @@ pub enum WorldSet {
 }
 
 #[derive(Component, Debug, Default)]
-pub struct RenderSet;
+pub struct RenderTag;
