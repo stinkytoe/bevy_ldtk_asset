@@ -19,7 +19,6 @@ pub struct LdtkProject {
     pub(crate) tilesets: HashMap<i64, Handle<Image>>,
     pub(crate) _value: ldtk_json::LdtkJson,
     pub(crate) world_level_map: HashMap<WorldIid, Vec<LevelIid>>,
-    // pub(crate) _worlds: HashMap<String, World>,
 }
 
 impl LdtkProject {
@@ -34,10 +33,4 @@ impl LdtkProject {
     pub fn get_level_iids(&self) -> impl Iterator<Item = &LevelIid> {
         self.world_level_map.values().flatten()
     }
-
-    // pub(crate) fn get_levels(&self) -> impl Iterator<Item = &Level> {
-    //     self._worlds
-    //         .values()
-    //         .flat_map(|world| world._levels.values())
-    // }
 }
