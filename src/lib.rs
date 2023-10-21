@@ -1,12 +1,12 @@
 mod assets;
 mod bundles;
 mod components;
-mod ldtk_json;
-mod level;
+pub mod ldtk_json;
+// mod level;
 mod plugin;
 mod systems;
 mod util;
-mod world;
+// mod world;
 
 pub mod prelude {
     pub use crate::assets::ldtk_project::LdtkProject;

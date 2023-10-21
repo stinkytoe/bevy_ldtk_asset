@@ -1,4 +1,4 @@
-pub(crate) mod render_set_from_images;
+pub(crate) mod add_children_once_assets_loaded;
 pub(crate) mod world_set_changed;
 
 use bevy::prelude::*;

@@ -44,7 +44,7 @@ impl AssetLoader for LdtkRootLoader {
                 level.bg_rel_path.as_ref().map(|bg_rel_path| {
                     let ldtk_level_background_asset_path =
                         ldtk_file_to_asset_path(bg_rel_path, ldtk_project_path);
-                    debug!("Adding level background to set: {ldtk_level_background_asset_path:?}");
+                    trace!("Adding level background to set: {ldtk_level_background_asset_path:?}");
                     (
                         level.iid.clone(),
                         ldtk_level_background_asset_path.clone(),
@@ -68,7 +68,7 @@ impl AssetLoader for LdtkRootLoader {
                 level.external_rel_path.as_ref().map(|external_rel_path| {
                     let ldtk_level_asset_path =
                         ldtk_file_to_asset_path(external_rel_path, ldtk_project_path);
-                    debug!("Adding level file to set: {ldtk_level_asset_path:?}");
+                    trace!("Adding level file to set: {ldtk_level_asset_path:?}");
                     (
                         level.iid.clone(),
                         ldtk_level_asset_path.clone(),
@@ -78,42 +78,22 @@ impl AssetLoader for LdtkRootLoader {
             })
             .collect::<Vec<(String, AssetPath, Handle<LdtkLevel>)>>();
 
-            let tilesets_meta = value
-                .defs
-                .tilesets
-                .iter()
-                .filter_map(|tileset| {
-                    if tileset.embed_atlas.is_none() {
-                        tileset.rel_path.as_ref().map(|rel_path| {
-                            let ldtk_tileset_asset_path =
-                                ldtk_file_to_asset_path(rel_path, ldtk_project_path);
-                            debug!("Adding tileset to set: {ldtk_tileset_asset_path:?}");
-                            (
-                                tileset.uid,
-                                ldtk_tileset_asset_path.clone(),
-                                load_context.get_handle(ldtk_tileset_asset_path),
-                            )
-                        })
-                    } else {
-                        None
-                    }
-                })
-                .collect::<Vec<(i64, AssetPath, Handle<Image>)>>();
-
-            // let worlds = if value.worlds.is_empty() {
-            //     let new_world = world::World::new_from_ldtk_json(&value, load_context);
-            //     HashMap::from([(value.iid.clone(), new_world)])
-            // } else {
-            //     debug!("Multi world file found! Will load all levels.");
-            //     value
-            //         .worlds
-            //         .iter()
-            //         .map(|value| {
-            //             let new_world = world::World::new_from_ldtk_world(value, load_context);
-            //             (value.iid.clone(), new_world)
-            //         })
-            //         .collect()
-            // };
+            let tilesets = value.defs.tilesets.iter().filter_map(|tileset| {
+                if tileset.embed_atlas.is_none() {
+                    tileset.rel_path.as_ref().map(|rel_path| {
+                        let ldtk_tileset_asset_path =
+                            ldtk_file_to_asset_path(rel_path, ldtk_project_path);
+                        trace!("Adding tileset to set: {ldtk_tileset_asset_path:?}");
+                        (
+                            tileset.uid,
+                            ldtk_tileset_asset_path.clone(),
+                            load_context.get_handle_untyped(ldtk_tileset_asset_path),
+                        )
+                    })
+                } else {
+                    None
+                }
+            });
 
             let _world_level_map = if value.worlds.is_empty() {
                 HashMap::from([(
@@ -143,11 +123,12 @@ impl AssetLoader for LdtkRootLoader {
                     .iter()
                     .map(|(id, _, handle)| (id.clone(), handle.clone()))
                     .collect(),
-                tilesets: tilesets_meta
-                    .iter()
-                    .map(|(id, _, handle)| (*id, handle.clone()))
+                tilesets: //tilesets_meta
+                    //.iter()
+                    tilesets.clone()
+                    .map(|(id, _, handle)| (id, handle.typed()))
                     .collect(),
-                _value: value,
+                _value: value.clone(),
                 world_level_map: _world_level_map, // _worlds: worlds,
             };
 
@@ -166,8 +147,9 @@ impl AssetLoader for LdtkRootLoader {
                             .collect(),
                     )
                     .with_dependencies(
-                        tilesets_meta
-                            .iter()
+                        // tilesets_meta
+                        //     .iter()
+                        tilesets
                             .map(|(_, asset_path, _)| asset_path.clone())
                             .collect(),
                     ),

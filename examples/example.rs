@@ -1,6 +1,6 @@
 const LDTK_EXAMPLE: &str = "ldtk/example.ldtk";
 
-use bevy::log::LogPlugin;
+use bevy::log::{Level, LogPlugin};
 use bevy::prelude::*;
 use ldtk_bevy_loader::prelude::*;
 
@@ -8,8 +8,9 @@ fn main() {
     App::new() //
         .add_plugins((
             DefaultPlugins.set(LogPlugin {
+                level: Level::WARN,
                 filter: "ldtk_bevy_loader=trace".to_string(),
-                ..default()
+                // ..default()
             }),
             LdtkBevyLoaderPlugin,
         ))

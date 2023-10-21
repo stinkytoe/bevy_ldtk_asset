@@ -4,7 +4,7 @@ use bevy::{
     prelude::*,
 };
 
-use crate::{ldtk_json, level::Level};
+use crate::ldtk_json;
 
 use super::ldtk_level::LdtkLevel;
 
@@ -24,9 +24,11 @@ impl AssetLoader for LdtkLevelLoader {
 
             let value: ldtk_json::Level = serde_json::from_slice(bytes)?;
 
-            load_context.set_default_asset(LoadedAsset::new(LdtkLevel {
-                _level: Level::new(&value, load_context),
-            }));
+            // load_context.set_default_asset(LoadedAsset::new(LdtkLevel {
+            //     _level: Level::new(&value, load_context),
+            // }));
+
+            load_context.set_default_asset(LoadedAsset::new(LdtkLevel { _level: value }));
 
             debug!(
                 "Loading LDtk level file: {} success!",
