@@ -37,6 +37,7 @@ impl TryFrom<&ldtk_json::LayerInstance> for Layer {
     type Error = LayerError;
 
     fn try_from(value: &ldtk_json::LayerInstance) -> Result<Self, Self::Error> {
+        trace!("Loading layer: {}", value.identifier);
         Ok(Self {
             _c_height: value.c_hei,
             _c_width: value.c_wid,
@@ -49,11 +50,20 @@ impl TryFrom<&ldtk_json::LayerInstance> for Layer {
                 "Entities" => LayerData::Entities {},
                 "Tiles" => LayerData::Tiles {
                     _tiles: value.grid_tiles.iter().map(Tile::from).collect(),
-                    _tileset_rel_path: value
-                        .tileset_rel_path
-                        .as_ref()
-                        .ok_or(LayerError::MissingTileset)?
-                        .clone(),
+                    _tileset_rel_path: value.tileset_rel_path.clone().map_or_else(
+                        || {
+                            if value.grid_tiles.is_empty() {
+                                trace!("Got a Tile layer with no tiles, and no tileset.");
+                                trace!("Is it just a background?");
+                                Ok("".to_string())
+                            } else {
+                                error!("Got a Tile layer with no tileset path, but has tiles?");
+                                error!("We don't know what to do with this! exiting...");
+                                Err(LayerError::MissingTileset)
+                            }
+                        },
+                        Ok,
+                    )?,
                 },
                 "AutoLayer" => LayerData::AutoLayer {},
                 _ => {

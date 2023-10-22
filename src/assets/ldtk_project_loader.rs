@@ -24,9 +24,9 @@ pub(crate) enum LdtkRootLoaderError {
     Io(#[from] std::io::Error),
     #[error("Unable to parse given color string! {0}")]
     UnableToParse(#[from] serde_json::Error),
-    #[error("Failed to construct world: {0}")]
+    #[error("Failed to construct World: {0}")]
     BadWorld(#[from] WorldError),
-    #[error("Failed to construct level: {0}")]
+    #[error("Failed to construct Level: {0}")]
     BadLevel(#[from] LevelError),
     #[error("Failed to construct external level")]
     BadExternalLevel,
@@ -103,6 +103,11 @@ impl AssetLoader for LdtkRootLoader {
                     worlds.insert(world.iid.clone(), world);
                 }
             }
+
+            debug!(
+                "LDtk root project file: {} loaded!",
+                load_context.path().to_str().unwrap_or_default()
+            );
 
             Ok(LdtkProject {
                 value,
