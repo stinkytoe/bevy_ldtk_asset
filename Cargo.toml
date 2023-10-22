@@ -10,8 +10,10 @@ name = "example"
 path = "examples/example.rs"
 
 [dependencies]
-anyhow = "1.0"
-bevy = "0.11"
+# anyhow = "1.0"
+# bevy = "0.11"
+bevy = { git = "https://github.com/bevyengine/bevy.git", branch = "main" }
 hex = "0.4"
 serde = "1.0"
 serde_json = "1.0"
+# thiserror = "1.0"

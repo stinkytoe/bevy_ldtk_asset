@@ -23,3 +23,9 @@ pub enum WorldSet {
 
 #[derive(Component, Debug, Default, Reflect)]
 pub struct AssetsLoadedTag;
+
+#[derive(Component, Debug, Default, Reflect)]
+pub struct Level {
+    identifier: String,
+    iid: String,
+}
