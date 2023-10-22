@@ -2,8 +2,8 @@ use crate::assets::ldtk_level::LdtkLevel;
 use crate::assets::ldtk_level_loader::LdtkLevelLoader;
 use crate::assets::ldtk_project::LdtkProject;
 use crate::assets::ldtk_project_loader::LdtkRootLoader;
-use crate::components::{LdtkRoot, LevelSet};
-use crate::prelude::{AssetsLoadedTag, WorldSet};
+use crate::components::LdtkRoot;
+// use crate::prelude::{AssetsLoadedTag, WorldSet};
 // use crate::systems::add_children_once_assets_loaded::add_children_once_assets_loaded;
 // use crate::systems::LdtkSet;
 use bevy::prelude::*;
@@ -14,9 +14,6 @@ impl Plugin for LdtkBevyLoaderPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
         app //
             .register_type::<LdtkRoot>()
-            .register_type::<LevelSet>()
-            .register_type::<WorldSet>()
-            .register_type::<AssetsLoadedTag>()
             .init_asset::<LdtkProject>()
             .init_asset_loader::<LdtkRootLoader>()
             .init_asset::<LdtkLevel>()

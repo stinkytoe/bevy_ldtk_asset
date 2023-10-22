@@ -54,7 +54,7 @@ impl AssetLoader for LdtkLevelLoader {
             reader.read_to_end(&mut bytes).await?;
 
             Ok(LdtkLevel {
-                _level: serde_json::from_slice(&bytes)?,
+                value: serde_json::from_slice(&bytes)?,
             })
         })
     }

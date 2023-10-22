@@ -7,22 +7,22 @@ pub struct LdtkRoot {
     // pub render_set: Vec<MaterialMesh2dBundle<ColorMaterial>>,
 }
 
-#[derive(Component, Debug, Default, Reflect)]
-pub enum LevelSet {
-    #[default]
-    All,
-    Only(Vec<String>),
-}
-
-#[derive(Component, Debug, Default, Reflect)]
-pub enum WorldSet {
-    #[default]
-    All,
-    Only(Vec<String>),
-}
-
-#[derive(Component, Debug, Default, Reflect)]
-pub struct AssetsLoadedTag;
+// #[derive(Component, Debug, Default, Reflect)]
+// pub enum LevelSet {
+//     #[default]
+//     All,
+//     Only(Vec<String>),
+// }
+//
+// #[derive(Component, Debug, Default, Reflect)]
+// pub enum WorldSet {
+//     #[default]
+//     All,
+//     Only(Vec<String>),
+// }
+//
+// #[derive(Component, Debug, Default, Reflect)]
+// pub struct AssetsLoadedTag;
 
 #[derive(Component, Debug, Default, Reflect)]
 pub struct Level {

@@ -19,16 +19,16 @@ use thiserror::Error;
 // }
 
 #[derive(Debug, Error)]
-pub(crate) enum ColorParseError<'a> {
+pub(crate) enum ColorParseError {
     #[error("Provided color string not seven characters! {0}")]
-    BadStringLength(&'a str),
+    BadStringLength(String),
     #[error("Unable to parse given color string! {0}")]
-    UnableToParse(&'a str),
+    UnableToParse(String),
 }
 
 // Format should be: Hex color "#rrggbb"
 // from: https://ldtk.io/json-2/#ldtk-ProjectJson;bgColor
-pub(crate) fn get_bevy_color_from_ldtk(color: &str) -> Result<Color, ColorParseError> {
+pub(crate) fn get_bevy_color_from_ldtk(color: String) -> Result<Color, ColorParseError> {
     if color.len() != 7 {
         return Err(ColorParseError::BadStringLength(color));
     }
@@ -45,7 +45,7 @@ pub(crate) fn get_bevy_color_from_ldtk(color: &str) -> Result<Color, ColorParseE
 
     let hex_to_float = |hex: &str| -> Result<f32, ColorParseError> {
         let Ok(byte) = <[u8; 1]>::from_hex(hex) else {
-            return Err(ColorParseError::UnableToParse(color));
+            return Err(ColorParseError::UnableToParse(color.clone()));
         };
 
         Ok(byte[0] as f32 / 255.0)

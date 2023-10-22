@@ -1,9 +1,15 @@
+use crate::assets::ldtk_level::LdtkLevel;
 use crate::assets::ldtk_project::LdtkProject;
+use crate::assets::structs::level::{Level, LevelError};
+use crate::assets::structs::world::{World, WorldError};
+use crate::assets::util::ldtk_file_to_asset_path;
 use crate::ldtk_json;
-use crate::util::{get_bevy_color_from_ldtk, ColorParseError};
-use bevy::asset::AsyncReadExt;
+use crate::util::ColorParseError;
 use bevy::asset::{io::Reader, AssetLoader, LoadContext};
+use bevy::asset::{AssetPath, AsyncReadExt};
+use bevy::prelude::*;
 use bevy::utils::thiserror;
+use std::collections::HashMap;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -13,11 +19,19 @@ pub(crate) enum LdtkRootLoaderError {
     // #[error("Unable to parse given color string! {0}")]
     // UnableToParse(&'a str),
     #[error("Failed to parse color: {0}")]
-    ColorParse(#[from] ColorParseError<'static>),
+    ColorParse(#[from] ColorParseError),
     #[error("Could load raw asset: {0}")]
     Io(#[from] std::io::Error),
     #[error("Unable to parse given color string! {0}")]
     UnableToParse(#[from] serde_json::Error),
+    #[error("Failed to construct world: {0}")]
+    BadWorld(#[from] WorldError),
+    #[error("Failed to construct level: {0}")]
+    BadLevel(#[from] LevelError),
+    #[error("Failed to construct external level")]
+    BadExternalLevel,
+    #[error("Bevy failed to load asset: {0}")]
+    BevyLoadDirectError(#[from] bevy::asset::LoadDirectError),
 }
 
 #[derive(Default)]
@@ -32,166 +46,68 @@ impl AssetLoader for LdtkRootLoader {
         &'a self,
         reader: &'a mut Reader,
         _settings: &'a (),
-        _load_context: &'a mut LoadContext,
+        load_context: &'a mut LoadContext,
     ) -> bevy::utils::BoxedFuture<'a, Result<Self::Asset, Self::Error>> {
         Box::pin(async move {
-            // debug!(
-            //     "Loading LDtk root project file: {}",
-            //     load_context.path().to_str().unwrap_or_default()
-            // );
-            //
-            // let value: ldtk_json::LdtkJson = serde_json::from_slice(bytes)?;
-            //
-            // let ldtk_project_path = load_context.path().parent().unwrap_or(Path::new(""));
-            //
-            // let level_backgrounds_meta = if value.worlds.is_empty() {
-            //     value.levels.iter().collect()
-            // } else {
-            //     value
-            //         .worlds
-            //         .iter()
-            //         .flat_map(|world| &world.levels)
-            //         .collect::<Vec<_>>()
-            // }
-            // .iter()
-            // .filter_map(|level| {
-            //     level.bg_rel_path.as_ref().map(|bg_rel_path| {
-            //         let ldtk_level_background_asset_path =
-            //             ldtk_file_to_asset_path(bg_rel_path, ldtk_project_path);
-            //         trace!("Adding level background to set: {ldtk_level_background_asset_path:?}");
-            //         (
-            //             level.iid.clone(),
-            //             ldtk_level_background_asset_path.clone(),
-            //             load_context.get_handle(ldtk_level_background_asset_path),
-            //         )
-            //     })
-            // })
-            // .collect::<Vec<(String, AssetPath, Handle<Image>)>>();
-            //
-            // let level_file_handles_meta = if value.worlds.is_empty() {
-            //     value.levels.iter().collect()
-            // } else {
-            //     value
-            //         .worlds
-            //         .iter()
-            //         .flat_map(|world| &world.levels)
-            //         .collect::<Vec<_>>()
-            // }
-            // .iter()
-            // .filter_map(|level| {
-            //     level.external_rel_path.as_ref().map(|external_rel_path| {
-            //         let ldtk_level_asset_path =
-            //             ldtk_file_to_asset_path(external_rel_path, ldtk_project_path);
-            //         trace!("Adding level file to set: {ldtk_level_asset_path:?}");
-            //         (
-            //             level.iid.clone(),
-            //             ldtk_level_asset_path.clone(),
-            //             load_context.get_handle(ldtk_level_asset_path),
-            //         )
-            //     })
-            // })
-            // .collect::<Vec<(String, AssetPath, Handle<LdtkLevel>)>>();
-            //
-            // let tilesets = value.defs.tilesets.iter().filter_map(|tileset| {
-            //     if tileset.embed_atlas.is_none() {
-            //         tileset.rel_path.as_ref().map(|rel_path| {
-            //             let ldtk_tileset_asset_path =
-            //                 ldtk_file_to_asset_path(rel_path, ldtk_project_path);
-            //             trace!("Adding tileset to set: {ldtk_tileset_asset_path:?}");
-            //             (
-            //                 tileset.uid,
-            //                 ldtk_tileset_asset_path.clone(),
-            //                 load_context.get_handle_untyped(ldtk_tileset_asset_path),
-            //             )
-            //         })
-            //     } else {
-            //         None
-            //     }
-            // });
-            //
-            // let _world_level_map = if value.worlds.is_empty() {
-            //     HashMap::from([(
-            //         value.iid.clone(),
-            //         value.levels.iter().map(|value| value.iid.clone()).collect(),
-            //     )])
-            // } else {
-            //     value
-            //         .worlds
-            //         .iter()
-            //         .map(|value| {
-            //             (
-            //                 value.iid.clone(),
-            //                 value.levels.iter().map(|value| value.iid.clone()).collect(),
-            //             )
-            //         })
-            //         .collect()
-            // };
-            //
-            // let ldtk_project = LdtkProject {
-            //     _bg_color: util::get_bevy_color_from_ldtk(&value.bg_color)?,
-            //     level_backgrounds: level_backgrounds_meta
-            //         .iter()
-            //         .map(|(id, _, handle)| (id.clone(), handle.clone()))
-            //         .collect(),
-            //     level_file_handles: level_file_handles_meta
-            //         .iter()
-            //         .map(|(id, _, handle)| (id.clone(), handle.clone()))
-            //         .collect(),
-            //     tilesets: //tilesets_meta
-            //         //.iter()
-            //         tilesets.clone()
-            //         .map(|(id, _, handle)| (id, handle.typed()))
-            //         .collect(),
-            //     value: value.clone(),
-            //     world_level_map: _world_level_map, // _worlds: worlds,
-            // };
-            //
-            // load_context.set_default_asset(
-            //     LoadedAsset::new(ldtk_project)
-            //         .with_dependencies(
-            //             level_backgrounds_meta
-            //                 .iter()
-            //                 .map(|(_, asset_path, _)| asset_path.clone())
-            //                 .collect(),
-            //         )
-            //         .with_dependencies(
-            //             level_file_handles_meta
-            //                 .iter()
-            //                 .map(|(_, asset_path, _)| asset_path.clone())
-            //                 .collect(),
-            //         )
-            //         .with_dependencies(
-            //             // tilesets_meta
-            //             //     .iter()
-            //             tilesets
-            //                 .map(|(_, asset_path, _)| asset_path.clone())
-            //                 .collect(),
-            //         ),
-            // );
-            //
-            // debug!(
-            //     "Loading LDtk root project file: {} success!",
-            //     load_context.path().to_str().unwrap_or_default()
-            // );
-            //
-            // Ok(())
-            let _ = get_bevy_color_from_ldtk("#FFFFFF")?;
+            debug!(
+                "Loading LDtk root project file: {}",
+                load_context.path().to_str().unwrap_or_default()
+            );
 
-            let mut bytes = Vec::new();
-            reader.read_to_end(&mut bytes).await?;
+            let value: ldtk_json::LdtkJson = {
+                let mut bytes = Vec::new();
+                reader.read_to_end(&mut bytes).await?;
+                serde_json::from_slice(&bytes)?
+            };
 
-            let value: ldtk_json::LdtkJson = serde_json::from_slice(&bytes)?;
+            let world_levels_associations: Vec<(World, &Vec<ldtk_json::Level>)> =
+                if value.worlds.is_empty() {
+                    vec![(World::try_from(&value)?, &value.levels)]
+                } else {
+                    value
+                        .worlds
+                        .iter()
+                        .map(|value| Ok((World::try_from(value)?, &value.levels)))
+                        .collect::<Result<_, WorldError>>()?
+                };
 
-            // let _external_levels = value.worlds.iter().flat_map(|world| {
-            //     world
-            //         .levels
-            //         .iter()
-            //         .filter_map(|level| level.external_rel_path.as_ref())
-            //         .map(|level_path| load_context.path().parent().unwrap().join(level_path))
-            //         .map(|path_buf| async { load_context.load_direct(path_buf).await })
-            // });
+            let mut worlds: HashMap<String, World> =
+                HashMap::with_capacity(world_levels_associations.len());
 
-            Ok(LdtkProject { value })
+            if !value.external_levels {
+                for (mut world, values) in world_levels_associations {
+                    world.levels = values
+                        .iter()
+                        .map(|value| Ok((value.iid.clone(), Level::try_from(value)?)))
+                        .collect::<Result<_, LevelError>>()?;
+                    worlds.insert(world.iid.clone(), world);
+                }
+            } else {
+                for (mut world, values) in world_levels_associations {
+                    let mut levels: HashMap<String, Level> = HashMap::with_capacity(values.len());
+                    for value in values {
+                        let level_asset = load_context
+                            .load_direct(AssetPath::parse(
+                                ldtk_file_to_asset_path(
+                                    value.external_rel_path.as_ref().unwrap().as_str(),
+                                    load_context.path(),
+                                )
+                                .as_str(),
+                            ))
+                            .await?
+                            .take::<LdtkLevel>()
+                            .ok_or(LdtkRootLoaderError::BadExternalLevel)?;
+                        levels.insert(value.iid.clone(), Level::try_from(&level_asset.value)?);
+                    }
+                    world.levels = levels;
+                    worlds.insert(world.iid.clone(), world);
+                }
+            }
+
+            Ok(LdtkProject {
+                value,
+                _worlds: worlds,
+            })
         })
     }
 
