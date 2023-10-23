@@ -1,9 +1,8 @@
-use std::collections::HashMap;
-
 use crate::util::ColorParseError;
 use crate::{assets, ldtk_json};
 use bevy::prelude::*;
 use bevy::utils::thiserror;
+use std::collections::HashMap;
 use thiserror::Error;
 
 #[derive(Clone, Debug)]
@@ -32,6 +31,8 @@ impl TryFrom<&ldtk_json::LdtkJson> for World {
     type Error = WorldError;
 
     fn try_from(value: &ldtk_json::LdtkJson) -> Result<Self, Self::Error> {
+        trace!("Loading world, single world variant.");
+
         let world_grid_helper = |world_grid_value: Option<i64>,
                                  which: &str|
          -> Result<i64, Self::Error> {
@@ -60,6 +61,8 @@ impl TryFrom<&ldtk_json::LdtkJson> for World {
         };
 
         Ok(Self {
+            // no identifier provided for single world variant,
+            // so we supply "(root)" as a stand-in
             _identifier: "(root)".to_string(),
             iid: value.iid.clone(),
             levels: HashMap::default(),
@@ -74,6 +77,8 @@ impl TryFrom<&ldtk_json::World> for World {
     type Error = WorldError;
 
     fn try_from(value: &ldtk_json::World) -> Result<Self, Self::Error> {
+        trace!("Loading world, multi-world variant: {}", value.identifier);
+
         let world_layout_helper = |world_layout: Option<&ldtk_json::WorldLayout>| -> Result<ldtk_json::WorldLayout, Self::Error> {
             if let Some(world_layout) = world_layout {
                 Ok(world_layout.clone())

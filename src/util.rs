@@ -3,21 +3,6 @@ use bevy::utils::thiserror;
 use hex::FromHex;
 use thiserror::Error;
 
-// #[derive(Debug)]
-// pub(crate) struct ColorParseError {
-//     value: String,
-// }
-//
-// impl std::fmt::Display for ColorParseError {
-//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-//         write!(
-//             f,
-//             "Unable to parse given ldtk color string into a bevy color! expected format: hex color #rrggbb, given: {}",
-//             self.value
-//         )
-//     }
-// }
-
 #[derive(Debug, Error)]
 pub(crate) enum ColorParseError {
     #[error("Provided color string not seven characters! {0}")]

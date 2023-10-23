@@ -3,9 +3,6 @@ use crate::assets::ldtk_level_loader::LdtkLevelLoader;
 use crate::assets::ldtk_project::LdtkProject;
 use crate::assets::ldtk_project_loader::LdtkRootLoader;
 use crate::components::LdtkRoot;
-// use crate::prelude::{AssetsLoadedTag, WorldSet};
-// use crate::systems::add_children_once_assets_loaded::add_children_once_assets_loaded;
-// use crate::systems::LdtkSet;
 use bevy::prelude::*;
 
 pub struct LdtkBevyLoaderPlugin;

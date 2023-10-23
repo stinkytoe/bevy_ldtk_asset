@@ -46,6 +46,8 @@ impl TryFrom<&ldtk_json::Level> for Level {
     type Error = LevelError;
 
     fn try_from(value: &ldtk_json::Level) -> Result<Self, Self::Error> {
+        trace!("Loading level: {}", value.identifier);
+
         Ok(Self {
             _background: match (value.bg_pos.as_ref(), value.bg_rel_path.as_ref()) {
                 (None, None) => None,

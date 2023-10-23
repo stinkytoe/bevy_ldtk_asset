@@ -89,14 +89,20 @@ impl AssetLoader for LdtkRootLoader {
                         let level_asset = load_context
                             .load_direct(AssetPath::parse(
                                 ldtk_file_to_asset_path(
-                                    value.external_rel_path.as_ref().unwrap().as_str(),
+                                    value.external_rel_path.as_ref().ok_or_else(|| {
+                                        error!("External level with ExternalRelPath as None!");
+                                        LdtkRootLoaderError::BadExternalLevel
+                                    })?,
                                     load_context.path(),
                                 )
                                 .as_str(),
                             ))
                             .await?
                             .take::<LdtkLevel>()
-                            .ok_or(LdtkRootLoaderError::BadExternalLevel)?;
+                            .ok_or_else(|| {
+                                error!("Failed to generate external level!");
+                                LdtkRootLoaderError::BadExternalLevel
+                            })?;
                         levels.insert(value.iid.clone(), Level::try_from(&level_asset.value)?);
                     }
                     world.levels = levels;

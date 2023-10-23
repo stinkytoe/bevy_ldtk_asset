@@ -38,6 +38,7 @@ impl TryFrom<&ldtk_json::LayerInstance> for Layer {
 
     fn try_from(value: &ldtk_json::LayerInstance) -> Result<Self, Self::Error> {
         trace!("Loading layer: {}", value.identifier);
+
         Ok(Self {
             _c_height: value.c_hei,
             _c_width: value.c_wid,
