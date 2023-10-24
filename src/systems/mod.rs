@@ -1,5 +1,4 @@
-pub(crate) mod add_children_once_assets_loaded;
-pub(crate) mod world_set_changed;
+pub(crate) mod update_loaded_ldtk_project;
 
 use bevy::prelude::*;
 

@@ -6,3 +6,6 @@ pub struct LdtkRoot {
     pub project: Handle<LdtkProject>,
     // pub render_set: Vec<MaterialMesh2dBundle<ColorMaterial>>,
 }
+
+#[derive(Component, Debug, Default, Reflect)]
+pub struct World {}
