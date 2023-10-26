@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use bevy::prelude::*;
 use bevy::utils::thiserror;
 use hex::FromHex;
@@ -41,4 +43,10 @@ pub(crate) fn get_bevy_color_from_ldtk(color: String) -> Result<Color, ColorPars
         hex_to_float(green_hex)?,
         hex_to_float(blue_hex)?,
     ))
+}
+
+// given the root directory of the project file, and a file path as given by LDtk,
+// return the PathBuf representing the joined path
+pub fn ldtk_project_path_join(ldtk_project_path: &str, ldtk_project_filename: &str) -> PathBuf {
+    PathBuf::from(ldtk_project_path).join(ldtk_project_filename)
 }

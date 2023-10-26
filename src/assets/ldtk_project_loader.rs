@@ -2,14 +2,15 @@ use crate::assets::ldtk_level::LdtkLevel;
 use crate::assets::ldtk_project::LdtkProject;
 use crate::assets::structs::level::{Level, LevelError};
 use crate::assets::structs::world::{World, WorldError};
-use crate::assets::util::ldtk_file_to_asset_path;
+// use crate::assets::util::ldtk_file_to_asset_path;
 use crate::ldtk_json;
-use crate::util::ColorParseError;
+use crate::util::{ldtk_project_path_join, ColorParseError};
 use bevy::asset::{io::Reader, AssetLoader, LoadContext};
 use bevy::asset::{AssetPath, AsyncReadExt};
 use bevy::prelude::*;
 use bevy::utils::thiserror;
 use std::collections::HashMap;
+use std::path::PathBuf;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -32,6 +33,12 @@ pub(crate) enum LdtkRootLoaderError {
     BadExternalLevel,
     #[error("Bevy failed to load asset: {0}")]
     BevyLoadDirectError(#[from] bevy::asset::LoadDirectError),
+    #[error("Unable to find root folder of project: {0}")]
+    BadAssetPath(PathBuf),
+    #[error("Unable to parse path into string: {0}")]
+    PathUnparsable(PathBuf),
+    #[error("Unable to parse path into string: {0}")]
+    PathJoinUnparsable(String),
 }
 
 #[derive(Default)]
@@ -54,6 +61,19 @@ impl AssetLoader for LdtkRootLoader {
                 load_context.path().to_str().unwrap_or_default()
             );
 
+            let assets_path: PathBuf = load_context.path().clone().into();
+            let assets_path = assets_path
+                .parent()
+                .ok_or_else(|| {
+                    error!("Unable to get parent directory of project file!");
+                    LdtkRootLoaderError::BadAssetPath(load_context.path().clone().into())
+                })?
+                .to_str()
+                .ok_or_else(|| {
+                    error!("Path unable to be parsed into a utf-8 string!");
+                    LdtkRootLoaderError::PathUnparsable(load_context.path().clone().into())
+                })?;
+
             let value: ldtk_json::LdtkJson = {
                 let mut bytes = Vec::new();
                 reader.read_to_end(&mut bytes).await?;
@@ -62,12 +82,12 @@ impl AssetLoader for LdtkRootLoader {
 
             let world_levels_associations: Vec<(World, &Vec<ldtk_json::Level>)> =
                 if value.worlds.is_empty() {
-                    vec![(World::try_from(&value)?, &value.levels)]
+                    vec![((&value).try_into()?, &value.levels)]
                 } else {
                     value
                         .worlds
                         .iter()
-                        .map(|value| Ok((World::try_from(value)?, &value.levels)))
+                        .map(|value| Ok((value.try_into()?, &value.levels)))
                         .collect::<Result<_, WorldError>>()?
                 };
 
@@ -78,7 +98,7 @@ impl AssetLoader for LdtkRootLoader {
                 for (mut world, values) in world_levels_associations {
                     world.levels = values
                         .iter()
-                        .map(|value| Ok((value.iid.clone(), Level::try_from(value)?)))
+                        .map(|value| Ok((value.iid.clone(), value.try_into()?)))
                         .collect::<Result<_, LevelError>>()?;
                     worlds.insert(world.iid.clone(), world);
                 }
@@ -88,14 +108,20 @@ impl AssetLoader for LdtkRootLoader {
                     for value in values {
                         let level_asset = load_context
                             .load_direct(AssetPath::parse(
-                                ldtk_file_to_asset_path(
+                                ldtk_project_path_join(
+                                    assets_path,
                                     value.external_rel_path.as_ref().ok_or_else(|| {
                                         error!("External level with ExternalRelPath as None!");
                                         LdtkRootLoaderError::BadExternalLevel
                                     })?,
-                                    load_context.path(),
                                 )
-                                .as_str(),
+                                .to_str()
+                                .ok_or_else(|| {
+                                    error!("Unable to parse joined string!");
+                                    LdtkRootLoaderError::PathJoinUnparsable(
+                                        value.external_rel_path.as_ref().unwrap().clone(),
+                                    )
+                                })?,
                             ))
                             .await?
                             .take::<LdtkLevel>()
@@ -117,7 +143,8 @@ impl AssetLoader for LdtkRootLoader {
 
             Ok(LdtkProject {
                 value,
-                _worlds: worlds,
+                worlds,
+                assets_path: assets_path.to_string(),
             })
         })
     }

@@ -6,7 +6,8 @@ use std::collections::HashMap;
 #[derive(Asset, Debug, TypePath)]
 pub struct LdtkProject {
     pub(crate) value: ldtk_json::LdtkJson,
-    pub(crate) _worlds: HashMap<String, World>,
+    pub(crate) worlds: HashMap<String, World>,
+    pub(crate) assets_path: String,
 }
 
 impl LdtkProject {

@@ -7,15 +7,15 @@ use thiserror::Error;
 
 #[derive(Clone, Debug)]
 pub(crate) struct Level {
-    pub(crate) _background: Option<LevelBackground>,
-    pub(crate) _bg_color: Color,
+    pub(crate) background: Option<LevelBackground>,
+    pub(crate) bg_color: Color,
     pub(crate) _neighbors: Vec<ldtk_json::NeighbourLevel>,
     pub(crate) _field_instances: Vec<ldtk_json::FieldInstance>,
     pub(crate) _identifier: String,
     pub(crate) _iid: String,
     pub(crate) _layers: Vec<Layer>,
-    pub(crate) _px_height: i64,
-    pub(crate) _px_width: i64,
+    pub(crate) px_height: i64,
+    pub(crate) px_width: i64,
     pub(crate) _uid: i64,
     pub(crate) _world_depth: i64,
     pub(crate) _world_x: i64,
@@ -49,7 +49,7 @@ impl TryFrom<&ldtk_json::Level> for Level {
         trace!("Loading level: {}", value.identifier);
 
         Ok(Self {
-            _background: match (value.bg_pos.as_ref(), value.bg_rel_path.as_ref()) {
+            background: match (value.bg_pos.as_ref(), value.bg_rel_path.as_ref()) {
                 (None, None) => None,
                 (None, Some(_)) => {
                     error!("We got a background rel path but no background position!");
@@ -64,7 +64,7 @@ impl TryFrom<&ldtk_json::Level> for Level {
                     _path: bg_rel_path.clone(),
                 }),
             },
-            _bg_color: get_bevy_color_from_ldtk(value.bg_color.clone())?,
+            bg_color: get_bevy_color_from_ldtk(value.bg_color.clone())?,
             _neighbors: value.neighbours.clone(),
             _field_instances: value.field_instances.clone(),
             _identifier: value.identifier.clone(),
@@ -76,8 +76,8 @@ impl TryFrom<&ldtk_json::Level> for Level {
                 .iter()
                 .map(Layer::try_from)
                 .collect::<Result<_, _>>()?,
-            _px_height: value.px_hei,
-            _px_width: value.px_wid,
+            px_height: value.px_hei,
+            px_width: value.px_wid,
             _uid: value.uid,
             _world_depth: value.world_depth,
             _world_x: value.world_x,
