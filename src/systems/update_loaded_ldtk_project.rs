@@ -49,11 +49,6 @@ pub fn update_loaded_ldtk_project(
 
                         parent.spawn(MaterialMesh2dBundle {
                             mesh: meshes
-                                // .add(Mesh::from(shape::Quad::new(Vec2::new(
-                                //     level._px_width as f32,
-                                //     level._px_height as f32,
-                                // ))))
-                                // .into(),
                                 .add(
                                     Mesh::new(PrimitiveTopology::TriangleList)
                                         .with_indices(Some(indices))
@@ -64,14 +59,10 @@ pub fn update_loaded_ldtk_project(
                                 .into(),
                             material: materials.add(ColorMaterial::from(level.bg_color)),
                             transform: Transform::from_xyz(
-                                level._world_x as f32,
-                                -level._world_y as f32,
-                                level._world_depth as f32,
+                                level.world_x as f32,
+                                -level.world_y as f32,
+                                level.world_depth as f32,
                             ),
-                            // global_transform: todo!(),
-                            // visibility: todo!(),
-                            // inherited_visibility: todo!(),
-                            // view_visibility: todo!(),
                             ..default()
                         });
                         if let Some(_background) = &level.background {
