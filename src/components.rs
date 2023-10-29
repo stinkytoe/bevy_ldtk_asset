@@ -8,6 +8,11 @@ pub struct LdtkRoot {
 }
 
 #[derive(Component, Debug, Default, Reflect)]
-pub(crate) struct World {
-    pub(crate) iid: String,
+pub struct World {
+    pub iid: String,
+}
+
+#[derive(Component, Debug, Default, Reflect)]
+pub struct Level {
+    pub iid: String,
 }

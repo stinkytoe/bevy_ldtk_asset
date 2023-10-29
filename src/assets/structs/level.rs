@@ -12,7 +12,7 @@ pub(crate) struct Level {
     pub(crate) _neighbors: Vec<ldtk_json::NeighbourLevel>,
     pub(crate) _field_instances: Vec<ldtk_json::FieldInstance>,
     pub(crate) _identifier: String,
-    pub(crate) _iid: String,
+    pub(crate) iid: String,
     pub(crate) _layers: Vec<Layer>,
     pub(crate) px_height: i64,
     pub(crate) px_width: i64,
@@ -68,7 +68,7 @@ impl TryFrom<&ldtk_json::Level> for Level {
             _neighbors: value.neighbours.clone(),
             _field_instances: value.field_instances.clone(),
             _identifier: value.identifier.clone(),
-            _iid: value.iid.clone(),
+            iid: value.iid.clone(),
             _layers: value
                 .layer_instances
                 .as_ref()

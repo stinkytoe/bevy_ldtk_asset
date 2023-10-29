@@ -61,17 +61,17 @@ impl AssetLoader for LdtkRootLoader {
                 load_context.path().to_str().unwrap_or_default()
             );
 
-            let assets_path: PathBuf = load_context.path().clone().into();
-            let assets_path = assets_path
+            let assets_path_buf: PathBuf = load_context.path().clone().into();
+            let assets_path = assets_path_buf
                 .parent()
                 .ok_or_else(|| {
                     error!("Unable to get parent directory of project file!");
-                    LdtkRootLoaderError::BadAssetPath(load_context.path().clone().into())
+                    LdtkRootLoaderError::BadAssetPath(assets_path_buf.clone())
                 })?
                 .to_str()
                 .ok_or_else(|| {
                     error!("Path unable to be parsed into a utf-8 string!");
-                    LdtkRootLoaderError::PathUnparsable(load_context.path().clone().into())
+                    LdtkRootLoaderError::PathUnparsable(assets_path_buf.clone())
                 })?;
 
             let value: ldtk_json::LdtkJson = {
@@ -129,7 +129,7 @@ impl AssetLoader for LdtkRootLoader {
                                 error!("Failed to generate external level!");
                                 LdtkRootLoaderError::BadExternalLevel
                             })?;
-                        levels.insert(value.iid.clone(), Level::try_from(&level_asset.value)?);
+                        levels.insert(value.iid.clone(), (&level_asset.value).try_into()?);
                     }
                     world.levels = levels;
                     worlds.insert(world.iid.clone(), world);

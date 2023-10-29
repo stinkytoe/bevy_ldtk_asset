@@ -32,10 +32,5 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 fn system(mut gizmos: Gizmos) {
     gizmos.circle(Vec3::ZERO, Vec3::Z, 10.0, Color::ORANGE_RED);
     gizmos.circle(Vec3::new(256.0, 0.0, 0.0), Vec3::Z, 10.0, Color::ORANGE_RED);
-    gizmos.circle(
-        Vec3::new(128.0, -256.0, 0.0),
-        Vec3::Z,
-        10.0,
-        Color::ORANGE_RED,
-    );
+    gizmos.circle(Vec3::new(128.0, -256.0, 0.0), Vec3::Z, 10.0, Color::RED);
 }
