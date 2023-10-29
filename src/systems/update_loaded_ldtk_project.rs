@@ -22,9 +22,18 @@ pub fn update_loaded_ldtk_project(
             let AssetEvent::LoadedWithDependencies { id } = event else {
                 return;
             };
-            ldtk_project_assets
-                .get(asset_server.get_id_handle(*id).unwrap())
-                .unwrap()
+
+            let Some(handle) = asset_server.get_id_handle(*id) else {
+                error!("Failing even though we got the LoadedWithDependencies symbol?");
+                return;
+            };
+
+            let Some(asset) = ldtk_project_assets.get(handle) else {
+                error!("handle returned bad asset?");
+                return;
+            };
+
+            asset
         };
 
         let mut level_helper = |parent: &mut ChildBuilder, world: &world::World| {
@@ -40,9 +49,16 @@ pub fn update_loaded_ldtk_project(
                 let indices = Indices::U32(vec![0, 1, 2, 0, 2, 3]);
 
                 parent
-                    .spawn(components::Level {
-                        iid: level.iid.clone(),
-                    })
+                    .spawn((
+                        components::Level {
+                            iid: level.iid.clone(),
+                        },
+                        SpatialBundle::from_transform(Transform::from_xyz(
+                            level.world_x,
+                            -level.world_y,
+                            level.world_depth,
+                        )),
+                    ))
                     .with_children(|parent| {
                         parent.spawn(MaterialMesh2dBundle {
                             mesh: meshes
@@ -55,11 +71,6 @@ pub fn update_loaded_ldtk_project(
                                 )
                                 .into(),
                             material: materials.add(ColorMaterial::from(level.bg_color)),
-                            transform: Transform::from_xyz(
-                                level.world_x as f32,
-                                -level.world_y as f32,
-                                level.world_depth as f32,
-                            ),
                             ..default()
                         });
                     });

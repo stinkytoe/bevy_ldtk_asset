@@ -17,9 +17,9 @@ pub(crate) struct Level {
     pub(crate) px_height: i64,
     pub(crate) px_width: i64,
     pub(crate) _uid: i64,
-    pub(crate) world_depth: i64,
-    pub(crate) world_x: i64,
-    pub(crate) world_y: i64,
+    pub(crate) world_depth: f32,
+    pub(crate) world_x: f32,
+    pub(crate) world_y: f32,
 }
 
 #[derive(Clone, Debug)]
@@ -79,9 +79,9 @@ impl TryFrom<&ldtk_json::Level> for Level {
             px_height: value.px_hei,
             px_width: value.px_wid,
             _uid: value.uid,
-            world_depth: value.world_depth,
-            world_x: value.world_x,
-            world_y: value.world_y,
+            world_depth: value.world_depth as f32,
+            world_x: value.world_x as f32,
+            world_y: value.world_y as f32,
         })
     }
 }
