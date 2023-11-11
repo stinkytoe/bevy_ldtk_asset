@@ -7,11 +7,10 @@ use bevy::utils::thiserror;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
-pub(crate) enum LdtkRootLoaderError {
-    /// An [IO](std::io) Error
-    #[error("Could load raw asset: {0}")]
+pub(crate) enum LdtkLevelLoaderError {
+    #[error("IO error when reading asset: {0}")]
     Io(#[from] std::io::Error),
-    #[error("Unable to parse given color string! {0}")]
+    #[error("Unable to parse JSON! {0}")]
     UnableToParse(#[from] serde_json::Error),
 }
 
@@ -21,7 +20,7 @@ pub(crate) struct LdtkLevelLoader;
 impl AssetLoader for LdtkLevelLoader {
     type Asset = LdtkLevel;
     type Settings = ();
-    type Error = LdtkRootLoaderError;
+    type Error = LdtkLevelLoaderError;
 
     fn load<'a>(
         &'a self,
@@ -46,7 +45,7 @@ impl AssetLoader for LdtkLevelLoader {
                 load_context.path().to_str().unwrap_or_default()
             );
 
-            Ok(LdtkLevel { value })
+            Ok(LdtkLevel { _value: value })
         })
     }
 

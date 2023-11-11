@@ -1,5 +1,5 @@
 [package]
-name = "ldtk_bevy_loader"
+name = "bevy_ldtk_asset"
 version = "0.1.0"
 edition = "2021"
 
@@ -10,11 +10,12 @@ name = "example"
 path = "examples/example.rs"
 
 [dependencies]
-bevy = { git = "https://github.com/bevyengine/bevy.git", branch = "main" }
+# bevy = { git = "https://github.com/bevyengine/bevy.git", branch = "main" }
+bevy = "0.12"
 hex = "0.4"
 serde = "1.0"
 serde_json = "1.0"
 futures = "0.3"
 
 # [dev-dependencies]
-# bevy-inspector-egui = "0.20"
+bevy-inspector-egui = "0.21"

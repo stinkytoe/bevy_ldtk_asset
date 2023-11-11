@@ -1,17 +1,18 @@
-use crate::assets::structs::world::World;
+use super::ldtk_level::LdtkLevel;
 use crate::ldtk_json;
-use bevy::{prelude::*, reflect::TypePath};
+use bevy::prelude::*;
 use std::collections::HashMap;
 
 #[derive(Asset, Debug, TypePath)]
 pub struct LdtkProject {
-    pub(crate) value: ldtk_json::LdtkJson,
-    pub(crate) worlds: HashMap<String, World>,
-    pub(crate) assets_path: String,
+    pub value: ldtk_json::LdtkJson,
+    pub level_handle_map: HashMap<String, Handle<LdtkLevel>>,
+    // pub(crate) worlds: HashMap<String, World>,
+    // pub(crate) assets_path: String,
 }
 
-impl LdtkProject {
-    pub fn json(&self) -> &ldtk_json::LdtkJson {
-        &self.value
-    }
-}
+// impl LdtkProject {
+//     pub fn json(&self) -> &ldtk_json::LdtkJson {
+//         &self.value
+//     }
+// }
