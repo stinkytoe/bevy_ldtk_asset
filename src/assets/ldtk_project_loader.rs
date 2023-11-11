@@ -85,7 +85,7 @@ impl AssetLoader for LdtkProjectLoader {
                     load_context.add_labeled_asset(
                         label.to_owned(),
                         LdtkLevel {
-                            _value: level.to_owned(),
+                            value: level.to_owned(),
                         },
                     ),
                 )

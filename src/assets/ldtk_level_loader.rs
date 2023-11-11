@@ -45,7 +45,7 @@ impl AssetLoader for LdtkLevelLoader {
                 load_context.path().to_str().unwrap_or_default()
             );
 
-            Ok(LdtkLevel { _value: value })
+            Ok(LdtkLevel { value })
         })
     }
 

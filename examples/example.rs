@@ -10,9 +10,9 @@ fn main() {
                 level: Level::WARN,
                 filter: "bevy_ldtk_asset=trace".to_string(),
             }),
-            LdtkBevyLoaderPlugin,
+            WorldInspectorPlugin::new(),
+            BevyLdtkAssetPlugin,
         ))
-        .add_plugins(WorldInspectorPlugin::new())
         .add_systems(Startup, setup)
         .add_systems(Update, system)
         .run();
@@ -23,7 +23,6 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     commands.spawn(LdtkLevelBundle {
         level: asset_server.load("ldtk/example.ldtk#Level_0"),
-        // project: asset_server.load("ldtk/example.ldtk"),
         ..default()
     });
 }
