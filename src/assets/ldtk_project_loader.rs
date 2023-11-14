@@ -1,6 +1,10 @@
+use std::collections::HashMap;
+
 use crate::assets::ldtk_level::LdtkLevel;
 use crate::assets::ldtk_project::LdtkProject;
 use crate::ldtk_json;
+use crate::util::get_bevy_path_from_ldtk_path;
+use crate::util::LdtkPathError;
 use bevy::asset::io::Reader;
 use bevy::asset::AssetLoader;
 use bevy::asset::AsyncReadExt;
@@ -15,6 +19,8 @@ pub(crate) enum LdtkProjectLoaderError {
     Io(#[from] std::io::Error),
     #[error("Unable to parse JSON! {0}")]
     UnableToParse(#[from] serde_json::Error),
+    #[error("Path Error: {0}")]
+    PathError(#[from] LdtkPathError),
 }
 
 #[derive(Default)]
@@ -43,10 +49,12 @@ impl AssetLoader for LdtkProjectLoader {
                 serde_json::from_slice(&bytes)?
             };
 
+            let context_path_buf = load_context.path().to_path_buf();
+
             // First return an iterator of tuples which contain
             // the world name and the list of levels in that world.
             //
-            // For single world projects, we only use the level name as
+            // For single world projects, we use only the level name as
             // the label. So you would load like:
             //
             // asset_server.get("project.ldtk#Level_0");
@@ -62,7 +70,6 @@ impl AssetLoader for LdtkProjectLoader {
                     .worlds
                     .iter()
                     .map(|world| (world.identifier.clone() + "/", world.levels.iter()))
-                    // .collect::<Vec<(String, Vec<ldtk_json::Level>)>>()
                     .collect()
             }
             .iter()
@@ -80,19 +87,25 @@ impl AssetLoader for LdtkProjectLoader {
             // asset in the second part. Its label is used so that we can
             // find it using bevy's labeled asset loading syntax
             .map(|(label, level)| {
-                (
+                Ok((
                     label.to_owned(),
-                    load_context.add_labeled_asset(
-                        label.to_owned(),
-                        LdtkLevel {
-                            value: level.to_owned(),
-                        },
-                    ),
-                )
+                    if let Some(level_path) = level.external_rel_path {
+                        load_context.load(
+                            get_bevy_path_from_ldtk_path(&context_path_buf, &level_path).unwrap(),
+                        )
+                    } else {
+                        load_context.add_labeled_asset(
+                            label.to_owned(),
+                            LdtkLevel {
+                                value: level.to_owned(),
+                            },
+                        )
+                    },
+                ))
             })
-            .collect();
+            .collect::<Result<HashMap<String, Handle<LdtkLevel>>, LdtkPathError>>()?;
 
-            debug!("World/Level pairs: \n{level_handle_map:#?}");
+            // debug!("World/Level pairs: \n{level_handle_map:#?}");
 
             debug!(
                 "LDtk root project file: {} loaded!",
@@ -101,8 +114,7 @@ impl AssetLoader for LdtkProjectLoader {
 
             Ok(LdtkProject {
                 value,
-                level_handle_map, // worlds,
-                                  // assets_path: assets_path.to_string(),
+                level_handle_map,
             })
         })
     }

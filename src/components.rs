@@ -7,8 +7,8 @@ use bevy::prelude::*;
 //     // pub render_set: Vec<MaterialMesh2dBundle<ColorMaterial>>,
 // }
 //
-#[derive(Component, Debug, Default, Reflect)]
-pub struct World;
+// #[derive(Component, Debug, Default, Reflect)]
+// pub struct World;
 
 #[derive(Component, Debug, Default, Reflect)]
-pub struct Level;
+pub struct LevelComponent;

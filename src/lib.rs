@@ -3,6 +3,7 @@ mod bundles;
 mod components;
 pub mod ldtk_json;
 mod plugin;
+mod systems;
 mod util;
 
 pub mod prelude {

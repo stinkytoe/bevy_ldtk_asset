@@ -1,5 +1,6 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
+use bevy::asset::ParseAssetPathError;
 use bevy::prelude::*;
 use bevy::utils::thiserror;
 use hex::FromHex;
@@ -47,6 +48,31 @@ pub(crate) fn _get_bevy_color_from_ldtk(color: String) -> Result<Color, ColorPar
 
 // given the root directory of the project file, and a file path as given by LDtk,
 // return the PathBuf representing the joined path
-pub fn _ldtk_project_path_join(ldtk_project_path: &str, ldtk_project_filename: &str) -> PathBuf {
-    PathBuf::from(ldtk_project_path).join(ldtk_project_filename)
+// pub fn _ldtk_project_path_join(ldtk_project_path: &str, ldtk_project_filename: &str) -> PathBuf {
+//     PathBuf::from(ldtk_project_path).join(ldtk_project_filename)
+// }
+
+#[derive(Debug, Error)]
+pub(crate) enum LdtkPathError {
+    #[error("Bad parent: {0}")]
+    BadParent(PathBuf),
+    #[error("Path error: {0}")]
+    PathError(#[from] ParseAssetPathError),
+}
+
+// give the ldtk asset path and a path from inside the JSON,
+// and we'll construct a PathBuf representing the JSON path
+// in relation to the asset path.
+pub(crate) fn get_bevy_path_from_ldtk_path(
+    bevy_load_context_path: &Path,
+    ldtk_path: &str,
+) -> Result<PathBuf, LdtkPathError> {
+    Ok(bevy_load_context_path
+        .to_path_buf()
+        .parent()
+        .ok_or(LdtkPathError::BadParent(
+            bevy_load_context_path.to_path_buf(),
+        ))?
+        .to_path_buf()
+        .join(ldtk_path))
 }
