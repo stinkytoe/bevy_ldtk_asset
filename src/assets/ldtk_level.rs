@@ -5,5 +5,5 @@ use serde::Deserialize;
 
 #[derive(Asset, TypePath, Debug, Deserialize)]
 pub struct LdtkLevel {
-    pub value: ldtk_json::Level,
+	pub value: ldtk_json::Level,
 }
