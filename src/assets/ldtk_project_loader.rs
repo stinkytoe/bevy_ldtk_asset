@@ -1,17 +1,17 @@
-use std::collections::HashMap;
-
-use crate::assets::ldtk_level::LdtkLevel;
-use crate::assets::ldtk_project::LdtkProject;
-use crate::ldtk_json;
-use crate::util::get_bevy_path_from_ldtk_path;
-use crate::util::LdtkPathError;
 use bevy::asset::io::Reader;
 use bevy::asset::AssetLoader;
 use bevy::asset::AsyncReadExt;
 use bevy::asset::LoadContext;
 use bevy::prelude::*;
 use bevy::utils::thiserror;
+use std::collections::HashMap;
 use thiserror::Error;
+
+use crate::assets::ldtk_level::LdtkLevel;
+use crate::assets::ldtk_project::LdtkProject;
+use crate::ldtk_json;
+use crate::util::get_bevy_path_from_ldtk_path;
+use crate::util::LdtkPathError;
 
 #[derive(Debug, Error)]
 pub(crate) enum LdtkProjectLoaderError {
