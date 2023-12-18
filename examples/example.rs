@@ -13,7 +13,6 @@ fn main() {
 			WorldInspectorPlugin::new(),
 			BevyLdtkAssetPlugin,
 		))
-		.register_type::<Handle<LdtkLevel>>()
 		.add_systems(Startup, setup)
 		.add_systems(Update, system)
 		.run();

@@ -4,14 +4,12 @@ use bevy::asset::AsyncReadExt;
 use bevy::asset::LoadContext;
 use bevy::prelude::*;
 use bevy::utils::thiserror;
-use std::collections::HashMap;
+use std::path::PathBuf;
 use thiserror::Error;
 
 use crate::assets::ldtk_level::LdtkLevel;
 use crate::assets::ldtk_project::LdtkProject;
 use crate::ldtk_json;
-use crate::util::get_bevy_path_from_ldtk_path;
-use crate::util::LdtkPathError;
 
 #[derive(Debug, Error)]
 pub(crate) enum LdtkProjectLoaderError {
@@ -19,8 +17,12 @@ pub(crate) enum LdtkProjectLoaderError {
 	Io(#[from] std::io::Error),
 	#[error("Unable to parse JSON! {0}")]
 	UnableToParse(#[from] serde_json::Error),
-	#[error("Path Error: {0}")]
-	PathError(#[from] LdtkPathError),
+	// #[error("Path Error: {0}")]
+	// PathError(#[from] LdtkPathError),
+	#[error("Couldn't load child LDTk level! {0}")]
+	UnableToLoadExternalChild(#[from] bevy::asset::LoadDirectError),
+	#[error("Couldn't get parent of asset path! {0}")]
+	UnableToGetParent(PathBuf),
 }
 
 #[derive(Default)]
@@ -49,73 +51,49 @@ impl AssetLoader for LdtkProjectLoader {
 				serde_json::from_slice(&bytes)?
 			};
 
-			let context_path_buf = load_context.path().to_path_buf();
-
-			// First return an iterator of tuples which contain
-			// the world name and the list of levels in that world.
-			//
-			// For single world projects, we use only the level name as
-			// the label. So you would load like:
-			//
-			// asset_server.get("project.ldtk#Level_0");
-			//
-			// For multi world projects, we cat the world name, and a slash '/'
-			// and the level name. In this case you would load like:
-			//
-			// asset_server.get("project.ldtk#World/Level_0");
-			let level_handle_map = if value.worlds.is_empty() {
-				vec![("".to_owned(), value.levels.iter())]
+			let load_context_path_buf = load_context.path().to_path_buf();
+			let load_context_directory = if let Some(parent) = load_context_path_buf.parent() {
+				PathBuf::from(parent)
 			} else {
-				value
-					.worlds
-					.iter()
-					.map(|world| (world.identifier.clone() + "/", world.levels.iter()))
-					.collect()
-			}
-			.iter()
-			// here we take each touple from before, and create a list
-			// of tuples with their json level representation
-			.flat_map(|(world_id, levels)| {
-				levels.clone().map(|level| {
-					(
-						world_id.to_owned() + &level.identifier.clone(),
-						level.clone(),
-					)
-				})
-			})
-			// now each tuple is reconstructed with a handle to their
-			// asset in the second part. Its label is used so that we can
-			// find it using bevy's labeled asset loading syntax
-			.map(|(label, level)| {
-				Ok((
-					label.to_owned(),
-					if let Some(level_path) = level.external_rel_path {
-						load_context.load(
-							get_bevy_path_from_ldtk_path(&context_path_buf, &level_path).unwrap(),
-						)
-					} else {
-						load_context.add_labeled_asset(
-							label.to_owned(),
-							LdtkLevel {
-								value: level.to_owned(),
-							},
-						)
-					},
-				))
-			})
-			.collect::<Result<HashMap<String, Handle<LdtkLevel>>, LdtkPathError>>()?;
+				return Err(LdtkProjectLoaderError::UnableToGetParent(
+					load_context_path_buf,
+				));
+			};
 
-			// debug!("World/Level pairs: \n{level_handle_map:#?}");
+			if value.external_levels {
+				for (level_asset_path, level_json) in value.levels.iter().filter_map(|level_json| {
+					level_json.external_rel_path.as_ref().map(|level_path| {
+						(load_context_directory.clone().join(level_path), level_json)
+					})
+				}) {
+					if let Some(level_asset) = load_context
+						.load_direct(level_asset_path)
+						.await?
+						.take::<LdtkLevel>()
+					{
+						load_context.add_loaded_labeled_asset(
+							level_json.identifier.clone(),
+							level_asset.into(),
+						);
+					};
+				}
+			} else {
+				value.levels.iter().for_each(|level| {
+					load_context.add_labeled_asset(
+						level.identifier.clone(),
+						LdtkLevel {
+							value: level.clone(),
+						},
+					);
+				});
+			}
 
 			debug!(
 				"LDtk root project file: {} loaded!",
 				load_context.path().to_str().unwrap_or_default()
 			);
 
-			Ok(LdtkProject {
-				value,
-				level_handle_map,
-			})
+			Ok(LdtkProject { value })
 		})
 	}
 

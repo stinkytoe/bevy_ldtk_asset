@@ -20,8 +20,5 @@ pub(crate) fn handle_new_level(
 		commands
 			.entity(entity)
 			.insert(Name::from(level.value.identifier.to_owned()));
-
-		// let callback = |mut _commands: Commands| {};
-		// commands.run_system(callback);
 	}
 }
