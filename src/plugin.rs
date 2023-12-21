@@ -9,8 +9,8 @@ use bevy::prelude::*;
 pub struct BevyLdtkAssetPlugin;
 
 impl Plugin for BevyLdtkAssetPlugin {
-	fn build(&self, app: &mut bevy::prelude::App) {
-		app //
+    fn build(&self, app: &mut bevy::prelude::App) {
+        app //
 			.init_asset::<LdtkProject>()
 			.init_asset_loader::<LdtkProjectLoader>()
 			.init_asset::<LdtkLevel>()
@@ -24,5 +24,5 @@ impl Plugin for BevyLdtkAssetPlugin {
 			//.add_systems(Update, handle_new_level)
 		//
 		;
-	}
+    }
 }
