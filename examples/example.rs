@@ -25,10 +25,18 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 		level: asset_server.load("ldtk/example.ldtk#Level_0"),
 		..default()
 	});
+	commands.spawn(LdtkLevelBundle {
+		level: asset_server.load("ldtk/example.ldtk#Level_1"),
+		..default()
+	});
+	commands.spawn(LdtkLevelBundle {
+		level: asset_server.load("ldtk/example.ldtk#Level_2"),
+		..default()
+	});
 }
 
-fn system(mut _gizmos: Gizmos) {
-	// gizmos.circle(Vec3::ZERO, Vec3::Z, 10.0, Color::ORANGE_RED);
-	// gizmos.circle(Vec3::new(256.0, 0.0, 0.0), Vec3::Z, 10.0, Color::ORANGE_RED);
-	// gizmos.circle(Vec3::new(128.0, -256.0, 0.0), Vec3::Z, 10.0, Color::RED);
+fn system(mut gizmos: Gizmos) {
+	gizmos.circle(Vec3::ZERO, Vec3::Z, 10.0, Color::ORANGE_RED);
+	gizmos.circle(Vec3::new(256.0, 0.0, 0.0), Vec3::Z, 10.0, Color::ORANGE_RED);
+	gizmos.circle(Vec3::new(128.0, -256.0, 0.0), Vec3::Z, 10.0, Color::RED);
 }

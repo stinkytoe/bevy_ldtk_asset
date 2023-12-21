@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use crate::assets::ldtk_level::LdtkLevel;
 use crate::ldtk_json;
 use bevy::asset::AsyncReadExt;
@@ -12,6 +14,8 @@ pub(crate) enum LdtkLevelLoaderError {
 	Io(#[from] std::io::Error),
 	#[error("Unable to parse JSON! {0}")]
 	UnableToParse(#[from] serde_json::Error),
+	#[error("Couldn't get parent of asset path! {0}")]
+	UnableToGetParent(PathBuf),
 }
 
 #[derive(Default)]
@@ -40,12 +44,21 @@ impl AssetLoader for LdtkLevelLoader {
 				serde_json::from_slice(&bytes)?
 			};
 
+			let load_context_path_buf = load_context.path().to_path_buf();
+			let load_context_directory = if let Some(parent) = load_context_path_buf.parent() {
+				PathBuf::from(parent)
+			} else {
+				return Err(LdtkLevelLoaderError::UnableToGetParent(
+					load_context_path_buf,
+				));
+			};
+
 			debug!(
 				"LDtk level file: {} loaded!",
 				load_context.path().to_str().unwrap_or_default()
 			);
 
-			Ok(LdtkLevel { value })
+			Ok(LdtkLevel::new(value, load_context_directory))
 		})
 	}
 

@@ -1,3 +1,6 @@
+use crate::assets::ldtk_level::LdtkLevel;
+use crate::assets::ldtk_project::LdtkProject;
+use crate::ldtk_json;
 use bevy::asset::io::Reader;
 use bevy::asset::AssetLoader;
 use bevy::asset::AsyncReadExt;
@@ -7,22 +10,18 @@ use bevy::utils::thiserror;
 use std::path::PathBuf;
 use thiserror::Error;
 
-use crate::assets::ldtk_level::LdtkLevel;
-use crate::assets::ldtk_project::LdtkProject;
-use crate::ldtk_json;
-
 #[derive(Debug, Error)]
 pub(crate) enum LdtkProjectLoaderError {
 	#[error("IO error when reading asset: {0}")]
 	Io(#[from] std::io::Error),
 	#[error("Unable to parse JSON! {0}")]
 	UnableToParse(#[from] serde_json::Error),
-	// #[error("Path Error: {0}")]
-	// PathError(#[from] LdtkPathError),
 	#[error("Couldn't load child LDTk level! {0}")]
 	UnableToLoadExternalChild(#[from] bevy::asset::LoadDirectError),
 	#[error("Couldn't get parent of asset path! {0}")]
 	UnableToGetParent(PathBuf),
+	#[error("Couldn't get file stem of asset path! {0}")]
+	UnableToGetFileStem(PathBuf),
 }
 
 #[derive(Default)]
@@ -60,6 +59,9 @@ impl AssetLoader for LdtkProjectLoader {
 				));
 			};
 
+			debug!("load_context: {:?}", load_context.asset_path());
+			debug!("label: {:?}", load_context.asset_path().label());
+
 			if value.external_levels {
 				for (level_asset_path, level_json) in value.levels.iter().filter_map(|level_json| {
 					level_json.external_rel_path.as_ref().map(|level_path| {
@@ -78,14 +80,18 @@ impl AssetLoader for LdtkProjectLoader {
 					};
 				}
 			} else {
-				value.levels.iter().for_each(|level| {
-					load_context.add_labeled_asset(
-						level.identifier.clone(),
-						LdtkLevel {
-							value: level.clone(),
-						},
-					);
-				});
+				for level in value.levels.iter() {
+					if let Some(prefix) = load_context_path_buf.file_stem() {
+						load_context.add_labeled_asset(
+							level.identifier.clone(),
+							LdtkLevel::new(level.clone(), load_context_directory.join(prefix)),
+						)
+					} else {
+						return Err(LdtkProjectLoaderError::UnableToGetFileStem(
+							load_context_path_buf,
+						));
+					};
+				}
 			}
 
 			debug!(
