@@ -84,7 +84,12 @@ impl AssetLoader for LdtkProjectLoader {
                     if let Some(prefix) = load_context_path_buf.file_stem() {
                         load_context.add_labeled_asset(
                             level.identifier.clone(),
-                            LdtkLevel::new(level.clone(), load_context_directory.join(prefix)),
+                            // LdtkLevel::new(level.clone(), load_context_directory.join(prefix)),
+                            LdtkLevel {
+                                value: level.clone(),
+                                ldtk_sub_files_dir: load_context_directory.join(prefix),
+                                // ldtk_project_dir: load_context_directory.clone(),
+                            },
                         )
                     } else {
                         return Err(LdtkProjectLoaderError::UnableToGetFileStem(

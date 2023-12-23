@@ -13,24 +13,24 @@ pub(crate) enum ColorParseError {
 
 // Format should be: Hex color "#rrggbb"
 // from: https://ldtk.io/json-2/#ldtk-ProjectJson;bgColor
-pub(crate) fn _get_bevy_color_from_ldtk(color: String) -> Result<Color, ColorParseError> {
+pub(crate) fn get_bevy_color_from_ldtk(color: &str) -> Result<Color, ColorParseError> {
     if color.len() != 7 {
-        return Err(ColorParseError::_BadStringLength(color));
+        return Err(ColorParseError::_BadStringLength(color.to_owned()));
     }
 
     if color.get(0..1) != Some("#") {
-        return Err(ColorParseError::_UnableToParse(color));
+        return Err(ColorParseError::_UnableToParse(color.to_owned()));
     };
 
     let (Some(red_hex), Some(green_hex), Some(blue_hex)) =
         (color.get(1..3), color.get(3..5), color.get(5..7))
     else {
-        return Err(ColorParseError::_UnableToParse(color));
+        return Err(ColorParseError::_UnableToParse(color.to_owned()));
     };
 
     let hex_to_float = |hex: &str| -> Result<f32, ColorParseError> {
         let Ok(byte) = <[u8; 1]>::from_hex(hex) else {
-            return Err(ColorParseError::_UnableToParse(color.clone()));
+            return Err(ColorParseError::_UnableToParse(color.to_string()));
         };
 
         Ok(byte[0] as f32 / 255.0)

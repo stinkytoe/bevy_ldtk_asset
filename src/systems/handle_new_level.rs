@@ -2,7 +2,7 @@ use crate::assets::ldtk_level::LdtkLevel;
 use bevy::{prelude::*, sprite::Anchor};
 
 #[allow(clippy::type_complexity)]
-pub(crate) fn handle_new_level(
+pub(crate) fn _handle_new_level(
     mut commands: Commands,
     mut changed_level_query: Query<
         (Entity, &mut Transform, &Handle<LdtkLevel>),
@@ -40,7 +40,7 @@ pub(crate) fn handle_new_level(
                     // global_transform: todo!(),
                     texture: asset_server.load(
                         level
-                            .dir
+                            .ldtk_sub_files_dir
                             .join(format!("png/{}_bg.png", level.value.identifier)),
                     ),
                     // visibility: todo!(),

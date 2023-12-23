@@ -45,20 +45,33 @@ impl AssetLoader for LdtkLevelLoader {
             };
 
             let load_context_path_buf = load_context.path().to_path_buf();
-            let load_context_directory = if let Some(parent) = load_context_path_buf.parent() {
+            let ldtk_sub_files_dir = if let Some(parent) = load_context_path_buf.parent() {
                 PathBuf::from(parent)
             } else {
                 return Err(LdtkLevelLoaderError::UnableToGetParent(
                     load_context_path_buf,
                 ));
             };
+            // let load_context_parent_directory = if let Some(parent) = load_context_path_buf.parent()
+            // {
+            //     PathBuf::from(parent)
+            // } else {
+            //     return Err(LdtkLevelLoaderError::UnableToGetParent(
+            //         load_context_path_buf,
+            //     ));
+            // };
 
             debug!(
                 "LDtk level file: {} loaded!",
                 load_context.path().to_str().unwrap_or_default()
             );
 
-            Ok(LdtkLevel::new(value, load_context_directory))
+            // Ok(LdtkLevel::new(value, load_context_directory))
+            Ok(LdtkLevel {
+                value,
+                ldtk_sub_files_dir,
+                // ldtk_project_dir: load_context_parent_directory,
+            })
         })
     }
 
