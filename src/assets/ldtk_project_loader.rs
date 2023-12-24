@@ -59,9 +59,9 @@ impl AssetLoader for LdtkProjectLoader {
                 ));
             };
 
-            debug!("load_context: {:?}", load_context.asset_path());
-            debug!("label: {:?}", load_context.asset_path().label());
+            let mut level_handles: Vec<Handle<LdtkLevel>> = Vec::new();
 
+            // loading levels
             if value.external_levels {
                 for (level_asset_path, level_json) in value.levels.iter().filter_map(|level_json| {
                     level_json.external_rel_path.as_ref().map(|level_path| {
@@ -73,24 +73,29 @@ impl AssetLoader for LdtkProjectLoader {
                         .await?
                         .take::<LdtkLevel>()
                     {
-                        load_context.add_loaded_labeled_asset(
+                        level_handles.push(load_context.add_loaded_labeled_asset(
                             level_json.identifier.clone(),
                             level_asset.into(),
-                        );
+                        ));
                     };
                 }
             } else {
                 for level in value.levels.iter() {
                     if let Some(prefix) = load_context_path_buf.file_stem() {
-                        load_context.add_labeled_asset(
-                            level.identifier.clone(),
-                            // LdtkLevel::new(level.clone(), load_context_directory.join(prefix)),
-                            LdtkLevel {
-                                value: level.clone(),
-                                ldtk_sub_files_dir: load_context_directory.join(prefix),
-                                // ldtk_project_dir: load_context_directory.clone(),
-                            },
-                        )
+                        let images: Vec<Handle<Image>> = Vec::new();
+
+                        let new_level = LdtkLevel::new(
+                            level.clone(),
+                            load_context_directory.join(prefix),
+                            images,
+                            level.bg_rel_path.as_ref().map(|bg_rel_path| {
+                                load_context.load(load_context_directory.join(bg_rel_path))
+                            }),
+                        );
+
+                        level_handles.push(
+                            load_context.add_labeled_asset(level.identifier.clone(), new_level),
+                        );
                     } else {
                         return Err(LdtkProjectLoaderError::UnableToGetFileStem(
                             load_context_path_buf,
@@ -99,12 +104,21 @@ impl AssetLoader for LdtkProjectLoader {
                 }
             }
 
+            // value.defs.tilesets.iter().for_each(|tileset| {
+            //     if let Some(rel_path) = &tileset.rel_path {
+            //         load_context.load::<Image>(load_context_directory.join(rel_path));
+            //     };
+            // });
+
             debug!(
                 "LDtk root project file: {} loaded!",
                 load_context.path().to_str().unwrap_or_default()
             );
 
-            Ok(LdtkProject { value })
+            Ok(LdtkProject {
+                value,
+                levels: level_handles,
+            })
         })
     }
 

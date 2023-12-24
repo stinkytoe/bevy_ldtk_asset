@@ -66,12 +66,13 @@ impl AssetLoader for LdtkLevelLoader {
                 load_context.path().to_str().unwrap_or_default()
             );
 
-            // Ok(LdtkLevel::new(value, load_context_directory))
-            Ok(LdtkLevel {
+            Ok(LdtkLevel::new(
                 value,
                 ldtk_sub_files_dir,
-                // ldtk_project_dir: load_context_parent_directory,
-            })
+                // load_context,
+                Vec::new(),
+                None, //TODO add this!
+            ))
         })
     }
 
