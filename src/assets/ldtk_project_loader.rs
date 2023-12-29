@@ -20,8 +20,12 @@ pub(crate) enum LdtkProjectLoaderError {
     UnableToLoadExternalChild(#[from] bevy::asset::LoadDirectError),
     #[error("Couldn't get parent of asset path! {0}")]
     UnableToGetParent(PathBuf),
-    #[error("Couldn't get file stem of asset path! {0}")]
-    UnableToGetFileStem(PathBuf),
+    // #[error("Couldn't get file stem of asset path! {0}")]
+    // UnableToGetFileStem(PathBuf),
+    #[error("External level files unsupported at this time!")]
+    UnsupportedExternalLevelFiles,
+    #[error("Multi World unsupported at this time!")]
+    UnsupportedMultiWorld,
 }
 
 #[derive(Default)]
@@ -51,7 +55,8 @@ impl AssetLoader for LdtkProjectLoader {
             };
 
             let load_context_path_buf = load_context.path().to_path_buf();
-            let load_context_directory = if let Some(parent) = load_context_path_buf.parent() {
+
+            let ldtk_project_directory = if let Some(parent) = load_context_path_buf.parent() {
                 PathBuf::from(parent)
             } else {
                 return Err(LdtkProjectLoaderError::UnableToGetParent(
@@ -59,56 +64,34 @@ impl AssetLoader for LdtkProjectLoader {
                 ));
             };
 
-            let mut level_handles: Vec<Handle<LdtkLevel>> = Vec::new();
-
-            // loading levels
-            if value.external_levels {
-                for (level_asset_path, level_json) in value.levels.iter().filter_map(|level_json| {
-                    level_json.external_rel_path.as_ref().map(|level_path| {
-                        (load_context_directory.clone().join(level_path), level_json)
-                    })
-                }) {
-                    if let Some(level_asset) = load_context
-                        .load_direct(level_asset_path)
-                        .await?
-                        .take::<LdtkLevel>()
-                    {
-                        level_handles.push(load_context.add_loaded_labeled_asset(
-                            level_json.identifier.clone(),
-                            level_asset.into(),
-                        ));
-                    };
-                }
+            let ldtk_extras_directory = if let Some(file_stem) = load_context_path_buf.file_stem() {
+                ldtk_project_directory.join(file_stem)
             } else {
-                for level in value.levels.iter() {
-                    if let Some(prefix) = load_context_path_buf.file_stem() {
-                        let images: Vec<Handle<Image>> = Vec::new();
+                return Err(LdtkProjectLoaderError::UnableToGetParent(
+                    load_context_path_buf,
+                ));
+            };
 
-                        let new_level = LdtkLevel::new(
-                            level.clone(),
-                            load_context_directory.join(prefix),
-                            images,
-                            level.bg_rel_path.as_ref().map(|bg_rel_path| {
-                                load_context.load(load_context_directory.join(bg_rel_path))
-                            }),
-                        );
-
-                        level_handles.push(
-                            load_context.add_labeled_asset(level.identifier.clone(), new_level),
-                        );
-                    } else {
-                        return Err(LdtkProjectLoaderError::UnableToGetFileStem(
-                            load_context_path_buf,
-                        ));
-                    };
-                }
+            if !value.worlds.is_empty() {
+                return Err(LdtkProjectLoaderError::UnsupportedMultiWorld);
             }
 
-            // value.defs.tilesets.iter().for_each(|tileset| {
-            //     if let Some(rel_path) = &tileset.rel_path {
-            //         load_context.load::<Image>(load_context_directory.join(rel_path));
-            //     };
-            // });
+            let self_handle: Handle<LdtkProject> = load_context.load(load_context_path_buf.clone());
+
+            if value.external_levels {
+                return Err(LdtkProjectLoaderError::UnsupportedExternalLevelFiles);
+            } else {
+                value.levels.iter().for_each(|level| {
+                    let new_level = LdtkLevel::new(
+                        level.clone(),
+                        ldtk_project_directory.clone(),
+                        ldtk_extras_directory.clone(),
+                        self_handle.clone(),
+                        load_context,
+                    );
+                    load_context.add_labeled_asset(level.identifier.clone(), new_level);
+                });
+            }
 
             debug!(
                 "LDtk root project file: {} loaded!",
@@ -117,7 +100,7 @@ impl AssetLoader for LdtkProjectLoader {
 
             Ok(LdtkProject {
                 value,
-                levels: level_handles,
+                // levels: level_handles,
             })
         })
     }

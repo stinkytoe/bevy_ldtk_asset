@@ -31,7 +31,7 @@
 	"exportTiled": false,
 	"simplifiedExport": false,
 	"imageExportMode": "OneImagePerLayer",
-	"exportLevelBg": true,
+	"exportLevelBg": false,
 	"pngFilePattern": null,
 	"backupOnSave": false,
 	"backupLimit": 10,

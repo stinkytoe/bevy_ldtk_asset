@@ -6,6 +6,7 @@ use bevy::asset::AsyncReadExt;
 use bevy::asset::{io::Reader, AssetLoader, LoadContext};
 use bevy::prelude::*;
 use bevy::utils::thiserror;
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -18,18 +19,21 @@ pub(crate) enum LdtkLevelLoaderError {
     UnableToGetParent(PathBuf),
 }
 
+#[derive(Debug, Default, Serialize, Deserialize)]
+pub(crate) struct LdtkLevelLoaderSettings;
+
 #[derive(Default)]
 pub(crate) struct LdtkLevelLoader;
 
 impl AssetLoader for LdtkLevelLoader {
     type Asset = LdtkLevel;
-    type Settings = ();
+    type Settings = LdtkLevelLoaderSettings;
     type Error = LdtkLevelLoaderError;
 
     fn load<'a>(
         &'a self,
         reader: &'a mut Reader,
-        _settings: &'a (),
+        _settings: &'a LdtkLevelLoaderSettings,
         load_context: &'a mut LoadContext,
     ) -> bevy::utils::BoxedFuture<'a, Result<Self::Asset, Self::Error>> {
         Box::pin(async move {
@@ -45,21 +49,22 @@ impl AssetLoader for LdtkLevelLoader {
             };
 
             let load_context_path_buf = load_context.path().to_path_buf();
-            let ldtk_sub_files_dir = if let Some(parent) = load_context_path_buf.parent() {
+
+            let ldtk_project_directory = if let Some(parent) = load_context_path_buf.parent() {
                 PathBuf::from(parent)
             } else {
                 return Err(LdtkLevelLoaderError::UnableToGetParent(
                     load_context_path_buf,
                 ));
             };
-            // let load_context_parent_directory = if let Some(parent) = load_context_path_buf.parent()
-            // {
-            //     PathBuf::from(parent)
-            // } else {
-            //     return Err(LdtkLevelLoaderError::UnableToGetParent(
-            //         load_context_path_buf,
-            //     ));
-            // };
+
+            let ldtk_extras_directory = if let Some(file_stem) = load_context_path_buf.file_stem() {
+                ldtk_project_directory.join(file_stem)
+            } else {
+                return Err(LdtkLevelLoaderError::UnableToGetParent(
+                    load_context_path_buf,
+                ));
+            };
 
             debug!(
                 "LDtk level file: {} loaded!",
@@ -68,10 +73,11 @@ impl AssetLoader for LdtkLevelLoader {
 
             Ok(LdtkLevel::new(
                 value,
-                ldtk_sub_files_dir,
-                // load_context,
-                Vec::new(),
-                None, //TODO add this!
+                ldtk_project_directory,
+                ldtk_extras_directory,
+                load_context.load(""),
+                // Vec::new(),
+                load_context, // bg_image,
             ))
         })
     }
