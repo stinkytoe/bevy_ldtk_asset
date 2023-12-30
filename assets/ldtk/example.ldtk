@@ -11,7 +11,7 @@
 	"iid": "de3a6960-6280-11ee-bf57-8315238fb5bc",
 	"jsonVersion": "1.4.1",
 	"appBuildId": 471015,
-	"nextUid": 12,
+	"nextUid": 13,
 	"identifierStyle": "Capitalize",
 	"toc": [],
 	"worldLayout": "Free",
@@ -321,22 +321,19 @@
 					"entityInstances": [
 						{
 							"__identifier": "Crab",
-							"__grid": [8,6],
+							"__grid": [1,14],
 							"__pivot": [0.5,0.5],
 							"__tags": [],
 							"__tile": { "tilesetUid": 8, "x": 0, "y": 0, "w": 464, "h": 304 },
 							"__smartColor": "#BE4A2F",
-							"__worldX": -128,
-							"__worldY": -160,
-							"iid": "2e556ae0-8990-11ee-bb02-7f50bf5152fb",
+							"__worldX": -232,
+							"__worldY": -24,
+							"iid": "0906b2f0-8990-11ee-ae1b-aba19f9d48a1",
 							"width": 16,
 							"height": 16,
 							"defUid": 10,
-							"px": [128,96],
-							"fieldInstances": [{ "__identifier": "File_path", "__type": "FilePath", "__value": "../icons/rustacean-flat-gesture.png", "__tile": null, "defUid": 11, "realEditorValues": [{
-								"id": "V_String",
-								"params": ["../icons/rustacean-flat-gesture.png"]
-							}] }]
+							"px": [24,232],
+							"fieldInstances": [{ "__identifier": "File_path", "__type": "FilePath", "__value": null, "__tile": null, "defUid": 11, "realEditorValues": [] }]
 						}
 					]
 				},

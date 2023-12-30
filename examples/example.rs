@@ -19,7 +19,10 @@ fn main() {
 }
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn(Camera2dBundle::default());
+    commands.spawn(Camera2dBundle {
+        transform: Transform::from_scale(Vec2::splat(0.4).extend(1.0)),
+        ..default()
+    });
     commands.spawn(LdtkLevelBundle {
         level: asset_server.load("ldtk/example.ldtk#Level_0"),
         ..default()

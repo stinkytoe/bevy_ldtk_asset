@@ -6,7 +6,7 @@ use crate::{
 use bevy::{
     prelude::*,
     render::{mesh::Indices, render_resource::PrimitiveTopology},
-    sprite::MaterialMesh2dBundle,
+    sprite::{Anchor, MaterialMesh2dBundle},
 };
 
 pub fn process_level_loading(
@@ -314,8 +314,8 @@ fn spawn_entities_layer(
     layer_index: usize,
     layer: &ldtk_json::LayerInstance,
     parent: &mut ChildBuilder,
-    meshes: &mut Assets<Mesh>,
-    materials: &mut Assets<ColorMaterial>,
+    _meshes: &mut Assets<Mesh>,
+    _materials: &mut Assets<ColorMaterial>,
     asset_server: &mut AssetServer,
 ) {
     parent
@@ -331,95 +331,246 @@ fn spawn_entities_layer(
             },
         ))
         .with_children(|parent| {
-            layer.entity_instances.iter().for_each(|layer_entity| {
-                let mut entity_builder = parent.spawn((
-                    Name::from(layer_entity.identifier.clone()),
-                    LdtkEntityComponent {
-                        value: layer_entity.clone(),
-                    },
-                    SpatialBundle {
-                        transform: Transform::from_xyz(
-                            layer_entity.px[0] as f32,
-                            -layer_entity.px[1] as f32,
-                            0.0,
-                        ),
-                        ..default()
-                    },
-                ));
-
-                if let Some(tileset_rectangle) = layer_entity.tile.as_ref() {
-                    let Some(tilemap_definition) =
-                        project
-                            .value
-                            .defs
-                            .tilesets
-                            .iter()
-                            .find(|tileset_definition| {
-                                tileset_definition.uid == tileset_rectangle.tileset_uid
-                            })
-                    else {
-                        error!("couldn't find a matching tilemap definition!");
-                        return;
-                    };
-
-                    let tilemap_handle = tilemap_definition.rel_path.clone().map(|rel_path| {
-                        asset_server.load(level.ldtk_project_directory.join(rel_path))
-                    });
-
-                    let image_width = tilemap_definition.px_wid as f32;
-                    let image_height = tilemap_definition.px_hei as f32;
-
-                    let uv_left = tileset_rectangle.x as f32 / image_width;
-                    let uv_right = tileset_rectangle.w as f32 / image_width;
-                    let uv_top = tileset_rectangle.y as f32 / image_height;
-                    let uv_bottom = tileset_rectangle.h as f32 / image_height;
-
-                    let indices = Indices::U32(vec![0, 1, 2, 0, 2, 3]);
-                    let verts = vec![
-                        [0.0, 0.0, 0.0],
-                        [layer_entity.width as f32, 0.0, 0.0],
-                        [layer_entity.width as f32, -layer_entity.height as f32, 0.0],
-                        [0.0, -layer_entity.height as f32, 0.0],
-                    ];
-                    let uvs = vec![
-                        [uv_left, uv_top],
-                        [uv_right, uv_top],
-                        [uv_right, uv_bottom],
-                        [uv_left, uv_bottom],
-                    ];
-
-                    entity_builder.with_children(|parent| {
-                        parent.spawn(MaterialMesh2dBundle {
-                            mesh: meshes
-                                .add(
-                                    Mesh::new(PrimitiveTopology::TriangleList)
-                                        .with_indices(Some(indices))
-                                        .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, verts)
-                                        .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, uvs),
-                                )
-                                .into(),
-                            material: materials.add(ColorMaterial {
-                                color: Color::default(),
-                                texture: tilemap_handle,
-                            }),
-                            transform: Transform::from_xyz(
-                                // layer_entity.px[0] as f32,
-                                // -layer_entity.px[1] as f32,
-                                0.0, 0.0, 0.0,
-                            ),
-                            ..default()
-                        });
-                    });
-                } else {
-                    // entity_builder.insert(SpatialBundle {
-                    //     transform: Transform::from_xyz(
-                    //         layer_entity.px[0] as f32,
-                    //         -layer_entity.px[1] as f32,
-                    //         0.0,
-                    //     ),
-                    //     ..default()
-                    // });
-                }
+            layer.entity_instances.iter().for_each(|entity_instance| {
+                spawn_entity(level, project, entity_instance, parent, asset_server);
+                // let mut entity_builder = parent.spawn((
+                //     Name::from(layer_entity.identifier.clone()),
+                //     LdtkEntityComponent {
+                //         value: layer_entity.clone(),
+                //     },
+                //     SpatialBundle {
+                //         transform: Transform::from_xyz(
+                //             layer_entity.px[0] as f32,
+                //             -layer_entity.px[1] as f32,
+                //             0.0,
+                //         ),
+                //         ..default()
+                //     },
+                // ));
+                //
+                // if let Some(tileset_rectangle) = layer_entity.tile.as_ref() {
+                //     let Some(tilemap_definition) =
+                //         project
+                //             .value
+                //             .defs
+                //             .tilesets
+                //             .iter()
+                //             .find(|tileset_definition| {
+                //                 tileset_definition.uid == tileset_rectangle.tileset_uid
+                //             })
+                //     else {
+                //         error!("couldn't find a matching tilemap definition!");
+                //         return;
+                //     };
+                //
+                //     let tilemap_handle = tilemap_definition.rel_path.clone().map(|rel_path| {
+                //         asset_server.load(level.ldtk_project_directory.join(rel_path))
+                //     });
+                //
+                //     let image_width = tilemap_definition.px_wid as f32;
+                //     let image_height = tilemap_definition.px_hei as f32;
+                //
+                //     let uv_left = tileset_rectangle.x as f32 / image_width;
+                //     let uv_right = tileset_rectangle.w as f32 / image_width;
+                //     let uv_top = tileset_rectangle.y as f32 / image_height;
+                //     let uv_bottom = tileset_rectangle.h as f32 / image_height;
+                //
+                //     let indices = Indices::U32(vec![0, 1, 2, 0, 2, 3]);
+                //     let verts = vec![
+                //         [0.0, 0.0, 0.0],
+                //         [layer_entity.width as f32, 0.0, 0.0],
+                //         [layer_entity.width as f32, -layer_entity.height as f32, 0.0],
+                //         [0.0, -layer_entity.height as f32, 0.0],
+                //     ];
+                //     let uvs = vec![
+                //         [uv_left, uv_top],
+                //         [uv_right, uv_top],
+                //         [uv_right, uv_bottom],
+                //         [uv_left, uv_bottom],
+                //     ];
+                //
+                //     entity_builder.with_children(|parent| {
+                //         parent.spawn(MaterialMesh2dBundle {
+                //             mesh: meshes
+                //                 .add(
+                //                     Mesh::new(PrimitiveTopology::TriangleList)
+                //                         .with_indices(Some(indices))
+                //                         .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, verts)
+                //                         .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, uvs),
+                //                 )
+                //                 .into(),
+                //             material: materials.add(ColorMaterial {
+                //                 color: Color::default(),
+                //                 texture: tilemap_handle,
+                //             }),
+                //             transform: Transform::from_xyz(
+                //                 // layer_entity.px[0] as f32,
+                //                 // -layer_entity.px[1] as f32,
+                //                 0.0, 0.0, 0.0,
+                //             ),
+                //             ..default()
+                //         });
+                //     });
+                // }
             })
         });
+}
+
+#[allow(clippy::too_many_arguments)]
+fn spawn_entity(
+    level: &LdtkLevel,
+    project: &LdtkProject,
+    entity_instance: &ldtk_json::EntityInstance,
+    parent: &mut ChildBuilder,
+    asset_server: &mut AssetServer,
+) {
+    let Some(entity_definition) = project
+        .value
+        .defs
+        .entities
+        .iter()
+        .find(|entity_definition| entity_definition.uid == entity_instance.def_uid)
+    else {
+        error!("couldn't find entity definition for a layer entity!");
+        return;
+    };
+
+    parent
+        .spawn((
+            Name::from(entity_instance.identifier.clone()),
+            LdtkEntityComponent {
+                value: entity_instance.clone(),
+            },
+            SpatialBundle {
+                transform: Transform::from_xyz(
+                    entity_instance.px[0] as f32,
+                    -entity_instance.px[1] as f32,
+                    0.0,
+                ),
+                ..default()
+            },
+        ))
+        .with_children(|parent| {
+            enum RenderAs {
+                _Mesh,
+                Sprite,
+                // DontRender,
+            }
+
+            if let (Some(tileset_rectangle), Some(tileset_id)) =
+                (&entity_instance.tile, entity_definition.tileset_id)
+            {
+                let Some(tileset_definition) = project.get_tileset_definition(tileset_id) else {
+                    error!("couldn't find tileset definition!");
+                    return;
+                };
+
+                let (render_as, scale) = match entity_definition.tile_render_mode {
+                    ldtk_json::TileRenderMode::Cover => todo!(),
+                    ldtk_json::TileRenderMode::FitInside => (
+                        RenderAs::Sprite,
+                        Vec2::splat(f32::min(
+                            entity_instance.width as f32 / tileset_definition.px_wid as f32,
+                            entity_instance.height as f32 / tileset_definition.px_hei as f32,
+                        )),
+                    ),
+                    ldtk_json::TileRenderMode::FullSizeCropped => todo!(),
+                    ldtk_json::TileRenderMode::FullSizeUncropped => todo!(),
+                    ldtk_json::TileRenderMode::NineSlice => todo!(),
+                    ldtk_json::TileRenderMode::Repeat => todo!(),
+                    ldtk_json::TileRenderMode::Stretch => (
+                        RenderAs::Sprite,
+                        Vec2::new(
+                            entity_instance.width as f32 / tileset_definition.px_wid as f32,
+                            entity_instance.height as f32 / tileset_definition.px_hei as f32,
+                        ),
+                    ),
+                };
+                match render_as {
+                    RenderAs::_Mesh => todo!(),
+                    RenderAs::Sprite => spawn_entity_sprite(
+                        level,
+                        project,
+                        entity_instance,
+                        entity_definition,
+                        scale,
+                        tileset_rectangle,
+                        parent,
+                        asset_server,
+                    ),
+                };
+            }
+        });
+}
+
+#[allow(clippy::too_many_arguments)]
+fn spawn_entity_sprite(
+    level: &LdtkLevel,
+    project: &LdtkProject,
+    entity_instance: &ldtk_json::EntityInstance,
+    entity_definition: &ldtk_json::EntityDefinition,
+    scale: Vec2,
+    tileset_rectangle: &ldtk_json::TilesetRectangle,
+    parent: &mut ChildBuilder,
+    asset_server: &mut AssetServer,
+) {
+    #[allow(illegal_floating_point_literal_pattern)]
+    let anchor = match entity_instance.pivot.as_slice() {
+        [0.0, 0.0] => Anchor::TopLeft,
+        [0.0, 0.5] => Anchor::TopCenter,
+        [0.0, 1.0] => Anchor::TopRight,
+        [0.5, 0.0] => Anchor::CenterLeft,
+        [0.5, 0.5] => Anchor::Center,
+        [0.5, 1.0] => Anchor::CenterRight,
+        [1.0, 0.0] => Anchor::BottomLeft,
+        [1.0, 0.5] => Anchor::BottomCenter,
+        [1.0, 1.0] => Anchor::BottomRight,
+        _ => {
+            error!("bad pivot found! {:?}", entity_instance.pivot);
+            return;
+        }
+    };
+
+    let Some(tilemap_definition) = project.get_tileset_definition(tileset_rectangle.tileset_uid)
+    else {
+        error!("couldn't find a matching tilemap definition!");
+        return;
+    };
+
+    let Some(texture) = tilemap_definition
+        .rel_path
+        .clone()
+        .map(|rel_path| asset_server.load(level.ldtk_project_directory.join(rel_path)))
+    else {
+        error!("no rel_path tilemap definition!");
+        return;
+    };
+
+    parent.spawn((
+        Name::from(format!("Sprite({})", entity_instance.identifier)),
+        SpriteBundle {
+            sprite: Sprite {
+                color: Color::Rgba {
+                    red: 1.0,
+                    green: 1.0,
+                    blue: 1.0,
+                    alpha: entity_definition.tile_opacity as f32,
+                },
+                // flip_x: todo!(),
+                // flip_y: todo!(),
+                // custom_size: todo!(),
+                rect: Some(Rect::new(
+                    tileset_rectangle.x as f32,
+                    tileset_rectangle.y as f32,
+                    tileset_rectangle.w as f32,
+                    tileset_rectangle.h as f32,
+                )),
+                anchor,
+                ..default()
+            },
+            transform: Transform::from_scale(scale.extend(1.0)),
+            texture,
+            ..default()
+        },
+    ));
 }
