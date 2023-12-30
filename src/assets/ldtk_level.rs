@@ -39,6 +39,7 @@ impl LdtkLevel {
     }
 
     pub fn is_loaded(&self, asset_server: &AssetServer) -> bool {
+        // TODO: This is ugly!
         matches!(
             asset_server.get_load_state(&self.project),
             Some(LoadState::Loaded)

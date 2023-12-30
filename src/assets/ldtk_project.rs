@@ -15,4 +15,12 @@ impl LdtkProject {
             .iter()
             .find(|tileset_definition| tileset_definition.uid == uid)
     }
+
+    pub(crate) fn get_entity_definition(&self, uid: i64) -> Option<&ldtk_json::EntityDefinition> {
+        self.value
+            .defs
+            .entities
+            .iter()
+            .find(|entity_definition| entity_definition.uid == uid)
+    }
 }

@@ -96,11 +96,18 @@ pub(crate) fn finish_level_asset_loading(
         .with_children(|parent| {
             spawn_bg_poly(level, parent, meshes, materials);
             spawn_bg_image(level, parent, meshes, materials, images);
-            spawn_layers(level, project, parent, meshes, materials, asset_server);
+            spawn_layers(project, level, parent, meshes, materials, asset_server);
         });
 
-    let mut transform = query.get_mut(entity).unwrap();
-    transform.translation = Vec3::new(level.value.world_x as f32, -level.value.world_y as f32, 0.0);
+    match query.get_mut(entity) {
+        Ok(mut transform) => {
+            transform.translation =
+                Vec3::new(level.value.world_x as f32, -level.value.world_y as f32, 0.0)
+        }
+        Err(e) => {
+            error!("level entity doesn't have a transform, or we couldn't get to it! error: {e:?}");
+        }
+    };
 }
 
 fn spawn_bg_poly(
@@ -215,8 +222,8 @@ fn spawn_bg_image(
 }
 
 fn spawn_layers(
-    level: &LdtkLevel,
     project: &LdtkProject,
+    level: &LdtkLevel,
     parent: &mut ChildBuilder,
     meshes: &mut Assets<Mesh>,
     materials: &mut Assets<ColorMaterial>,
@@ -235,8 +242,8 @@ fn spawn_layers(
                     |(layer_index, layer)| match layer.layer_instance_type.as_str() {
                         "IntGrid" => (),
                         "Entities" => spawn_entities_layer(
-                            level,
                             project,
+                            level,
                             layer_index,
                             layer,
                             parent,
@@ -309,8 +316,8 @@ fn spawn_tiles_layer(
 
 #[allow(clippy::too_many_arguments)]
 fn spawn_entities_layer(
-    level: &LdtkLevel,
     project: &LdtkProject,
+    level: &LdtkLevel,
     layer_index: usize,
     layer: &ldtk_json::LayerInstance,
     parent: &mut ChildBuilder,
@@ -332,7 +339,7 @@ fn spawn_entities_layer(
         ))
         .with_children(|parent| {
             layer.entity_instances.iter().for_each(|entity_instance| {
-                spawn_entity(level, project, entity_instance, parent, asset_server);
+                spawn_entity(project, level, entity_instance, parent, asset_server);
                 // let mut entity_builder = parent.spawn((
                 //     Name::from(layer_entity.identifier.clone()),
                 //     LdtkEntityComponent {
@@ -418,19 +425,13 @@ fn spawn_entities_layer(
 
 #[allow(clippy::too_many_arguments)]
 fn spawn_entity(
-    level: &LdtkLevel,
     project: &LdtkProject,
+    level: &LdtkLevel,
     entity_instance: &ldtk_json::EntityInstance,
     parent: &mut ChildBuilder,
     asset_server: &mut AssetServer,
 ) {
-    let Some(entity_definition) = project
-        .value
-        .defs
-        .entities
-        .iter()
-        .find(|entity_definition| entity_definition.uid == entity_instance.def_uid)
-    else {
+    let Some(entity_definition) = project.get_entity_definition(entity_instance.def_uid) else {
         error!("couldn't find entity definition for a layer entity!");
         return;
     };
@@ -465,6 +466,7 @@ fn spawn_entity(
                     return;
                 };
 
+                // https://github.com/deepnight/ldtk/blob/dc348af58d846554cb3bafb9452f245aec275196/src/electron.renderer/display/EntityRender.hx#L138C10-L138C10
                 let (render_as, scale) = match entity_definition.tile_render_mode {
                     ldtk_json::TileRenderMode::Cover => todo!(),
                     ldtk_json::TileRenderMode::FitInside => (
@@ -489,8 +491,8 @@ fn spawn_entity(
                 match render_as {
                     RenderAs::_Mesh => todo!(),
                     RenderAs::Sprite => spawn_entity_sprite(
-                        level,
                         project,
+                        level,
                         entity_instance,
                         entity_definition,
                         scale,
@@ -505,8 +507,8 @@ fn spawn_entity(
 
 #[allow(clippy::too_many_arguments)]
 fn spawn_entity_sprite(
-    level: &LdtkLevel,
     project: &LdtkProject,
+    level: &LdtkLevel,
     entity_instance: &ldtk_json::EntityInstance,
     entity_definition: &ldtk_json::EntityDefinition,
     scale: Vec2,
