@@ -1,6 +1,6 @@
 use crate::{
     ldtk_json,
-    prelude::{LdtkLevel, LevelComponent},
+    prelude::{LdtkEntityComponent, LdtkLevel, LdtkLevelComponent, LdtkProject},
     resources::LdtkLevels,
 };
 use bevy::{
@@ -12,7 +12,7 @@ use bevy::{
 pub fn process_level_loading(
     mut levels: ResMut<LdtkLevels>,
     mut ev_asset: EventReader<AssetEvent<LdtkLevel>>,
-    level_query: Query<(Entity, &Handle<LdtkLevel>), With<LevelComponent>>,
+    level_query: Query<(Entity, &Handle<LdtkLevel>), With<LdtkLevelComponent>>,
 ) {
     for ev in ev_asset.read() {
         if let AssetEvent::<LdtkLevel>::LoadedWithDependencies { id } = ev {
@@ -20,7 +20,7 @@ pub fn process_level_loading(
                 .iter()
                 .find(|(_entity, handle)| handle.id() == *id)
             {
-                debug!("Found a matching ldtk level label and entity! {entity:?} {handle:?}");
+                trace!("Found a matching ldtk level label and entity! {entity:?} {handle:?}");
                 levels.to_load.insert((entity, handle.clone()));
             }
         }
@@ -33,14 +33,12 @@ pub fn levels_changed(
     mut levels: ResMut<LdtkLevels>,
     mut asset_server: ResMut<AssetServer>,
     level_assets: Res<Assets<LdtkLevel>>,
-    // project_assets: Res<Assets<LdtkProject>>,
+    project_assets: Res<Assets<LdtkProject>>,
     mut query: Query<&mut Transform>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     images: Res<Assets<Image>>,
 ) {
-    debug!("resource changed: {levels:#?}");
-
     if !levels.to_load.is_empty() {
         let to_load: Vec<_> = levels.to_load.drain().collect();
         to_load.iter().for_each(|x| {
@@ -53,7 +51,7 @@ pub fn levels_changed(
                     &mut commands,
                     &mut asset_server,
                     &level_assets,
-                    // &project_assets,
+                    &project_assets,
                     &mut query,
                     &mut meshes,
                     &mut materials,
@@ -72,7 +70,7 @@ pub(crate) fn finish_level_asset_loading(
     commands: &mut Commands,
     asset_server: &mut AssetServer,
     level_assets: &Assets<LdtkLevel>,
-    // project_assets: &Assets<LdtkProject>,
+    project_assets: &Assets<LdtkProject>,
     query: &mut Query<&mut Transform>,
     meshes: &mut Assets<Mesh>,
     materials: &mut Assets<ColorMaterial>,
@@ -87,10 +85,10 @@ pub(crate) fn finish_level_asset_loading(
         return;
     };
 
-    // let Some(project) = project_assets.get(&level.project) else {
-    //     error!("project handle returned none!");
-    //     return;
-    // };
+    let Some(project) = project_assets.get(&level.project) else {
+        error!("project handle returned none!");
+        return;
+    };
 
     commands
         .entity(entity)
@@ -98,7 +96,7 @@ pub(crate) fn finish_level_asset_loading(
         .with_children(|parent| {
             spawn_bg_poly(level, parent, meshes, materials);
             spawn_bg_image(level, parent, meshes, materials, images);
-            spawn_layers(level, parent, meshes, materials, asset_server);
+            spawn_layers(level, project, parent, meshes, materials, asset_server);
         });
 
     let mut transform = query.get_mut(entity).unwrap();
@@ -218,6 +216,7 @@ fn spawn_bg_image(
 
 fn spawn_layers(
     level: &LdtkLevel,
+    project: &LdtkProject,
     parent: &mut ChildBuilder,
     meshes: &mut Assets<Mesh>,
     materials: &mut Assets<ColorMaterial>,
@@ -235,7 +234,16 @@ fn spawn_layers(
                 .for_each(
                     |(layer_index, layer)| match layer.layer_instance_type.as_str() {
                         "IntGrid" => (),
-                        "Entities" => (),
+                        "Entities" => spawn_entities_layer(
+                            level,
+                            project,
+                            layer_index,
+                            layer,
+                            parent,
+                            meshes,
+                            materials,
+                            asset_server,
+                        ),
                         "Tiles" => spawn_tiles_layer(
                             level,
                             layer_index,
@@ -254,6 +262,7 @@ fn spawn_layers(
         });
 }
 
+#[allow(clippy::too_many_arguments)]
 fn spawn_tiles_layer(
     level: &LdtkLevel,
     layer_index: usize,
@@ -263,13 +272,13 @@ fn spawn_tiles_layer(
     materials: &mut Assets<ColorMaterial>,
     asset_server: &mut AssetServer,
 ) {
+    let indices = Indices::U32(vec![0, 1, 2, 0, 2, 3]);
     let verts = vec![
         [0.0, 0.0, 0.0],
         [level.value.px_wid as f32, 0.0, 0.0],
         [level.value.px_wid as f32, -level.value.px_hei as f32, 0.0],
         [0.0, -level.value.px_hei as f32, 0.0],
     ];
-    let indices = Indices::U32(vec![0, 1, 2, 0, 2, 3]);
     let uvs = vec![[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]];
 
     let layer_handle = asset_server.load(level.ldtk_extras_directory.join("png/").join(format!(
@@ -296,4 +305,121 @@ fn spawn_tiles_layer(
             ..default()
         },
     ));
+}
+
+#[allow(clippy::too_many_arguments)]
+fn spawn_entities_layer(
+    level: &LdtkLevel,
+    project: &LdtkProject,
+    layer_index: usize,
+    layer: &ldtk_json::LayerInstance,
+    parent: &mut ChildBuilder,
+    meshes: &mut Assets<Mesh>,
+    materials: &mut Assets<ColorMaterial>,
+    asset_server: &mut AssetServer,
+) {
+    parent
+        .spawn((
+            Name::from(layer.identifier.clone()),
+            SpatialBundle {
+                transform: Transform::from_xyz(
+                    0.0,
+                    0.0,
+                    (layer_index + 2) as f32 * f32::MIN_POSITIVE,
+                ),
+                ..default()
+            },
+        ))
+        .with_children(|parent| {
+            layer.entity_instances.iter().for_each(|layer_entity| {
+                let mut entity_builder = parent.spawn((
+                    Name::from(layer_entity.identifier.clone()),
+                    LdtkEntityComponent {
+                        value: layer_entity.clone(),
+                    },
+                    SpatialBundle {
+                        transform: Transform::from_xyz(
+                            layer_entity.px[0] as f32,
+                            -layer_entity.px[1] as f32,
+                            0.0,
+                        ),
+                        ..default()
+                    },
+                ));
+
+                if let Some(tileset_rectangle) = layer_entity.tile.as_ref() {
+                    let Some(tilemap_definition) =
+                        project
+                            .value
+                            .defs
+                            .tilesets
+                            .iter()
+                            .find(|tileset_definition| {
+                                tileset_definition.uid == tileset_rectangle.tileset_uid
+                            })
+                    else {
+                        error!("couldn't find a matching tilemap definition!");
+                        return;
+                    };
+
+                    let tilemap_handle = tilemap_definition.rel_path.clone().map(|rel_path| {
+                        asset_server.load(level.ldtk_project_directory.join(rel_path))
+                    });
+
+                    let image_width = tilemap_definition.px_wid as f32;
+                    let image_height = tilemap_definition.px_hei as f32;
+
+                    let uv_left = tileset_rectangle.x as f32 / image_width;
+                    let uv_right = tileset_rectangle.w as f32 / image_width;
+                    let uv_top = tileset_rectangle.y as f32 / image_height;
+                    let uv_bottom = tileset_rectangle.h as f32 / image_height;
+
+                    let indices = Indices::U32(vec![0, 1, 2, 0, 2, 3]);
+                    let verts = vec![
+                        [0.0, 0.0, 0.0],
+                        [layer_entity.width as f32, 0.0, 0.0],
+                        [layer_entity.width as f32, -layer_entity.height as f32, 0.0],
+                        [0.0, -layer_entity.height as f32, 0.0],
+                    ];
+                    let uvs = vec![
+                        [uv_left, uv_top],
+                        [uv_right, uv_top],
+                        [uv_right, uv_bottom],
+                        [uv_left, uv_bottom],
+                    ];
+
+                    entity_builder.with_children(|parent| {
+                        parent.spawn(MaterialMesh2dBundle {
+                            mesh: meshes
+                                .add(
+                                    Mesh::new(PrimitiveTopology::TriangleList)
+                                        .with_indices(Some(indices))
+                                        .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, verts)
+                                        .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, uvs),
+                                )
+                                .into(),
+                            material: materials.add(ColorMaterial {
+                                color: Color::default(),
+                                texture: tilemap_handle,
+                            }),
+                            transform: Transform::from_xyz(
+                                // layer_entity.px[0] as f32,
+                                // -layer_entity.px[1] as f32,
+                                0.0, 0.0, 0.0,
+                            ),
+                            ..default()
+                        });
+                    });
+                } else {
+                    // entity_builder.insert(SpatialBundle {
+                    //     transform: Transform::from_xyz(
+                    //         layer_entity.px[0] as f32,
+                    //         -layer_entity.px[1] as f32,
+                    //         0.0,
+                    //     ),
+                    //     ..default()
+                    // });
+                }
+            })
+        });
 }

@@ -11,7 +11,7 @@
 	"iid": "de3a6960-6280-11ee-bf57-8315238fb5bc",
 	"jsonVersion": "1.4.1",
 	"appBuildId": 471015,
-	"nextUid": 10,
+	"nextUid": 12,
 	"identifierStyle": "Capitalize",
 	"toc": [],
 	"worldLayout": "Free",
@@ -134,7 +134,78 @@
 			"tilePivotX": 0,
 			"tilePivotY": 0
 		}
-	], "entities": [], "tilesets": [
+	], "entities": [
+		{
+			"identifier": "Crab",
+			"uid": 10,
+			"tags": [],
+			"exportToToc": false,
+			"doc": null,
+			"width": 16,
+			"height": 16,
+			"resizableX": false,
+			"resizableY": false,
+			"minWidth": null,
+			"maxWidth": null,
+			"minHeight": null,
+			"maxHeight": null,
+			"keepAspectRatio": false,
+			"tileOpacity": 1,
+			"fillOpacity": 0.08,
+			"lineOpacity": 0,
+			"hollow": false,
+			"color": "#BE4A2F",
+			"renderMode": "Tile",
+			"showName": true,
+			"tilesetId": 8,
+			"tileRenderMode": "FitInside",
+			"tileRect": { "tilesetUid": 8, "x": 0, "y": 0, "w": 464, "h": 304 },
+			"uiTileRect": { "tilesetUid": 8, "x": 0, "y": 0, "w": 464, "h": 304 },
+			"nineSliceBorders": [],
+			"maxCount": 0,
+			"limitScope": "PerLevel",
+			"limitBehavior": "MoveLastOne",
+			"pivotX": 0.5,
+			"pivotY": 0.5,
+			"fieldDefs": [
+				{
+					"identifier": "File_path",
+					"doc": null,
+					"__type": "FilePath",
+					"uid": 11,
+					"type": "F_Path",
+					"isArray": false,
+					"canBeNull": true,
+					"arrayMinLength": null,
+					"arrayMaxLength": null,
+					"editorDisplayMode": "Hidden",
+					"editorDisplayScale": 1,
+					"editorDisplayPos": "Above",
+					"editorLinkStyle": "StraightArrow",
+					"editorDisplayColor": null,
+					"editorAlwaysShow": false,
+					"editorShowInWorld": true,
+					"editorCutLongValues": true,
+					"editorTextSuffix": null,
+					"editorTextPrefix": null,
+					"useForSmartColor": false,
+					"min": null,
+					"max": null,
+					"regex": null,
+					"acceptFileTypes": null,
+					"defaultOverride": null,
+					"textLanguageMode": null,
+					"symmetricalRef": false,
+					"autoChainRef": true,
+					"allowOutOfLevelRef": true,
+					"allowedRefs": "OnlySame",
+					"allowedRefsEntityUid": null,
+					"allowedRefTags": [],
+					"tilesetUid": null
+				}
+			]
+		}
+	], "tilesets": [
 		{
 			"__cWid": 5,
 			"__cHei": 5,
@@ -247,7 +318,27 @@
 					"seed": 7100028,
 					"overrideTilesetUid": null,
 					"gridTiles": [],
-					"entityInstances": []
+					"entityInstances": [
+						{
+							"__identifier": "Crab",
+							"__grid": [8,6],
+							"__pivot": [0.5,0.5],
+							"__tags": [],
+							"__tile": { "tilesetUid": 8, "x": 0, "y": 0, "w": 464, "h": 304 },
+							"__smartColor": "#BE4A2F",
+							"__worldX": -128,
+							"__worldY": -160,
+							"iid": "2e556ae0-8990-11ee-bb02-7f50bf5152fb",
+							"width": 16,
+							"height": 16,
+							"defUid": 10,
+							"px": [128,96],
+							"fieldInstances": [{ "__identifier": "File_path", "__type": "FilePath", "__value": "../icons/rustacean-flat-gesture.png", "__tile": null, "defUid": 11, "realEditorValues": [{
+								"id": "V_String",
+								"params": ["../icons/rustacean-flat-gesture.png"]
+							}] }]
+						}
+					]
 				},
 				{
 					"__identifier": "Ground_Decorations",
