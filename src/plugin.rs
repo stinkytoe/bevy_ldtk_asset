@@ -6,6 +6,8 @@ use crate::resources::LdtkLevels;
 use crate::systems::level_asset_loading::{levels_changed, process_level_loading};
 use bevy::prelude::*;
 
+/// The bevy plugin for enabling the features of this crate.
+/// See [The Bevy Book -- Plugins](https://bevyengine.org/learn/book/getting-started/plugins/)
 pub struct BevyLdtkAssetPlugin;
 
 impl Plugin for BevyLdtkAssetPlugin {
@@ -16,9 +18,7 @@ impl Plugin for BevyLdtkAssetPlugin {
             .init_asset::<LdtkLevel>()
             .init_asset_loader::<LdtkLevelLoader>()
             .init_resource::<LdtkLevels>()
-            // .init_resource::<LdtkProjects>()
             .add_systems(Update, process_level_loading)
-            // .add_systems(Update, process_world_loading)
             .add_systems(
                 Update,
                 levels_changed.run_if(resource_changed::<LdtkLevels>()),

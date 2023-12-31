@@ -1,8 +1,10 @@
 use crate::ldtk_json;
 use bevy::prelude::*;
 
+/// The asset which represents an LDtk project.
 #[derive(Asset, Debug, TypePath)]
 pub struct LdtkProject {
+    /// The rust representation of the LDtk project JSON definition [ldtk_json::LdtkJson]
     pub value: ldtk_json::LdtkJson,
     // pub levels: Vec<Handle<LdtkLevel>>,
 }

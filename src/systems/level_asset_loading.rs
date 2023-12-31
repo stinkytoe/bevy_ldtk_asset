@@ -1,6 +1,8 @@
 use crate::{
     ldtk_json,
-    prelude::{LdtkEntityComponent, LdtkLevel, LdtkLevelComponent, LdtkProject},
+    prelude::{
+        LdtkEntityComponent, LdtkLayerComponent, LdtkLevel, LdtkLevelComponent, LdtkProject,
+    },
     resources::LdtkLevels,
 };
 use bevy::{
@@ -295,6 +297,9 @@ fn spawn_tiles_layer(
 
     parent.spawn((
         Name::from(layer.identifier.clone()),
+        LdtkLayerComponent {
+            value: layer.clone(),
+        },
         MaterialMesh2dBundle {
             mesh: meshes
                 .add(
@@ -379,7 +384,7 @@ fn spawn_entity(
                 // DontRender,
             }
 
-            if let (Some(tileset_rectangle), Some(tileset_id)) =
+            if let (Some(tileset_rectangle), Some(_tileset_id)) =
                 (&entity_instance.tile, entity_definition.tileset_id)
             {
                 // let Some(tileset_definition) = project.get_tileset_definition(tileset_id) else {

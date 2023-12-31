@@ -43,12 +43,7 @@ fn move_player(
 ) {
     if let Some((mut player_transform, player_ldtk_entity_component)) = ldtk_entity_query
         .iter_mut()
-        .find(|(_, ldtk_entity_component)| {
-            ldtk_entity_component
-                .value
-                .tags
-                .contains(&"player".to_string())
-        })
+        .find(|(_, ldtk_entity_component)| ldtk_entity_component.has_tag("player"))
     {
         if keys.just_pressed(KeyCode::Left) {
             player_transform.translation.x -= player_ldtk_entity_component.value.width as f32;
