@@ -413,22 +413,6 @@
 					"gridTiles": [],
 					"entityInstances": [
 						{
-							"__identifier": "Axe_Man",
-							"__grid": [8,8],
-							"__pivot": [0,0],
-							"__tags": ["player"],
-							"__tile": { "tilesetUid": 16, "x": 8, "y": 8, "w": 16, "h": 16 },
-							"__smartColor": "#D77643",
-							"__worldX": 0,
-							"__worldY": 0,
-							"iid": "6e0ed2d0-8990-11ee-ae1b-e97580046efd",
-							"width": 16,
-							"height": 16,
-							"defUid": 17,
-							"px": [128,128],
-							"fieldInstances": []
-						},
-						{
 							"__identifier": "Thief",
 							"__grid": [6,11],
 							"__pivot": [0,0],
@@ -442,6 +426,22 @@
 							"height": 16,
 							"defUid": 20,
 							"px": [96,176],
+							"fieldInstances": []
+						},
+						{
+							"__identifier": "Axe_Man",
+							"__grid": [8,8],
+							"__pivot": [0,0],
+							"__tags": ["player"],
+							"__tile": { "tilesetUid": 16, "x": 8, "y": 8, "w": 16, "h": 16 },
+							"__smartColor": "#D77643",
+							"__worldX": 0,
+							"__worldY": 0,
+							"iid": "6e0ed2d0-8990-11ee-ae1b-e97580046efd",
+							"width": 16,
+							"height": 16,
+							"defUid": 17,
+							"px": [128,128],
 							"fieldInstances": []
 						}
 					]

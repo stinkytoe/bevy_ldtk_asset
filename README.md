@@ -55,7 +55,7 @@ to the world:
 
 Over time I will do my best to include as many optional features of LDtk as are appropriate. Right now, these 
 requirements of the LDtk project are in place:
-- Multi-world is not yet supported. 
+- Multi-world is not yet supported 
 - External level files is not yet completed
 - It is required to select the "One PNG per layer" or "One PNG per layer and one per level" option in the Project settings
 - Only "Entities" and "Tiles" layers are loaded, the others are silently ignored
