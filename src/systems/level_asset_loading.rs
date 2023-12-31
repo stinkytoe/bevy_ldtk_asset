@@ -340,85 +340,6 @@ fn spawn_entities_layer(
         .with_children(|parent| {
             layer.entity_instances.iter().for_each(|entity_instance| {
                 spawn_entity(project, level, entity_instance, parent, asset_server);
-                // let mut entity_builder = parent.spawn((
-                //     Name::from(layer_entity.identifier.clone()),
-                //     LdtkEntityComponent {
-                //         value: layer_entity.clone(),
-                //     },
-                //     SpatialBundle {
-                //         transform: Transform::from_xyz(
-                //             layer_entity.px[0] as f32,
-                //             -layer_entity.px[1] as f32,
-                //             0.0,
-                //         ),
-                //         ..default()
-                //     },
-                // ));
-                //
-                // if let Some(tileset_rectangle) = layer_entity.tile.as_ref() {
-                //     let Some(tilemap_definition) =
-                //         project
-                //             .value
-                //             .defs
-                //             .tilesets
-                //             .iter()
-                //             .find(|tileset_definition| {
-                //                 tileset_definition.uid == tileset_rectangle.tileset_uid
-                //             })
-                //     else {
-                //         error!("couldn't find a matching tilemap definition!");
-                //         return;
-                //     };
-                //
-                //     let tilemap_handle = tilemap_definition.rel_path.clone().map(|rel_path| {
-                //         asset_server.load(level.ldtk_project_directory.join(rel_path))
-                //     });
-                //
-                //     let image_width = tilemap_definition.px_wid as f32;
-                //     let image_height = tilemap_definition.px_hei as f32;
-                //
-                //     let uv_left = tileset_rectangle.x as f32 / image_width;
-                //     let uv_right = tileset_rectangle.w as f32 / image_width;
-                //     let uv_top = tileset_rectangle.y as f32 / image_height;
-                //     let uv_bottom = tileset_rectangle.h as f32 / image_height;
-                //
-                //     let indices = Indices::U32(vec![0, 1, 2, 0, 2, 3]);
-                //     let verts = vec![
-                //         [0.0, 0.0, 0.0],
-                //         [layer_entity.width as f32, 0.0, 0.0],
-                //         [layer_entity.width as f32, -layer_entity.height as f32, 0.0],
-                //         [0.0, -layer_entity.height as f32, 0.0],
-                //     ];
-                //     let uvs = vec![
-                //         [uv_left, uv_top],
-                //         [uv_right, uv_top],
-                //         [uv_right, uv_bottom],
-                //         [uv_left, uv_bottom],
-                //     ];
-                //
-                //     entity_builder.with_children(|parent| {
-                //         parent.spawn(MaterialMesh2dBundle {
-                //             mesh: meshes
-                //                 .add(
-                //                     Mesh::new(PrimitiveTopology::TriangleList)
-                //                         .with_indices(Some(indices))
-                //                         .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, verts)
-                //                         .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, uvs),
-                //                 )
-                //                 .into(),
-                //             material: materials.add(ColorMaterial {
-                //                 color: Color::default(),
-                //                 texture: tilemap_handle,
-                //             }),
-                //             transform: Transform::from_xyz(
-                //                 // layer_entity.px[0] as f32,
-                //                 // -layer_entity.px[1] as f32,
-                //                 0.0, 0.0, 0.0,
-                //             ),
-                //             ..default()
-                //         });
-                //     });
-                // }
             })
         });
 }
@@ -461,10 +382,10 @@ fn spawn_entity(
             if let (Some(tileset_rectangle), Some(tileset_id)) =
                 (&entity_instance.tile, entity_definition.tileset_id)
             {
-                let Some(tileset_definition) = project.get_tileset_definition(tileset_id) else {
-                    error!("couldn't find tileset definition!");
-                    return;
-                };
+                // let Some(tileset_definition) = project.get_tileset_definition(tileset_id) else {
+                //     error!("couldn't find tileset definition!");
+                //     return;
+                // };
 
                 // https://github.com/deepnight/ldtk/blob/dc348af58d846554cb3bafb9452f245aec275196/src/electron.renderer/display/EntityRender.hx#L138C10-L138C10
                 let (render_as, scale) = match entity_definition.tile_render_mode {
@@ -472,8 +393,8 @@ fn spawn_entity(
                     ldtk_json::TileRenderMode::FitInside => (
                         RenderAs::Sprite,
                         Vec2::splat(f32::min(
-                            entity_instance.width as f32 / tileset_definition.px_wid as f32,
-                            entity_instance.height as f32 / tileset_definition.px_hei as f32,
+                            entity_instance.width as f32 / tileset_rectangle.w as f32,
+                            entity_instance.height as f32 / tileset_rectangle.h as f32,
                         )),
                     ),
                     ldtk_json::TileRenderMode::FullSizeCropped => todo!(),
@@ -483,8 +404,8 @@ fn spawn_entity(
                     ldtk_json::TileRenderMode::Stretch => (
                         RenderAs::Sprite,
                         Vec2::new(
-                            entity_instance.width as f32 / tileset_definition.px_wid as f32,
-                            entity_instance.height as f32 / tileset_definition.px_hei as f32,
+                            entity_instance.width as f32 / tileset_rectangle.w as f32,
+                            entity_instance.height as f32 / tileset_rectangle.h as f32,
                         ),
                     ),
                 };
@@ -564,8 +485,8 @@ fn spawn_entity_sprite(
                 rect: Some(Rect::new(
                     tileset_rectangle.x as f32,
                     tileset_rectangle.y as f32,
-                    tileset_rectangle.w as f32,
-                    tileset_rectangle.h as f32,
+                    (tileset_rectangle.x + tileset_rectangle.w) as f32,
+                    (tileset_rectangle.y + tileset_rectangle.h) as f32,
                 )),
                 anchor,
                 ..default()

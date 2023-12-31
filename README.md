@@ -14,3 +14,7 @@ Released under the dual MIT and Apache licenses, as inspired by the Bevy team.
 ## Getting Started
 
 Add bevy_ldtk_asset to your Config.toml file, along with Bevy. We currently target Bevy version 0.12 . 
+
+## Assets
+
+[Fantasy Battle Pack](https://mattwalkden.itch.io/fantasy-battle-pack)
