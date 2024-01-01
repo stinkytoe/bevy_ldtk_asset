@@ -50,7 +50,7 @@ fn move_player(
         .iter_mut()
         .find(|(_, ldtk_entity_component)| ldtk_entity_component.has_tag("player"))
     {
-        let mut move_attempt = player_transform.translation.truncate();
+        let mut move_attempt = player_transform.translation;
 
         if keys.just_pressed(KeyCode::Right) {
             move_attempt.x += player_ldtk_entity_component.value.width as f32;
@@ -72,10 +72,19 @@ fn move_player(
             return;
         };
 
-        let int_grid_value = level.get_int_grid_value_at_level_coord(move_attempt);
-
-        info!("Int Grid value at move attempt: {int_grid_value:?}");
-
-        player_transform.translation = move_attempt.extend(player_transform.translation.z);
+        if move_attempt != player_transform.translation {
+            if let Some(int_grid_value) =
+                level.get_int_grid_value_at_level_coord(move_attempt.truncate())
+            {
+                match int_grid_value.identifier.as_deref() {
+                    Some("water") => info!("collision with water!"),
+                    Some(identifier) => {
+                        info!("walking on: {identifier}");
+                        player_transform.translation = move_attempt;
+                    }
+                    None => info!("no identifier"),
+                }
+            }
+        }
     }
 }

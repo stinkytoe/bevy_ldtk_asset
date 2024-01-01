@@ -15,6 +15,8 @@ I aim to create a library for users to:
 - Have these display to the screen in a simple and expected way
 - Provide hooks for the user to work with these 
 
+What this library is NOT intended to do:
+
 ## Levels
 
 Levels are loaded as ECS entities with their translation set to their location in the project world space. They will
@@ -38,7 +40,11 @@ A tile layer will contain a `Handle<Image>` referencing its visual contents.
 An entity layer will include, as children ECS entities, all the entity instances defined in that layer. These
 ECS entities will include an `LdtkEntityComponent` which the user can query and react against. 
 
-## What's working/not working
+If an editor visual is defined, we will attempt to render by spawning either a Sprite or a MaterialMesh2d as a child
+of the main ECS entity. We don't render shapes, or alt UI icon visuals, but the info is provided in the value field 
+if you want to render them yourselves. 
+
+## What's working
 
 Currently a user can load a level as a labeled asset of an LDtk project file. As an example,
 adding the following to a typical startup system in a Bevy project will add the defined layers and entity instances
