@@ -87,7 +87,7 @@ pub(crate) fn finish_level_asset_loading(
         return;
     };
 
-    let Some(project) = project_assets.get(&level.project) else {
+    let Some(project) = project_assets.get(&level.project_handle) else {
         error!("project handle returned none!");
         return;
     };
@@ -242,7 +242,6 @@ fn spawn_layers(
                 .enumerate()
                 .for_each(
                     |(layer_index, layer)| match layer.layer_instance_type.as_str() {
-                        "IntGrid" => (),
                         "Entities" => spawn_entities_layer(
                             project,
                             level,
@@ -253,7 +252,7 @@ fn spawn_layers(
                             materials,
                             asset_server,
                         ),
-                        "Tiles" => spawn_tiles_layer(
+                        "AutoLayer" | "IntGrid" | "Tiles" => spawn_tiles_layer(
                             level,
                             layer_index,
                             layer,
@@ -262,7 +261,6 @@ fn spawn_layers(
                             materials,
                             asset_server,
                         ),
-                        "AutoLayer" => (),
                         _ => {
                             error!("Unknown layer type! {}", layer.layer_instance_type);
                         }

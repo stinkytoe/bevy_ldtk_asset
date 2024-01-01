@@ -86,6 +86,7 @@ impl AssetLoader for LdtkProjectLoader {
                         level.clone(),
                         ldtk_project_directory.clone(),
                         ldtk_extras_directory.clone(),
+                        &value,
                         self_handle.clone(),
                         load_context,
                     );
