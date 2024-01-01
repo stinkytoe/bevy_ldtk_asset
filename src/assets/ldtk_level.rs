@@ -107,6 +107,13 @@ impl LdtkLevel {
 
                         let x_coord = coord.x.floor() as i64 / layer_definition.grid_size;
                         let y_coord = (-coord.y).floor() as i64 / layer_definition.grid_size;
+
+                        if !(0..layer_definition.grid_size).contains(&x_coord)
+                            || !(0..layer_definition.grid_size).contains(&y_coord)
+                        {
+                            return None;
+                        }
+
                         let grid_index = (x_coord
                             + y_coord * self.value.px_wid / layer_definition.grid_size)
                             as usize;
