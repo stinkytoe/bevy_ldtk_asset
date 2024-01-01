@@ -60,4 +60,36 @@ impl LdtkLevel {
                 Some(LoadState::Loaded)
             ))
     }
+
+    /// In level space, finds the top-most int grid at the given coordinate
+    /// and returns it as `Some(..)`, or None if no int grid value at that coordinate
+    pub fn get_int_grid_value_at_level_coord(
+        &self,
+        project: &LdtkProject,
+        coord: Vec2,
+    ) -> Option<i64> {
+        // TODO this is kind of deep, consider refactor? maybe an in-place lambda just for clarity?
+
+        self.value
+            .layer_instances
+            .as_ref()
+            .and_then(|layer_instances| {
+                layer_instances.iter().find_map(|layer_instance| {
+                    project
+                        .get_layer_definition(layer_instance.layer_def_uid)
+                        .and_then(|layer_definition| {
+                            let x_coord = coord.x.floor() as i64 / layer_definition.grid_size;
+                            let y_coord = (-coord.y).floor() as i64 / layer_definition.grid_size;
+                            let index = (x_coord
+                                + y_coord * self.value.px_wid / layer_definition.grid_size)
+                                as usize;
+                            match layer_instance.int_grid_csv.get(index).copied() {
+                                Some(0) => None,
+                                Some(v) => Some(v),
+                                None => None,
+                            }
+                        })
+                })
+            })
+    }
 }

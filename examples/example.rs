@@ -10,7 +10,7 @@ fn main() {
             DefaultPlugins
                 .set(LogPlugin {
                     level: Level::WARN,
-                    filter: "bevy_ldtk_asset=debug".to_string(),
+                    filter: "bevy_ldtk_asset=debug,example=debug".to_string(),
                 })
                 .set(ImagePlugin::default_nearest()),
             WorldInspectorPlugin::new(),
@@ -40,25 +40,41 @@ fn move_player(
     // mut commands: Commands,
     mut ldtk_entity_query: Query<(&mut Transform, &LdtkEntityComponent)>,
     keys: Res<Input<KeyCode>>,
+    asset_server: Res<AssetServer>,
+    project_assets: Res<Assets<LdtkProject>>,
+    level_assets: Res<Assets<LdtkLevel>>,
 ) {
+    let level_handle: Handle<LdtkLevel> = asset_server.load("ldtk/example.ldtk#Level_0");
+
     if let Some((mut player_transform, player_ldtk_entity_component)) = ldtk_entity_query
         .iter_mut()
         .find(|(_, ldtk_entity_component)| ldtk_entity_component.has_tag("player"))
     {
+        let mut move_attempt = player_transform.translation.truncate();
+
         if keys.just_pressed(KeyCode::Left) {
-            player_transform.translation.x -= player_ldtk_entity_component.value.width as f32;
+            move_attempt.x -= player_ldtk_entity_component.value.width as f32;
         }
 
         if keys.just_pressed(KeyCode::Right) {
-            player_transform.translation.x += player_ldtk_entity_component.value.width as f32;
+            move_attempt.x += player_ldtk_entity_component.value.width as f32;
         }
 
         if keys.just_pressed(KeyCode::Up) {
-            player_transform.translation.y += player_ldtk_entity_component.value.width as f32;
+            move_attempt.y += player_ldtk_entity_component.value.width as f32;
         }
 
         if keys.just_pressed(KeyCode::Down) {
-            player_transform.translation.y -= player_ldtk_entity_component.value.width as f32;
+            move_attempt.y -= player_ldtk_entity_component.value.width as f32;
         }
+
+        if let Some(level) = level_assets.get(level_handle) {
+            if let Some(project) = project_assets.get(&level.project) {
+                let int_grid_value = level.get_int_grid_value_at_level_coord(project, move_attempt);
+                info!("Int Grid value at move attempt: {int_grid_value:?}");
+            }
+        }
+
+        player_transform.translation = move_attempt.extend(player_transform.translation.z);
     }
 }

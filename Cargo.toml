@@ -1,7 +1,12 @@
 [package]
 name = "bevy_ldtk_asset"
+description = "A library for loading LDtk levels and projects as Bevy assets."
 version = "0.1.0"
 edition = "2021"
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+homepage = "https://github.com/stinkytoe/bevy_ldtk_asset/"
+repository = "https://github.com/stinkytoe/bevy_ldtk_asset/"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -19,3 +24,4 @@ futures = "0.3"
 
 [dev-dependencies]
 bevy-inspector-egui = "0.22"
+
