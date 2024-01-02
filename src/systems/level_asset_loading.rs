@@ -401,7 +401,9 @@ fn spawn_entity(
                         )),
                     ),
                     ldtk_json::TileRenderMode::FullSizeCropped => todo!(),
-                    ldtk_json::TileRenderMode::FullSizeUncropped => todo!(),
+                    ldtk_json::TileRenderMode::FullSizeUncropped => {
+                        (RenderAs::Sprite, Vec2::splat(1.0))
+                    }
                     ldtk_json::TileRenderMode::NineSlice => todo!(),
                     ldtk_json::TileRenderMode::Repeat => todo!(),
                     ldtk_json::TileRenderMode::Stretch => (
@@ -443,13 +445,13 @@ fn spawn_entity_sprite(
     #[allow(illegal_floating_point_literal_pattern)]
     let anchor = match entity_instance.pivot.as_slice() {
         [0.0, 0.0] => Anchor::TopLeft,
-        [0.0, 0.5] => Anchor::TopCenter,
-        [0.0, 1.0] => Anchor::TopRight,
-        [0.5, 0.0] => Anchor::CenterLeft,
+        [0.5, 0.0] => Anchor::TopCenter,
+        [1.0, 0.0] => Anchor::TopRight,
+        [0.0, 0.5] => Anchor::CenterLeft,
         [0.5, 0.5] => Anchor::Center,
-        [0.5, 1.0] => Anchor::CenterRight,
-        [1.0, 0.0] => Anchor::BottomLeft,
-        [1.0, 0.5] => Anchor::BottomCenter,
+        [1.0, 0.5] => Anchor::CenterRight,
+        [0.0, 1.0] => Anchor::BottomLeft,
+        [0.5, 1.0] => Anchor::BottomCenter,
         [1.0, 1.0] => Anchor::BottomRight,
         _ => {
             error!("bad pivot found! {:?}", entity_instance.pivot);
