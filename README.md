@@ -13,9 +13,14 @@ I aim to create a library for users to:
 - Load levels and/or entity instances from an LDtk project file, as Bevy assets
 - Create ECS entities representing these levels
 - Have these display to the screen in a simple and expected way
-- Provide hooks for the user to work with these 
+- Provide hooks for the user to work with these elements
 
 What this library is NOT intended to do:
+- Define how things like the following should work:
+-- Collision Detection
+-- Sprite animations
+-- Parallax backgrounds
+-- Any other logic which a game may need
 
 ## Levels
 

@@ -11,8 +11,8 @@ repository = "https://github.com/stinkytoe/bevy_ldtk_asset/"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [[example]]
-name = "example"
-path = "examples/example.rs"
+name = "top_down"
+path = "examples/top_down.rs"
 
 [dependencies]
 # bevy = { git = "https://github.com/bevyengine/bevy.git", branch = "main" }
