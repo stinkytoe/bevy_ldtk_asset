@@ -85,3 +85,4 @@ Add bevy_ldtk_asset to your Config.toml file, along with Bevy. We currently targ
 ## Included Assets
 
 [Fantasy Battle Pack](https://mattwalkden.itch.io/fantasy-battle-pack)
+[Treasure Hunters](https://pixelfrog-assets.itch.io/treasure-hunters)
