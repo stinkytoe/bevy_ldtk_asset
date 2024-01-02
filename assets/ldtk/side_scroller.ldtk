@@ -1801,7 +1801,10 @@
 							"height": 16,
 							"defUid": 9,
 							"px": [528,672],
-							"fieldInstances": [{ "__identifier": "aseprite", "__type": "FilePath", "__value": null, "__tile": null, "defUid": 260, "realEditorValues": [] }]
+							"fieldInstances": [{ "__identifier": "aseprite", "__type": "FilePath", "__value": "../Treasure Hunters/The Crusty Crew/Aseprite/Crabby.aseprite", "__tile": null, "defUid": 260, "realEditorValues": [{
+								"id": "V_String",
+								"params": ["../Treasure Hunters/The Crusty Crew/Aseprite/Crabby.aseprite"]
+							}] }]
 						}
 					]
 				},

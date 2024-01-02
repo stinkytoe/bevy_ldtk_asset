@@ -28,4 +28,4 @@ futures = "0.3"
 
 [dev-dependencies]
 bevy-inspector-egui = "0.22"
-bevy_aseprite = "0.12"
+bevy_mod_aseprite = "0.6"
