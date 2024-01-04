@@ -45,9 +45,6 @@ fn process_entities_with_aseprite_files(
             .remove_children(children)
             .with_children(|parent| {
                 parent.spawn(AsepriteBundle {
-                    // transform: todo!(),
-                    // global_transform: todo!(),
-                    // animation: AsepriteAnimation::new(, tag),
                     aseprite: asset_server
                         .load("Treasure Hunters/The Crusty Crew/Aseprite/Crabby.aseprite"),
                     ..default()
