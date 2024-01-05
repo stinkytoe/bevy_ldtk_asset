@@ -36,13 +36,13 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
 fn process_entities_with_aseprite_files(
     mut commands: Commands,
-    entity_instance_query: Query<(Entity, &Children), Added<LdtkEntityComponent>>,
+    entity_instance_query: Query<Entity, Added<LdtkEntityComponent>>,
     asset_server: Res<AssetServer>,
 ) {
-    for (entity, children) in entity_instance_query.iter() {
+    for entity in entity_instance_query.iter() {
         commands
             .entity(entity)
-            .remove_children(children)
+            .despawn_descendants()
             .with_children(|parent| {
                 parent.spawn(AsepriteBundle {
                     aseprite: asset_server
