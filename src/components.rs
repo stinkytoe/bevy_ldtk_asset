@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use crate::ldtk_json;
 use bevy::prelude::*;
 
@@ -19,6 +21,10 @@ pub struct LdtkEntityComponent {
     /// The rust representation of the LDtk entity instance JSON definition
     /// [ldtk_json::EntityInstance]
     pub value: ldtk_json::EntityInstance,
+    /// The directory where the ldtk file resides. Use this with `.join(...)`
+    /// for the path of an asset referenced in the LDtk JSON, to get it's path
+    /// relative to the Bevy assets folder.
+    pub ldtk_project_directory: PathBuf,
 }
 
 impl LdtkEntityComponent {

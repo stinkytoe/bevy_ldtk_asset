@@ -365,6 +365,7 @@ fn spawn_entity(
             Name::from(entity_instance.identifier.clone()),
             LdtkEntityComponent {
                 value: entity_instance.clone(),
+                ldtk_project_directory: level.ldtk_project_directory.clone(),
             },
             SpatialBundle {
                 transform: Transform::from_xyz(
