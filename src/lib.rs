@@ -5,6 +5,7 @@
 mod assets;
 mod bundles;
 mod components;
+mod layer;
 mod plugin;
 mod resources;
 mod systems;
@@ -24,5 +25,7 @@ pub mod prelude {
     pub use crate::assets::ldtk_project::LdtkProject;
     pub use crate::bundles::LdtkLevelBundle;
     pub use crate::components::*;
+    pub use crate::layer::LdtkLayerDefinition;
+    pub use crate::layer::LdtkLayerInstance;
     pub use crate::plugin::BevyLdtkAssetPlugin;
 }

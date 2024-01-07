@@ -1,4 +1,5 @@
 use super::ldtk_project::LdtkProject;
+use crate::layer::{LdtkLayerDefinition, LdtkLayerInstance};
 use crate::ldtk_json;
 use bevy::asset::{LoadContext, LoadState};
 use bevy::prelude::*;
@@ -8,8 +9,8 @@ use std::path::PathBuf;
 /// The asset which represents an LDtk level instance.
 #[derive(Asset, TypePath, Debug)]
 pub struct LdtkLevel {
-    /// The rust representation of the LDtk level JSON definition [ldtk_json::Level]
-    pub value: ldtk_json::Level,
+    // The rust representation of the LDtk level JSON definition [ldtk_json::Level]
+    pub(crate) value: ldtk_json::Level,
     /// The directory where the ldtk file resides. Use this with `.join(...)`
     /// for the path of an asset referenced in the LDtk JSON, to get it's path
     /// relative to the Bevy assets folder.
@@ -86,6 +87,44 @@ impl LdtkLevel {
                 asset_server.get_load_state(self.bg_image.as_ref().unwrap()),
                 Some(LoadState::Loaded)
             ))
+    }
+
+    /// Get the world coordinates for this level, as defined in the LDtk project
+    /// file. If you want the actual offset of the Bevy level entity, then
+    /// use its global transform component. They should match unless the entity
+    /// has been moved.
+    pub fn get_world_coordinate(&self) -> Vec3 {
+        Vec3::new(self.value.world_x as f32, -self.value.world_y as f32, 0.0)
+    }
+
+    /// Get the layer definition which matches the given identifier. This is set in LDtk,
+    /// in the `Project Layers` tab.
+    pub fn get_layer_definition_by_identifier(
+        &self,
+        identifier: &str,
+    ) -> Option<LdtkLayerDefinition> {
+        self.layer_definitions
+            .iter()
+            .find(|layer_definition| layer_definition.identifier == identifier)
+            .map(|layer_definition| LdtkLayerDefinition {
+                value: layer_definition,
+            })
+    }
+
+    /// Get the layer definition which matches the given identifier. This is set in LDtk,
+    /// and is a copy of the layer definition which this instance belongs to.
+    pub fn get_layer_instance_by_identifier(&self, identifier: &str) -> Option<LdtkLayerInstance> {
+        self.value
+            .layer_instances
+            .as_ref()
+            .and_then(|layer_instances| {
+                layer_instances
+                    .iter()
+                    .find(|layer_instance| layer_instance.identifier == identifier)
+                    .map(|layer_instance| LdtkLayerInstance {
+                        value: layer_instance,
+                    })
+            })
     }
 
     /// In level space, finds the top-most int grid at the given coordinate

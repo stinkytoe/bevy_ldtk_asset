@@ -135,32 +135,31 @@ fn draw_collision_boxes(
         level_handles.iter().for_each(|level_handle| {
             let level = levels.get(level_handle).unwrap();
 
-            if let Some(layer_instances) = level.value.layer_instances.as_ref() {
-                layer_instances
-                    .iter()
-                    .filter(|layer_instance| layer_instance.identifier == "Cave")
-                    .for_each(|layer_instance| {
-                        layer_instance.int_grid_csv.iter().enumerate().for_each(
-                            |(index, int_grid_value)| {
-                                if *int_grid_value != 0 {
-                                    let x = level.value.world_x
-                                        + layer_instance.grid_size / 2
-                                        + (layer_instance.grid_size
-                                            * (index as i64 % layer_instance.c_wid));
-                                    let y = level.value.world_y
-                                        + layer_instance.grid_size / 2
-                                        + (layer_instance.grid_size
-                                            * (index as i64 / layer_instance.c_wid));
-                                    let location = Vec3::new(x as f32, -y as f32, 0.0);
+            let Some(layer_instance) = level.get_layer_instance_by_identifier("Cave") else {
+                return;
+            };
 
-                                    let size = Vec2::splat(layer_instance.grid_size as f32);
+            layer_instance
+                .int_grid_csv()
+                .iter()
+                .enumerate()
+                .for_each(|(index, int_grid_value)| {
+                    if *int_grid_value != 0 {
+                        let level_coordinate = layer_instance
+                            .get_level_coordinate_from_index(index)
+                            .expect("out of bounds index!");
+                        let level_world_coordinate = level.get_world_coordinate();
+                        let grid_size = Vec2::splat(layer_instance.grid_size() as f32);
+                        let offset = Vec3::new(grid_size.x / 2.0, -grid_size.y / 2.0, 0.0); // (grid_size / 2.0).extend(0.0);
 
-                                    gizmos.rect(location, Quat::IDENTITY, size, Color::RED);
-                                }
-                            },
-                        )
-                    });
-            }
+                        gizmos.rect(
+                            level_coordinate + level_world_coordinate + offset,
+                            Quat::IDENTITY,
+                            grid_size,
+                            Color::RED,
+                        );
+                    }
+                })
         });
     }
 
