@@ -95,7 +95,7 @@
 			"parallaxScaling": true,
 			"requiredTags": [],
 			"excludedTags": [],
-			"intGridValues": [{ "value": 1, "identifier": "Hole", "color": "#000000", "tile": null, "groupUid": 0 }],
+			"intGridValues": [{ "value": 1, "identifier": "Solid", "color": "#000000", "tile": null, "groupUid": 0 }],
 			"intGridValuesGroups": [],
 			"autoRuleGroups": [{ "uid": 159, "name": "Hole", "color": null, "icon": null, "active": true, "isOptional": false, "rules": [
 				{
@@ -1568,7 +1568,7 @@
 			"tags": [],
 			"exportToToc": false,
 			"doc": null,
-			"width": 16,
+			"width": 32,
 			"height": 16,
 			"resizableX": false,
 			"resizableY": false,
@@ -1797,7 +1797,7 @@
 							"__worldX": 16,
 							"__worldY": 288,
 							"iid": "90fa5f50-8990-11ee-a89b-61a5d6bf4aec",
-							"width": 16,
+							"width": 32,
 							"height": 16,
 							"defUid": 9,
 							"px": [528,672],

@@ -27,7 +27,16 @@ fn main() {
             BevyLdtkAssetPlugin,
         ))
         .add_systems(Startup, setup)
-        .add_systems(Update, (process_entities, handle_aseprite_loaded))
+        .add_systems(
+            Update,
+            (
+                handle_entities_added,
+                handle_aseprite_loaded,
+                draw_collision_boxes,
+                debug_keys,
+            ),
+        )
+        .init_resource::<CollisionBoxes>()
         .run();
 }
 
@@ -45,7 +54,7 @@ struct AsepriteImport {
     handle: Handle<Aseprite>,
 }
 
-fn process_entities(
+fn handle_entities_added(
     mut commands: Commands,
     // level_query: Query<&LdtkLevelComponent>,
     entity_instance_query: Query<(Entity, &LdtkEntityComponent), Added<LdtkEntityComponent>>,
@@ -107,5 +116,62 @@ fn handle_aseprite_loaded(
                 });
             }
         };
+    }
+}
+
+#[derive(Resource, Default)]
+struct CollisionBoxes {
+    tiles: bool,
+    ecs_entities: bool,
+}
+
+fn draw_collision_boxes(
+    collision_boxes: Res<CollisionBoxes>,
+    level_handles: Query<&Handle<LdtkLevel>, With<LdtkLevelComponent>>,
+    levels: Res<Assets<LdtkLevel>>,
+    mut gizmos: Gizmos,
+) {
+    if collision_boxes.tiles {
+        level_handles.iter().for_each(|level_handle| {
+            let level = levels.get(level_handle).unwrap();
+
+            if let Some(layer_instances) = level.value.layer_instances.as_ref() {
+                layer_instances
+                    .iter()
+                    .filter(|layer_instance| layer_instance.identifier == "Cave")
+                    .for_each(|layer_instance| {
+                        layer_instance.int_grid_csv.iter().enumerate().for_each(
+                            |(index, int_grid_value)| {
+                                if *int_grid_value != 0 {
+                                    let x = level.value.world_x
+                                        + layer_instance.grid_size / 2
+                                        + (layer_instance.grid_size
+                                            * (index as i64 % layer_instance.c_wid));
+                                    let y = level.value.world_y
+                                        + layer_instance.grid_size / 2
+                                        + (layer_instance.grid_size
+                                            * (index as i64 / layer_instance.c_wid));
+                                    let location = Vec3::new(x as f32, -y as f32, 0.0);
+
+                                    let size = Vec2::splat(layer_instance.grid_size as f32);
+
+                                    gizmos.rect(location, Quat::IDENTITY, size, Color::RED);
+                                }
+                            },
+                        )
+                    });
+            }
+        });
+    }
+
+    if collision_boxes.ecs_entities {}
+}
+
+fn debug_keys(keys: Res<Input<KeyCode>>, mut collision_boxes: ResMut<CollisionBoxes>) {
+    if keys.just_pressed(KeyCode::F3) {
+        collision_boxes.tiles = !collision_boxes.tiles;
+    }
+    if keys.just_pressed(KeyCode::F4) {
+        collision_boxes.ecs_entities = !collision_boxes.ecs_entities;
     }
 }
