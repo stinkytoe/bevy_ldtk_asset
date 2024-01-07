@@ -17,7 +17,8 @@ mod util;
 /// [serde_json](https://docs.rs/serde_json/latest/serde_json/).
 #[allow(missing_docs)]
 #[allow(rustdoc::bare_urls)]
-pub mod ldtk_json;
+#[allow(clippy::enum_variant_names)]
+pub(crate) mod ldtk_json;
 
 /// Include this for all of the public interface.
 pub mod prelude {

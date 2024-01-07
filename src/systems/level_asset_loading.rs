@@ -296,7 +296,7 @@ fn spawn_tiles_layer(
     parent.spawn((
         Name::from(layer.identifier.clone()),
         LdtkLayerComponent {
-            value: layer.clone(),
+            _value: layer.clone(),
         },
         MaterialMesh2dBundle {
             mesh: meshes

@@ -79,29 +79,31 @@ fn move_player(
 
     let mut move_attempt = player_transform.translation;
 
+    let level = level_assets
+        .get(level_handle)
+        .expect("failed to get the level asset?");
+
+    let entity_size = player_ldtk_entity_component.size();
+
     if keys.just_pressed(KeyCode::Right) {
-        move_attempt.x += player_ldtk_entity_component.value.width as f32;
+        move_attempt.x += entity_size.x;
     }
 
     if keys.just_pressed(KeyCode::Left) {
-        move_attempt.x -= player_ldtk_entity_component.value.width as f32;
+        move_attempt.x -= entity_size.x;
     }
 
     if keys.just_pressed(KeyCode::Up) {
-        move_attempt.y += player_ldtk_entity_component.value.width as f32;
+        move_attempt.y += entity_size.y;
     }
 
     if keys.just_pressed(KeyCode::Down) {
-        move_attempt.y -= player_ldtk_entity_component.value.width as f32;
+        move_attempt.y -= entity_size.y;
     }
 
     if move_attempt == player_transform.translation {
         return;
     };
-
-    let level = level_assets
-        .get(level_handle)
-        .expect("failed to get the level asset?");
 
     if let Some(int_grid_value) = level.get_int_grid_value_at_level_coord(move_attempt.truncate()) {
         match int_grid_value.identifier.as_deref() {

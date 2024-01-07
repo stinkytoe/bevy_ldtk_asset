@@ -62,11 +62,9 @@ fn handle_entities_added(
 ) {
     for (ecs_entity, entity_instance) in entity_instance_query.iter() {
         if let Some(path) = entity_instance
-            .value
-            .field_instances
-            .iter()
+            .field_instances()
             .find(|field_instance| {
-                field_instance.field_instance_type.as_str() == "FilePath"
+                field_instance.field_instance_type == "FilePath"
                     && field_instance.identifier == "aseprite"
             })
             .and_then(|field_instance| field_instance.value.as_ref())

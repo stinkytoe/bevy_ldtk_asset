@@ -5,7 +5,7 @@ use bevy::prelude::*;
 #[derive(Asset, Debug, TypePath)]
 pub struct LdtkProject {
     /// The rust representation of the LDtk project JSON definition [ldtk_json::LdtkJson]
-    pub value: ldtk_json::LdtkJson,
+    pub(crate) value: ldtk_json::LdtkJson,
     // pub levels: Vec<Handle<LdtkLevel>>,
 }
 

@@ -5,15 +5,13 @@ use crate::ldtk_json;
 /// A read-only object which represents the layer definition
 /// as defined in the LDtk project.
 pub struct LdtkLayerDefinition<'a> {
-    ///
-    pub value: &'a ldtk_json::LayerDefinition,
+    pub(crate) _value: &'a ldtk_json::LayerDefinition,
 }
 
 /// A read-only object which represents the layer instance
 /// as defined in the LDtk project.
 pub struct LdtkLayerInstance<'a> {
-    ///
-    pub value: &'a ldtk_json::LayerInstance,
+    pub(crate) value: &'a ldtk_json::LayerInstance,
 }
 
 impl LdtkLayerInstance<'_> {
@@ -22,7 +20,6 @@ impl LdtkLayerInstance<'_> {
     pub fn int_grid_csv(&self) -> &Vec<i64> {
         &self.value.int_grid_csv
     }
-
     /// The size of the logical grid for this layer.
     pub fn grid_size(&self) -> i64 {
         self.value.grid_size
@@ -44,7 +41,8 @@ impl LdtkLayerInstance<'_> {
     pub fn get_grid_coordinate_from_index(&self, index: usize) -> Option<(i64, i64)> {
         let row = index as i64 % self.c_wid();
         let col = index as i64 / self.c_wid();
-        if (0..self.grid_size()).contains(&row) || (0..self.grid_size()).contains(&col) {
+
+        if (0..self.grid_size()).contains(&row) && (0..self.grid_size()).contains(&col) {
             Some((row, col))
         } else {
             None

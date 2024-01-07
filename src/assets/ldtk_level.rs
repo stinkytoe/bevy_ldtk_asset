@@ -107,7 +107,7 @@ impl LdtkLevel {
             .iter()
             .find(|layer_definition| layer_definition.identifier == identifier)
             .map(|layer_definition| LdtkLayerDefinition {
-                value: layer_definition,
+                _value: layer_definition,
             })
     }
 
@@ -129,7 +129,6 @@ impl LdtkLevel {
 
     /// In level space, finds the top-most int grid at the given coordinate
     /// and returns it as `Some(..)`, or None if no int grid value at that coordinate.
-    ///
     /// This will search through the layers, starting with the topmost layer and continuing down
     /// until an intgrid value is found. It will only return the first, top-most, value.
     pub fn get_int_grid_value_at_level_coord(
