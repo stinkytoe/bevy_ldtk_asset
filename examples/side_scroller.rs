@@ -102,13 +102,7 @@ fn handle_aseprite_loaded(
                         sprite: TextureAtlasSprite::new(animation.current_frame()),
                         aseprite: entity_instance_import.handle.clone_weak(),
                         animation,
-                        // sprite: todo!(),
-                        // texture_atlas: todo!(),
                         transform: Transform::from_xyz(0.0, 16.0, 0.0),
-                        // global_transform: todo!(),
-                        // visibility: todo!(),
-                        // inherited_visibility: todo!(),
-                        // view_visibility: todo!(),
                         ..default()
                     });
                 });
@@ -127,6 +121,7 @@ fn draw_collision_boxes(
     collision_boxes: Res<CollisionBoxes>,
     level_handles: Query<&Handle<LevelAsset>, With<LevelComponent>>,
     levels: Res<Assets<LevelAsset>>,
+    entities: Query<(&GlobalTransform, &EntityInstance)>,
     mut gizmos: Gizmos,
 ) {
     if collision_boxes.tiles {
@@ -161,7 +156,16 @@ fn draw_collision_boxes(
         });
     }
 
-    if collision_boxes.ecs_entities {}
+    if collision_boxes.ecs_entities {
+        for (entity_transform, entity_instance) in entities.iter() {
+            let location = entity_transform.translation();
+            let size = entity_instance.size();
+            let pivot = entity_instance.pivot();
+            let offset = Vec3::new(size.x * (pivot.x - 0.5), size.y * (pivot.y - 0.5), 0.0);
+
+            gizmos.rect(location + offset, Quat::IDENTITY, size, Color::GREEN);
+        }
+    }
 }
 
 fn debug_keys(keys: Res<Input<KeyCode>>, mut collision_boxes: ResMut<CollisionBoxes>) {
