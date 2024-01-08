@@ -2,7 +2,8 @@ use bevy::{prelude::*, utils::info};
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_ldtk_asset::prelude::*;
 
-const LEVEL_PATH: &str = "ldtk/top_down.ldtk#Island_of_Thieves";
+const LEVEL1_PATH: &str = "ldtk/top_down.ldtk#Island_of_Thieves";
+const LEVEL2_PATH: &str = "ldtk/top_down.ldtk#Isthmus_of_Pain";
 
 fn main() {
     App::new() //
@@ -20,7 +21,10 @@ fn main() {
             BevyLdtkAssetPlugin,
         ))
         .add_systems(Startup, setup)
-        .add_systems(Update, (register_player_by_tag, move_player))
+        .add_systems(
+            Update,
+            (register_player_by_tag, move_player, camera_follow_player).chain(),
+        )
         .init_resource::<Player>()
         .run();
 }
@@ -35,7 +39,11 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         ..default()
     });
     commands.spawn(LdtkLevelBundle {
-        level: asset_server.load(LEVEL_PATH),
+        level: asset_server.load(LEVEL1_PATH),
+        ..default()
+    });
+    commands.spawn(LdtkLevelBundle {
+        level: asset_server.load(LEVEL2_PATH),
         ..default()
     });
 }
@@ -65,7 +73,7 @@ fn move_player(
     asset_server: Res<AssetServer>,
     level_assets: Res<Assets<LevelAsset>>,
 ) {
-    let level_handle: Handle<LevelAsset> = asset_server.load(LEVEL_PATH);
+    let level_handle: Handle<LevelAsset> = asset_server.load(LEVEL1_PATH);
 
     let level = level_assets
         .get(level_handle)
@@ -118,5 +126,19 @@ fn move_player(
         }
     } else {
         info("no int grid at attempted move location. We don't know what we're going to be walking on!");
+    }
+}
+
+fn camera_follow_player(
+    mut camera_query: Query<&mut Transform, (With<Camera2d>, Without<EntityInstance>)>,
+    player_query: Query<&GlobalTransform, (With<EntityInstance>, Without<Camera2d>)>,
+    player: Res<Player>,
+) {
+    if let Some(player_entity) = player.0 {
+        let mut camera_transform = camera_query.get_single_mut().expect("no camera!");
+
+        let player_transform = player_query.get(player_entity).expect("no player entity!");
+
+        camera_transform.translation = player_transform.translation();
     }
 }

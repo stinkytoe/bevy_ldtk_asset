@@ -1,6 +1,6 @@
 use super::int_grid_value::IntGridValue;
 use super::layer_definition::LayerDefinition;
-use super::project::Project;
+use super::project_asset::ProjectAsset;
 use crate::ldtk::layer_instance::LayerInstance;
 use crate::ldtk_json;
 use bevy::asset::{LoadContext, LoadState};
@@ -28,7 +28,7 @@ pub struct LevelAsset {
     /// loaded from a ldtk project file [LdtkProject], even if the project is configured to
     /// have external level files.
     #[dependency]
-    pub project_handle: Handle<Project>,
+    pub project_handle: Handle<ProjectAsset>,
     /// An optional handle to the defined background image, if any, for the level.
     #[dependency]
     pub bg_image: Option<Handle<Image>>,
@@ -40,7 +40,7 @@ impl LevelAsset {
         ldtk_project_directory: PathBuf,
         ldtk_extras_directory: PathBuf,
         project_json: &ldtk_json::LdtkJson,
-        project_handle: Handle<Project>,
+        project_handle: Handle<ProjectAsset>,
         load_context: &mut LoadContext,
     ) -> Self {
         let layer_definitions = value

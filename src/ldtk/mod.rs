@@ -4,4 +4,5 @@ pub(crate) mod layer_definition;
 pub(crate) mod layer_instance;
 pub(crate) mod level_asset;
 pub(crate) mod level_component;
-pub(crate) mod project;
+pub(crate) mod project_asset;
+pub(crate) mod project_component;

@@ -28,6 +28,7 @@ pub mod prelude {
     pub use crate::ldtk::layer_instance::LayerInstance;
     pub use crate::ldtk::level_asset::LevelAsset;
     pub use crate::ldtk::level_component::LevelComponent;
-    pub use crate::ldtk::project::Project;
+    pub use crate::ldtk::project_asset::ProjectAsset;
+    pub use crate::ldtk::project_component::ProjectComponent;
     pub use crate::plugin::BevyLdtkAssetPlugin;
 }

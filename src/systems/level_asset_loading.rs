@@ -1,7 +1,7 @@
 use crate::{
     ldtk::{
         entity_instance::EntityInstance, layer_instance::LayerInstance, level_asset::LevelAsset,
-        level_component::LevelComponent, project::Project,
+        level_component::LevelComponent, project_asset::ProjectAsset,
     },
     ldtk_json::{self},
     resources::LdtkLevels,
@@ -36,7 +36,7 @@ pub fn levels_changed(
     mut levels: ResMut<LdtkLevels>,
     mut asset_server: ResMut<AssetServer>,
     level_assets: Res<Assets<LevelAsset>>,
-    project_assets: Res<Assets<Project>>,
+    project_assets: Res<Assets<ProjectAsset>>,
     mut query: Query<&mut Transform>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
@@ -73,7 +73,7 @@ pub(crate) fn finish_level_asset_loading(
     commands: &mut Commands,
     asset_server: &mut AssetServer,
     level_assets: &Assets<LevelAsset>,
-    project_assets: &Assets<Project>,
+    project_assets: &Assets<ProjectAsset>,
     query: &mut Query<&mut Transform>,
     meshes: &mut Assets<Mesh>,
     materials: &mut Assets<ColorMaterial>,
@@ -225,7 +225,7 @@ fn spawn_bg_image(
 }
 
 fn spawn_layers(
-    project: &Project,
+    project: &ProjectAsset,
     level: &LevelAsset,
     parent: &mut ChildBuilder,
     meshes: &mut Assets<Mesh>,
@@ -320,7 +320,7 @@ fn spawn_tiles_layer(
 
 #[allow(clippy::too_many_arguments)]
 fn spawn_entities_layer(
-    project: &Project,
+    project: &ProjectAsset,
     level: &LevelAsset,
     layer_index: usize,
     layer: &ldtk_json::LayerInstance,
@@ -350,7 +350,7 @@ fn spawn_entities_layer(
 
 #[allow(clippy::too_many_arguments)]
 fn spawn_entity(
-    project: &Project,
+    project: &ProjectAsset,
     level: &LevelAsset,
     entity_instance: &ldtk_json::EntityInstance,
     parent: &mut ChildBuilder,
@@ -435,7 +435,7 @@ fn spawn_entity(
 
 #[allow(clippy::too_many_arguments)]
 fn spawn_entity_sprite(
-    project: &Project,
+    project: &ProjectAsset,
     level: &LevelAsset,
     entity_instance: &ldtk_json::EntityInstance,
     entity_definition: &ldtk_json::EntityDefinition,
