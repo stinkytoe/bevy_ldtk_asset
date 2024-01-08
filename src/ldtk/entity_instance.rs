@@ -29,6 +29,9 @@ impl EntityInstance {
         Vec2::new(self.value.width as f32, self.value.height as f32)
     }
 
+    /// Returns the pivot. This is a vector composed of two numbers equal to:
+    /// 0.0, 0.5, or 1.0 . This is meant to represent how the bounding box for
+    /// the entity instance is aligned with the location point.
     pub fn pivot(&self) -> Vec2 {
         Vec2::new(self.value.pivot[0] as f32, self.value.pivot[1] as f32)
     }
