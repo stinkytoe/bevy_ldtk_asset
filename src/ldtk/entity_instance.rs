@@ -29,6 +29,10 @@ impl EntityInstance {
         Vec2::new(self.value.width as f32, self.value.height as f32)
     }
 
+    pub fn pivot(&self) -> Vec2 {
+        Vec2::new(self.value.pivot[0] as f32, self.value.pivot[1] as f32)
+    }
+
     /// Return an iterator over all field instances
     pub fn field_instances(&self) -> impl Iterator<Item = &ldtk_json::FieldInstance> {
         self.value.field_instances.iter()

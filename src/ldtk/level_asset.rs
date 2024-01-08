@@ -1,3 +1,4 @@
+use super::int_grid_value::IntGridValue;
 use super::layer_definition::LayerDefinition;
 use super::project::Project;
 use crate::ldtk::layer_instance::LayerInstance;
@@ -129,10 +130,7 @@ impl LevelAsset {
     /// and returns it as `Some(..)`, or None if no int grid value at that coordinate.
     /// This will search through the layers, starting with the topmost layer and continuing down
     /// until an intgrid value is found. It will only return the first, top-most, value.
-    pub fn get_int_grid_value_at_level_coordinate(
-        &self,
-        coord: Vec2,
-    ) -> Option<&ldtk_json::IntGridValueDefinition> {
+    pub fn get_int_grid_value_at_level_coordinate(&self, coord: Vec2) -> Option<IntGridValue> {
         // TODO this is kind of deep, consider refactor? maybe an in-place lambda just for clarity?
         self.value
             .layer_instances
@@ -172,6 +170,9 @@ impl LevelAsset {
                             .int_grid_values
                             .iter()
                             .find(|int_grid_value| int_grid_value.value == int_grid_index)
+                    })
+                    .map(|int_grid_value_definition| IntGridValue {
+                        value: int_grid_value_definition,
                     })
             })
     }

@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, utils::info};
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_ldtk_asset::prelude::*;
 
@@ -108,7 +108,7 @@ fn move_player(
     if let Some(int_grid_value) =
         level.get_int_grid_value_at_level_coordinate(move_attempt.truncate())
     {
-        match int_grid_value.identifier.as_deref() {
+        match int_grid_value.identifier().as_deref() {
             Some("water") => info!("collision with water!"),
             Some(identifier) => {
                 info!("walking on: {identifier}");
@@ -116,5 +116,7 @@ fn move_player(
             }
             None => info!("no identifier"),
         }
+    } else {
+        info("no int grid at attempted move location. We don't know what we're going to be walking on!");
     }
 }
