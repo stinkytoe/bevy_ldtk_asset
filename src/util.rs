@@ -4,7 +4,7 @@ use hex::FromHex;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
-pub(crate) enum ColorParseError {
+pub enum ColorParseError {
     #[error("Provided color string not seven characters! {0}")]
     BadStringLength(String),
     #[error("Unable to parse given color string! expect hex color in format: #rrggbb, got: {0}")]

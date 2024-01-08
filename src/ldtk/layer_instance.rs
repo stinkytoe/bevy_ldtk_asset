@@ -1,20 +1,14 @@
-use bevy::prelude::*;
-
 use crate::ldtk_json;
-
-/// A read-only object which represents the layer definition
-/// as defined in the LDtk project.
-pub struct LdtkLayerDefinition<'a> {
-    pub(crate) _value: &'a ldtk_json::LayerDefinition,
-}
+use bevy::prelude::*;
 
 /// A read-only object which represents the layer instance
 /// as defined in the LDtk project.
-pub struct LdtkLayerInstance<'a> {
-    pub(crate) value: &'a ldtk_json::LayerInstance,
+#[derive(Component)]
+pub struct LayerInstance {
+    pub(crate) value: ldtk_json::LayerInstance,
 }
 
-impl LdtkLayerInstance<'_> {
+impl LayerInstance {
     /// Returns the grid holding the values of the int_grid, if any,
     /// which was defined in the LDtk project.
     pub fn int_grid_csv(&self) -> &Vec<i64> {

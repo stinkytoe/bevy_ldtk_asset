@@ -1,5 +1,5 @@
-use crate::assets::ldtk_level::LdtkLevel;
-use crate::assets::ldtk_project::LdtkProject;
+use crate::ldtk::level_asset::LevelAsset;
+use crate::ldtk::project::Project;
 use crate::ldtk_json;
 use bevy::asset::io::Reader;
 use bevy::asset::AssetLoader;
@@ -32,7 +32,7 @@ pub(crate) enum LdtkProjectLoaderError {
 pub(crate) struct LdtkProjectLoader;
 
 impl AssetLoader for LdtkProjectLoader {
-    type Asset = LdtkProject;
+    type Asset = Project;
     type Settings = ();
     type Error = LdtkProjectLoaderError;
 
@@ -76,13 +76,13 @@ impl AssetLoader for LdtkProjectLoader {
                 return Err(LdtkProjectLoaderError::UnsupportedMultiWorld);
             }
 
-            let self_handle: Handle<LdtkProject> = load_context.load(load_context_path_buf.clone());
+            let self_handle: Handle<Project> = load_context.load(load_context_path_buf.clone());
 
             if value.external_levels {
                 return Err(LdtkProjectLoaderError::UnsupportedExternalLevelFiles);
             } else {
                 value.levels.iter().for_each(|level| {
-                    let new_level = LdtkLevel::new(
+                    let new_level = LevelAsset::new(
                         level.clone(),
                         ldtk_project_directory.clone(),
                         ldtk_extras_directory.clone(),
@@ -99,7 +99,7 @@ impl AssetLoader for LdtkProjectLoader {
                 load_context.path().to_str().unwrap_or_default()
             );
 
-            Ok(LdtkProject {
+            Ok(Project {
                 value,
                 // levels: level_handles,
             })

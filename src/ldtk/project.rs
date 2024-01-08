@@ -3,13 +3,13 @@ use bevy::prelude::*;
 
 /// The asset which represents an LDtk project.
 #[derive(Asset, Debug, TypePath)]
-pub struct LdtkProject {
+pub struct Project {
     /// The rust representation of the LDtk project JSON definition [ldtk_json::LdtkJson]
     pub(crate) value: ldtk_json::LdtkJson,
     // pub levels: Vec<Handle<LdtkLevel>>,
 }
 
-impl LdtkProject {
+impl Project {
     /// The rust representation of the LDtk entity JSON definition [ldtk_json::EntityDefinition]
     pub fn get_entity_definition(&self, uid: i64) -> Option<&ldtk_json::EntityDefinition> {
         self.value

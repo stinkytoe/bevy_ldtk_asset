@@ -44,7 +44,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 struct Player(Option<Entity>);
 
 fn register_player_by_tag(
-    new_entity_instance_query: Query<(Entity, &LdtkEntityComponent), Added<LdtkEntityComponent>>,
+    new_entity_instance_query: Query<(Entity, &EntityInstance), Added<EntityInstance>>,
     mut player: ResMut<Player>,
 ) {
     for (entity, ldtk_entity_component) in new_entity_instance_query.iter() {
@@ -59,13 +59,17 @@ fn register_player_by_tag(
 }
 
 fn move_player(
-    mut ldtk_entity_query: Query<(&mut Transform, &LdtkEntityComponent)>,
+    mut ldtk_entity_query: Query<(&mut Transform, &EntityInstance)>,
     player: Res<Player>,
     keys: Res<Input<KeyCode>>,
     asset_server: Res<AssetServer>,
-    level_assets: Res<Assets<LdtkLevel>>,
+    level_assets: Res<Assets<LevelAsset>>,
 ) {
-    let level_handle: Handle<LdtkLevel> = asset_server.load(LEVEL_PATH);
+    let level_handle: Handle<LevelAsset> = asset_server.load(LEVEL_PATH);
+
+    let level = level_assets
+        .get(level_handle)
+        .expect("failed to get the level asset?");
 
     let Some((mut player_transform, player_ldtk_entity_component)) =
         player.0.map(|player_entity| {
@@ -78,10 +82,6 @@ fn move_player(
     };
 
     let mut move_attempt = player_transform.translation;
-
-    let level = level_assets
-        .get(level_handle)
-        .expect("failed to get the level asset?");
 
     let entity_size = player_ldtk_entity_component.size();
 
@@ -105,7 +105,9 @@ fn move_player(
         return;
     };
 
-    if let Some(int_grid_value) = level.get_int_grid_value_at_level_coord(move_attempt.truncate()) {
+    if let Some(int_grid_value) =
+        level.get_int_grid_value_at_level_coordinate(move_attempt.truncate())
+    {
         match int_grid_value.identifier.as_deref() {
             Some("water") => info!("collision with water!"),
             Some(identifier) => {

@@ -1,4 +1,4 @@
-use crate::assets::ldtk_level::LdtkLevel;
+use crate::ldtk::level_asset::LevelAsset;
 use bevy::asset::{io::Reader, AssetLoader, LoadContext};
 use bevy::prelude::*;
 use bevy::utils::thiserror;
@@ -24,7 +24,7 @@ pub(crate) struct LdtkLevelLoaderSettings;
 pub(crate) struct LdtkLevelLoader;
 
 impl AssetLoader for LdtkLevelLoader {
-    type Asset = LdtkLevel;
+    type Asset = LevelAsset;
     type Settings = LdtkLevelLoaderSettings;
     type Error = LdtkLevelLoaderError;
 

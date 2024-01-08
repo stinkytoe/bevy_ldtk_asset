@@ -57,7 +57,7 @@ struct AsepriteImport {
 fn handle_entities_added(
     mut commands: Commands,
     // level_query: Query<&LdtkLevelComponent>,
-    entity_instance_query: Query<(Entity, &LdtkEntityComponent), Added<LdtkEntityComponent>>,
+    entity_instance_query: Query<(Entity, &EntityInstance), Added<EntityInstance>>,
     asset_server: Res<AssetServer>,
 ) {
     for (ecs_entity, entity_instance) in entity_instance_query.iter() {
@@ -83,7 +83,7 @@ fn handle_entities_added(
 
 fn handle_aseprite_loaded(
     mut commands: Commands,
-    aseprite_entity_query: Query<(Entity, &AsepriteImport), With<LdtkEntityComponent>>,
+    aseprite_entity_query: Query<(Entity, &AsepriteImport), With<EntityInstance>>,
     mut asset_events: EventReader<AssetEvent<Aseprite>>,
     aseprites: Res<Assets<Aseprite>>,
 ) {
@@ -125,8 +125,8 @@ struct CollisionBoxes {
 
 fn draw_collision_boxes(
     collision_boxes: Res<CollisionBoxes>,
-    level_handles: Query<&Handle<LdtkLevel>, With<LdtkLevelComponent>>,
-    levels: Res<Assets<LdtkLevel>>,
+    level_handles: Query<&Handle<LevelAsset>, With<LevelComponent>>,
+    levels: Res<Assets<LevelAsset>>,
     mut gizmos: Gizmos,
 ) {
     if collision_boxes.tiles {

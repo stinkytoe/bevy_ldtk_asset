@@ -1,23 +1,10 @@
-use std::path::PathBuf;
-
 use crate::ldtk_json;
 use bevy::prelude::*;
-
-/// A component for identifying this as an LdtkLevel in the ECS system
-#[derive(Component, Debug, Default, Reflect)]
-pub struct LdtkLevelComponent;
-
-/// A component attached to a layer when created
-#[derive(Component)]
-pub struct LdtkLayerComponent {
-    /// The rust representation of the LDtk layer instance JSON definition
-    /// [ldtk_json::LayerInstance]
-    pub(crate) _value: ldtk_json::LayerInstance,
-}
+use std::path::PathBuf;
 
 /// A component attached to an entity when created
 #[derive(Component)]
-pub struct LdtkEntityComponent {
+pub struct EntityInstance {
     pub(crate) value: ldtk_json::EntityInstance,
     /// The directory where the ldtk file resides. Use this with `.join(...)`
     /// for the path of an asset referenced in the LDtk JSON, to get it's path
@@ -25,7 +12,7 @@ pub struct LdtkEntityComponent {
     pub ldtk_project_directory: PathBuf,
 }
 
-impl LdtkEntityComponent {
+impl EntityInstance {
     /// The rust representation of the LDtk entity instance JSON definition
     /// [ldtk_json::EntityInstance]
     // pub(crate) fn value(&self) -> &ldtk_json::EntityInstance {

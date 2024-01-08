@@ -1,8 +1,9 @@
 use crate::{
-    ldtk_json,
-    prelude::{
-        LdtkEntityComponent, LdtkLayerComponent, LdtkLevel, LdtkLevelComponent, LdtkProject,
+    ldtk::{
+        entity_instance::EntityInstance, layer_instance::LayerInstance, level_asset::LevelAsset,
+        level_component::LevelComponent, project::Project,
     },
+    ldtk_json::{self},
     resources::LdtkLevels,
 };
 use bevy::{
@@ -13,11 +14,11 @@ use bevy::{
 
 pub fn process_level_loading(
     mut levels: ResMut<LdtkLevels>,
-    mut ev_asset: EventReader<AssetEvent<LdtkLevel>>,
-    level_query: Query<(Entity, &Handle<LdtkLevel>), With<LdtkLevelComponent>>,
+    mut ev_asset: EventReader<AssetEvent<LevelAsset>>,
+    level_query: Query<(Entity, &Handle<LevelAsset>), With<LevelComponent>>,
 ) {
     for ev in ev_asset.read() {
-        if let AssetEvent::<LdtkLevel>::LoadedWithDependencies { id } = ev {
+        if let AssetEvent::<LevelAsset>::LoadedWithDependencies { id } = ev {
             if let Some((entity, handle)) = level_query
                 .iter()
                 .find(|(_entity, handle)| handle.id() == *id)
@@ -34,8 +35,8 @@ pub fn levels_changed(
     mut commands: Commands,
     mut levels: ResMut<LdtkLevels>,
     mut asset_server: ResMut<AssetServer>,
-    level_assets: Res<Assets<LdtkLevel>>,
-    project_assets: Res<Assets<LdtkProject>>,
+    level_assets: Res<Assets<LevelAsset>>,
+    project_assets: Res<Assets<Project>>,
     mut query: Query<&mut Transform>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
@@ -68,11 +69,11 @@ pub fn levels_changed(
 
 #[allow(clippy::too_many_arguments)]
 pub(crate) fn finish_level_asset_loading(
-    entity_handle: (Entity, Handle<LdtkLevel>),
+    entity_handle: (Entity, Handle<LevelAsset>),
     commands: &mut Commands,
     asset_server: &mut AssetServer,
-    level_assets: &Assets<LdtkLevel>,
-    project_assets: &Assets<LdtkProject>,
+    level_assets: &Assets<LevelAsset>,
+    project_assets: &Assets<Project>,
     query: &mut Query<&mut Transform>,
     meshes: &mut Assets<Mesh>,
     materials: &mut Assets<ColorMaterial>,
@@ -113,7 +114,7 @@ pub(crate) fn finish_level_asset_loading(
 }
 
 fn spawn_bg_poly(
-    level: &LdtkLevel,
+    level: &LevelAsset,
     parent: &mut ChildBuilder,
     meshes: &mut Assets<Mesh>,
     materials: &mut Assets<ColorMaterial>,
@@ -147,7 +148,7 @@ fn spawn_bg_poly(
 }
 
 fn spawn_bg_image(
-    level: &LdtkLevel,
+    level: &LevelAsset,
     parent: &mut ChildBuilder,
     meshes: &mut Assets<Mesh>,
     materials: &mut Assets<ColorMaterial>,
@@ -224,8 +225,8 @@ fn spawn_bg_image(
 }
 
 fn spawn_layers(
-    project: &LdtkProject,
-    level: &LdtkLevel,
+    project: &Project,
+    level: &LevelAsset,
     parent: &mut ChildBuilder,
     meshes: &mut Assets<Mesh>,
     materials: &mut Assets<ColorMaterial>,
@@ -271,7 +272,7 @@ fn spawn_layers(
 
 #[allow(clippy::too_many_arguments)]
 fn spawn_tiles_layer(
-    level: &LdtkLevel,
+    level: &LevelAsset,
     layer_index: usize,
     layer: &ldtk_json::LayerInstance,
     parent: &mut ChildBuilder,
@@ -295,8 +296,8 @@ fn spawn_tiles_layer(
 
     parent.spawn((
         Name::from(layer.identifier.clone()),
-        LdtkLayerComponent {
-            _value: layer.clone(),
+        LayerInstance {
+            value: layer.clone(),
         },
         MaterialMesh2dBundle {
             mesh: meshes
@@ -319,8 +320,8 @@ fn spawn_tiles_layer(
 
 #[allow(clippy::too_many_arguments)]
 fn spawn_entities_layer(
-    project: &LdtkProject,
-    level: &LdtkLevel,
+    project: &Project,
+    level: &LevelAsset,
     layer_index: usize,
     layer: &ldtk_json::LayerInstance,
     parent: &mut ChildBuilder,
@@ -349,8 +350,8 @@ fn spawn_entities_layer(
 
 #[allow(clippy::too_many_arguments)]
 fn spawn_entity(
-    project: &LdtkProject,
-    level: &LdtkLevel,
+    project: &Project,
+    level: &LevelAsset,
     entity_instance: &ldtk_json::EntityInstance,
     parent: &mut ChildBuilder,
     asset_server: &mut AssetServer,
@@ -363,7 +364,7 @@ fn spawn_entity(
     parent
         .spawn((
             Name::from(entity_instance.identifier.clone()),
-            LdtkEntityComponent {
+            EntityInstance {
                 value: entity_instance.clone(),
                 ldtk_project_directory: level.ldtk_project_directory.clone(),
             },
@@ -434,8 +435,8 @@ fn spawn_entity(
 
 #[allow(clippy::too_many_arguments)]
 fn spawn_entity_sprite(
-    project: &LdtkProject,
-    level: &LdtkLevel,
+    project: &Project,
+    level: &LevelAsset,
     entity_instance: &ldtk_json::EntityInstance,
     entity_definition: &ldtk_json::EntityDefinition,
     scale: Vec2,

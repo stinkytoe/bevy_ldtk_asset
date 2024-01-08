@@ -1,5 +1,6 @@
-use super::ldtk_project::LdtkProject;
-use crate::layer::{LdtkLayerDefinition, LdtkLayerInstance};
+use super::layer_definition::LayerDefinition;
+use super::project::Project;
+use crate::ldtk::layer_instance::LayerInstance;
 use crate::ldtk_json;
 use bevy::asset::{LoadContext, LoadState};
 use bevy::prelude::*;
@@ -8,7 +9,7 @@ use std::path::PathBuf;
 
 /// The asset which represents an LDtk level instance.
 #[derive(Asset, TypePath, Debug)]
-pub struct LdtkLevel {
+pub struct LevelAsset {
     // The rust representation of the LDtk level JSON definition [ldtk_json::Level]
     pub(crate) value: ldtk_json::Level,
     /// The directory where the ldtk file resides. Use this with `.join(...)`
@@ -26,19 +27,19 @@ pub struct LdtkLevel {
     /// loaded from a ldtk project file [LdtkProject], even if the project is configured to
     /// have external level files.
     #[dependency]
-    pub project_handle: Handle<LdtkProject>,
+    pub project_handle: Handle<Project>,
     /// An optional handle to the defined background image, if any, for the level.
     #[dependency]
     pub bg_image: Option<Handle<Image>>,
 }
 
-impl LdtkLevel {
+impl LevelAsset {
     pub(crate) fn new(
         value: ldtk_json::Level,
         ldtk_project_directory: PathBuf,
         ldtk_extras_directory: PathBuf,
         project_json: &ldtk_json::LdtkJson,
-        project_handle: Handle<LdtkProject>,
+        project_handle: Handle<Project>,
         load_context: &mut LoadContext,
     ) -> Self {
         let layer_definitions = value
@@ -99,21 +100,18 @@ impl LdtkLevel {
 
     /// Get the layer definition which matches the given identifier. This is set in LDtk,
     /// in the `Project Layers` tab.
-    pub fn get_layer_definition_by_identifier(
-        &self,
-        identifier: &str,
-    ) -> Option<LdtkLayerDefinition> {
+    pub fn get_layer_definition_by_identifier(&self, identifier: &str) -> Option<LayerDefinition> {
         self.layer_definitions
             .iter()
             .find(|layer_definition| layer_definition.identifier == identifier)
-            .map(|layer_definition| LdtkLayerDefinition {
+            .map(|layer_definition| LayerDefinition {
                 _value: layer_definition,
             })
     }
 
     /// Get the layer definition which matches the given identifier. This is set in LDtk,
     /// and is a copy of the layer definition which this instance belongs to.
-    pub fn get_layer_instance_by_identifier(&self, identifier: &str) -> Option<LdtkLayerInstance> {
+    pub fn get_layer_instance_by_identifier(&self, identifier: &str) -> Option<LayerInstance> {
         self.value
             .layer_instances
             .as_ref()
@@ -121,8 +119,8 @@ impl LdtkLevel {
                 layer_instances
                     .iter()
                     .find(|layer_instance| layer_instance.identifier == identifier)
-                    .map(|layer_instance| LdtkLayerInstance {
-                        value: layer_instance,
+                    .map(|layer_instance| LayerInstance {
+                        value: layer_instance.clone(),
                     })
             })
     }
@@ -131,7 +129,7 @@ impl LdtkLevel {
     /// and returns it as `Some(..)`, or None if no int grid value at that coordinate.
     /// This will search through the layers, starting with the topmost layer and continuing down
     /// until an intgrid value is found. It will only return the first, top-most, value.
-    pub fn get_int_grid_value_at_level_coord(
+    pub fn get_int_grid_value_at_level_coordinate(
         &self,
         coord: Vec2,
     ) -> Option<&ldtk_json::IntGridValueDefinition> {
