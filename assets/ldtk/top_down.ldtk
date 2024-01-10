@@ -11,7 +11,7 @@
 	"iid": "d5ab0640-8990-11ee-a83b-7da29036a93f",
 	"jsonVersion": "1.4.1",
 	"appBuildId": 471015,
-	"nextUid": 306,
+	"nextUid": 308,
 	"identifierStyle": "Capitalize",
 	"toc": [],
 	"worldLayout": "Free",
@@ -1917,7 +1917,78 @@
 			"limitBehavior": "MoveLastOne",
 			"pivotX": 0.5,
 			"pivotY": 0.5,
-			"fieldDefs": []
+			"fieldDefs": [
+				{
+					"identifier": "Walk_Right",
+					"doc": null,
+					"__type": "Array<Tile>",
+					"uid": 306,
+					"type": "F_Tile",
+					"isArray": true,
+					"canBeNull": false,
+					"arrayMinLength": null,
+					"arrayMaxLength": null,
+					"editorDisplayMode": "EntityTile",
+					"editorDisplayScale": 1,
+					"editorDisplayPos": "Above",
+					"editorLinkStyle": "StraightArrow",
+					"editorDisplayColor": null,
+					"editorAlwaysShow": false,
+					"editorShowInWorld": true,
+					"editorCutLongValues": true,
+					"editorTextSuffix": null,
+					"editorTextPrefix": null,
+					"useForSmartColor": false,
+					"min": null,
+					"max": null,
+					"regex": null,
+					"acceptFileTypes": null,
+					"defaultOverride": null,
+					"textLanguageMode": null,
+					"symmetricalRef": false,
+					"autoChainRef": true,
+					"allowOutOfLevelRef": true,
+					"allowedRefs": "OnlySame",
+					"allowedRefsEntityUid": null,
+					"allowedRefTags": [],
+					"tilesetUid": 288
+				},
+				{
+					"identifier": "Multilines",
+					"doc": null,
+					"__type": "String",
+					"uid": 307,
+					"type": "F_Text",
+					"isArray": false,
+					"canBeNull": true,
+					"arrayMinLength": null,
+					"arrayMaxLength": null,
+					"editorDisplayMode": "Hidden",
+					"editorDisplayScale": 1,
+					"editorDisplayPos": "Above",
+					"editorLinkStyle": "StraightArrow",
+					"editorDisplayColor": null,
+					"editorAlwaysShow": false,
+					"editorShowInWorld": true,
+					"editorCutLongValues": true,
+					"editorTextSuffix": null,
+					"editorTextPrefix": null,
+					"useForSmartColor": false,
+					"min": null,
+					"max": null,
+					"regex": null,
+					"acceptFileTypes": null,
+					"defaultOverride": null,
+					"textLanguageMode": null,
+					"symmetricalRef": false,
+					"autoChainRef": true,
+					"allowOutOfLevelRef": true,
+					"allowedRefs": "OnlySame",
+					"allowedRefsEntityUid": null,
+					"allowedRefTags": [],
+					"tilesetUid": null
+				}
+			]
 		},
 		{
 			"identifier": "Thief",
@@ -2170,7 +2241,27 @@
 							"height": 16,
 							"defUid": 287,
 							"px": [136,136],
-							"fieldInstances": []
+							"fieldInstances": [
+								{ "__identifier": "Walk_Right", "__type": "Array<Tile>", "__value": [
+									{ "tilesetUid": 288, "x": 8, "y": 8, "w": 16, "h": 16 },
+									{ "tilesetUid": 288, "x": 40, "y": 8, "w": 16, "h": 16 },
+									{ "tilesetUid": 288, "x": 72, "y": 8, "w": 16, "h": 16 },
+									{ "tilesetUid": 288, "x": 104, "y": 8, "w": 16, "h": 16 }
+								], "__tile": { "tilesetUid": 288, "x": 8, "y": 8, "w": 16, "h": 16 }, "defUid": 306, "realEditorValues": [ {
+									"id": "V_String",
+									"params": ["8,8,16,16"]
+								}, {
+									"id": "V_String",
+									"params": ["40,8,16,16"]
+								}, {
+									"id": "V_String",
+									"params": ["72,8,16,16"]
+								}, {
+									"id": "V_String",
+									"params": ["104,8,16,16"]
+								} ] },
+								{ "__identifier": "Multilines", "__type": "String", "__value": null, "__tile": null, "defUid": 307, "realEditorValues": [] }
+							]
 						},
 						{
 							"__identifier": "Thief",

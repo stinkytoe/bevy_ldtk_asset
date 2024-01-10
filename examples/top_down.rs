@@ -21,10 +21,8 @@ fn main() {
             BevyLdtkAssetPlugin,
         ))
         .add_systems(Startup, setup)
-        .add_systems(
-            Update,
-            (register_player_by_tag, move_player, camera_follow_player).chain(),
-        )
+        .add_systems(Update, (register_player_by_tag, move_player))
+        // .add_systems(PostUpdate, camera_follow_player)
         .init_resource::<Player>()
         .run();
 }
@@ -67,7 +65,8 @@ fn register_player_by_tag(
 }
 
 fn move_player(
-    mut ldtk_entity_query: Query<(&mut Transform, &EntityInstance)>,
+    mut ldtk_entity_query: Query<(&mut Transform, &EntityInstance), Without<Camera2d>>,
+    mut camera_query: Query<&mut Transform, With<Camera2d>>,
     player: Res<Player>,
     keys: Res<Input<KeyCode>>,
     asset_server: Res<AssetServer>,
@@ -120,6 +119,8 @@ fn move_player(
             Some("water") => info!("collision with water!"),
             Some(identifier) => {
                 info!("walking on: {identifier}");
+                let mut camera_transform = camera_query.single_mut();
+                camera_transform.translation += move_attempt - player_transform.translation;
                 player_transform.translation = move_attempt;
             }
             None => info!("no identifier"),
@@ -129,16 +130,16 @@ fn move_player(
     }
 }
 
-fn camera_follow_player(
-    mut camera_query: Query<&mut Transform, (With<Camera2d>, Without<EntityInstance>)>,
-    player_query: Query<&GlobalTransform, (With<EntityInstance>, Without<Camera2d>)>,
-    player: Res<Player>,
-) {
-    if let Some(player_entity) = player.0 {
-        let mut camera_transform = camera_query.get_single_mut().expect("no camera!");
-
-        let player_transform = player_query.get(player_entity).expect("no player entity!");
-
-        camera_transform.translation = player_transform.translation();
-    }
-}
+// fn camera_follow_player(
+//     mut camera_query: Query<&mut Transform, (With<Camera2d>, Without<EntityInstance>)>,
+//     player_query: Query<&GlobalTransform, (With<EntityInstance>, Without<Camera2d>)>,
+//     player: Res<Player>,
+// ) {
+//     if let Some(player_entity) = player.0 {
+//         let mut camera_transform = camera_query.get_single_mut().expect("no camera!");
+//
+//         let player_transform = player_query.get(player_entity).expect("no player entity!");
+//
+//         camera_transform.translation = player_transform.translation();
+//     }
+// }
