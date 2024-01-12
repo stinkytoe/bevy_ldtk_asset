@@ -2,6 +2,7 @@ use bevy::{prelude::*, utils::info};
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_ldtk_asset::prelude::*;
 
+// const PROJECT_PATH: &str = "ldtk/top_down.ldtk";
 const LEVEL1_PATH: &str = "ldtk/top_down.ldtk#Island_of_Thieves";
 const LEVEL2_PATH: &str = "ldtk/top_down.ldtk#Isthmus_of_Pain";
 
@@ -44,6 +45,10 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         level: asset_server.load(LEVEL2_PATH),
         ..default()
     });
+    // commands.spawn(LdtkProjectBundle {
+    //     project: asset_server.load(PROJECT_PATH),
+    //     ..default()
+    // });
 }
 
 #[derive(Resource, Debug, Default)]
@@ -71,12 +76,19 @@ fn move_player(
     keys: Res<Input<KeyCode>>,
     asset_server: Res<AssetServer>,
     level_assets: Res<Assets<LevelAsset>>,
+    _project_assets: Res<Assets<ProjectAsset>>,
 ) {
     let level_handle: Handle<LevelAsset> = asset_server.load(LEVEL1_PATH);
 
     let level = level_assets
         .get(level_handle)
         .expect("failed to get the level asset?");
+
+    // let project_handle: Handle<ProjectAsset> = asset_server.load(PROJECT_PATH);
+    //
+    // let project = project_assets
+    //     .get(project_handle)
+    //     .expect("failed to get the project asset?");
 
     let Some((mut player_transform, player_ldtk_entity_component)) =
         player.0.map(|player_entity| {
@@ -129,17 +141,3 @@ fn move_player(
         info("no int grid at attempted move location. We don't know what we're going to be walking on!");
     }
 }
-
-// fn camera_follow_player(
-//     mut camera_query: Query<&mut Transform, (With<Camera2d>, Without<EntityInstance>)>,
-//     player_query: Query<&GlobalTransform, (With<EntityInstance>, Without<Camera2d>)>,
-//     player: Res<Player>,
-// ) {
-//     if let Some(player_entity) = player.0 {
-//         let mut camera_transform = camera_query.get_single_mut().expect("no camera!");
-//
-//         let player_transform = player_query.get(player_entity).expect("no player entity!");
-//
-//         camera_transform.translation = player_transform.translation();
-//     }
-// }

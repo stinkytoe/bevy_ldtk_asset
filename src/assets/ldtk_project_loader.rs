@@ -83,15 +83,24 @@ impl AssetLoader for LdtkProjectLoader {
                 return Err(LdtkProjectLoaderError::UnsupportedExternalLevelFiles);
             } else {
                 value.levels.iter().for_each(|level| {
-                    let new_level = LevelAsset::new(
-                        level.clone(),
-                        ldtk_project_directory.clone(),
-                        ldtk_extras_directory.clone(),
-                        &value,
-                        self_handle.clone(),
-                        load_context,
-                    );
-                    load_context.add_labeled_asset(level.identifier.clone(), new_level);
+                    load_context.labeled_asset_scope(level.identifier.clone(), |load_context| {
+                        if let Some(bg_rel_path) = &level.bg_rel_path {
+                            load_context
+                                // .load::<Image>("Fantasy Battle Pack 26-10-22/Tiles/FullTileset.png");
+                                .load::<Image>(ldtk_project_directory.join(bg_rel_path));
+                        }
+                        LevelAsset::new(
+                            level.clone(),
+                            ldtk_project_directory.clone(),
+                            ldtk_extras_directory.clone(),
+                            &value,
+                            self_handle.clone(),
+                            load_context,
+                        )
+                    });
+
+                    // levels.push(new_level);
+                    // load_context.add_labeled_asset(level.identifier.clone(), new_level);
                 });
             }
 

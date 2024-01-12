@@ -9,7 +9,7 @@ use bevy::prelude::*;
 /// example programs.
 #[derive(Bundle, Default)]
 pub struct LdtkLevelBundle {
-    /// A handle holding the reference to the LdtkLevel [LdtkLevel]
+    /// A handle holding the reference to the Level Asset [LevelAsset]
     pub level: Handle<LevelAsset>,
     #[doc(hidden)]
     pub level_component: LevelComponent,
@@ -17,8 +17,10 @@ pub struct LdtkLevelBundle {
     pub spatial_bundle: SpatialBundle,
 }
 
+/// The bundle user for spawning an entire LDtk project.
 #[derive(Bundle, Default)]
 pub struct LdtkProjectBundle {
+    /// A handle holding the reference to the Project Asset [ProjectAsset]
     pub project: Handle<ProjectAsset>,
     #[doc(hidden)]
     pub project_component: ProjectComponent,

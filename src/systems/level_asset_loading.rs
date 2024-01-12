@@ -4,7 +4,8 @@ use crate::{
         level_component::LevelComponent, project_asset::ProjectAsset,
     },
     ldtk_json::{self},
-    resources::LdtkLevels,
+    resources::LdtkLevelEntities,
+    // resources::LdtkLevels,
 };
 use bevy::{
     prelude::*,
@@ -12,8 +13,9 @@ use bevy::{
     sprite::{Anchor, MaterialMesh2dBundle},
 };
 
-pub fn process_level_loading(
-    mut levels: ResMut<LdtkLevels>,
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn process_level_loading(
+    mut level_entities: ResMut<LdtkLevelEntities>,
     mut ev_asset: EventReader<AssetEvent<LevelAsset>>,
     level_query: Query<(Entity, &Handle<LevelAsset>), With<LevelComponent>>,
 ) {
@@ -24,7 +26,7 @@ pub fn process_level_loading(
                 .find(|(_entity, handle)| handle.id() == *id)
             {
                 trace!("Found a matching ldtk level label and entity! {entity:?} {handle:?}");
-                levels.to_load.insert((entity, handle.clone()));
+                level_entities.to_load.insert((entity, handle.clone()));
             }
         }
     }
@@ -33,35 +35,35 @@ pub fn process_level_loading(
 #[allow(clippy::too_many_arguments)]
 pub fn levels_changed(
     mut commands: Commands,
-    mut levels: ResMut<LdtkLevels>,
+    mut level_entities: ResMut<LdtkLevelEntities>,
     mut asset_server: ResMut<AssetServer>,
     level_assets: Res<Assets<LevelAsset>>,
     project_assets: Res<Assets<ProjectAsset>>,
-    mut query: Query<&mut Transform>,
+    mut transform_query: Query<&mut Transform, With<LevelComponent>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     images: Res<Assets<Image>>,
 ) {
-    if !levels.to_load.is_empty() {
-        let to_load: Vec<_> = levels.to_load.drain().collect();
-        to_load.iter().for_each(|x| {
-            let ldtk_level = level_assets.get(&x.1).expect("level handle is None?");
+    if !level_entities.to_load.is_empty() {
+        let to_load: Vec<_> = level_entities.to_load.drain().collect();
+        to_load.iter().for_each(|(entity, handle)| {
+            let ldtk_level = level_assets.get(handle).expect("level handle is None?");
 
-            if ldtk_level.is_loaded(&asset_server) {
-                levels.loaded.insert(x.clone());
+            if ldtk_level._is_fully_loaded(&asset_server) {
+                level_entities.loaded.insert((*entity, handle.clone()));
                 finish_level_asset_loading(
-                    x.clone(),
+                    (*entity, handle.clone()),
                     &mut commands,
                     &mut asset_server,
                     &level_assets,
                     &project_assets,
-                    &mut query,
+                    &mut transform_query,
                     &mut meshes,
                     &mut materials,
                     &images,
                 );
             } else {
-                levels.to_load.insert(x.clone());
+                level_entities.to_load.insert((*entity, handle.clone()));
             };
         });
     }
@@ -74,7 +76,7 @@ pub(crate) fn finish_level_asset_loading(
     asset_server: &mut AssetServer,
     level_assets: &Assets<LevelAsset>,
     project_assets: &Assets<ProjectAsset>,
-    query: &mut Query<&mut Transform>,
+    transform_query: &mut Query<&mut Transform, With<LevelComponent>>,
     meshes: &mut Assets<Mesh>,
     materials: &mut Assets<ColorMaterial>,
     images: &Assets<Image>,
@@ -102,7 +104,7 @@ pub(crate) fn finish_level_asset_loading(
             spawn_layers(project, level, parent, meshes, materials, asset_server);
         });
 
-    match query.get_mut(entity) {
+    match transform_query.get_mut(entity) {
         Ok(mut transform) => {
             transform.translation =
                 Vec3::new(level.value.world_x as f32, -level.value.world_y as f32, 0.0)

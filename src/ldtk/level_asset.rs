@@ -27,10 +27,8 @@ pub struct LevelAsset {
     /// A handle to the project which this level belongs in. A [LdtkLevel] is only valid if
     /// loaded from a ldtk project file [LdtkProject], even if the project is configured to
     /// have external level files.
-    #[dependency]
     pub project_handle: Handle<ProjectAsset>,
     /// An optional handle to the defined background image, if any, for the level.
-    #[dependency]
     pub bg_image: Option<Handle<Image>>,
 }
 
@@ -79,7 +77,7 @@ impl LevelAsset {
         }
     }
 
-    pub(crate) fn is_loaded(&self, asset_server: &AssetServer) -> bool {
+    pub(crate) fn _is_fully_loaded(&self, asset_server: &AssetServer) -> bool {
         // TODO: This is ugly!
         matches!(
             asset_server.get_load_state(&self.project_handle),

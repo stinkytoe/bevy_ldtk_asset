@@ -7,6 +7,7 @@ pub struct ProjectAsset {
     /// The rust representation of the LDtk project JSON definition [ldtk_json::LdtkJson]
     pub(crate) value: ldtk_json::LdtkJson,
     // pub levels: Vec<Handle<LdtkLevel>>,
+    // pub levels: HashMap<String, Handle<LevelAsset>>,
 }
 
 impl ProjectAsset {
