@@ -2,9 +2,9 @@ use crate::assets::ldtk_level_loader::LdtkLevelLoader;
 use crate::assets::ldtk_project_loader::LdtkProjectLoader;
 use crate::ldtk::level_asset::LevelAsset;
 use crate::ldtk::project_asset::ProjectAsset;
-use crate::resources::LdtkLevelEntities;
-// use crate::resources::LdtkLevels;
+use crate::resources::{LevelEntities, ProjectEntities};
 use crate::systems::level_asset_loading::{levels_changed, process_level_loading};
+use crate::systems::project_asset_loading::{process_project_loading, projects_changed};
 use bevy::prelude::*;
 
 /// The bevy plugin for enabling the features of this crate.
@@ -18,11 +18,16 @@ impl Plugin for BevyLdtkAssetPlugin {
             .init_asset_loader::<LdtkProjectLoader>()
             .init_asset::<LevelAsset>()
             .init_asset_loader::<LdtkLevelLoader>()
-            .init_resource::<LdtkLevelEntities>()
-            .add_systems(Update, process_level_loading)
+            .init_resource::<ProjectEntities>()
+            .init_resource::<LevelEntities>()
+            .add_systems(Update, (process_project_loading, process_level_loading))
             .add_systems(
                 Update,
-                levels_changed.run_if(resource_changed::<LdtkLevelEntities>()),
+                projects_changed.run_if(resource_changed::<ProjectEntities>()),
+            )
+            .add_systems(
+                Update,
+                levels_changed.run_if(resource_changed::<LevelEntities>()),
             );
     }
 }

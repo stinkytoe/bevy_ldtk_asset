@@ -42,3 +42,11 @@ pub(crate) fn get_bevy_color_from_ldtk(color: &str) -> Result<Color, ColorParseE
         hex_to_float(blue_hex)?,
     ))
 }
+
+pub(crate) fn _get_bevy_vec2_from_i64_pair(r: i64, c: i64) -> Vec2 {
+    Vec2::new(r as f32, c as f32)
+}
+
+pub(crate) fn _get_i64_pair_from_bevy_vec2(coord: Vec2) -> (i64, i64) {
+    (f32::floor(coord.x) as i64, f32::floor(coord.y) as i64)
+}

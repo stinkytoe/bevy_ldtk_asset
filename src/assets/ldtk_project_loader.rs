@@ -79,30 +79,37 @@ impl AssetLoader for LdtkProjectLoader {
             let self_handle: Handle<ProjectAsset> =
                 load_context.load(load_context_path_buf.clone());
 
-            if value.external_levels {
+            let levels = if value.external_levels {
                 return Err(LdtkProjectLoaderError::UnsupportedExternalLevelFiles);
             } else {
-                value.levels.iter().for_each(|level| {
-                    load_context.labeled_asset_scope(level.identifier.clone(), |load_context| {
-                        if let Some(bg_rel_path) = &level.bg_rel_path {
-                            load_context
-                                // .load::<Image>("Fantasy Battle Pack 26-10-22/Tiles/FullTileset.png");
-                                .load::<Image>(ldtk_project_directory.join(bg_rel_path));
-                        }
-                        LevelAsset::new(
+                value
+                    .levels
+                    .iter()
+                    .map(|level| {
+                        let new_asset = LevelAsset::new(
                             level.clone(),
                             ldtk_project_directory.clone(),
                             ldtk_extras_directory.clone(),
                             &value,
                             self_handle.clone(),
                             load_context,
-                        )
-                    });
+                        );
+                        // debug!(
+                        //     "{}",
+                        //     format!("{:?}#{}", load_context_path_buf, level.identifier)
+                        // );
+                        // let _: Handle<LevelAsset> = load_context
+                        //     .load(load_context_path_buf.join(format!("#{}", level.identifier)));
+                        // (
+                        //     level.uid,
+                        load_context.add_labeled_asset(level.identifier.clone(), new_asset)
+                        // )
 
-                    // levels.push(new_level);
-                    // load_context.add_labeled_asset(level.identifier.clone(), new_level);
-                });
-            }
+                        // levels.push(new_level);
+                        // load_context.add_labeled_asset(level.identifier.clone(), new_level);
+                    })
+                    .collect()
+            };
 
             debug!(
                 "LDtk root project file: {} loaded!",
@@ -111,7 +118,7 @@ impl AssetLoader for LdtkProjectLoader {
 
             Ok(ProjectAsset {
                 value,
-                // levels: level_handles,
+                levels, // levels: level_handles,
             })
         })
     }

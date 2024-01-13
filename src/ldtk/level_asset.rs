@@ -3,7 +3,7 @@ use super::layer_definition::LayerDefinition;
 use super::project_asset::ProjectAsset;
 use crate::ldtk::layer_instance::LayerInstance;
 use crate::ldtk_json;
-use bevy::asset::{LoadContext, LoadState};
+use bevy::asset::LoadContext;
 use bevy::prelude::*;
 use bevy::reflect::TypePath;
 use std::path::PathBuf;
@@ -77,17 +77,17 @@ impl LevelAsset {
         }
     }
 
-    pub(crate) fn _is_fully_loaded(&self, asset_server: &AssetServer) -> bool {
-        // TODO: This is ugly!
-        matches!(
-            asset_server.get_load_state(&self.project_handle),
-            Some(LoadState::Loaded)
-        ) && (self.bg_image.is_none()
-            || matches!(
-                asset_server.get_load_state(self.bg_image.as_ref().unwrap()),
-                Some(LoadState::Loaded)
-            ))
-    }
+    // pub(crate) fn _is_fully_loaded(&self, asset_server: &AssetServer) -> bool {
+    //     // TODO: This is ugly!
+    //     matches!(
+    //         asset_server.get_load_state(&self.project_handle),
+    //         Some(LoadState::Loaded)
+    //     ) && (self.bg_image.is_none()
+    //         || matches!(
+    //             asset_server.get_load_state(self.bg_image.as_ref().unwrap()),
+    //             Some(LoadState::Loaded)
+    //         ))
+    // }
 
     /// Get the world coordinates for this level, as defined in the LDtk project
     /// file. If you want the actual offset of the Bevy level entity, then
@@ -96,6 +96,11 @@ impl LevelAsset {
     pub fn get_world_coordinate(&self) -> Vec3 {
         Vec3::new(self.value.world_x as f32, -self.value.world_y as f32, 0.0)
     }
+
+    // pub fn contains_world_coordinate(&self, coord: Vec2) -> bool {
+    //     (self.value.world_x..(self.value.px_wid)).contains(&(coord.x as i64))
+    //         && (self.value.world_y..(self.value.px_hei)).contains(&(-coord.y as i64))
+    // }
 
     /// Get the layer definition which matches the given identifier. This is set in LDtk,
     /// in the `Project Layers` tab.
@@ -108,7 +113,7 @@ impl LevelAsset {
             })
     }
 
-    /// Get the layer definition which matches the given identifier. This is set in LDtk,
+    /// Get the layer instance which matches the given identifier. This is set in LDtk,
     /// and is a copy of the layer definition which this instance belongs to.
     pub fn get_layer_instance_by_identifier(&self, identifier: &str) -> Option<LayerInstance> {
         self.value

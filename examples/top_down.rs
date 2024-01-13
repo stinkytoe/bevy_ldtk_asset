@@ -1,10 +1,8 @@
-use bevy::{prelude::*, utils::info};
+use bevy::{log::LogPlugin, prelude::*, utils::info};
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_ldtk_asset::prelude::*;
 
-// const PROJECT_PATH: &str = "ldtk/top_down.ldtk";
-const LEVEL1_PATH: &str = "ldtk/top_down.ldtk#Island_of_Thieves";
-const LEVEL2_PATH: &str = "ldtk/top_down.ldtk#Isthmus_of_Pain";
+const PROJECT_PATH: &str = "ldtk/top_down.ldtk";
 
 fn main() {
     App::new() //
@@ -17,13 +15,16 @@ fn main() {
                         ..default()
                     }),
                     ..default()
+                })
+                .set(LogPlugin {
+                    level: bevy::log::Level::WARN,
+                    filter: "bevy_ldtk_asset=debug".into(),
                 }),
             WorldInspectorPlugin::new(),
             BevyLdtkAssetPlugin,
         ))
         .add_systems(Startup, setup)
         .add_systems(Update, (register_player_by_tag, move_player))
-        // .add_systems(PostUpdate, camera_follow_player)
         .init_resource::<Player>()
         .run();
 }
@@ -37,18 +38,10 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
         ..default()
     });
-    commands.spawn(LdtkLevelBundle {
-        level: asset_server.load(LEVEL1_PATH),
+    commands.spawn(LdtkProjectBundle {
+        project: asset_server.load(PROJECT_PATH),
         ..default()
     });
-    commands.spawn(LdtkLevelBundle {
-        level: asset_server.load(LEVEL2_PATH),
-        ..default()
-    });
-    // commands.spawn(LdtkProjectBundle {
-    //     project: asset_server.load(PROJECT_PATH),
-    //     ..default()
-    // });
 }
 
 #[derive(Resource, Debug, Default)]
@@ -58,51 +51,64 @@ fn register_player_by_tag(
     new_entity_instance_query: Query<(Entity, &EntityInstance), Added<EntityInstance>>,
     mut player: ResMut<Player>,
 ) {
-    for (entity, ldtk_entity_component) in new_entity_instance_query.iter() {
+    for (ecs_entity, ldtk_entity_component) in new_entity_instance_query.iter() {
         if ldtk_entity_component.has_tag("player") {
             if player.0.is_some() {
                 error!("There are more than one entities spawned with the \"player\" tag!");
             } else {
-                player.0 = Some(entity);
+                player.0 = Some(ecs_entity);
             }
         }
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn move_player(
-    mut ldtk_entity_query: Query<(&mut Transform, &EntityInstance), Without<Camera2d>>,
+    mut ldtk_entity_query: Query<(Entity, &mut Transform, &EntityInstance), Without<Camera2d>>,
     mut camera_query: Query<&mut Transform, With<Camera2d>>,
+    level_query: Query<&Handle<LevelAsset>>,
+    parent_query: Query<&Parent>,
     player: Res<Player>,
     keys: Res<Input<KeyCode>>,
     asset_server: Res<AssetServer>,
     level_assets: Res<Assets<LevelAsset>>,
-    _project_assets: Res<Assets<ProjectAsset>>,
+    project_assets: Res<Assets<ProjectAsset>>,
 ) {
-    let level_handle: Handle<LevelAsset> = asset_server.load(LEVEL1_PATH);
-
-    let level = level_assets
-        .get(level_handle)
-        .expect("failed to get the level asset?");
-
-    // let project_handle: Handle<ProjectAsset> = asset_server.load(PROJECT_PATH);
-    //
-    // let project = project_assets
-    //     .get(project_handle)
-    //     .expect("failed to get the project asset?");
-
-    let Some((mut player_transform, player_ldtk_entity_component)) =
+    let Some((player_ecs_entity, mut player_transform, entity_instance)) =
         player.0.map(|player_entity| {
             ldtk_entity_query
                 .get_mut(player_entity)
-                .expect("query failed!")
+                .expect("ldtk entity query failed!")
         })
     else {
         return;
     };
 
+    let layer_entity = parent_query
+        .get(player_ecs_entity)
+        .expect("Entity Instance isn't on a layer!")
+        .get();
+
+    let level_entity = parent_query
+        .get(layer_entity)
+        .expect("Layer Instance isn't on a level!")
+        .get();
+
+    let level_handle = level_query.get(level_entity).expect("Bad level entity!");
+
+    let level = level_assets
+        .get(level_handle)
+        .expect("failed to get the level asset?");
+
+    let project_handle: Handle<ProjectAsset> = asset_server.load(PROJECT_PATH);
+
+    let project = project_assets
+        .get(project_handle)
+        .expect("failed to get the project asset?");
+
     let mut move_attempt = player_transform.translation;
 
-    let entity_size = player_ldtk_entity_component.size();
+    let entity_size = entity_instance.size();
 
     if keys.just_pressed(KeyCode::Right) {
         move_attempt.x += entity_size.x;

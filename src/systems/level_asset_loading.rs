@@ -4,7 +4,7 @@ use crate::{
         level_component::LevelComponent, project_asset::ProjectAsset,
     },
     ldtk_json::{self},
-    resources::LdtkLevelEntities,
+    resources::LevelEntities,
     // resources::LdtkLevels,
 };
 use bevy::{
@@ -13,9 +13,8 @@ use bevy::{
     sprite::{Anchor, MaterialMesh2dBundle},
 };
 
-#[allow(clippy::too_many_arguments)]
 pub(crate) fn process_level_loading(
-    mut level_entities: ResMut<LdtkLevelEntities>,
+    mut level_entities: ResMut<LevelEntities>,
     mut ev_asset: EventReader<AssetEvent<LevelAsset>>,
     level_query: Query<(Entity, &Handle<LevelAsset>), With<LevelComponent>>,
 ) {
@@ -35,7 +34,7 @@ pub(crate) fn process_level_loading(
 #[allow(clippy::too_many_arguments)]
 pub fn levels_changed(
     mut commands: Commands,
-    mut level_entities: ResMut<LdtkLevelEntities>,
+    mut level_entities: ResMut<LevelEntities>,
     mut asset_server: ResMut<AssetServer>,
     level_assets: Res<Assets<LevelAsset>>,
     project_assets: Res<Assets<ProjectAsset>>,
@@ -47,24 +46,18 @@ pub fn levels_changed(
     if !level_entities.to_load.is_empty() {
         let to_load: Vec<_> = level_entities.to_load.drain().collect();
         to_load.iter().for_each(|(entity, handle)| {
-            let ldtk_level = level_assets.get(handle).expect("level handle is None?");
-
-            if ldtk_level._is_fully_loaded(&asset_server) {
-                level_entities.loaded.insert((*entity, handle.clone()));
-                finish_level_asset_loading(
-                    (*entity, handle.clone()),
-                    &mut commands,
-                    &mut asset_server,
-                    &level_assets,
-                    &project_assets,
-                    &mut transform_query,
-                    &mut meshes,
-                    &mut materials,
-                    &images,
-                );
-            } else {
-                level_entities.to_load.insert((*entity, handle.clone()));
-            };
+            level_entities.loaded.insert((*entity, handle.clone()));
+            finish_level_asset_loading(
+                (*entity, handle.clone()),
+                &mut commands,
+                &mut asset_server,
+                &level_assets,
+                &project_assets,
+                &mut transform_query,
+                &mut meshes,
+                &mut materials,
+                &images,
+            );
         });
     }
 }
@@ -358,7 +351,8 @@ fn spawn_entity(
     parent: &mut ChildBuilder,
     asset_server: &mut AssetServer,
 ) {
-    let Some(entity_definition) = project.get_entity_definition(entity_instance.def_uid) else {
+    let Some(entity_definition) = project.get_entity_definition_by_uid(entity_instance.def_uid)
+    else {
         error!("couldn't find entity definition for a layer entity!");
         return;
     };
@@ -463,7 +457,8 @@ fn spawn_entity_sprite(
         }
     };
 
-    let Some(tilemap_definition) = project.get_tileset_definition(tileset_rectangle.tileset_uid)
+    let Some(tilemap_definition) =
+        project.get_tileset_definition_by_uid(tileset_rectangle.tileset_uid)
     else {
         error!("couldn't find a matching tilemap definition!");
         return;
