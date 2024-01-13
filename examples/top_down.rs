@@ -32,7 +32,7 @@ fn main() {
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(Camera2dBundle {
         transform: Transform {
-            translation: Vec3::new(8.0, -8.0, 0.0),
+            // translation: Vec3::ZERO,
             scale: Vec2::splat(0.25).extend(1.0),
             ..default()
         },
@@ -48,15 +48,23 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 struct Player(Option<Entity>);
 
 fn register_player_by_tag(
-    new_entity_instance_query: Query<(Entity, &EntityInstance), Added<EntityInstance>>,
+    new_entity_instance_query: Query<
+        (Entity, &EntityInstance, &GlobalTransform),
+        Added<EntityInstance>,
+    >,
+    mut camera_query: Query<&mut Transform, With<Camera2d>>,
     mut player: ResMut<Player>,
 ) {
-    for (ecs_entity, ldtk_entity_component) in new_entity_instance_query.iter() {
+    for (ecs_entity, ldtk_entity_component, entity_global_transform) in
+        new_entity_instance_query.iter()
+    {
         if ldtk_entity_component.has_tag("player") {
             if player.0.is_some() {
                 error!("There are more than one entities spawned with the \"player\" tag!");
             } else {
                 player.0 = Some(ecs_entity);
+                let mut camera_transform = camera_query.single_mut();
+                camera_transform.translation = entity_global_transform.translation()
             }
         }
     }
