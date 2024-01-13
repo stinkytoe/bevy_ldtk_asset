@@ -1,4 +1,4 @@
-use bevy::{log::LogPlugin, prelude::*, utils::info};
+use bevy::{log::LogPlugin, prelude::*};
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_ldtk_asset::prelude::*;
 
@@ -18,7 +18,7 @@ fn main() {
                 })
                 .set(LogPlugin {
                     level: bevy::log::Level::WARN,
-                    filter: "bevy_ldtk_asset=debug".into(),
+                    filter: "bevy_ldtk_asset=debug,top_down=debug".into(),
                 }),
             WorldInspectorPlugin::new(),
             BevyLdtkAssetPlugin,
@@ -32,7 +32,7 @@ fn main() {
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(Camera2dBundle {
         transform: Transform {
-            translation: Vec3::ZERO,
+            translation: Vec3::new(8.0, -8.0, 0.0),
             scale: Vec2::splat(0.25).extend(1.0),
             ..default()
         },
@@ -64,17 +64,20 @@ fn register_player_by_tag(
 
 #[allow(clippy::too_many_arguments)]
 fn move_player(
-    mut ldtk_entity_query: Query<(Entity, &mut Transform, &EntityInstance), Without<Camera2d>>,
+    mut commands: Commands,
+    mut ldtk_entity_query: Query<
+        (Entity, &mut Transform, &GlobalTransform, &EntityInstance),
+        Without<Camera2d>,
+    >,
     mut camera_query: Query<&mut Transform, With<Camera2d>>,
-    level_query: Query<&Handle<LevelAsset>>,
+    level_query: Query<(&Handle<LevelAsset>, &Children)>,
     parent_query: Query<&Parent>,
+    layer_name_query: Query<&Name, With<LayerInstance>>,
     player: Res<Player>,
     keys: Res<Input<KeyCode>>,
-    // asset_server: Res<AssetServer>,
     level_assets: Res<Assets<LevelAsset>>,
-    // project_assets: Res<Assets<ProjectAsset>>,
 ) {
-    let Some((player_ecs_entity, mut player_transform, entity_instance)) =
+    let Some((player_ecs_entity, mut player_transform, player_global_transform, entity_instance)) =
         player.0.map(|player_entity| {
             ldtk_entity_query
                 .get_mut(player_entity)
@@ -94,56 +97,108 @@ fn move_player(
         .expect("Layer Instance isn't on a level!")
         .get();
 
-    let level_handle = level_query.get(level_entity).expect("Bad level entity!");
+    let (level_handle, _) = level_query.get(level_entity).expect("Bad level entity!");
 
     let level = level_assets
         .get(level_handle)
         .expect("failed to get the level asset?");
 
-    // let project_handle: Handle<ProjectAsset> = asset_server.load(PROJECT_PATH);
-    //
-    // let project = project_assets
-    //     .get(project_handle)
-    //     .expect("failed to get the project asset?");
-
-    let mut move_attempt = player_transform.translation;
+    let mut move_attempt = Vec2::ZERO; //player_transform.translation;
 
     let entity_size = entity_instance.size();
 
     if keys.just_pressed(KeyCode::Right) {
-        move_attempt.x += entity_size.x;
+        move_attempt.x = entity_size.x;
     }
 
     if keys.just_pressed(KeyCode::Left) {
-        move_attempt.x -= entity_size.x;
+        move_attempt.x = -entity_size.x;
     }
 
     if keys.just_pressed(KeyCode::Up) {
-        move_attempt.y += entity_size.y;
+        move_attempt.y = entity_size.y;
     }
 
     if keys.just_pressed(KeyCode::Down) {
-        move_attempt.y -= entity_size.y;
+        move_attempt.y = -entity_size.y;
     }
 
-    if move_attempt == player_transform.translation {
+    if move_attempt == Vec2::ZERO {
         return;
     };
 
-    if let Some(int_grid_value) =
-        level.get_int_grid_value_at_level_coordinate(move_attempt.truncate())
-    {
-        match int_grid_value.identifier().as_deref() {
-            Some("water") => info!("collision with water!"),
-            Some(identifier) => {
-                info!("walking on: {identifier}");
-                let mut camera_transform = camera_query.single_mut();
-                camera_transform.translation += move_attempt - player_transform.translation;
-                player_transform.translation = move_attempt;
-            }
-            None => info!("no identifier"),
+    let mut camera_transform = camera_query.single_mut();
+
+    if let Some(int_grid_value) = level.get_int_grid_value_at_level_coordinate(
+        player_transform.translation.truncate() + move_attempt,
+    ) {
+        if is_passable_tile(&int_grid_value) {
+            player_transform.translation += move_attempt.extend(0.0);
+            camera_transform.translation =
+                player_global_transform.translation() + move_attempt.extend(0.0);
         }
     } else {
-        info("no int grid at attempted move location. We don't know what we're going to be walking on!");
+        let new_player_global = player_global_transform.translation().truncate() + move_attempt;
+
+        if let Some((new_level, new_level_children)) =
+            level_query
+                .iter()
+                .find_map(|(level_handle, level_children)| {
+                    Some((
+                        level_assets
+                            .get(level_handle.clone())
+                            .and_then(|new_level| {
+                                new_level
+                                    .contains_world_coordinate(new_player_global)
+                                    .then_some(new_level)
+                            })?,
+                        level_children,
+                    ))
+                })
+        {
+            let new_player_translation =
+                new_player_global - new_level.get_world_coordinate().truncate();
+
+            if let Some(new_int_grid_value) =
+                new_level.get_int_grid_value_at_level_coordinate(new_player_translation)
+            {
+                if is_passable_tile(&new_int_grid_value) {
+                    info!("Moving onto new level: {}", new_level.identifier());
+                    let new_entity_layer = new_level_children
+                        .iter()
+                        .filter(|layer_entity| layer_name_query.contains(**layer_entity))
+                        .find(|layer_entity| {
+                            layer_name_query
+                                .get(**layer_entity)
+                                .expect("bad name query?")
+                                .as_str()
+                                == "Entities"
+                        })
+                        .expect("Couldn't find the \"Entities\" layer?");
+                    commands
+                        .entity(player_ecs_entity)
+                        .set_parent(*new_entity_layer);
+                    player_transform.translation = new_player_translation.extend(0.0);
+                    camera_transform.translation = new_player_global.extend(0.0);
+                }
+            }
+        }
+    }
+}
+
+fn is_passable_tile(int_grid_value: &IntGridValue) -> bool {
+    match int_grid_value.identifier().as_deref() {
+        Some("water") => {
+            info!("collision with water!");
+            false
+        }
+        Some(identifier) => {
+            info!("walking on: {identifier}");
+            true
+        }
+        None => {
+            info!("no identifier");
+            false
+        }
     }
 }

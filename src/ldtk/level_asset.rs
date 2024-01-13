@@ -89,6 +89,12 @@ impl LevelAsset {
     //         ))
     // }
 
+    /// Returns the identifier for this level, as defined in the LDtk project.
+    /// This ~should~ be unique
+    pub fn identifier(&self) -> &str {
+        &self.value.identifier
+    }
+
     /// Get the world coordinates for this level, as defined in the LDtk project
     /// file. If you want the actual offset of the Bevy level entity, then
     /// use its global transform component. They should match unless the entity
@@ -97,10 +103,13 @@ impl LevelAsset {
         Vec3::new(self.value.world_x as f32, -self.value.world_y as f32, 0.0)
     }
 
-    // pub fn contains_world_coordinate(&self, coord: Vec2) -> bool {
-    //     (self.value.world_x..(self.value.px_wid)).contains(&(coord.x as i64))
-    //         && (self.value.world_y..(self.value.px_hei)).contains(&(-coord.y as i64))
-    // }
+    /// Will evaluate if the given coordinates fall within the bounds of this level
+    /// TODO: this is not valid for horisontal or vertical level layouts!
+    pub fn contains_world_coordinate(&self, coord: Vec2) -> bool {
+        (self.value.world_x..(self.value.world_x + self.value.px_wid)).contains(&(coord.x as i64))
+            && (self.value.world_y..(self.value.world_y + self.value.px_hei))
+                .contains(&(-coord.y as i64))
+    }
 
     /// Get the layer definition which matches the given identifier. This is set in LDtk,
     /// in the `Project Layers` tab.

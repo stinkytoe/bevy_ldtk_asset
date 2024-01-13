@@ -46,18 +46,22 @@ pub fn levels_changed(
     if !level_entities.to_load.is_empty() {
         let to_load: Vec<_> = level_entities.to_load.drain().collect();
         to_load.iter().for_each(|(entity, handle)| {
-            level_entities.loaded.insert((*entity, handle.clone()));
-            finish_level_asset_loading(
-                (*entity, handle.clone()),
-                &mut commands,
-                &mut asset_server,
-                &level_assets,
-                &project_assets,
-                &mut transform_query,
-                &mut meshes,
-                &mut materials,
-                &images,
-            );
+            if transform_query.contains(*entity) {
+                level_entities.loaded.insert((*entity, handle.clone()));
+                finish_level_asset_loading(
+                    (*entity, handle.clone()),
+                    &mut commands,
+                    &mut asset_server,
+                    &level_assets,
+                    &project_assets,
+                    &mut transform_query,
+                    &mut meshes,
+                    &mut materials,
+                    &images,
+                );
+            } else {
+                level_entities.to_load.insert((*entity, handle.clone()));
+            }
         });
     }
 }
@@ -76,7 +80,7 @@ pub(crate) fn finish_level_asset_loading(
 ) {
     let (entity, handle) = entity_handle;
 
-    debug!("finish_level: {entity:?}");
+    debug!("{entity:?}");
 
     let Some(level) = level_assets.get(handle.id()) else {
         error!("level handle returned none!");
@@ -327,6 +331,9 @@ fn spawn_entities_layer(
     parent
         .spawn((
             Name::from(layer.identifier.clone()),
+            LayerInstance {
+                value: layer.clone(),
+            },
             SpatialBundle {
                 transform: Transform::from_xyz(
                     0.0,

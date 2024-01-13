@@ -23,7 +23,6 @@ pub(crate) fn process_project_loading(
     }
 }
 
-#[allow(clippy::too_many_arguments)]
 pub fn projects_changed(
     mut commands: Commands,
     mut project_entities: ResMut<ProjectEntities>,
