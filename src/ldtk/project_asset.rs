@@ -1,6 +1,6 @@
 use super::{int_grid_value::IntGridValue, level_asset::LevelAsset};
 use crate::ldtk_json;
-use bevy::{prelude::*, utils::HashMap};
+use bevy::{asset::LoadState, prelude::*, utils::HashMap};
 
 /// The asset which represents an LDtk project.
 #[derive(Asset, Debug, TypePath)]
@@ -13,6 +13,15 @@ pub struct ProjectAsset {
 }
 
 impl ProjectAsset {
+    pub(crate) fn is_loaded(&self, asset_server: &AssetServer) -> bool {
+        self.levels.iter().all(|level_handle| {
+            matches!(
+                asset_server.get_load_state(level_handle),
+                Some(LoadState::Loaded)
+            )
+        })
+    }
+
     /// The rust representation of the LDtk entity JSON definition [ldtk_json::EntityDefinition]
     pub fn get_entity_definition_by_uid(&self, uid: i64) -> Option<&ldtk_json::EntityDefinition> {
         self.value
