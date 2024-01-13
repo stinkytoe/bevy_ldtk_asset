@@ -1,6 +1,6 @@
-use super::{int_grid_value::IntGridValue, level_asset::LevelAsset};
+use super::level_asset::LevelAsset;
 use crate::ldtk_json;
-use bevy::{asset::LoadState, prelude::*, utils::HashMap};
+use bevy::{asset::LoadState, prelude::*};
 
 /// The asset which represents an LDtk project.
 #[derive(Asset, Debug, TypePath)]

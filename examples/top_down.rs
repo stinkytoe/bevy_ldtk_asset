@@ -70,9 +70,9 @@ fn move_player(
     parent_query: Query<&Parent>,
     player: Res<Player>,
     keys: Res<Input<KeyCode>>,
-    asset_server: Res<AssetServer>,
+    // asset_server: Res<AssetServer>,
     level_assets: Res<Assets<LevelAsset>>,
-    project_assets: Res<Assets<ProjectAsset>>,
+    // project_assets: Res<Assets<ProjectAsset>>,
 ) {
     let Some((player_ecs_entity, mut player_transform, entity_instance)) =
         player.0.map(|player_entity| {
@@ -100,11 +100,11 @@ fn move_player(
         .get(level_handle)
         .expect("failed to get the level asset?");
 
-    let project_handle: Handle<ProjectAsset> = asset_server.load(PROJECT_PATH);
-
-    let project = project_assets
-        .get(project_handle)
-        .expect("failed to get the project asset?");
+    // let project_handle: Handle<ProjectAsset> = asset_server.load(PROJECT_PATH);
+    //
+    // let project = project_assets
+    //     .get(project_handle)
+    //     .expect("failed to get the project asset?");
 
     let mut move_attempt = player_transform.translation;
 

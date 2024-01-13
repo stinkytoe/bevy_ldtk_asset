@@ -28,7 +28,7 @@ pub fn projects_changed(
     mut commands: Commands,
     mut project_entities: ResMut<ProjectEntities>,
     mut level_entities: ResMut<LevelEntities>,
-    mut asset_server: ResMut<AssetServer>,
+    asset_server: Res<AssetServer>,
     project_assets: Res<Assets<ProjectAsset>>,
 ) {
     if !project_entities.to_load.is_empty() {
