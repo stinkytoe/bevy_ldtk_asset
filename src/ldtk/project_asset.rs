@@ -1,4 +1,4 @@
-use super::level_asset::LevelAsset;
+use crate::ldtk::level_asset::LevelAsset;
 use crate::ldtk_json;
 use bevy::{asset::LoadState, prelude::*};
 

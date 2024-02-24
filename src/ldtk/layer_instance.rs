@@ -3,12 +3,17 @@ use bevy::prelude::*;
 
 /// A read-only object which represents the layer instance
 /// as defined in the LDtk project.
-#[derive(Component)]
+#[derive(Component, Debug)]
 pub struct LayerInstance {
     pub(crate) value: ldtk_json::LayerInstance,
 }
 
 impl LayerInstance {
+    /// Returns the identifier for this layer instance, as defined in the LDtk project.
+    pub fn identifier(&self) -> &str {
+        &self.value.identifier
+    }
+
     /// Returns the grid holding the values of the int_grid, if any,
     /// which was defined in the LDtk project.
     pub fn int_grid_csv(&self) -> &Vec<i64> {
@@ -43,15 +48,32 @@ impl LayerInstance {
         }
     }
 
-    /// Returns the top-left coordinate of a given index.
+    /// Returns the top-left coordinate of the cell for a given index.
     /// Returns Some(coordinate) if the index is in bounds, or None if
     /// out of bounds.
-    pub fn get_level_coordinate_from_index(&self, index: usize) -> Option<Vec3> {
+    pub fn get_cell_coordinate_from_index(&self, index: usize) -> Option<Vec2> {
         let (r, c) = self.get_grid_coordinate_from_index(index)?;
 
         let x = self.grid_size() * r;
         let y = self.grid_size() * c;
 
-        Some(Vec3::new(x as f32, -y as f32, 0.0))
+        Some(Vec2::new(x as f32, -y as f32))
+    }
+
+    /// Returns a touple containing the coordinate of the center of the cell,
+    /// and the size of the cell. This if meant to match the format of the
+    /// collide_aabb::collide(...) member from Bevy.
+    pub fn get_cell_bounds_from_index(&self, index: usize) -> Option<(Vec3, Vec2)> {
+        let (r, c) = self.get_grid_coordinate_from_index(index)?;
+
+        let size = self.grid_size();
+
+        let x = size * r + size / 2;
+        let y = size * c + size / 2;
+
+        Some((
+            Vec3::new(x as f32, -y as f32, 0.0),
+            Vec2::splat(size as f32),
+        ))
     }
 }

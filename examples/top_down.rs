@@ -55,19 +55,22 @@ fn register_player_by_tag(
     mut camera_query: Query<&mut Transform, With<Camera2d>>,
     mut player: ResMut<Player>,
 ) {
-    for (ecs_entity, ldtk_entity_component, entity_global_transform) in
-        new_entity_instance_query.iter()
-    {
-        if ldtk_entity_component.has_tag("player") {
-            if player.0.is_some() {
-                error!("There are more than one entities spawned with the \"player\" tag!");
-            } else {
-                player.0 = Some(ecs_entity);
-                let mut camera_transform = camera_query.single_mut();
-                camera_transform.translation = entity_global_transform.translation()
-            }
-        }
-    }
+    new_entity_instance_query
+        .iter()
+        .filter(|(_, ldtk_entity_component, _)| ldtk_entity_component.has_tag("player"))
+        .for_each(
+            |(ecs_entity, ldtk_entity_component, entity_global_transform)| {
+                if ldtk_entity_component.has_tag("player") {
+                    if player.0.is_some() {
+                        error!("There are more than one entities spawned with the \"player\" tag!");
+                    } else {
+                        player.0 = Some(ecs_entity);
+                        let mut camera_transform = camera_query.single_mut();
+                        camera_transform.translation = entity_global_transform.translation()
+                    }
+                }
+            },
+        );
 }
 
 #[allow(clippy::too_many_arguments)]

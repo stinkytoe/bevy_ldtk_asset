@@ -1,7 +1,7 @@
-use super::int_grid_value::IntGridValue;
-use super::layer_definition::LayerDefinition;
-use super::project_asset::ProjectAsset;
+use crate::ldtk::int_grid_value::IntGridValue;
+use crate::ldtk::layer_definition::LayerDefinition;
 use crate::ldtk::layer_instance::LayerInstance;
+use crate::ldtk::project_asset::ProjectAsset;
 use crate::ldtk_json;
 use bevy::asset::LoadContext;
 use bevy::prelude::*;

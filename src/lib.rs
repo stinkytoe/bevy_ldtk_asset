@@ -17,7 +17,7 @@ mod util;
 #[allow(missing_docs)]
 #[allow(rustdoc::bare_urls)]
 #[allow(clippy::enum_variant_names)]
-mod ldtk_json;
+pub mod ldtk_json;
 
 /// Include this for all of the public interface.
 pub mod prelude {
@@ -30,6 +30,6 @@ pub mod prelude {
     pub use crate::ldtk::level_asset::LevelAsset;
     pub use crate::ldtk::level_component::LevelComponent;
     pub use crate::ldtk::project_asset::ProjectAsset;
-    // pub use crate::ldtk::project_component::ProjectComponent;
+    pub use crate::ldtk_json;
     pub use crate::plugin::BevyLdtkAssetPlugin;
 }
