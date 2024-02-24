@@ -19,6 +19,7 @@ fn main() {
                 .set(LogPlugin {
                     level: bevy::log::Level::WARN,
                     filter: "bevy_ldtk_asset=debug,top_down=debug".into(),
+                    ..default()
                 }),
             WorldInspectorPlugin::new(),
             BevyLdtkAssetPlugin,
@@ -85,7 +86,7 @@ fn move_player(
     parent_query: Query<&Parent>,
     layer_name_query: Query<&Name, With<LayerInstance>>,
     player: Res<Player>,
-    keys: Res<Input<KeyCode>>,
+    keys: Res<ButtonInput<KeyCode>>,
     level_assets: Res<Assets<LevelAsset>>,
 ) {
     let Some((player_ecs_entity, mut player_transform, player_global_transform, entity_instance)) =
@@ -118,19 +119,19 @@ fn move_player(
 
     let entity_size = entity_instance.size();
 
-    if keys.just_pressed(KeyCode::Right) {
+    if keys.just_pressed(KeyCode::ArrowRight) {
         move_attempt.x = entity_size.x;
     }
 
-    if keys.just_pressed(KeyCode::Left) {
+    if keys.just_pressed(KeyCode::ArrowLeft) {
         move_attempt.x = -entity_size.x;
     }
 
-    if keys.just_pressed(KeyCode::Up) {
+    if keys.just_pressed(KeyCode::ArrowUp) {
         move_attempt.y = entity_size.y;
     }
 
-    if keys.just_pressed(KeyCode::Down) {
+    if keys.just_pressed(KeyCode::ArrowDown) {
         move_attempt.y = -entity_size.y;
     }
 

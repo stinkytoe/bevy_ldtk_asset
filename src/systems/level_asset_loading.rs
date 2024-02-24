@@ -9,7 +9,7 @@ use crate::{
 };
 use bevy::{
     prelude::*,
-    render::{mesh::Indices, render_resource::PrimitiveTopology},
+    render::{mesh::Indices, render_asset::RenderAssetUsages, render_resource::PrimitiveTopology},
     sprite::{Anchor, MaterialMesh2dBundle},
 };
 
@@ -131,9 +131,12 @@ fn spawn_bg_poly(
         MaterialMesh2dBundle {
             mesh: meshes
                 .add(
-                    Mesh::new(PrimitiveTopology::TriangleList)
-                        .with_indices(Some(indices))
-                        .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, verts),
+                    Mesh::new(
+                        PrimitiveTopology::TriangleList,
+                        RenderAssetUsages::default(),
+                    )
+                    .with_inserted_indices(indices)
+                    .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, verts),
                 )
                 .into(),
             material: materials.add(ColorMaterial {
@@ -195,10 +198,13 @@ fn spawn_bg_image(
         MaterialMesh2dBundle {
             mesh: meshes
                 .add(
-                    Mesh::new(PrimitiveTopology::TriangleList)
-                        .with_indices(Some(indices))
-                        .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, verts)
-                        .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, uvs),
+                    Mesh::new(
+                        PrimitiveTopology::TriangleList,
+                        RenderAssetUsages::default(),
+                    )
+                    .with_inserted_indices(indices)
+                    .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, verts)
+                    .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, uvs),
                 )
                 .into(),
             material: materials.add(ColorMaterial {
@@ -301,10 +307,13 @@ fn spawn_tiles_layer(
         MaterialMesh2dBundle {
             mesh: meshes
                 .add(
-                    Mesh::new(PrimitiveTopology::TriangleList)
-                        .with_indices(Some(indices))
-                        .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, verts)
-                        .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, uvs),
+                    Mesh::new(
+                        PrimitiveTopology::TriangleList,
+                        RenderAssetUsages::default(),
+                    )
+                    .with_inserted_indices(indices)
+                    .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, verts)
+                    .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, uvs),
                 )
                 .into(),
             material: materials.add(ColorMaterial {

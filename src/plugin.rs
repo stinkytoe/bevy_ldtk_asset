@@ -23,11 +23,11 @@ impl Plugin for BevyLdtkAssetPlugin {
             .add_systems(Update, (process_project_loading, process_level_loading))
             .add_systems(
                 Update,
-                projects_changed.run_if(resource_changed::<ProjectEntities>()),
+                projects_changed.run_if(resource_changed::<ProjectEntities>),
             )
             .add_systems(
                 Update,
-                levels_changed.run_if(resource_changed::<LevelEntities>()),
+                levels_changed.run_if(resource_changed::<LevelEntities>),
             );
     }
 }

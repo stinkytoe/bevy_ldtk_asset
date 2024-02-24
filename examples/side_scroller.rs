@@ -1,14 +1,14 @@
 use bevy::{log::LogPlugin, prelude::*};
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_ldtk_asset::prelude::*;
-use bevy_mod_aseprite::{Aseprite, AsepriteAnimation, AsepriteBundle, AsepritePlugin};
+// use bevy_mod_aseprite::{Aseprite, AsepriteAnimation, AsepriteBundle, AsepritePlugin};
 
 const LEVEL_PATH: &str = "ldtk/side_scroller.ldtk#The_Grotto";
 
-pub mod sprites {
-    use bevy_mod_aseprite::aseprite;
-    aseprite!(pub Crabby, "../assets/Treasure Hunters/The Crusty Crew/Aseprite/Crabby.aseprite");
-}
+// pub mod sprites {
+//     use bevy_mod_aseprite::aseprite;
+//     aseprite!(pub Crabby, "../assets/Treasure Hunters/The Crusty
+//     Crew/Aseprite/Crabby.aseprite");jjjj// }
 
 #[derive(Resource, Debug, Default)]
 struct Player(Option<Entity>);
@@ -28,8 +28,9 @@ fn main() {
                 .set(LogPlugin {
                     level: bevy::log::Level::WARN,
                     filter: "bevy_ldtk_asset=debug,side_scroller=debug".into(),
+                    ..default()
                 }),
-            AsepritePlugin,
+            // AsepritePlugin,
             WorldInspectorPlugin::new(),
             BevyLdtkAssetPlugin,
         ))
@@ -58,10 +59,9 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     });
 }
 
-#[derive(Component)]
-struct AsepriteImport {
-    handle: Handle<Aseprite>,
-}
+// #[derive(Component)]
+// struct AsepriteImport {
+//     handle: Handle<Aseprite>// }
 
 #[derive(Component)]
 struct LdtkCollider;
@@ -90,10 +90,11 @@ fn handle_entities_added(
                 commands
                     .entity(ecs_entity)
                     .despawn_descendants()
-                    .insert(AsepriteImport {
-                        handle: asset_server
-                            .load(entity_instance.ldtk_project_directory.join(aseprite_path)),
-                    });
+                    // .insert(AsepriteImport {
+                    //     handle: asset_server
+                    //         .load(entity_instance.ldtk_project_directory.join(aseprite_path)),
+                    // });
+                ;
             });
 
         if entity_instance.has_tag("collider") {
@@ -145,35 +146,35 @@ fn handle_layers_added(
 
 fn handle_aseprite_loaded(
     mut commands: Commands,
-    aseprite_entity_query: Query<(Entity, &AsepriteImport), With<EntityInstance>>,
-    mut asset_events: EventReader<AssetEvent<Aseprite>>,
-    aseprites: Res<Assets<Aseprite>>,
+    // aseprite_entity_query: Query<(Entity, &AsepriteImport), With<EntityInstance>>,
+    //     mut asset_events: EventReader<AssetEvent<Aseprite>>,
+    //     aseprites: Res<Assets<Aseprite>>,
 ) {
-    for event in asset_events.read() {
-        if let AssetEvent::LoadedWithDependencies { id } = event {
-            aseprite_entity_query
-                .iter()
-                .filter(|(_, entity_instance_import)| entity_instance_import.handle.id() == *id)
-                .for_each(|(ecs_entity, entity_instance_import)| {
-                    let aseprite = aseprites.get(&entity_instance_import.handle).unwrap();
-                    let animation =
-                        AsepriteAnimation::new(aseprite.info(), sprites::Crabby::tags::GROUND);
-                    commands.entity(ecs_entity).with_children(|parent| {
-                        parent.spawn((
-                            Name::from("aseprite"),
-                            AsepriteBundle {
-                                texture_atlas: aseprite.atlas().clone_weak(),
-                                sprite: TextureAtlasSprite::new(animation.current_frame()),
-                                aseprite: entity_instance_import.handle.clone_weak(),
-                                animation,
-                                transform: Transform::from_xyz(0.0, 16.0, 0.0),
-                                ..default()
-                            },
-                        ));
-                    });
-                });
-        }
-    }
+    // for event in asset_events.read() {
+    //     if let AssetEvent::LoadedWithDependencies { id } = event {
+    //         aseprite_entity_query
+    //             .iter()
+    //             .filter(|(_, entity_instance_import)| entity_instance_import.handle.id() == *id)
+    //             .for_each(|(ecs_entity, entity_instance_import)| {
+    //                 let aseprite = aseprites.get(&entity_instance_import.handle).unwrap();
+    //                 let animation =
+    //                     AsepriteAnimation::new(aseprite.info(), sprites::Crabby::tags::GROUND);
+    //                 commands.entity(ecs_entity).with_children(|parent| {
+    //                     parent.spawn((
+    //                         Name::from("aseprite"),
+    //                         AsepriteBundle {
+    //                             texture_atlas: aseprite.atlas().clone_weak(),
+    //                             sprite: TextureAtlasSprite::new(animation.current_frame()),
+    //                             aseprite: entity_instance_import.handle.clone_weak(),
+    //                             animation,
+    //                             transform: Transform::from_xyz(0.0, 16.0, 0.0),
+    //                             ..default()
+    //                         },
+    //                     ));
+    //                 });
+    //             });
+    //     }
+    // }
 }
 
 #[derive(Resource, Default)]
@@ -230,11 +231,7 @@ fn draw_debug_collision_boxes(
     }
 }
 
-fn debug_keys(
-    keys: Res<Input<KeyCode>>,
-    mut collision_boxes: ResMut<CollisionBoxSettings>,
-    // mut debug_render_context: ResMut<DebugRenderContext>,
-) {
+fn debug_keys(keys: Res<ButtonInput<KeyCode>>, mut collision_boxes: ResMut<CollisionBoxSettings>) {
     if keys.just_pressed(KeyCode::F3) {
         collision_boxes.tiles = !collision_boxes.tiles;
     }
