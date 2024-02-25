@@ -2,10 +2,11 @@ use std::path::PathBuf;
 
 use bevy::asset::{AssetLoader, AsyncReadExt};
 use bevy::prelude::*;
-use bevy::utils::{thiserror, HashMap};
+use bevy::utils::thiserror;
 use thiserror::Error;
 
 use crate::ldtk::{self};
+use crate::prelude::LdtkWorld;
 
 use super::project::ProjectAsset;
 
@@ -66,29 +67,35 @@ impl AssetLoader for ProjectLoader {
                 }
             });
 
-            // let worlds = if value.worlds.is_empty() {
-            //     let world: LdtkWorld = value.into();
-            //     [(
-            //         world.identifier().clone(),
-            //         load_context.add_labeled_asset(world.identifier().clone(), world),
-            //     )]
-            //     .into()
-            // } else {
-            //     value
-            //         .worlds
-            //         .iter()
-            //         .cloned()
-            //         .map(|world| {
-            //             let world: LdtkWorld = world.into();
-            //             (
-            //                 world.identifier().clone(),
-            //                 load_context.add_labeled_asset(world.identifier().clone(), world),
-            //             )
-            //         })
-            //         .collect()
-            // };
+            let tilesets = value
+                .defs
+                .tilesets
+                .iter()
+                .filter_map(|tileset_definition| tileset_definition.rel_path.as_ref())
+                .map(|rel_path| load_context.load(base_directory.join(rel_path)))
+                .collect();
 
-            let worlds = HashMap::default();
+            let worlds = if value.worlds.is_empty() {
+                let world: LdtkWorld = value.into();
+                [(
+                    world.identifier().clone(),
+                    load_context.add_labeled_asset(world.identifier().clone(), world),
+                )]
+                .into()
+            } else {
+                value
+                    .worlds
+                    .iter()
+                    .cloned()
+                    .map(|world| {
+                        let world: LdtkWorld = world.into();
+                        (
+                            world.identifier().clone(),
+                            load_context.add_labeled_asset(world.identifier().clone(), world),
+                        )
+                    })
+                    .collect()
+            };
 
             debug!("LDtk project file {file_name:?} loaded!");
 
@@ -96,6 +103,7 @@ impl AssetLoader for ProjectLoader {
                 asset_path,
                 base_directory,
                 exports_directory,
+                tilesets,
                 worlds,
             })
         })

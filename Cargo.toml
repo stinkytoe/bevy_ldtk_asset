@@ -15,4 +15,4 @@ name = "top_down"
 path = "examples/top_down.rs"
 
 [dev-dependencies]
-bevy-inspector-egui = "0.23.2"
+bevy-inspector-egui = "0.23"

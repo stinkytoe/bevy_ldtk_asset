@@ -6,5 +6,5 @@ mod structs;
 pub mod prelude {
     pub use crate::assets::project::ProjectAsset;
     pub use crate::assets::world::LdtkWorld;
-    pub use crate::plugin::BevyLdtkToolkitPlugin;
+    pub use crate::plugin::BevyLdtkAssetPlugin;
 }
