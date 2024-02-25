@@ -3,7 +3,7 @@ use std::path::PathBuf;
 
 use bevy::{prelude::*, utils::HashMap};
 
-use super::world::WorldAsset;
+use super::{level::LevelAsset, world::WorldAsset};
 
 /// An asset representing the entire ldtk project
 #[derive(Asset, Debug, TypePath)]
@@ -11,41 +11,36 @@ pub struct ProjectAsset {
     pub(crate) asset_path: PathBuf,
     pub(crate) base_directory: PathBuf,
     pub(crate) exports_directory: PathBuf,
+    pub(crate) worlds: HashMap<String, Handle<WorldAsset>>,
+    pub(crate) levels: HashMap<String, Handle<LevelAsset>>,
     #[dependency]
     pub(crate) tilesets: Vec<Handle<Image>>,
-    pub(crate) worlds: HashMap<String, Handle<WorldAsset>>,
+    #[dependency]
+    pub(crate) backgrounds: Vec<Handle<Image>>,
 }
 
 impl ProjectAsset {
-    /// Returns an iterator listing all world identifiers
-    pub fn world_identifiers(&self) -> impl Iterator<Item = &String> {
-        self.worlds.keys()
+    /// Returns a hashmap of the worlds in this project
+    pub fn worlds(&self) -> &HashMap<String, Handle<WorldAsset>> {
+        &self.worlds
     }
 
-    /// Returns an iterator of all asset handles to all worlds in this project
-    pub fn world_handles(&self) -> impl Iterator<Item = &Handle<WorldAsset>> {
-        self.worlds.values()
+    /// Returns a hashmap of the levels in this project
+    pub fn levels(&self) -> &HashMap<String, Handle<LevelAsset>> {
+        &self.levels
     }
-
-    /// Returns an iterator of tuples, containing the identifier and handle
-    /// of all worlds in this project
-    pub fn world_names_and_handles(&self) -> impl Iterator<Item = (&String, &Handle<WorldAsset>)> {
-        self.worlds.iter()
-    }
-
-    /// Returns an option containing the handle for a world with a given unique
-    /// identifier, or None
-    pub fn get_world_by_identifier(&self, identifier: &str) -> Option<&Handle<WorldAsset>> {
-        self.worlds.get(identifier)
-    }
-
-    /// Returns an iterator over all tilesets outlined by this project
+    /// Returns a list of handles to all tilesets in this project
     pub fn tilesets(&self) -> impl Iterator<Item = &Handle<Image>> {
         self.tilesets.iter()
     }
 
+    /// Returns a list of handles to all background images in this project
+    pub fn backgrounds(&self) -> &[Handle<Image>] {
+        self.backgrounds.as_ref()
+    }
+
     /// Returns the path to this project file
-    pub fn get_asset_path(&self) -> &PathBuf {
+    pub fn asset_path(&self) -> &PathBuf {
         &self.asset_path
     }
 

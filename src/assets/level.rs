@@ -6,17 +6,19 @@ use crate::ldtk;
 #[derive(Asset, Clone, Debug, TypePath)]
 pub struct LevelAsset {
     identifier: String,
-}
-
-impl From<ldtk::Level> for LevelAsset {
-    fn from(value: ldtk::Level) -> Self {
-        Self {
-            identifier: value.identifier.clone(),
-        }
-    }
+    _background_color: Color,
+    _background: Option<(String, ldtk::BgPos)>,
 }
 
 impl LevelAsset {
+    pub(crate) fn new(level: &ldtk::Level) -> Self {
+        Self {
+            identifier: level.identifier.clone(),
+            _background_color: Color::WHITE,
+            _background: None,
+        }
+    }
+
     /// Returns the unique identifier for this level
     pub fn identifier(&self) -> &String {
         &self.identifier

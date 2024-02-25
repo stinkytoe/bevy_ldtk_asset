@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::{assets::world::WorldAsset, structs::LoadParameters};
 
-pub(crate) fn process_load_parameters(
+pub(crate) fn process_load_parameters_world(
     mut commands: Commands,
     worlds: Res<Assets<WorldAsset>>,
     worlds_query: Query<(Entity, &Handle<WorldAsset>, &LoadParameters), Added<LoadParameters>>,
@@ -26,8 +26,7 @@ pub(crate) fn process_load_parameters(
 }
 
 fn spawn_world(entity: Entity, world: &WorldAsset, commands: &mut Commands) {
-    commands.entity(entity).insert((
-        Name::from(world.identifier().as_str()),
-        SpatialBundle::default(),
-    ));
+    commands
+        .entity(entity)
+        .insert((Name::from(world.identifier().as_str()),));
 }
