@@ -9,6 +9,7 @@ edition = "2021"
 bevy = "0.13"
 serde = "1.0"
 serde_json = "1.0"
+path-clean = "1.0.1"
 
 [[example]]
 name = "top_down"

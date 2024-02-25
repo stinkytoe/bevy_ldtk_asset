@@ -5,6 +5,8 @@ use crate::{
     systems::process_load_parameters::process_load_parameters,
 };
 
+/// The plugin which the user should include in their main function
+/// during app creation to enable all of bevy_ldtk_asset's features
 pub struct BevyLdtkAssetPlugin;
 
 impl Plugin for BevyLdtkAssetPlugin {
