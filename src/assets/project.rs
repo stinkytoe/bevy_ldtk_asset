@@ -8,15 +8,15 @@ use super::{level::LevelAsset, world::WorldAsset};
 /// An asset representing the entire ldtk project
 #[derive(Asset, Debug, TypePath)]
 pub struct ProjectAsset {
-    pub(crate) asset_path: PathBuf,
-    pub(crate) base_directory: PathBuf,
-    pub(crate) exports_directory: PathBuf,
     pub(crate) worlds: HashMap<String, Handle<WorldAsset>>,
     pub(crate) levels: HashMap<String, Handle<LevelAsset>>,
     #[dependency]
     pub(crate) tilesets: Vec<Handle<Image>>,
     #[dependency]
     pub(crate) backgrounds: Vec<Handle<Image>>,
+    pub(crate) asset_path: PathBuf,
+    pub(crate) base_directory: PathBuf,
+    pub(crate) exports_directory: PathBuf,
 }
 
 impl ProjectAsset {

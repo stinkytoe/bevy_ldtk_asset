@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use bevy::asset::{AssetLoader, AsyncReadExt, LoadContext, ReadAssetBytesError};
 use bevy::prelude::*;
@@ -44,17 +44,15 @@ impl AssetLoader for ProjectAssetLoader {
         load_context: &'a mut bevy::asset::LoadContext,
     ) -> bevy::utils::BoxedFuture<'a, Result<Self::Asset, Self::Error>> {
         Box::pin(async move {
-            let file_name = load_context.path().to_path_buf();
+            let asset_path = load_context.path().to_path_buf();
 
-            debug!("Loading LDtk project file: {file_name:?}");
+            debug!("Loading LDtk project file: {asset_path:?}");
 
             let value: ldtk::LdtkJson = {
                 let mut bytes = Vec::new();
                 reader.read_to_end(&mut bytes).await?;
                 serde_json::from_slice(&bytes)?
             };
-
-            let asset_path = load_context.path().to_path_buf();
 
             let base_directory = asset_path
                 .parent()
@@ -67,24 +65,14 @@ impl AssetLoader for ProjectAssetLoader {
                 ProjectAssetLoaderError::BadProjectDirectory(asset_path.clone()),
             )?);
 
-            let tilesets = value
-                .defs
-                .tilesets
-                .iter()
-                .filter_map(|tileset_definition| tileset_definition.rel_path.as_ref())
-                .map(|rel_path| load_context.load(base_directory.join(rel_path)))
-                .collect();
-
-            debug!("LDtk project file {file_name:?} loaded!");
-
             Ok(ProjectAsset {
-                asset_path,
-                base_directory,
-                exports_directory,
-                tilesets,
+                tilesets: build_tilesets(&value, load_context, &base_directory),
                 worlds: build_worlds(&value, load_context),
                 levels: build_levels(&value, load_context).await?,
                 backgrounds: Vec::default(),
+                asset_path,
+                base_directory,
+                exports_directory,
             })
         })
     }
@@ -92,6 +80,20 @@ impl AssetLoader for ProjectAssetLoader {
     fn extensions(&self) -> &[&str] {
         &["ldtk"]
     }
+}
+
+fn build_tilesets(
+    value: &ldtk::LdtkJson,
+    load_context: &mut LoadContext,
+    base_directory: &Path,
+) -> Vec<Handle<Image>> {
+    value
+        .defs
+        .tilesets
+        .iter()
+        .filter_map(|tileset_definition| tileset_definition.rel_path.as_ref())
+        .map(|rel_path| load_context.load(base_directory.join(rel_path)))
+        .collect()
 }
 
 fn build_worlds(
