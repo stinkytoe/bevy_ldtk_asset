@@ -1,30 +1,18 @@
 [package]
 name = "bevy_ldtk_asset"
-description = "A library for loading LDtk levels and projects as Bevy assets."
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
-license = "MIT OR Apache-2.0"
-readme = "README.md"
-homepage = "https://github.com/stinkytoe/bevy_ldtk_asset/"
-repository = "https://github.com/stinkytoe/bevy_ldtk_asset/"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bevy = "0.13"
+serde = "1.0"
+serde_json = "1.0"
 
 [[example]]
 name = "top_down"
 path = "examples/top_down.rs"
 
-[[example]]
-name = "side_scroller"
-path = "examples/side_scroller.rs"
-
-[dependencies]
-bevy = "0.13"
-hex = "0.4"
-serde = "1.0"
-serde_json = "1.0"
-
 [dev-dependencies]
 bevy-inspector-egui = "0.23.2"
-#bevy_mod_aseprite = "0.6"
-# bevy_rapier2d = { version = "0.23", features = [ "simd-stable", "debug-render-2d" ] }
