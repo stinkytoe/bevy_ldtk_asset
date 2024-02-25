@@ -42,37 +42,8 @@ impl From<&ldtk::LdtkJson> for WorldAsset {
     }
 }
 
-impl From<ldtk::LdtkJson> for WorldAsset {
-    fn from(value: ldtk::LdtkJson) -> Self {
-        Self {
-            identifier: "World".to_string(),
-            world_grid_size: if matches!(value.world_layout, Some(ldtk::WorldLayout::GridVania)) {
-                Some((
-                    value
-                        .world_grid_width
-                        .expect("world_grid_width is 'None' in a GridVania layout?"),
-                    value
-                        .world_grid_height
-                        .expect("world_grid_height is 'None' in a GridVania layout?"),
-                ))
-            } else {
-                None
-            },
-            world_layout: value
-                .world_layout
-                .expect("World layout is 'None' in a single world context?"),
-            level_identifiers: value
-                .levels
-                .iter()
-                .map(|level| &level.identifier)
-                .cloned()
-                .collect(),
-        }
-    }
-}
-
-impl From<ldtk::World> for WorldAsset {
-    fn from(value: ldtk::World) -> Self {
+impl From<&ldtk::World> for WorldAsset {
+    fn from(value: &ldtk::World) -> Self {
         Self {
             identifier: value.identifier.clone(),
             world_grid_size: if matches!(value.world_layout, Some(ldtk::WorldLayout::GridVania)) {
@@ -82,7 +53,9 @@ impl From<ldtk::World> for WorldAsset {
             },
             world_layout: value
                 .world_layout
-                .expect("World layout is 'None' in a multi world context?"),
+                .as_ref()
+                .expect("World layout is 'None' in a multi world context?")
+                .clone(),
             level_identifiers: value
                 .levels
                 .iter()

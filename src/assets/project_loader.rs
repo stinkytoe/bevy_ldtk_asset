@@ -104,20 +104,18 @@ fn build_worlds(
         [(
             SINGLE_WORLD_NAME.to_string(),
             load_context.add_labeled_asset(SINGLE_WORLD_NAME.to_string(), value.into()),
-            // world,
         )]
         .into()
     } else {
         value
             .worlds
             .iter()
-            .cloned()
+            // .cloned()
             .map(|world| {
                 let world: WorldAsset = world.into();
                 (
                     world.identifier().clone(),
                     load_context.add_labeled_asset(world.identifier().clone(), world),
-                    // world,
                 )
             })
             .collect()
@@ -159,7 +157,7 @@ async fn build_levels(
         (
             identifier,
             if value.external_levels {
-                // let bytes = load_context.read_asset_bytes("").await?;
+                // let bytes = load_context.read_asset_bytes("").await;
                 unimplemented!()
             } else {
                 LevelAsset::new(level)
