@@ -1,12 +1,6 @@
 use bevy::prelude::*;
 
-use crate::assets::world::WorldAsset;
-
-#[derive(Component, Default)]
-pub enum LoadParameters {
-    #[default]
-    LoadNothing,
-}
+use crate::{assets::world::WorldAsset, structs::LoadParameters};
 
 #[derive(Bundle, Default)]
 pub struct WorldBundle {

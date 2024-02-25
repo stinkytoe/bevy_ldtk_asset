@@ -11,4 +11,5 @@ pub mod prelude {
     pub use crate::assets::world::WorldAsset;
     pub use crate::bundles::WorldBundle;
     pub use crate::plugin::BevyLdtkAssetPlugin;
+    pub use crate::structs::LoadParameters;
 }

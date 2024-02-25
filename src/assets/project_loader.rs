@@ -60,13 +60,6 @@ impl AssetLoader for ProjectAssetLoader {
                 ProjectAssetLoaderError::BadProjectDirectory(asset_path.clone()),
             )?);
 
-            value.defs.tilesets.iter().for_each(|tileset_definition| {
-                if let Some(tileset_path) = &tileset_definition.rel_path {
-                    // load_context.load_untyped(asset_path.join(tileset_path));
-                    info!("{:?}", base_directory.join(tileset_path));
-                }
-            });
-
             let tilesets = value
                 .defs
                 .tilesets
