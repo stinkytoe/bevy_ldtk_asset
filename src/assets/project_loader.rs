@@ -6,12 +6,12 @@ use bevy::utils::thiserror;
 use thiserror::Error;
 
 use crate::ldtk::{self};
-use crate::prelude::LdtkWorld;
+use crate::prelude::WorldAsset;
 
 use super::project::ProjectAsset;
 
 #[derive(Debug, Error)]
-pub(crate) enum ProjectLoaderError {
+pub(crate) enum ProjectAssetLoaderError {
     #[error("IO Error! {0}")]
     Io(#[from] std::io::Error),
     #[error("JSON Parse error! {0}")]
@@ -21,14 +21,14 @@ pub(crate) enum ProjectLoaderError {
 }
 
 #[derive(Default)]
-pub(crate) struct ProjectLoader;
+pub(crate) struct ProjectAssetLoader;
 
-impl AssetLoader for ProjectLoader {
+impl AssetLoader for ProjectAssetLoader {
     type Asset = ProjectAsset;
 
     type Settings = ();
 
-    type Error = ProjectLoaderError;
+    type Error = ProjectAssetLoaderError;
 
     fn load<'a>(
         &'a self,
@@ -51,14 +51,14 @@ impl AssetLoader for ProjectLoader {
 
             let base_directory = asset_path
                 .parent()
-                .ok_or(ProjectLoaderError::BadProjectDirectory(asset_path.clone()))?
+                .ok_or(ProjectAssetLoaderError::BadProjectDirectory(
+                    asset_path.clone(),
+                ))?
                 .to_path_buf();
 
-            let exports_directory = base_directory.join(
-                asset_path
-                    .file_stem()
-                    .ok_or(ProjectLoaderError::BadProjectDirectory(asset_path.clone()))?,
-            );
+            let exports_directory = base_directory.join(asset_path.file_stem().ok_or(
+                ProjectAssetLoaderError::BadProjectDirectory(asset_path.clone()),
+            )?);
 
             value.defs.tilesets.iter().for_each(|tileset_definition| {
                 if let Some(tileset_path) = &tileset_definition.rel_path {
@@ -76,7 +76,7 @@ impl AssetLoader for ProjectLoader {
                 .collect();
 
             let worlds = if value.worlds.is_empty() {
-                let world: LdtkWorld = value.into();
+                let world: WorldAsset = value.into();
                 [(
                     world.identifier().clone(),
                     load_context.add_labeled_asset(world.identifier().clone(), world),
@@ -88,7 +88,7 @@ impl AssetLoader for ProjectLoader {
                     .iter()
                     .cloned()
                     .map(|world| {
-                        let world: LdtkWorld = world.into();
+                        let world: WorldAsset = world.into();
                         (
                             world.identifier().clone(),
                             load_context.add_labeled_asset(world.identifier().clone(), world),
