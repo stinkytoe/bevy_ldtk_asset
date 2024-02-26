@@ -10,6 +10,7 @@ use thiserror::Error;
 use crate::assets::level::LevelAsset;
 use crate::ldtk;
 use crate::prelude::WorldAsset;
+use crate::util::ldtk_path_to_asset_path;
 
 use super::project::ProjectAsset;
 
@@ -66,9 +67,9 @@ impl AssetLoader for ProjectAssetLoader {
             )?);
 
             Ok(ProjectAsset {
-                tilesets: build_tilesets(&value, load_context, &base_directory),
+                tilesets: build_tilesets(&value, load_context, &base_directory).await,
                 worlds: build_worlds(&value, load_context),
-                levels: build_levels(&value, load_context).await?,
+                levels: build_levels(&value, load_context, &base_directory).await?,
                 backgrounds: Vec::default(),
                 asset_path,
                 base_directory,
@@ -82,9 +83,9 @@ impl AssetLoader for ProjectAssetLoader {
     }
 }
 
-fn build_tilesets(
+async fn build_tilesets(
     value: &ldtk::LdtkJson,
-    load_context: &mut LoadContext,
+    load_context: &mut LoadContext<'_>,
     base_directory: &Path,
 ) -> Vec<Handle<Image>> {
     value
@@ -125,52 +126,101 @@ fn build_worlds(
 async fn build_levels(
     value: &ldtk::LdtkJson,
     load_context: &mut LoadContext<'_>,
+    base_directory: &Path,
 ) -> Result<HashMap<String, Handle<LevelAsset>>, ProjectAssetLoaderError> {
-    Ok(stream::iter(
-        if value.worlds.is_empty() {
-            value
-                .levels
-                .iter()
-                .map(|level| (SINGLE_WORLD_NAME.to_string(), level))
-                .collect::<Vec<_>>()
+    let all_levels = if value.worlds.is_empty() {
+        value
+            .levels
+            .iter()
+            .map(|level| (SINGLE_WORLD_NAME.to_string(), level))
+            .collect::<Vec<_>>()
+    } else {
+        value
+            .worlds
+            .iter()
+            .map(|world| (world.identifier.clone(), world))
+            .flat_map(|(identifier, world)| {
+                world
+                    .levels
+                    .iter()
+                    .map(move |level| (identifier.clone(), level))
+            })
+            .collect::<Vec<_>>()
+    };
+
+    let mut ret = HashMap::default();
+
+    let mut levels_stream = stream::iter(all_levels);
+
+    while let Some((identifier, level)) = levels_stream.next().await {
+        let level = if value.external_levels {
+            let bytes = load_context
+                .read_asset_bytes(ldtk_path_to_asset_path(
+                    base_directory,
+                    Path::new(
+                        &level
+                            .external_rel_path
+                            .as_ref()
+                            .expect("external_rel_path is 'None' when external levels is true?")
+                            .clone(),
+                    ),
+                ))
+                .await?;
+            serde_json::from_slice(&bytes)?
         } else {
-            value
-                .worlds
-                .iter()
-                .map(|world| (world.identifier.clone(), world))
-                .flat_map(|(identifier, world)| {
-                    world
-                        .levels
-                        .iter()
-                        .map(move |level| (identifier.clone(), level))
-                })
-                .collect::<Vec<_>>()
-        }
-        .iter(),
-    )
-    .map(|(identifier, level)| {
-        // let x = load_context.read_asset_bytes("").await?;
-        // let x = stream::iter(worlds.clone())
-        //     .map(|(a, b)| b)
-        //     .collect::<Vec<_>>()
-        //     .await;
-        (
-            identifier,
-            if value.external_levels {
-                // let bytes = load_context.read_asset_bytes("").await;
-                unimplemented!()
-            } else {
-                LevelAsset::new(level)
-            },
-        )
-    })
-    .map(|(identifier, level)| {
-        (
-            level.identifier().clone(),
-            load_context
-                .add_labeled_asset(identifier.to_owned() + "/" + &level.identifier(), level),
-        )
-    })
-    .collect()
-    .await)
+            LevelAsset::new(level)
+        };
+
+        ret.insert(
+            identifier.clone(),
+            load_context.add_labeled_asset(identifier, level),
+        );
+    }
+
+    Ok(ret)
+
+    // Ok(if value.worlds.is_empty() {
+    //     value
+    //         .levels
+    //         .iter()
+    //         .map(|level| (SINGLE_WORLD_NAME.to_string(), level))
+    //         .collect::<Vec<_>>()
+    // } else {
+    //     value
+    //         .worlds
+    //         .iter()
+    //         .map(|world| (world.identifier.clone(), world))
+    //         .flat_map(|(identifier, world)| {
+    //             world
+    //                 .levels
+    //                 .iter()
+    //                 .map(move |level| (identifier.clone(), level))
+    //         })
+    //         .collect::<Vec<_>>()
+    // }
+    // .iter()
+    // .map(|(identifier, level)| {
+    //     // let x = load_context.read_asset_bytes("").await?;
+    //     // let x = stream::iter(worlds.clone())
+    //     //     .map(|(a, b)| b)
+    //     //     .collect::<Vec<_>>()
+    //     //     .await;
+    //     (
+    //         identifier,
+    //         if value.external_levels {
+    //             // let bytes = load_context.read_asset_bytes("").await;
+    //             unimplemented!()
+    //         } else {
+    //             LevelAsset::new(level)
+    //         },
+    //     )
+    // })
+    // .map(|(identifier, level)| {
+    //     (
+    //         level.identifier().clone(),
+    //         load_context
+    //             .add_labeled_asset(identifier.to_owned() + "/" + &level.identifier(), level),
+    //     )
+    // })
+    // .collect())
 }
