@@ -4,7 +4,7 @@ use serde::Deserialize;
 use crate::ldtk;
 
 /// An asset representing an LDTK level
-#[derive(Asset, Clone, Debug, Deserialize, TypePath)]
+#[derive(Asset, Clone, Debug, TypePath)]
 pub struct LevelAsset {
     identifier: String,
     _background_color: Color,

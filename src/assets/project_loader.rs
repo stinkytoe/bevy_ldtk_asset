@@ -149,7 +149,6 @@ async fn build_levels(
     };
 
     let mut ret = HashMap::default();
-
     let mut levels_stream = stream::iter(all_levels);
 
     while let Some((identifier, level)) = levels_stream.next().await {
@@ -166,7 +165,7 @@ async fn build_levels(
                     ),
                 ))
                 .await?;
-            serde_json::from_slice(&bytes)?
+            LevelAsset::new(&serde_json::from_slice(&bytes)?)
         } else {
             LevelAsset::new(level)
         };
