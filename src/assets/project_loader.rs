@@ -67,7 +67,7 @@ impl AssetLoader for ProjectAssetLoader {
             )?);
 
             Ok(ProjectAsset {
-                tilesets: build_tilesets(&value, load_context, &base_directory).await,
+                tilesets: build_tilesets(&value, load_context, &base_directory),
                 worlds: build_worlds(&value, load_context),
                 levels: build_levels(&value, load_context, &base_directory).await?,
                 backgrounds: Vec::default(),
@@ -83,7 +83,7 @@ impl AssetLoader for ProjectAssetLoader {
     }
 }
 
-async fn build_tilesets(
+fn build_tilesets(
     value: &ldtk::LdtkJson,
     load_context: &mut LoadContext<'_>,
     base_directory: &Path,
