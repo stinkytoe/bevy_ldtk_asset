@@ -4,6 +4,7 @@ use bevy::asset::{AssetLoader, AsyncReadExt, LoadContext, ReadAssetBytesError};
 use bevy::prelude::*;
 use bevy::tasks::futures_lite;
 use bevy::utils::{thiserror, HashMap};
+use either::Either;
 use futures_lite::stream::{self, StreamExt};
 use thiserror::Error;
 
@@ -68,9 +69,9 @@ impl AssetLoader for ProjectAssetLoader {
 
             Ok(ProjectAsset {
                 tilesets: build_tilesets(&value, load_context, &base_directory),
+                backgrounds: build_backgrounds(&value, load_context, &base_directory),
                 worlds: build_worlds(&value, load_context),
                 levels: build_levels(&value, load_context, &base_directory).await?,
-                backgrounds: Vec::default(),
                 asset_path,
                 base_directory,
                 exports_directory,
@@ -87,14 +88,46 @@ fn build_tilesets(
     value: &ldtk::LdtkJson,
     load_context: &mut LoadContext<'_>,
     base_directory: &Path,
-) -> Vec<Handle<Image>> {
+) -> HashMap<String, Handle<Image>> {
     value
         .defs
         .tilesets
         .iter()
         .filter_map(|tileset_definition| tileset_definition.rel_path.as_ref())
-        .map(|rel_path| load_context.load(base_directory.join(rel_path)))
+        // .map(|rel_path| load_context.load(base_directory.join(rel_path)))
+        .map(|ldtk_path| {
+            (
+                ldtk_path.clone(),
+                load_context.load(ldtk_path_to_asset_path(
+                    base_directory,
+                    &PathBuf::from(ldtk_path),
+                )),
+            )
+        })
         .collect()
+}
+
+fn build_backgrounds(
+    value: &ldtk::LdtkJson,
+    load_context: &mut LoadContext<'_>,
+    base_directory: &Path,
+) -> HashMap<String, Handle<Image>> {
+    if value.worlds.is_empty() {
+        Either::Left(value.levels.iter())
+    } else {
+        Either::Right(value.worlds.iter().flat_map(|world| world.levels.iter()))
+    }
+    .filter_map(|level| level.bg_rel_path.as_ref())
+    .map(|ldtk_path| {
+        (
+            ldtk_path.clone(),
+            load_context.load(ldtk_path_to_asset_path(
+                base_directory,
+                &PathBuf::from(ldtk_path),
+            )),
+        )
+    })
+    .collect()
 }
 
 fn build_worlds(
@@ -111,7 +144,6 @@ fn build_worlds(
         value
             .worlds
             .iter()
-            // .cloned()
             .map(|world| {
                 let world: WorldAsset = world.into();
                 (
@@ -177,49 +209,4 @@ async fn build_levels(
     }
 
     Ok(ret)
-
-    // Ok(if value.worlds.is_empty() {
-    //     value
-    //         .levels
-    //         .iter()
-    //         .map(|level| (SINGLE_WORLD_NAME.to_string(), level))
-    //         .collect::<Vec<_>>()
-    // } else {
-    //     value
-    //         .worlds
-    //         .iter()
-    //         .map(|world| (world.identifier.clone(), world))
-    //         .flat_map(|(identifier, world)| {
-    //             world
-    //                 .levels
-    //                 .iter()
-    //                 .map(move |level| (identifier.clone(), level))
-    //         })
-    //         .collect::<Vec<_>>()
-    // }
-    // .iter()
-    // .map(|(identifier, level)| {
-    //     // let x = load_context.read_asset_bytes("").await?;
-    //     // let x = stream::iter(worlds.clone())
-    //     //     .map(|(a, b)| b)
-    //     //     .collect::<Vec<_>>()
-    //     //     .await;
-    //     (
-    //         identifier,
-    //         if value.external_levels {
-    //             // let bytes = load_context.read_asset_bytes("").await;
-    //             unimplemented!()
-    //         } else {
-    //             LevelAsset::new(level)
-    //         },
-    //     )
-    // })
-    // .map(|(identifier, level)| {
-    //     (
-    //         level.identifier().clone(),
-    //         load_context
-    //             .add_labeled_asset(identifier.to_owned() + "/" + &level.identifier(), level),
-    //     )
-    // })
-    // .collect())
 }

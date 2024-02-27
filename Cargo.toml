@@ -7,9 +7,10 @@ edition = "2021"
 
 [dependencies]
 bevy = "0.13"
+either = "1.10"
+path-clean = "1.0.1"
 serde = "1.0"
 serde_json = "1.0"
-path-clean = "1.0.1"
 
 [[example]]
 name = "top_down"

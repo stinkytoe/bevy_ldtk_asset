@@ -11,10 +11,8 @@ use super::{level::LevelAsset, world::WorldAsset};
 pub struct ProjectAsset {
     pub(crate) worlds: HashMap<String, Handle<WorldAsset>>,
     pub(crate) levels: HashMap<String, Handle<LevelAsset>>,
-    #[dependency]
-    pub(crate) tilesets: Vec<Handle<Image>>,
-    #[dependency]
-    pub(crate) backgrounds: Vec<Handle<Image>>,
+    pub(crate) tilesets: HashMap<String, Handle<Image>>,
+    pub(crate) backgrounds: HashMap<String, Handle<Image>>,
     pub(crate) asset_path: PathBuf,
     pub(crate) base_directory: PathBuf,
     pub(crate) exports_directory: PathBuf,
@@ -30,14 +28,16 @@ impl ProjectAsset {
     pub fn levels(&self) -> &HashMap<String, Handle<LevelAsset>> {
         &self.levels
     }
-    /// Returns a list of handles to all tilesets in this project
-    pub fn tilesets(&self) -> impl Iterator<Item = &Handle<Image>> {
-        self.tilesets.iter()
+    /// Returns a hashmap of handles to all tilesets in this project,
+    /// indexed by their ldtk paths
+    pub fn tilesets(&self) -> &HashMap<String, Handle<Image>> {
+        &self.tilesets
     }
 
-    /// Returns a list of handles to all background images in this project
-    pub fn backgrounds(&self) -> &[Handle<Image>] {
-        self.backgrounds.as_ref()
+    /// Returns a list of handles to all background images in this project,
+    /// indexed by their ldtk paths
+    pub fn backgrounds(&self) -> &HashMap<String, Handle<Image>> {
+        &self.backgrounds
     }
 
     /// Returns the path to this project file
