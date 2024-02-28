@@ -13,7 +13,7 @@ pub(crate) fn process_load_parameters_world(
             LoadParameters::Nothing => (),
             LoadParameters::Everything => {
                 let Some(world) = worlds.get(handle) else {
-                    debug!("Couldn't get world from handle?");
+                    error!("Couldn't get world from handle?");
                     return;
                 };
                 debug!("Attempting to load world: {}", world.identifier());
