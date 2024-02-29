@@ -16,6 +16,7 @@ pub mod prelude {
     pub use crate::assets::level::LevelAsset;
     pub use crate::assets::project::ProjectAsset;
     pub use crate::assets::world::WorldAsset;
+    pub use crate::bundles::LevelBundle;
     pub use crate::bundles::WorldBundle;
     pub use crate::ldtk::WorldLayout;
     pub use crate::plugin::BevyLdtkAssetPlugin;

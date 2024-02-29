@@ -134,20 +134,12 @@ async fn build_worlds(
     load_context: &mut LoadContext<'_>,
 ) -> HashMap<String, Handle<WorldAsset>> {
     if value.worlds.is_empty() {
-        let x = load_context.begin_labeled_asset();
-        let world = WorldAsset::new_from_ldtk_json(value);
-        let loaded_world = x.finish(world, None);
-        let world_handle =
-            load_context.add_loaded_labeled_asset(SINGLE_WORLD_NAME.to_string(), loaded_world);
-
         [(
             SINGLE_WORLD_NAME.to_string(),
-            world_handle,
-            // load_context.add_labeled_asset(
-            //     SINGLE_WORLD_NAME.to_string(),
-            //     WorldAsset::new_from_ldtk_json(value),
-            //     // value.into(),
-            // ),
+            load_context.add_labeled_asset(
+                SINGLE_WORLD_NAME.to_string(),
+                WorldAsset::new_from_ldtk_json(value),
+            ),
         )]
         .into()
     } else {
@@ -190,9 +182,10 @@ async fn build_levels(
     };
 
     let mut ret = HashMap::default();
-    //stream::iter(all_levels);
+    let mut stream = stream::iter(all_levels);
 
-    for (identifier, level) in all_levels {
+    // for (identifier, level) in all_levels {
+    while let Some((identifier, level)) = stream.next().await {
         let level = if value.external_levels {
             let ldtk_path = ldtk_path_to_asset_path(
                 base_directory,
