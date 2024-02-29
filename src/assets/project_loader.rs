@@ -4,7 +4,7 @@ use bevy::asset::{AssetLoader, AsyncReadExt, LoadContext, ReadAssetBytesError};
 use bevy::prelude::*;
 use bevy::tasks::futures_lite;
 use bevy::utils::{thiserror, HashMap};
-use either::Either;
+use futures_either::Either;
 use futures_lite::stream::{self, StreamExt};
 use thiserror::Error;
 
@@ -68,10 +68,10 @@ impl AssetLoader for ProjectAssetLoader {
             )?);
 
             Ok(ProjectAsset {
-                tilesets: build_tilesets(&value, load_context, &base_directory),
-                backgrounds: build_backgrounds(&value, load_context, &base_directory),
-                worlds: build_worlds(&value, load_context),
+                tilesets: build_tilesets(&value, load_context, &base_directory).await,
+                backgrounds: build_backgrounds(&value, load_context, &base_directory).await,
                 levels: build_levels(&value, load_context, &base_directory).await?,
+                worlds: build_worlds(&value, load_context).await,
                 asset_path,
                 base_directory,
                 exports_directory,
@@ -84,15 +84,12 @@ impl AssetLoader for ProjectAssetLoader {
     }
 }
 
-fn build_tilesets(
+async fn build_tilesets(
     value: &ldtk::LdtkJson,
     load_context: &mut LoadContext<'_>,
     base_directory: &Path,
 ) -> HashMap<String, Handle<Image>> {
-    value
-        .defs
-        .tilesets
-        .iter()
+    stream::iter(value.defs.tilesets.iter())
         .filter_map(|tileset_definition| tileset_definition.rel_path.as_ref())
         // .map(|rel_path| load_context.load(base_directory.join(rel_path)))
         .map(|ldtk_path| {
@@ -105,18 +102,19 @@ fn build_tilesets(
             )
         })
         .collect()
+        .await
 }
 
-fn build_backgrounds(
-    value: &ldtk::LdtkJson,
-    load_context: &mut LoadContext<'_>,
-    base_directory: &Path,
+async fn build_backgrounds<'a>(
+    value: &'a ldtk::LdtkJson,
+    load_context: &'a mut LoadContext<'_>,
+    base_directory: &'a Path,
 ) -> HashMap<String, Handle<Image>> {
-    if value.worlds.is_empty() {
+    stream::iter(if value.worlds.is_empty() {
         Either::Left(value.levels.iter())
     } else {
         Either::Right(value.worlds.iter().flat_map(|world| world.levels.iter()))
-    }
+    })
     .filter_map(|level| level.bg_rel_path.as_ref())
     .map(|ldtk_path| {
         (
@@ -128,22 +126,32 @@ fn build_backgrounds(
         )
     })
     .collect()
+    .await
 }
 
-fn build_worlds(
+async fn build_worlds(
     value: &ldtk::LdtkJson,
-    load_context: &mut LoadContext,
+    load_context: &mut LoadContext<'_>,
 ) -> HashMap<String, Handle<WorldAsset>> {
     if value.worlds.is_empty() {
+        let x = load_context.begin_labeled_asset();
+        let world = WorldAsset::new_from_ldtk_json(value);
+        let loaded_world = x.finish(world, None);
+        let world_handle =
+            load_context.add_loaded_labeled_asset(SINGLE_WORLD_NAME.to_string(), loaded_world);
+
         [(
             SINGLE_WORLD_NAME.to_string(),
-            load_context.add_labeled_asset(SINGLE_WORLD_NAME.to_string(), value.into()),
+            world_handle,
+            // load_context.add_labeled_asset(
+            //     SINGLE_WORLD_NAME.to_string(),
+            //     WorldAsset::new_from_ldtk_json(value),
+            //     // value.into(),
+            // ),
         )]
         .into()
     } else {
-        value
-            .worlds
-            .iter()
+        stream::iter(value.worlds.iter())
             .map(|world| {
                 let world: WorldAsset = world.into();
                 (
@@ -152,6 +160,7 @@ fn build_worlds(
                 )
             })
             .collect()
+            .await
     }
 }
 
@@ -181,31 +190,59 @@ async fn build_levels(
     };
 
     let mut ret = HashMap::default();
-    let mut levels_stream = stream::iter(all_levels);
+    //stream::iter(all_levels);
 
-    while let Some((identifier, level)) = levels_stream.next().await {
+    for (identifier, level) in all_levels {
         let level = if value.external_levels {
-            let bytes = load_context
-                .read_asset_bytes(ldtk_path_to_asset_path(
-                    base_directory,
-                    Path::new(
-                        &level
-                            .external_rel_path
-                            .as_ref()
-                            .expect("external_rel_path is 'None' when external levels is true?")
-                            .clone(),
-                    ),
-                ))
-                .await?;
-            LevelAsset::new(&serde_json::from_slice(&bytes)?)
+            let ldtk_path = ldtk_path_to_asset_path(
+                base_directory,
+                Path::new(
+                    &level
+                        .external_rel_path
+                        .as_ref()
+                        .expect("external_rel_path is 'None' when external levels is true?")
+                        .clone(),
+                ),
+            );
+            // debug!("{ldtk_path:?}");
+            let bytes = load_context.read_asset_bytes(ldtk_path).await;
+            // debug!("{bytes:?}");
+            let parsed = serde_json::from_slice(&bytes?)?;
+            // debug!("{parsed:?}");
+            LevelAsset::new(&parsed)
         } else {
             LevelAsset::new(level)
         };
 
-        ret.insert(
-            identifier.clone(),
-            load_context.add_labeled_asset(identifier, level),
-        );
+        let k = identifier.clone() + "/" + level.identifier();
+        // let asset =
+        //     load_context.add_labeled_asset(identifier.clone() + "/" + level.identifier(), level);
+
+        let labeled = load_context.begin_labeled_asset();
+        let loaded_asset = labeled.finish(level, None);
+        //
+        let v = load_context.add_loaded_labeled_asset(k.clone(), loaded_asset);
+
+        ret.insert(k, v);
+        // let mut handles = Vec::new();
+        // for i in 0..2 {
+        //     let mut labeled = load_context.begin_labeled_asset();
+        //     handles.push(std::thread::spawn(move || {
+        //         (i.to_string(), labeled.finish(Image::default(), None))
+        //     }));
+        // }
+        // for handle in handles {
+        //     let (label, loaded_asset) = handle.join().unwrap();
+        //     load_context.add_loaded_labeled_asset(label, loaded_asset);
+        // }
+
+        // ret.insert(
+        //     identifier.clone(),
+        //     load_context.add_loaded_labeled_asset(
+        //         identifier.to_string() + "/" + level.identifier(),
+        //         level.into(),
+        //     ),
+        // );
     }
 
     Ok(ret)

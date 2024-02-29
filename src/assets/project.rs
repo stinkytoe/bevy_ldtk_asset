@@ -7,7 +7,7 @@ use crate::util::ldtk_path_to_asset_path;
 use super::{level::LevelAsset, world::WorldAsset};
 
 /// An asset representing the entire ldtk project
-#[derive(Asset, Debug, TypePath)]
+#[derive(Asset, Debug, Reflect)]
 pub struct ProjectAsset {
     pub(crate) worlds: HashMap<String, Handle<WorldAsset>>,
     pub(crate) levels: HashMap<String, Handle<LevelAsset>>,
