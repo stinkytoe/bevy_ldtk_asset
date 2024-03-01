@@ -146,7 +146,7 @@ async fn build_worlds(
     } else {
         stream::iter(value.worlds.iter())
             .map(|world| {
-                let world: WorldAsset = world.into();
+                let world: WorldAsset = WorldAsset::new_from_ldtk_world(world);
                 (
                     world.identifier().clone(),
                     load_context.add_labeled_asset(world.identifier().clone(), world),

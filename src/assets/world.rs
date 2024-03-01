@@ -14,20 +14,6 @@ pub struct WorldAsset {
     level_identifiers: Vec<String>,
 }
 
-impl HasIdentifier for WorldAsset {
-    fn identifier(&self) -> &String {
-        &self.identifier
-    }
-}
-
-impl SpawnsEntities for WorldAsset {
-    fn spawn_entities(&self, commands: &mut Commands, entity: Entity) {
-        commands
-            .entity(entity)
-            .insert((Name::from(self.identifier().as_str()),));
-    }
-}
-
 impl WorldAsset {
     pub(crate) fn new_from_ldtk_json(value: &ldtk::LdtkJson) -> Self {
         Self {
@@ -57,41 +43,7 @@ impl WorldAsset {
                 .collect(),
         }
     }
-}
-
-// impl From<&ldtk::LdtkJson> for WorldAsset {
-//     fn from(value: &ldtk::LdtkJson) -> Self {
-//         Self {
-//             identifier: "World".to_string(),
-//             world_grid_size: if matches!(value.world_layout, Some(ldtk::WorldLayout::GridVania)) {
-//                 Some((
-//                     value
-//                         .world_grid_width
-//                         .expect("world_grid_width is 'None' in a GridVania layout?"),
-//                     value
-//                         .world_grid_height
-//                         .expect("world_grid_height is 'None' in a GridVania layout?"),
-//                 ))
-//             } else {
-//                 None
-//             },
-//             world_layout: value
-//                 .world_layout
-//                 .as_ref()
-//                 .expect("World layout is 'None' in a single world context?")
-//                 .clone(),
-//             level_identifiers: value
-//                 .levels
-//                 .iter()
-//                 .map(|level| &level.identifier)
-//                 .cloned()
-//                 .collect(),
-//         }
-//     }
-// }
-
-impl From<&ldtk::World> for WorldAsset {
-    fn from(value: &ldtk::World) -> Self {
+    pub(crate) fn new_from_ldtk_world(value: &ldtk::World) -> Self {
         Self {
             identifier: value.identifier.clone(),
             world_grid_size: if matches!(value.world_layout, Some(ldtk::WorldLayout::GridVania)) {
@@ -113,13 +65,7 @@ impl From<&ldtk::World> for WorldAsset {
         }
     }
 }
-
 impl WorldAsset {
-    /// Returns the identifier of the world
-    // pub fn identifier(&self) -> &String {
-    //     &self.identifier
-    // }
-
     /// The world layout as defined in the project
     pub fn get_world_layout(&self) -> &ldtk::WorldLayout {
         &self.world_layout
@@ -142,5 +88,19 @@ impl WorldAsset {
     /// and false otherwise
     pub fn has_level_identifier(&self, identifier: String) -> bool {
         self.level_identifiers.contains(&identifier)
+    }
+}
+
+impl HasIdentifier for WorldAsset {
+    fn identifier(&self) -> &String {
+        &self.identifier
+    }
+}
+
+impl SpawnsEntities for WorldAsset {
+    fn spawn_entities(&self, commands: &mut Commands, entity: Entity) {
+        commands
+            .entity(entity)
+            .insert((Name::from(self.identifier().as_str()),));
     }
 }
