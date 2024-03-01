@@ -1,14 +1,31 @@
 use bevy::prelude::*;
 
-use crate::ldtk;
+use crate::{
+    ldtk,
+    traits::{HasIdentifier, Spawn},
+};
 
 /// An asset representing a world in an ldtk project
 #[derive(Asset, Clone, Debug, TypePath)]
 pub struct WorldAsset {
-    identifier: String,
+    pub(crate) identifier: String,
     world_grid_size: Option<(i64, i64)>,
     world_layout: ldtk::WorldLayout,
     level_identifiers: Vec<String>,
+}
+
+impl HasIdentifier for WorldAsset {
+    fn identifier(&self) -> &String {
+        &self.identifier
+    }
+}
+
+impl Spawn for WorldAsset {
+    fn spawn(&self, commands: &mut Commands, entity: Entity) {
+        commands
+            .entity(entity)
+            .insert((Name::from(self.identifier().as_str()),));
+    }
 }
 
 impl WorldAsset {
@@ -42,36 +59,36 @@ impl WorldAsset {
     }
 }
 
-impl From<&ldtk::LdtkJson> for WorldAsset {
-    fn from(value: &ldtk::LdtkJson) -> Self {
-        Self {
-            identifier: "World".to_string(),
-            world_grid_size: if matches!(value.world_layout, Some(ldtk::WorldLayout::GridVania)) {
-                Some((
-                    value
-                        .world_grid_width
-                        .expect("world_grid_width is 'None' in a GridVania layout?"),
-                    value
-                        .world_grid_height
-                        .expect("world_grid_height is 'None' in a GridVania layout?"),
-                ))
-            } else {
-                None
-            },
-            world_layout: value
-                .world_layout
-                .as_ref()
-                .expect("World layout is 'None' in a single world context?")
-                .clone(),
-            level_identifiers: value
-                .levels
-                .iter()
-                .map(|level| &level.identifier)
-                .cloned()
-                .collect(),
-        }
-    }
-}
+// impl From<&ldtk::LdtkJson> for WorldAsset {
+//     fn from(value: &ldtk::LdtkJson) -> Self {
+//         Self {
+//             identifier: "World".to_string(),
+//             world_grid_size: if matches!(value.world_layout, Some(ldtk::WorldLayout::GridVania)) {
+//                 Some((
+//                     value
+//                         .world_grid_width
+//                         .expect("world_grid_width is 'None' in a GridVania layout?"),
+//                     value
+//                         .world_grid_height
+//                         .expect("world_grid_height is 'None' in a GridVania layout?"),
+//                 ))
+//             } else {
+//                 None
+//             },
+//             world_layout: value
+//                 .world_layout
+//                 .as_ref()
+//                 .expect("World layout is 'None' in a single world context?")
+//                 .clone(),
+//             level_identifiers: value
+//                 .levels
+//                 .iter()
+//                 .map(|level| &level.identifier)
+//                 .cloned()
+//                 .collect(),
+//         }
+//     }
+// }
 
 impl From<&ldtk::World> for WorldAsset {
     fn from(value: &ldtk::World) -> Self {
@@ -99,9 +116,9 @@ impl From<&ldtk::World> for WorldAsset {
 
 impl WorldAsset {
     /// Returns the identifier of the world
-    pub fn identifier(&self) -> &String {
-        &self.identifier
-    }
+    // pub fn identifier(&self) -> &String {
+    //     &self.identifier
+    // }
 
     /// The world layout as defined in the project
     pub fn get_world_layout(&self) -> &ldtk::WorldLayout {

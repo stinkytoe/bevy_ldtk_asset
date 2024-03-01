@@ -1,3 +1,4 @@
+use crate::traits::HasIdentifier;
 use std::path::{Path, PathBuf};
 
 use bevy::asset::{AssetLoader, AsyncReadExt, LoadContext, ReadAssetBytesError};

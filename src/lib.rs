@@ -9,6 +9,7 @@ mod ldtk;
 mod plugin;
 mod structs;
 mod systems;
+mod traits;
 mod util;
 
 /// Add `use bevy_ldtk_asset::prelude::*` to import the common interface

@@ -14,7 +14,7 @@ pub struct WorldBundle {
     #[allow(missing_docs)]
     pub load_parameters: LoadParameters,
     #[allow(missing_docs)]
-    pub _spatial_bundle: SpatialBundle,
+    pub spatial_bundle: SpatialBundle,
 }
 
 /// A bundle for spawning Levels. Use the Bevy asset label syntax:
