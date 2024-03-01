@@ -2,10 +2,10 @@ use bevy::{asset::LoadState, prelude::*};
 
 use crate::{
     structs::LoadParameters,
-    traits::{HasIdentifier, Spawn},
+    traits::{HasIdentifier, SpawnsEntities},
 };
 
-pub(crate) fn process_load_parameters<T: Asset + HasIdentifier + Spawn>(
+pub(crate) fn process_load_parameters<T: Asset + HasIdentifier + SpawnsEntities>(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     worlds: Res<Assets<T>>,
@@ -22,7 +22,7 @@ pub(crate) fn process_load_parameters<T: Asset + HasIdentifier + Spawn>(
                         return;
                     };
                     debug!("Attempting to load world: {}", *world.identifier());
-                    world.spawn(&mut commands, entity);
+                    world.spawn_entities(&mut commands, entity);
                 } else {
                     return;
                 }

@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::{
     assets::project_loader::ProjectAssetLoader, prelude::*,
-    systems::process_load_parameters_world::process_load_parameters,
+    systems::process_load_parameters::process_load_parameters,
 };
 
 /// The plugin which the user should include in their main function
@@ -17,6 +17,7 @@ impl Plugin for BevyLdtkAssetPlugin {
             .init_asset::<LevelAsset>()
             .init_asset_loader::<ProjectAssetLoader>()
             // .add_systems(Update, process_load_parameters_world)
-            .add_systems(Update, process_load_parameters::<WorldAsset>);
+            .add_systems(Update, process_load_parameters::<WorldAsset>)
+            .add_systems(Update, process_load_parameters::<LevelAsset>);
     }
 }

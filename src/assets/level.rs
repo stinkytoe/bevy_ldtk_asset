@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
-use crate::ldtk;
+use crate::{
+    ldtk,
+    traits::{HasIdentifier, SpawnsEntities},
+};
 
 /// An asset representing an LDTK level
 #[derive(Asset, Clone, Debug, TypePath)]
@@ -18,9 +21,18 @@ impl LevelAsset {
             _background: None,
         }
     }
+}
 
-    /// Returns the unique identifier for this level
-    pub fn identifier(&self) -> &String {
+impl HasIdentifier for LevelAsset {
+    fn identifier(&self) -> &String {
         &self.identifier
+    }
+}
+
+impl SpawnsEntities for LevelAsset {
+    fn spawn_entities(&self, commands: &mut Commands, entity: Entity) {
+        commands
+            .entity(entity)
+            .insert((Name::from(self.identifier().as_str()),));
     }
 }

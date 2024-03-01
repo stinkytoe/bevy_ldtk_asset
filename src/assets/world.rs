@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::{
     ldtk,
-    traits::{HasIdentifier, Spawn},
+    traits::{HasIdentifier, SpawnsEntities},
 };
 
 /// An asset representing a world in an ldtk project
@@ -20,8 +20,8 @@ impl HasIdentifier for WorldAsset {
     }
 }
 
-impl Spawn for WorldAsset {
-    fn spawn(&self, commands: &mut Commands, entity: Entity) {
+impl SpawnsEntities for WorldAsset {
+    fn spawn_entities(&self, commands: &mut Commands, entity: Entity) {
         commands
             .entity(entity)
             .insert((Name::from(self.identifier().as_str()),));

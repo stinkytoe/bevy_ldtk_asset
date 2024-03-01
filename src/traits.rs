@@ -4,6 +4,6 @@ pub trait HasIdentifier {
     fn identifier(&self) -> &String;
 }
 
-pub trait Spawn {
-    fn spawn(&self, commands: &mut Commands, entity: Entity);
+pub trait SpawnsEntities {
+    fn spawn_entities(&self, commands: &mut Commands, entity: Entity);
 }

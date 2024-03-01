@@ -28,7 +28,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     commands.spawn(LevelBundle {
         level: asset_server.load("ldtk/top_down.ldtk#World/Island_of_Thieves"),
-        load_parameters: LoadParameters::Nothing,
+        load_parameters: LoadParameters::Everything,
         ..default()
     });
 }
