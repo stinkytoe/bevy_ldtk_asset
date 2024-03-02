@@ -121,10 +121,15 @@ impl SpawnsEntities for WorldAsset {
         &self,
         commands: &mut Commands,
         entity: Entity,
+        _asset_server: &AssetServer,
+        _meshes: &mut Assets<Mesh>,
+        _materials: &mut Assets<ColorMaterial>,
+        images: &Assets<Image>,
         projects: &Assets<ProjectAsset>,
         _worlds: &Assets<WorldAsset>,
         _levels: &Assets<LevelAsset>,
     ) {
+        let _ = images;
         let project = projects
             .get(self.project_handle.clone_weak())
             .expect("No project for this world?");

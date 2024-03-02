@@ -22,6 +22,12 @@ pub mod prelude {
     pub use crate::plugin::BevyLdtkAssetPlugin;
     pub use crate::structs::SpawnEntities;
 
+    //
+    pub use crate::ldtk::LayerInstance;
+    //
+    pub use crate::ldtk::FieldInstance;
+    //
+    pub use crate::ldtk::NeighbourLevel;
     /// Described the layout of the level in a specific world.
     pub use crate::ldtk::WorldLayout;
 }

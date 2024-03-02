@@ -8,10 +8,14 @@ use crate::{
     traits::{HasIdentifier, SpawnsEntities},
 };
 
+#[allow(clippy::too_many_arguments)]
 pub(crate) fn process_load_parameters<T: Asset + HasIdentifier + SpawnsEntities>(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     entity_spawner_asset: Res<Assets<T>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+    images: Res<Assets<Image>>,
     projects: Res<Assets<ProjectAsset>>,
     worlds: Res<Assets<WorldAsset>>,
     levels: Res<Assets<LevelAsset>>,
@@ -31,7 +35,18 @@ pub(crate) fn process_load_parameters<T: Asset + HasIdentifier + SpawnsEntities>
                         type_name_of_val(world),
                         *world.identifier()
                     );
-                    world.spawn_entities(&mut commands, entity, &projects, &worlds, &levels);
+                    // world.spawn_entities(&mut commands, entity, &projects, &worlds, &levels);
+                    world.spawn_entities(
+                        &mut commands,
+                        entity,
+                        &asset_server,
+                        &mut meshes,
+                        &mut materials,
+                        &images,
+                        &projects,
+                        &worlds,
+                        &levels,
+                    )
                 } else {
                     return;
                 }

@@ -1,4 +1,7 @@
-use bevy::prelude::*;
+use bevy::{
+    prelude::*,
+    sprite::{Material2d, MaterialMesh2dBundle},
+};
 
 use crate::{assets::world::WorldAsset, prelude::LevelAsset, structs::SpawnEntities};
 
@@ -30,4 +33,10 @@ pub struct LevelBundle {
     pub spawn_entitied: SpawnEntities,
     #[allow(missing_docs)]
     pub spatial_bundle: SpatialBundle,
+}
+
+#[derive(Bundle, Default)]
+pub(crate) struct LayerBundle<M: Material2d> {
+    pub(crate) name: Name,
+    pub(crate) mesh: MaterialMesh2dBundle<M>,
 }

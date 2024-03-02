@@ -13,6 +13,7 @@ fn main() {
             WorldInspectorPlugin::default(),
             BevyLdtkAssetPlugin,
         ))
+        .insert_resource(Msaa::Off)
         .add_systems(Startup, setup)
         .run();
 }
