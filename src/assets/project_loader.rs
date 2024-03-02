@@ -68,11 +68,14 @@ impl AssetLoader for ProjectAssetLoader {
                 ProjectAssetLoaderError::BadProjectDirectory(asset_path.clone()),
             )?);
 
+            let project_handle = load_context.load(load_context.path().to_path_buf());
+
             Ok(ProjectAsset {
                 tilesets: build_tilesets(&value, load_context, &base_directory).await,
                 backgrounds: build_backgrounds(&value, load_context, &base_directory).await,
-                levels: build_levels(&value, load_context, &base_directory).await?,
-                worlds: build_worlds(&value, load_context).await,
+                levels: build_levels(&value, load_context, &base_directory, &project_handle)
+                    .await?,
+                worlds: build_worlds(&value, load_context, &project_handle).await,
                 asset_path,
                 base_directory,
                 exports_directory,
@@ -133,20 +136,21 @@ async fn build_backgrounds<'a>(
 async fn build_worlds(
     value: &ldtk::LdtkJson,
     load_context: &mut LoadContext<'_>,
+    project_handle: &Handle<ProjectAsset>,
 ) -> HashMap<String, Handle<WorldAsset>> {
     if value.worlds.is_empty() {
         [(
             SINGLE_WORLD_NAME.to_string(),
             load_context.add_labeled_asset(
                 SINGLE_WORLD_NAME.to_string(),
-                WorldAsset::new_from_ldtk_json(value),
+                WorldAsset::new_from_ldtk_json(value, project_handle.clone()),
             ),
         )]
         .into()
     } else {
         stream::iter(value.worlds.iter())
             .map(|world| {
-                let world: WorldAsset = WorldAsset::new_from_ldtk_world(world);
+                let world: WorldAsset = WorldAsset::new_from_ldtk_world(world, Handle::default());
                 (
                     world.identifier().clone(),
                     load_context.add_labeled_asset(world.identifier().clone(), world),
@@ -161,6 +165,7 @@ async fn build_levels(
     value: &ldtk::LdtkJson,
     load_context: &mut LoadContext<'_>,
     base_directory: &Path,
+    project_handle: &Handle<ProjectAsset>,
 ) -> Result<HashMap<String, Handle<LevelAsset>>, ProjectAssetLoaderError> {
     let all_levels = if value.worlds.is_empty() {
         value
@@ -198,45 +203,25 @@ async fn build_levels(
                         .clone(),
                 ),
             );
-            // debug!("{ldtk_path:?}");
-            let bytes = load_context.read_asset_bytes(ldtk_path).await;
-            // debug!("{bytes:?}");
-            let parsed = serde_json::from_slice(&bytes?)?;
-            // debug!("{parsed:?}");
-            LevelAsset::new(&parsed)
+
+            LevelAsset::new(
+                &serde_json::from_slice(&(load_context.read_asset_bytes(ldtk_path).await)?)?,
+                project_handle.clone(),
+            )
         } else {
-            LevelAsset::new(level)
+            LevelAsset::new(level, project_handle.clone())
         };
 
-        let k = identifier.clone() + "/" + level.identifier();
-        // let asset =
-        //     load_context.add_labeled_asset(identifier.clone() + "/" + level.identifier(), level);
+        let level_identifier = level.identifier().clone();
+
+        let k = identifier.clone() + "/" + &level_identifier;
 
         let labeled = load_context.begin_labeled_asset();
         let loaded_asset = labeled.finish(level, None);
-        //
+
         let v = load_context.add_loaded_labeled_asset(k.clone(), loaded_asset);
 
-        ret.insert(k, v);
-        // let mut handles = Vec::new();
-        // for i in 0..2 {
-        //     let mut labeled = load_context.begin_labeled_asset();
-        //     handles.push(std::thread::spawn(move || {
-        //         (i.to_string(), labeled.finish(Image::default(), None))
-        //     }));
-        // }
-        // for handle in handles {
-        //     let (label, loaded_asset) = handle.join().unwrap();
-        //     load_context.add_loaded_labeled_asset(label, loaded_asset);
-        // }
-
-        // ret.insert(
-        //     identifier.clone(),
-        //     load_context.add_loaded_labeled_asset(
-        //         identifier.to_string() + "/" + level.identifier(),
-        //         level.into(),
-        //     ),
-        // );
+        ret.insert(level_identifier, v);
     }
 
     Ok(ret)

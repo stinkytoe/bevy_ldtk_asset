@@ -2,22 +2,30 @@ use bevy::prelude::*;
 
 use crate::{
     ldtk,
+    prelude::{LevelBundle, LoadParameters},
     traits::{HasIdentifier, SpawnsEntities},
 };
+
+use super::{level::LevelAsset, project::ProjectAsset};
 
 /// An asset representing a world in an ldtk project
 #[derive(Asset, Clone, Debug, TypePath)]
 pub struct WorldAsset {
-    pub(crate) identifier: String,
+    identifier: String,
+    project_handle: Handle<ProjectAsset>,
     world_grid_size: Option<(i64, i64)>,
     world_layout: ldtk::WorldLayout,
     level_identifiers: Vec<String>,
 }
 
 impl WorldAsset {
-    pub(crate) fn new_from_ldtk_json(value: &ldtk::LdtkJson) -> Self {
+    pub(crate) fn new_from_ldtk_json(
+        value: &ldtk::LdtkJson,
+        project_handle: Handle<ProjectAsset>,
+    ) -> Self {
         Self {
             identifier: "World".to_string(),
+            project_handle,
             world_grid_size: if matches!(value.world_layout, Some(ldtk::WorldLayout::GridVania)) {
                 Some((
                     value
@@ -43,9 +51,14 @@ impl WorldAsset {
                 .collect(),
         }
     }
-    pub(crate) fn new_from_ldtk_world(value: &ldtk::World) -> Self {
+
+    pub(crate) fn new_from_ldtk_world(
+        value: &ldtk::World,
+        project_handle: Handle<ProjectAsset>,
+    ) -> Self {
         Self {
             identifier: value.identifier.clone(),
+            project_handle,
             world_grid_size: if matches!(value.world_layout, Some(ldtk::WorldLayout::GridVania)) {
                 Some((value.world_grid_width, value.world_grid_height))
             } else {
@@ -64,7 +77,13 @@ impl WorldAsset {
                 .collect(),
         }
     }
+
+    /// Returns a handle to the project which defines this world
+    pub fn project_handle(&self) -> &Handle<ProjectAsset> {
+        &self.project_handle
+    }
 }
+
 impl WorldAsset {
     /// The world layout as defined in the project
     pub fn get_world_layout(&self) -> &ldtk::WorldLayout {
@@ -98,9 +117,34 @@ impl HasIdentifier for WorldAsset {
 }
 
 impl SpawnsEntities for WorldAsset {
-    fn spawn_entities(&self, commands: &mut Commands, entity: Entity) {
+    fn spawn_entities(
+        &self,
+        commands: &mut Commands,
+        entity: Entity,
+        projects: &Assets<ProjectAsset>,
+        _worlds: &Assets<WorldAsset>,
+        _levels: &Assets<LevelAsset>,
+    ) {
+        let project = projects
+            .get(self.project_handle.clone_weak())
+            .expect("No project for this world?");
+
         commands
             .entity(entity)
-            .insert((Name::from(self.identifier().as_str()),));
+            .insert(Name::from(self.identifier().as_str()));
+
+        self.level_identifiers
+            .iter()
+            .filter_map(|identifier| project.levels().get(identifier))
+            .for_each(|level_asset| {
+                let level_entity = commands
+                    .spawn(LevelBundle {
+                        level: level_asset.clone(),
+                        load_parameters: LoadParameters::Everything,
+                        ..default()
+                    })
+                    .id();
+                commands.entity(entity).add_child(level_entity);
+            });
     }
 }
