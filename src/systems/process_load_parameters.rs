@@ -1,3 +1,5 @@
+use std::any::type_name_of_val;
+
 use bevy::{asset::LoadState, prelude::*};
 
 use crate::{
@@ -25,7 +27,11 @@ pub(crate) fn process_load_parameters<T: Asset + HasIdentifier + SpawnsEntities>
                         error!("Couldn't get world from handle?");
                         return;
                     };
-                    debug!("Attempting to load world: {}", *world.identifier());
+                    debug!(
+                        "Loading entities for LDtk object {}: {}",
+                        type_name_of_val(world),
+                        *world.identifier()
+                    );
                     world.spawn_entities(&mut commands, entity, &projects, &worlds, &levels);
                 } else {
                     return;

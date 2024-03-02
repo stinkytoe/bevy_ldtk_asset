@@ -150,7 +150,8 @@ async fn build_worlds(
     } else {
         stream::iter(value.worlds.iter())
             .map(|world| {
-                let world: WorldAsset = WorldAsset::new_from_ldtk_world(world, Handle::default());
+                let world: WorldAsset =
+                    WorldAsset::new_from_ldtk_world(world, project_handle.clone());
                 (
                     world.identifier().clone(),
                     load_context.add_labeled_asset(world.identifier().clone(), world),
@@ -190,8 +191,7 @@ async fn build_levels(
     let mut ret = HashMap::default();
     let mut stream = stream::iter(all_levels);
 
-    // for (identifier, level) in all_levels {
-    while let Some((identifier, level)) = stream.next().await {
+    while let Some((world_identifier, level)) = stream.next().await {
         let level = if value.external_levels {
             let ldtk_path = ldtk_path_to_asset_path(
                 base_directory,
@@ -214,14 +214,10 @@ async fn build_levels(
 
         let level_identifier = level.identifier().clone();
 
-        let k = identifier.clone() + "/" + &level_identifier;
+        let level_handle =
+            load_context.add_labeled_asset(format!("{world_identifier}/{level_identifier}"), level);
 
-        let labeled = load_context.begin_labeled_asset();
-        let loaded_asset = labeled.finish(level, None);
-
-        let v = load_context.add_loaded_labeled_asset(k.clone(), loaded_asset);
-
-        ret.insert(level_identifier, v);
+        ret.insert(level_identifier, level_handle);
     }
 
     Ok(ret)
