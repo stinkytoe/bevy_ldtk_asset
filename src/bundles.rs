@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{assets::world::WorldAsset, prelude::LevelAsset, structs::LoadParameters};
+use crate::{assets::world::WorldAsset, prelude::LevelAsset, structs::SpawnEntities};
 
 /// A bundle for spawning Worlds. Use the Bevy asset label syntax:
 /// "project.ldtk#World" to specify a given world.
@@ -12,7 +12,7 @@ pub struct WorldBundle {
     #[allow(missing_docs)]
     pub world: Handle<WorldAsset>,
     #[allow(missing_docs)]
-    pub load_parameters: LoadParameters,
+    pub spawn_entities: SpawnEntities,
     #[allow(missing_docs)]
     pub spatial_bundle: SpatialBundle,
 }
@@ -27,7 +27,7 @@ pub struct LevelBundle {
     #[allow(missing_docs)]
     pub level: Handle<LevelAsset>,
     #[allow(missing_docs)]
-    pub load_parameters: LoadParameters,
+    pub spawn_entitied: SpawnEntities,
     #[allow(missing_docs)]
-    pub _spatial_bundle: SpatialBundle,
+    pub spatial_bundle: SpatialBundle,
 }

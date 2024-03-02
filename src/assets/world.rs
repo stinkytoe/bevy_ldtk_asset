@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::{
     ldtk,
-    prelude::{LevelBundle, LoadParameters},
+    prelude::{LevelBundle, SpawnEntities},
     traits::{HasIdentifier, SpawnsEntities},
 };
 
@@ -11,8 +11,8 @@ use super::{level::LevelAsset, project::ProjectAsset};
 /// An asset representing a world in an ldtk project
 #[derive(Asset, Clone, Debug, TypePath)]
 pub struct WorldAsset {
-    identifier: String,
     project_handle: Handle<ProjectAsset>,
+    identifier: String,
     world_grid_size: Option<(i64, i64)>,
     world_layout: ldtk::WorldLayout,
     level_identifiers: Vec<String>,
@@ -24,8 +24,8 @@ impl WorldAsset {
         project_handle: Handle<ProjectAsset>,
     ) -> Self {
         Self {
-            identifier: "World".to_string(),
             project_handle,
+            identifier: "World".to_string(),
             world_grid_size: if matches!(value.world_layout, Some(ldtk::WorldLayout::GridVania)) {
                 Some((
                     value
@@ -57,8 +57,8 @@ impl WorldAsset {
         project_handle: Handle<ProjectAsset>,
     ) -> Self {
         Self {
-            identifier: value.identifier.clone(),
             project_handle,
+            identifier: value.identifier.clone(),
             world_grid_size: if matches!(value.world_layout, Some(ldtk::WorldLayout::GridVania)) {
                 Some((value.world_grid_width, value.world_grid_height))
             } else {
@@ -140,7 +140,7 @@ impl SpawnsEntities for WorldAsset {
                 let level_entity = commands
                     .spawn(LevelBundle {
                         level: level_asset.clone(),
-                        load_parameters: LoadParameters::Everything,
+                        spawn_entitied: SpawnEntities::Everything,
                         ..default()
                     })
                     .id();

@@ -19,7 +19,9 @@ pub mod prelude {
     pub use crate::assets::world::WorldAsset;
     pub use crate::bundles::LevelBundle;
     pub use crate::bundles::WorldBundle;
-    pub use crate::ldtk::WorldLayout;
     pub use crate::plugin::BevyLdtkAssetPlugin;
-    pub use crate::structs::LoadParameters;
+    pub use crate::structs::SpawnEntities;
+
+    /// Described the layout of the level in a specific world.
+    pub use crate::ldtk::WorldLayout;
 }

@@ -4,7 +4,7 @@ use bevy::{asset::LoadState, prelude::*};
 
 use crate::{
     prelude::{LevelAsset, ProjectAsset, WorldAsset},
-    structs::LoadParameters,
+    structs::SpawnEntities,
     traits::{HasIdentifier, SpawnsEntities},
 };
 
@@ -15,13 +15,12 @@ pub(crate) fn process_load_parameters<T: Asset + HasIdentifier + SpawnsEntities>
     projects: Res<Assets<ProjectAsset>>,
     worlds: Res<Assets<WorldAsset>>,
     levels: Res<Assets<LevelAsset>>,
-    worlds_query: Query<(Entity, &Handle<T>, &LoadParameters), With<LoadParameters>>,
+    worlds_query: Query<(Entity, &Handle<T>, &SpawnEntities), With<SpawnEntities>>,
 ) {
     for (entity, handle, load_parameters) in worlds_query.iter() {
-        // debug!("A new world bundle has been spawned!");
         match load_parameters {
-            LoadParameters::Nothing => (),
-            LoadParameters::Everything => {
+            SpawnEntities::Nothing => (),
+            SpawnEntities::Everything => {
                 if let Some(LoadState::Loaded) = asset_server.get_load_state(handle) {
                     let Some(world) = entity_spawner_asset.get(handle) else {
                         error!("Couldn't get world from handle?");
@@ -39,6 +38,6 @@ pub(crate) fn process_load_parameters<T: Asset + HasIdentifier + SpawnsEntities>
             }
         }
 
-        commands.entity(entity).remove::<LoadParameters>();
+        commands.entity(entity).remove::<SpawnEntities>();
     }
 }

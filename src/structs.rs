@@ -3,7 +3,7 @@ use bevy::prelude::*;
 /// A component included in WorldBundle, which we will use to determine if a given
 /// asset should spawn its associated entities, or simply be loaded as data
 #[derive(Component, Default)]
-pub enum LoadParameters {
+pub enum SpawnEntities {
     #[default]
     /// Load nothing
     Nothing,
