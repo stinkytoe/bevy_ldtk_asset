@@ -181,8 +181,6 @@ impl SpawnsEntities for LevelAsset {
                     parent.spawn(bundle);
                 };
             });
-
-        let _ = self.layer_separation;
     }
 }
 
@@ -267,36 +265,42 @@ impl LevelAsset {
         materials: &mut Assets<ColorMaterial>,
         images: &Assets<Image>,
     ) -> Option<LayerBundle<ColorMaterial>> {
-        if let Some((path, bg_pos)) = &self.background {
-            let handle = project.backgrounds.get(path).expect("bad image path?");
-            let image = images.get(handle).expect("bad handle?");
-            let image_size = image.size_f32();
-            let (crop_x, crop_y, crop_width, crop_height) = (
-                bg_pos.crop_rect[0] as f32,
-                bg_pos.crop_rect[1] as f32,
-                bg_pos.crop_rect[2] as f32,
-                bg_pos.crop_rect[3] as f32,
-            );
+        let Some((path, bg_pos)) = &self.background else {
+            return None;
+        };
 
-            Some(self.spawn_generic_layer(
-                meshes,
-                "background_image",
-                materials.add(ColorMaterial {
-                    color: Color::WHITE,
-                    texture: Some(handle.clone()),
-                }),
-                Vec2::new(bg_pos.top_left_px[0] as f32, -bg_pos.top_left_px[1] as f32),
-                Vec2::new(crop_width, crop_height),
-                self.layer_separation,
-                Vec2::new(bg_pos.scale[0] as f32, bg_pos.scale[1] as f32),
-                Vec2::new(crop_x / image_size.x, crop_y / image_size.y),
-                Vec2::new(
-                    (crop_x + crop_width) / image_size.x,
-                    (crop_y + crop_height) / image_size.y,
-                ),
-            ))
-        } else {
-            None
-        }
+        let handle = project.backgrounds.get(path).expect("bad image path?");
+        let image_size = images.get(handle).expect("bad handle?").size_f32();
+        let (crop_x, crop_y, crop_width, crop_height) = (
+            bg_pos.crop_rect[0] as f32,
+            bg_pos.crop_rect[1] as f32,
+            bg_pos.crop_rect[2] as f32,
+            bg_pos.crop_rect[3] as f32,
+        );
+
+        let top_left = Vec2::new(bg_pos.top_left_px[0] as f32, -bg_pos.top_left_px[1] as f32);
+        let size = Vec2::new(crop_width, crop_height);
+        let z = self.layer_separation;
+        let scale = Vec2::new(bg_pos.scale[0] as f32, bg_pos.scale[1] as f32);
+        let uv_start = Vec2::new(crop_x / image_size.x, crop_y / image_size.y);
+        let uv_end = Vec2::new(
+            (crop_x + crop_width) / image_size.x,
+            (crop_y + crop_height) / image_size.y,
+        );
+
+        Some(self.spawn_generic_layer(
+            meshes,
+            "background_image",
+            materials.add(ColorMaterial {
+                color: Color::WHITE,
+                texture: Some(handle.clone()),
+            }),
+            top_left,
+            size,
+            z,
+            scale,
+            uv_start,
+            uv_end,
+        ))
     }
 }

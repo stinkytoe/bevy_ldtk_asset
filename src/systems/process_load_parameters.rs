@@ -35,7 +35,6 @@ pub(crate) fn process_load_parameters<T: Asset + HasIdentifier + SpawnsEntities>
                         type_name_of_val(world),
                         *world.identifier()
                     );
-                    // world.spawn_entities(&mut commands, entity, &projects, &worlds, &levels);
                     world.spawn_entities(
                         &mut commands,
                         entity,
