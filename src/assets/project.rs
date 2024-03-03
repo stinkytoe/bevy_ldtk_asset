@@ -2,17 +2,21 @@ use std::path::{Path, PathBuf};
 
 use bevy::{prelude::*, utils::HashMap};
 
-use crate::util::ldtk_path_to_asset_path;
+use crate::{ldtk, util::ldtk_path_to_asset_path};
 
 use super::{level::LevelAsset, world::WorldAsset};
 
 /// An asset representing the entire ldtk project
-#[derive(Asset, Debug, Reflect)]
+#[derive(Asset, Debug, TypePath)]
 pub struct ProjectAsset {
     pub(crate) worlds: HashMap<String, Handle<WorldAsset>>,
     pub(crate) levels: HashMap<String, Handle<LevelAsset>>,
     pub(crate) tilesets: HashMap<String, Handle<Image>>,
     pub(crate) backgrounds: HashMap<String, Handle<Image>>,
+    pub(crate) entity_definitions: HashMap<i64, ldtk::EntityDefinition>,
+    pub(crate) enum_definitions: HashMap<i64, ldtk::EnumDefinition>,
+    pub(crate) layer_definitions: HashMap<i64, ldtk::LayerDefinition>,
+    pub(crate) tileset_definitions: HashMap<i64, ldtk::TilesetDefinition>,
     pub(crate) asset_path: PathBuf,
     pub(crate) base_directory: PathBuf,
     pub(crate) exports_directory: PathBuf,
@@ -68,5 +72,25 @@ impl ProjectAsset {
     /// export tile layers as images feature.
     pub fn ldtk_export_path_to_asset_path(&self, ldtk_path: &Path) -> PathBuf {
         ldtk_path_to_asset_path(&self.exports_directory, ldtk_path)
+    }
+
+    /// The entity definitions from the LDtk project.
+    pub fn entity_definitions(&self) -> &HashMap<i64, ldtk::EntityDefinition> {
+        &self.entity_definitions
+    }
+
+    /// The enum definitions from the LDtk project.
+    pub fn enum_definitions(&self) -> &HashMap<i64, ldtk::EnumDefinition> {
+        &self.enum_definitions
+    }
+
+    /// The layer definitions from the LDtk project.
+    pub fn layer_definitions(&self) -> &HashMap<i64, ldtk::LayerDefinition> {
+        &self.layer_definitions
+    }
+
+    /// The tileset definitions from the LDtk project.
+    pub fn tileset_definitions(&self) -> &HashMap<i64, ldtk::TilesetDefinition> {
+        &self.tileset_definitions
     }
 }

@@ -76,6 +76,10 @@ impl AssetLoader for ProjectAssetLoader {
                 levels: build_levels(&value, load_context, &base_directory, &project_handle)
                     .await?,
                 worlds: build_worlds(&value, load_context, &project_handle).await,
+                entity_definitions: build_entity_definitions(&value),
+                enum_definitions: build_enum_definitions(&value),
+                layer_definitions: build_layer_definitions(&value),
+                tileset_definitions: build_tileset_definitions(&value),
                 asset_path,
                 base_directory,
                 exports_directory,
@@ -221,4 +225,44 @@ async fn build_levels(
     }
 
     Ok(ret)
+}
+
+fn build_entity_definitions(value: &ldtk::LdtkJson) -> HashMap<i64, ldtk::EntityDefinition> {
+    value
+        .defs
+        .entities
+        .iter()
+        .cloned()
+        .map(|entity_definition| (entity_definition.uid, entity_definition))
+        .collect()
+}
+
+fn build_enum_definitions(value: &ldtk::LdtkJson) -> HashMap<i64, ldtk::EnumDefinition> {
+    value
+        .defs
+        .enums
+        .iter()
+        .cloned()
+        .map(|enum_definition| (enum_definition.uid, enum_definition))
+        .collect()
+}
+
+fn build_layer_definitions(value: &ldtk::LdtkJson) -> HashMap<i64, ldtk::LayerDefinition> {
+    value
+        .defs
+        .layers
+        .iter()
+        .cloned()
+        .map(|layer_definition| (layer_definition.uid, layer_definition))
+        .collect()
+}
+
+fn build_tileset_definitions(value: &ldtk::LdtkJson) -> HashMap<i64, ldtk::TilesetDefinition> {
+    value
+        .defs
+        .tilesets
+        .iter()
+        .cloned()
+        .map(|tileset_definition| (tileset_definition.uid, tileset_definition))
+        .collect()
 }
