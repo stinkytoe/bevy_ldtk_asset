@@ -3,6 +3,10 @@ use bevy::{
     render::{mesh::Indices, render_asset::RenderAssetUsages, render_resource::PrimitiveTopology},
     sprite::{Material2d, MaterialMesh2dBundle},
 };
+use image::{
+    imageops::{crop, flip_horizontal, flip_vertical, overlay},
+    ColorType, DynamicImage,
+};
 
 use crate::{
     bundles::LayerBundle,
@@ -62,7 +66,7 @@ impl LevelAsset {
             uid: level.uid,
             world_depth: level.world_depth,
             world_location: Vec2::new(level.world_x as f32, -level.world_y as f32),
-            layer_separation: f32::EPSILON,
+            layer_separation: 1.0,
         }
     }
 
@@ -107,6 +111,8 @@ impl LevelAsset {
     }
 
     /// A vector of layer instance objects.
+    ///
+    /// This is in back-to-front order, as opposed to how it's represented in the LDtk project.
     ///
     /// See the LDtk documentation for [LayerInstance](https://ldtk.io/json/#ldtk-LayerInstanceJson).
     pub fn layer_instances(&self) -> &[ldtk::LayerInstance] {
@@ -158,7 +164,7 @@ impl SpawnsEntities for LevelAsset {
         _asset_server: &AssetServer,
         meshes: &mut Assets<Mesh>,
         materials: &mut Assets<ColorMaterial>,
-        images: &Assets<Image>,
+        images: &mut Assets<Image>,
         projects: &Assets<ProjectAsset>,
         _worlds: &Assets<WorldAsset>,
         _levels: &Assets<LevelAsset>,
@@ -175,11 +181,9 @@ impl SpawnsEntities for LevelAsset {
                     .get(self.project_handle.clone())
                     .expect("couldn't get project?");
 
-                parent.spawn(self.spawn_bg_poly(meshes, materials));
-
-                if let Some(bundle) = self.spawn_bg_image(project, meshes, materials, images) {
-                    parent.spawn(bundle);
-                };
+                self.spawn_bg_poly(parent, meshes, materials);
+                self.spawn_bg_image(parent, project, meshes, materials, images);
+                self.spawn_layers(parent, project, meshes, materials, images);
             });
     }
 }
@@ -188,6 +192,7 @@ impl LevelAsset {
     #[allow(clippy::too_many_arguments)]
     fn spawn_generic_layer<M: Material2d + Default>(
         &self,
+        parent: &mut ChildBuilder,
         meshes: &mut Assets<Mesh>,
         name: &str,
         material: impl Into<Handle<M>>,
@@ -197,7 +202,7 @@ impl LevelAsset {
         scale: Vec2,
         uv_start: Vec2,
         uv_end: Vec2,
-    ) -> LayerBundle<M> {
+    ) {
         let indices = Indices::U32(vec![0, 1, 2, 0, 2, 3]);
         let verts = vec![
             [0.0, 0.0, 0.0],
@@ -212,7 +217,7 @@ impl LevelAsset {
             [uv_start.x, uv_end.y],   //3
         ];
 
-        LayerBundle {
+        parent.spawn(LayerBundle {
             name: Name::from(name),
             mesh: MaterialMesh2dBundle {
                 mesh: meshes
@@ -234,15 +239,17 @@ impl LevelAsset {
                 },
                 ..default()
             },
-        }
+        });
     }
 
     fn spawn_bg_poly(
         &self,
+        parent: &mut ChildBuilder,
         meshes: &mut Assets<Mesh>,
         materials: &mut Assets<ColorMaterial>,
-    ) -> LayerBundle<ColorMaterial> {
+    ) {
         self.spawn_generic_layer(
+            parent,
             meshes,
             "background_color",
             materials.add(ColorMaterial {
@@ -255,22 +262,24 @@ impl LevelAsset {
             Vec2::ONE,
             Vec2::ZERO,
             Vec2::ONE,
-        )
+        );
     }
 
     fn spawn_bg_image(
         &self,
+        parent: &mut ChildBuilder,
         project: &ProjectAsset,
         meshes: &mut Assets<Mesh>,
         materials: &mut Assets<ColorMaterial>,
         images: &Assets<Image>,
-    ) -> Option<LayerBundle<ColorMaterial>> {
+    ) {
         let Some((path, bg_pos)) = &self.background else {
-            return None;
+            return;
         };
 
         let handle = project.backgrounds.get(path).expect("bad image path?");
         let image_size = images.get(handle).expect("bad handle?").size_f32();
+
         let (crop_x, crop_y, crop_width, crop_height) = (
             bg_pos.crop_rect[0] as f32,
             bg_pos.crop_rect[1] as f32,
@@ -288,7 +297,8 @@ impl LevelAsset {
             (crop_y + crop_height) / image_size.y,
         );
 
-        Some(self.spawn_generic_layer(
+        self.spawn_generic_layer(
+            parent,
             meshes,
             "background_image",
             materials.add(ColorMaterial {
@@ -301,6 +311,124 @@ impl LevelAsset {
             scale,
             uv_start,
             uv_end,
-        ))
+        );
+    }
+
+    fn spawn_layers(
+        &self,
+        parent: &mut ChildBuilder,
+        project: &ProjectAsset,
+        meshes: &mut Assets<Mesh>,
+        materials: &mut Assets<ColorMaterial>,
+        images: &mut Assets<Image>,
+    ) {
+        self.layer_instances
+            .iter()
+            .enumerate()
+            .for_each(|(depth, layer)| {
+                let z = self.layer_separation * (depth + 2) as f32;
+
+                match layer.layer_instance_type.as_str() {
+                    "Tiles" => self.spawn_tiles_layer(
+                        parent,
+                        project,
+                        meshes,
+                        materials,
+                        images,
+                        layer,
+                        &layer.grid_tiles,
+                        z,
+                    ),
+                    "AutoLayer" | "IntGrid" => self.spawn_tiles_layer(
+                        parent,
+                        project,
+                        meshes,
+                        materials,
+                        images,
+                        layer,
+                        &layer.auto_layer_tiles,
+                        z,
+                    ),
+                    "Entities" => (),
+                    _ => {
+                        debug!(
+                            "Unknown layer instance type! given: {}",
+                            layer.layer_instance_type
+                        );
+                    }
+                }
+            });
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn spawn_tiles_layer(
+        &self,
+        parent: &mut ChildBuilder,
+        project: &ProjectAsset,
+        meshes: &mut Assets<Mesh>,
+        materials: &mut Assets<ColorMaterial>,
+        images: &mut Assets<Image>,
+        layer: &ldtk::LayerInstance,
+        tiles: &[ldtk::TileInstance],
+        z: f32,
+    ) {
+        let Some(path) = layer.tileset_rel_path.as_ref() else {
+            return;
+        };
+
+        let handle = project
+            .tilesets
+            .get(path)
+            .expect("A tileset with no handle in the project?");
+
+        let mut tileset = images
+            .get(handle)
+            .expect("bad tileset handle in project?")
+            .clone()
+            .try_into_dynamic()
+            .expect("Unable to make dynamic image?");
+
+        let mut dynamic_image =
+            DynamicImage::new(self.size.x as u32, self.size.y as u32, ColorType::Rgba32F);
+
+        tiles.iter().for_each(|tile| {
+            let mut cropped = crop(
+                &mut tileset,
+                tile.src[0] as u32,
+                tile.src[1] as u32,
+                layer.c_wid as u32,
+                layer.c_hei as u32,
+            )
+            .to_image();
+
+            if tile.f & 0x1 == 0x1 {
+                cropped = flip_horizontal(&cropped);
+            }
+
+            if tile.f & 0x2 == 0x2 {
+                cropped = flip_vertical(&cropped);
+            }
+
+            overlay(&mut dynamic_image, &cropped, tile.px[0], tile.px[1]);
+        });
+
+        let new_image = Image::from_dynamic(dynamic_image, true, RenderAssetUsages::default());
+        let new_handle = images.add(new_image);
+
+        self.spawn_generic_layer(
+            parent,
+            meshes,
+            &layer.identifier.clone(),
+            materials.add(ColorMaterial {
+                color: Color::WHITE,
+                texture: Some(new_handle.clone()),
+            }),
+            Vec2::ZERO,
+            self.size,
+            z,
+            Vec2::ONE,
+            Vec2::ZERO,
+            Vec2::ONE,
+        );
     }
 }

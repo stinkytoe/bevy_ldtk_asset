@@ -19,7 +19,14 @@ fn main() {
 }
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn(Camera2dBundle::default());
+    commands.spawn(Camera2dBundle {
+        transform: Transform {
+            translation: (256.0, -256.0, 1000.0).into(),
+            scale: Vec2::splat(0.5).extend(1.0),
+            ..default()
+        },
+        ..default()
+    });
 
     commands.spawn(WorldBundle {
         world: asset_server.load("ldtk/top_down.ldtk#World"),

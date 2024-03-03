@@ -15,7 +15,7 @@ pub trait SpawnsEntities {
         asset_server: &AssetServer,
         meshes: &mut Assets<Mesh>,
         materials: &mut Assets<ColorMaterial>,
-        images: &Assets<Image>,
+        images: &mut Assets<Image>,
         projects: &Assets<ProjectAsset>,
         worlds: &Assets<WorldAsset>,
         levels: &Assets<LevelAsset>,

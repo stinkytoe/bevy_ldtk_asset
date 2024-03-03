@@ -124,7 +124,7 @@ impl SpawnsEntities for WorldAsset {
         _asset_server: &AssetServer,
         _meshes: &mut Assets<Mesh>,
         _materials: &mut Assets<ColorMaterial>,
-        images: &Assets<Image>,
+        images: &mut Assets<Image>,
         projects: &Assets<ProjectAsset>,
         _worlds: &Assets<WorldAsset>,
         _levels: &Assets<LevelAsset>,
