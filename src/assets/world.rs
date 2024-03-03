@@ -140,12 +140,12 @@ impl SpawnsEntities for WorldAsset {
 
         self.level_identifiers
             .iter()
-            .filter_map(|identifier| project.levels().get(identifier))
+            .filter_map(|identifier| project.level_handles().get(identifier))
             .for_each(|level_asset| {
                 let level_entity = commands
                     .spawn(LevelBundle {
                         level: level_asset.clone(),
-                        spawn_entitied: SpawnEntities::Everything,
+                        spawn_entities: SpawnEntities::Everything,
                         ..default()
                     })
                     .id();

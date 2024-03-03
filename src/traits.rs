@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 use crate::prelude::{LevelAsset, ProjectAsset, WorldAsset};
 
+#[allow(missing_docs)]
 pub trait HasIdentifier {
     fn identifier(&self) -> &String;
 }

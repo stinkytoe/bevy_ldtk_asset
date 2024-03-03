@@ -9,10 +9,10 @@ use super::{level::LevelAsset, world::WorldAsset};
 /// An asset representing the entire ldtk project
 #[derive(Asset, Debug, TypePath)]
 pub struct ProjectAsset {
-    pub(crate) worlds: HashMap<String, Handle<WorldAsset>>,
-    pub(crate) levels: HashMap<String, Handle<LevelAsset>>,
-    pub(crate) tilesets: HashMap<String, Handle<Image>>,
-    pub(crate) backgrounds: HashMap<String, Handle<Image>>,
+    pub(crate) world_handles: HashMap<String, Handle<WorldAsset>>,
+    pub(crate) level_handles: HashMap<String, Handle<LevelAsset>>,
+    pub(crate) tileset_handles: HashMap<String, Handle<Image>>,
+    pub(crate) background_handles: HashMap<String, Handle<Image>>,
     pub(crate) entity_definitions: HashMap<i64, ldtk::EntityDefinition>,
     pub(crate) enum_definitions: HashMap<i64, ldtk::EnumDefinition>,
     pub(crate) layer_definitions: HashMap<i64, ldtk::LayerDefinition>,
@@ -20,28 +20,30 @@ pub struct ProjectAsset {
     pub(crate) asset_path: PathBuf,
     pub(crate) base_directory: PathBuf,
     pub(crate) exports_directory: PathBuf,
+    pub(crate) value: ldtk::LdtkJson,
 }
 
+// Getters
 impl ProjectAsset {
-    /// Returns a hashmap of the worlds in this project
-    pub fn worlds(&self) -> &HashMap<String, Handle<WorldAsset>> {
-        &self.worlds
+    /// Returns a hashmap of the worlds in this project, indexed by identifier
+    pub fn world_handles(&self) -> &HashMap<String, Handle<WorldAsset>> {
+        &self.world_handles
     }
 
-    /// Returns a hashmap of the levels in this project
-    pub fn levels(&self) -> &HashMap<String, Handle<LevelAsset>> {
-        &self.levels
+    /// Returns a hashmap of the levels in this project, indexed by identifier
+    pub fn level_handles(&self) -> &HashMap<String, Handle<LevelAsset>> {
+        &self.level_handles
     }
     /// Returns a hashmap of handles to all tilesets in this project,
     /// indexed by their ldtk paths
-    pub fn tilesets(&self) -> &HashMap<String, Handle<Image>> {
-        &self.tilesets
+    pub fn tileset_handles(&self) -> &HashMap<String, Handle<Image>> {
+        &self.tileset_handles
     }
 
     /// Returns a list of handles to all background images in this project,
     /// indexed by their ldtk paths
-    pub fn backgrounds(&self) -> &HashMap<String, Handle<Image>> {
-        &self.backgrounds
+    pub fn background_handles(&self) -> &HashMap<String, Handle<Image>> {
+        &self.background_handles
     }
 
     /// Returns the path to this project file
@@ -49,6 +51,34 @@ impl ProjectAsset {
         &self.asset_path
     }
 
+    /// The entity definitions from the LDtk project.
+    pub fn entity_definitions(&self) -> &HashMap<i64, ldtk::EntityDefinition> {
+        &self.entity_definitions
+    }
+
+    /// The enum definitions from the LDtk project.
+    pub fn enum_definitions(&self) -> &HashMap<i64, ldtk::EnumDefinition> {
+        &self.enum_definitions
+    }
+
+    /// The layer definitions from the LDtk project.
+    pub fn layer_definitions(&self) -> &HashMap<i64, ldtk::LayerDefinition> {
+        &self.layer_definitions
+    }
+
+    /// The tileset definitions from the LDtk project.
+    pub fn tileset_definitions(&self) -> &HashMap<i64, ldtk::TilesetDefinition> {
+        &self.tileset_definitions
+    }
+
+    /// The raw imported and deserialized JSON data
+    pub fn value(&self) -> &ldtk::LdtkJson {
+        &self.value
+    }
+}
+
+// Helpers for finding asset paths
+impl ProjectAsset {
     /// Expects a path as given from the ldtk json, and returns that path
     /// refactored as a path utilizable by the Bevy asset crate.
     ///
@@ -73,24 +103,6 @@ impl ProjectAsset {
     pub fn ldtk_export_path_to_asset_path(&self, ldtk_path: &Path) -> PathBuf {
         ldtk_path_to_asset_path(&self.exports_directory, ldtk_path)
     }
-
-    /// The entity definitions from the LDtk project.
-    pub fn entity_definitions(&self) -> &HashMap<i64, ldtk::EntityDefinition> {
-        &self.entity_definitions
-    }
-
-    /// The enum definitions from the LDtk project.
-    pub fn enum_definitions(&self) -> &HashMap<i64, ldtk::EnumDefinition> {
-        &self.enum_definitions
-    }
-
-    /// The layer definitions from the LDtk project.
-    pub fn layer_definitions(&self) -> &HashMap<i64, ldtk::LayerDefinition> {
-        &self.layer_definitions
-    }
-
-    /// The tileset definitions from the LDtk project.
-    pub fn tileset_definitions(&self) -> &HashMap<i64, ldtk::TilesetDefinition> {
-        &self.tileset_definitions
-    }
 }
+
+impl ProjectAsset {}

@@ -15,6 +15,7 @@ fn main() {
         ))
         .insert_resource(Msaa::Off)
         .add_systems(Startup, setup)
+        .add_systems(Update, update)
         .run();
 }
 
@@ -33,4 +34,9 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         spawn_entities: SpawnEntities::Everything,
         ..default()
     });
+}
+
+fn update(levels: Res<Assets<LevelAsset>>, levels_query: LevelAtPositionQuery) {
+    let levels_at = levels_at_position(Vec2::ZERO, &levels, levels_query);
+    debug!("{levels_at:?}");
 }

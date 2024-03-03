@@ -71,11 +71,11 @@ impl AssetLoader for ProjectAssetLoader {
             let project_handle = load_context.load(load_context.path().to_path_buf());
 
             Ok(ProjectAsset {
-                tilesets: build_tilesets(&value, load_context, &base_directory).await,
-                backgrounds: build_backgrounds(&value, load_context, &base_directory).await,
-                levels: build_levels(&value, load_context, &base_directory, &project_handle)
+                tileset_handles: build_tilesets(&value, load_context, &base_directory).await,
+                background_handles: build_backgrounds(&value, load_context, &base_directory).await,
+                world_handles: build_worlds(&value, load_context, &project_handle).await,
+                level_handles: build_levels(&value, load_context, &base_directory, &project_handle)
                     .await?,
-                worlds: build_worlds(&value, load_context, &project_handle).await,
                 entity_definitions: build_entity_definitions(&value),
                 enum_definitions: build_enum_definitions(&value),
                 layer_definitions: build_layer_definitions(&value),
@@ -83,6 +83,7 @@ impl AssetLoader for ProjectAssetLoader {
                 asset_path,
                 base_directory,
                 exports_directory,
+                value,
             })
         })
     }

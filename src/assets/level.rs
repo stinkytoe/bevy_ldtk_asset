@@ -278,7 +278,10 @@ impl LevelAsset {
             return;
         };
 
-        let handle = project.backgrounds.get(path).expect("bad image path?");
+        let handle = project
+            .background_handles
+            .get(path)
+            .expect("bad image path?");
         let image_size = images.get(handle).expect("bad handle?").size_f32();
 
         let (crop_x, crop_y, crop_width, crop_height) = (
@@ -385,7 +388,7 @@ impl LevelAsset {
         };
 
         let handle = project
-            .tilesets
+            .tileset_handles
             .get(path)
             .expect("A tileset with no handle in the project?");
 
@@ -490,7 +493,7 @@ impl LevelAsset {
                     .expect("missing entity definition?");
 
                 let tileset_handle = project
-                    .tilesets
+                    .tileset_handles
                     .get(
                         tileset_definition
                             .rel_path

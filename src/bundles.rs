@@ -34,7 +34,7 @@ pub struct LevelBundle {
     #[allow(missing_docs)]
     pub level: Handle<LevelAsset>,
     #[allow(missing_docs)]
-    pub spawn_entitied: SpawnEntities,
+    pub spawn_entities: SpawnEntities,
     #[allow(missing_docs)]
     pub spatial_bundle: SpatialBundle,
 }
