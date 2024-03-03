@@ -4,9 +4,9 @@ use crate::prelude::*;
 
 #[allow(missing_docs)]
 pub type LevelAtPositionQuery<'a, 'b> =
-    Query<'a, 'b, (&'static Transform, &'static Handle<LevelAsset>)>;
+    Query<'a, 'b, (&'static GlobalTransform, &'static Handle<LevelAsset>)>;
 
-#[allow(missing_docs)]
+/// Finds all levels whose surface covers the given position in global space
 pub fn levels_at_position(
     position: Vec2,
     levels: &Assets<LevelAsset>,
@@ -19,7 +19,7 @@ pub fn levels_at_position(
             (_transform, level)
         })
         .filter(|(transform, level)| {
-            let level_position = Vec2::new(1.0, -1.0) * transform.translation.truncate();
+            let level_position = Vec2::new(1.0, -1.0) * transform.translation().truncate();
             let level_size = level.size();
             Rect::from_corners(level_position, level_position + level_size).contains(position)
         })
