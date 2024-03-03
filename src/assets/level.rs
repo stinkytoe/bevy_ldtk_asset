@@ -1,7 +1,7 @@
 use bevy::{
     prelude::*,
     render::{mesh::Indices, render_asset::RenderAssetUsages, render_resource::PrimitiveTopology},
-    sprite::{Material2d, MaterialMesh2dBundle},
+    sprite::{Anchor, Material2d, MaterialMesh2dBundle},
 };
 use image::{
     imageops::{crop, flip_horizontal, flip_vertical, overlay},
@@ -350,7 +350,14 @@ impl LevelAsset {
                         &layer.auto_layer_tiles,
                         z,
                     ),
-                    "Entities" => self.spawn_entities_layer(parent, layer, &layer.entity_instances),
+                    // "Entities" => self.spawn_entities_layer(parent, layer, &layer.entity_instances),
+                    "Entities" => self.spawn_entities_layer(
+                        parent,
+                        project,
+                        layer,
+                        &layer.entity_instances,
+                        z,
+                    ),
                     _ => {
                         debug!(
                             "Unknown layer instance type! given: {}",
@@ -433,24 +440,86 @@ impl LevelAsset {
         );
     }
 
+    #[allow(clippy::too_many_arguments)]
     fn spawn_entities_layer(
         &self,
         parent: &mut ChildBuilder,
+        project: &ProjectAsset,
         layer: &ldtk::LayerInstance,
         entities: &[ldtk::EntityInstance],
+        z: f32,
     ) {
         parent
             .spawn(LdtkEntityLayerBundle {
                 name: Name::from(layer.identifier.clone()),
-                ..default()
+                spatial_bundle: SpatialBundle::from_transform(Transform::from_xyz(0.0, 0.0, z)),
+                // ..default()
             })
             .with_children(|parent| {
                 entities.iter().for_each(|entity| {
-                    parent.spawn(LdtkEntityBundle {
-                        name: Name::from(entity.identifier.clone()),
-                        entity: LdtkEntity::new(entity),
+                    self.spawn_entity(parent, project, entity);
+                });
+            });
+    }
+
+    fn spawn_entity(
+        &self,
+        parent: &mut ChildBuilder,
+        project: &ProjectAsset,
+        entity: &ldtk::EntityInstance,
+    ) {
+        parent
+            .spawn(LdtkEntityBundle {
+                name: Name::from(entity.identifier.clone()),
+                entity: LdtkEntity::new(entity, self.project_handle.clone()),
+                spatial_bundle: SpatialBundle {
+                    transform: Transform::from_translation(
+                        Vec2::new(entity.px[0] as f32, -entity.px[1] as f32).extend(0.0),
+                    ),
+                    ..default()
+                },
+            })
+            .with_children(|parent| {
+                let Some(tileset_rect) = &entity.tile else {
+                    return;
+                };
+
+                let tileset_definition = project
+                    .tileset_definitions
+                    .get(&tileset_rect.tileset_uid)
+                    .expect("missing entity definition?");
+
+                let tileset_handle = project
+                    .tilesets
+                    .get(
+                        tileset_definition
+                            .rel_path
+                            .as_ref()
+                            .expect("bad tileset rel path?"),
+                    )
+                    .expect("bad tileset path?");
+
+                let top_left = Vec2::new(tileset_rect.x as f32, tileset_rect.y as f32);
+                let size = Vec2::new(tileset_rect.w as f32, tileset_rect.h as f32);
+                let offset = Vec3::new(
+                    (entity.width as f32) * (entity.pivot[0] as f32 - 1.0),
+                    -(entity.height as f32) * (entity.pivot[1] as f32 - 1.0),
+                    0.0,
+                );
+
+                parent.spawn(SpriteBundle {
+                    sprite: Sprite {
+                        custom_size: Some(size),
+                        rect: Some(Rect {
+                            min: top_left,
+                            max: top_left + size,
+                        }),
+                        anchor: Anchor::TopLeft,
                         ..default()
-                    });
+                    },
+                    transform: Transform::from_translation(offset),
+                    texture: tileset_handle.clone(),
+                    ..default()
                 });
             });
     }
