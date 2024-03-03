@@ -20,6 +20,7 @@ pub mod prelude {
     pub use crate::bundles::LevelBundle;
     pub use crate::bundles::WorldBundle;
     pub use crate::plugin::BevyLdtkAssetPlugin;
+    pub use crate::structs::LdtkEntity;
     pub use crate::structs::SpawnEntities;
 
     //

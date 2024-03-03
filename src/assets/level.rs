@@ -9,8 +9,9 @@ use image::{
 };
 
 use crate::{
-    bundles::LayerBundle,
+    bundles::{LayerBundle, LdtkEntityBundle, LdtkEntityLayerBundle},
     ldtk,
+    prelude::LdtkEntity,
     traits::{HasIdentifier, SpawnsEntities},
     util::bevy_color_from_ldtk,
 };
@@ -349,7 +350,7 @@ impl LevelAsset {
                         &layer.auto_layer_tiles,
                         z,
                     ),
-                    "Entities" => (),
+                    "Entities" => self.spawn_entities_layer(parent, layer, &layer.entity_instances),
                     _ => {
                         debug!(
                             "Unknown layer instance type! given: {}",
@@ -430,5 +431,27 @@ impl LevelAsset {
             Vec2::ZERO,
             Vec2::ONE,
         );
+    }
+
+    fn spawn_entities_layer(
+        &self,
+        parent: &mut ChildBuilder,
+        layer: &ldtk::LayerInstance,
+        entities: &[ldtk::EntityInstance],
+    ) {
+        parent
+            .spawn(LdtkEntityLayerBundle {
+                name: Name::from(layer.identifier.clone()),
+                ..default()
+            })
+            .with_children(|parent| {
+                entities.iter().for_each(|entity| {
+                    parent.spawn(LdtkEntityBundle {
+                        name: Name::from(entity.identifier.clone()),
+                        entity: LdtkEntity::new(entity),
+                        ..default()
+                    });
+                });
+            });
     }
 }

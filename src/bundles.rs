@@ -3,7 +3,11 @@ use bevy::{
     sprite::{Material2d, MaterialMesh2dBundle},
 };
 
-use crate::{assets::world::WorldAsset, prelude::LevelAsset, structs::SpawnEntities};
+use crate::{
+    assets::world::WorldAsset,
+    prelude::{LdtkEntity, LevelAsset},
+    structs::SpawnEntities,
+};
 
 /// A bundle for spawning Worlds. Use the Bevy asset label syntax:
 /// "project.ldtk#World" to specify a given world.
@@ -39,4 +43,19 @@ pub struct LevelBundle {
 pub(crate) struct LayerBundle<M: Material2d> {
     pub(crate) name: Name,
     pub(crate) mesh: MaterialMesh2dBundle<M>,
+}
+
+/// A bundle for spawning LDtk entities
+#[derive(Bundle, Default)]
+pub struct LdtkEntityLayerBundle {
+    pub name: Name,
+    pub spatial_bundle: SpatialBundle,
+}
+
+/// A bundle for spawning LDtk entities
+#[derive(Bundle, Default)]
+pub struct LdtkEntityBundle {
+    pub name: Name,
+    pub entity: LdtkEntity,
+    pub spatial_bundle: SpatialBundle,
 }
