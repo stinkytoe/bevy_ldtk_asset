@@ -111,7 +111,7 @@ impl WorldAsset {
 }
 
 impl HasIdentifier for WorldAsset {
-    fn identifier(&self) -> &String {
+    fn identifier(&self) -> &str {
         &self.identifier
     }
 }
@@ -136,7 +136,7 @@ impl SpawnsEntities for WorldAsset {
 
         commands
             .entity(entity)
-            .insert(Name::from(self.identifier().as_str()));
+            .insert(Name::from(self.identifier().to_string()));
 
         self.level_identifiers
             .iter()

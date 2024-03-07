@@ -6,7 +6,7 @@ use bevy::{
 use crate::{
     assets::world::WorldAsset,
     prelude::{LdtkEntity, LevelAsset},
-    structs::SpawnEntities,
+    structs::{Layer, SpawnEntities},
 };
 
 /// A bundle for spawning Worlds. Use the Bevy asset label syntax:
@@ -40,16 +40,18 @@ pub struct LevelBundle {
 }
 
 #[derive(Bundle, Default)]
-pub(crate) struct LayerBundle<M: Material2d> {
+pub(crate) struct LayerVisibleBundle<M: Material2d> {
     pub(crate) name: Name,
+    pub(crate) layer: Layer,
     pub(crate) mesh: MaterialMesh2dBundle<M>,
 }
 
 /// A bundle for spawning LDtk entities
 #[derive(Bundle, Default)]
-pub struct LdtkEntityLayerBundle {
-    pub name: Name,
-    pub spatial_bundle: SpatialBundle,
+pub(crate) struct LdtkEntityLayerBundle {
+    pub(crate) name: Name,
+    pub(crate) layer: Layer,
+    pub(crate) spatial_bundle: SpatialBundle,
 }
 
 /// A bundle for spawning LDtk entities

@@ -158,8 +158,8 @@ async fn build_worlds(
                 let world: WorldAsset =
                     WorldAsset::new_from_ldtk_world(world, project_handle.clone());
                 (
-                    world.identifier().clone(),
-                    load_context.add_labeled_asset(world.identifier().clone(), world),
+                    world.identifier().to_string(),
+                    load_context.add_labeled_asset(world.identifier().to_string(), world),
                 )
             })
             .collect()
@@ -183,12 +183,12 @@ async fn build_levels(
         value
             .worlds
             .iter()
-            .map(|world| (world.identifier.clone(), world))
+            .map(|world| (world.identifier.to_string(), world))
             .flat_map(|(identifier, world)| {
                 world
                     .levels
                     .iter()
-                    .map(move |level| (identifier.clone(), level))
+                    .map(move |level| (identifier.to_string(), level))
             })
             .collect::<Vec<_>>()
     };
@@ -217,7 +217,7 @@ async fn build_levels(
             LevelAsset::new(level, project_handle.clone())
         };
 
-        let level_identifier = level.identifier().clone();
+        let level_identifier = level.identifier().to_string();
 
         let level_handle =
             load_context.add_labeled_asset(format!("{world_identifier}/{level_identifier}"), level);

@@ -1,6 +1,10 @@
 use bevy::prelude::*;
 
-use crate::{ldtk, prelude::ProjectAsset, util::bevy_color_from_ldtk};
+use crate::{
+    ldtk,
+    prelude::{HasIdentifier, ProjectAsset},
+    util::bevy_color_from_ldtk,
+};
 
 /// A component included in WorldBundle, which we will use to determine if a given
 /// asset should spawn its associated entities, or simply be loaded as data
@@ -11,6 +15,26 @@ pub enum SpawnEntities {
     Nothing,
     /// Load all entities
     Everything,
+}
+
+/// A component attached to all level layers
+#[derive(Component, Default)]
+pub struct Layer {
+    identifier: String,
+}
+
+impl HasIdentifier for Layer {
+    fn identifier(&self) -> &str {
+        &self.identifier
+    }
+}
+
+impl Layer {
+    pub(crate) fn new(identifier: &str) -> Self {
+        Self {
+            identifier: identifier.to_string(),
+        }
+    }
 }
 
 /// A layer containing ldtk entities
@@ -89,3 +113,13 @@ impl LdtkEntity {
         &self.project_handle
     }
 }
+
+impl LdtkEntity {
+    /// Checks a given ldtk entity component for the presense of the given tag.
+    pub fn has_tag(&self, tag: &str) -> bool {
+        self.tags.iter().any(|inner_tag| inner_tag == tag)
+    }
+}
+
+#[derive(Component, Default)]
+pub struct TrackLocation;

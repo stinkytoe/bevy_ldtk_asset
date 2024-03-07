@@ -33,7 +33,7 @@ pub(crate) fn process_load_parameters<T: Asset + HasIdentifier + SpawnsEntities>
                     debug!(
                         "Loading entities for LDtk object {}: {}",
                         type_name_of_val(world),
-                        *world.identifier()
+                        world.identifier()
                     );
                     world.spawn_entities(
                         &mut commands,

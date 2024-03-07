@@ -9,9 +9,10 @@ use image::{
 };
 
 use crate::{
-    bundles::{LayerBundle, LdtkEntityBundle, LdtkEntityLayerBundle},
+    bundles::{LayerVisibleBundle, LdtkEntityBundle, LdtkEntityLayerBundle},
     ldtk,
     prelude::LdtkEntity,
+    structs::Layer,
     traits::{HasIdentifier, SpawnsEntities},
     util::bevy_color_from_ldtk,
 };
@@ -152,7 +153,7 @@ impl LevelAsset {
 }
 
 impl HasIdentifier for LevelAsset {
-    fn identifier(&self) -> &String {
+    fn identifier(&self) -> &str {
         &self.identifier
     }
 }
@@ -172,7 +173,7 @@ impl SpawnsEntities for LevelAsset {
     ) {
         commands
             .entity(entity)
-            .insert(Name::from(self.identifier().as_str()))
+            .insert(Name::from(self.identifier()))
             .insert(SpatialBundle {
                 transform: Transform::from_translation(self.world_location.extend(0.0)),
                 ..default()
@@ -218,8 +219,9 @@ impl LevelAsset {
             [uv_start.x, uv_end.y],   //3
         ];
 
-        parent.spawn(LayerBundle {
+        parent.spawn(LayerVisibleBundle {
             name: Name::from(name),
+            layer: Layer::new(name),
             mesh: MaterialMesh2dBundle {
                 mesh: meshes
                     .add(
@@ -455,6 +457,7 @@ impl LevelAsset {
         parent
             .spawn(LdtkEntityLayerBundle {
                 name: Name::from(layer.identifier.clone()),
+                layer: Layer::new(&layer.identifier),
                 spatial_bundle: SpatialBundle::from_transform(Transform::from_xyz(0.0, 0.0, z)),
                 // ..default()
             })

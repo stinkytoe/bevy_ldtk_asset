@@ -7,8 +7,8 @@ pub type LevelAtPositionQuery<'a, 'b> =
     Query<'a, 'b, (&'static GlobalTransform, &'static Handle<LevelAsset>)>;
 
 /// Finds all levels whose surface covers the given position in global space
-pub fn levels_at_position(
-    position: Vec2,
+pub fn levels_at_location(
+    location: Vec2,
     levels: &Assets<LevelAsset>,
     levels_query: LevelAtPositionQuery,
 ) -> Vec<String> {
@@ -19,10 +19,10 @@ pub fn levels_at_position(
             (_transform, level)
         })
         .filter(|(transform, level)| {
-            let level_position = Vec2::new(1.0, -1.0) * transform.translation().truncate();
-            let level_size = level.size();
-            Rect::from_corners(level_position, level_position + level_size).contains(position)
+            let level_position = transform.translation().truncate();
+            let level_size = Vec2::new(1.0, -1.0) * level.size();
+            Rect::from_corners(level_position, level_position + level_size).contains(location)
         })
-        .map(|(_transform, level)| level.identifier().clone())
+        .map(|(_transform, level)| level.identifier().to_string())
         .collect()
 }

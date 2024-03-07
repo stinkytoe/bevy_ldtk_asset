@@ -4,7 +4,7 @@ use crate::prelude::{LevelAsset, ProjectAsset, WorldAsset};
 
 #[allow(missing_docs)]
 pub trait HasIdentifier {
-    fn identifier(&self) -> &String;
+    fn identifier(&self) -> &str;
 }
 
 #[allow(clippy::too_many_arguments)]
