@@ -322,11 +322,13 @@ impl LevelAsset {
         &self,
         parent: &mut ChildBuilder,
         meshes: &mut Assets<Mesh>,
-        name: &str,
+        layer: &ldtk::LayerInstance,
+        layer_definition: &ldtk::LayerDefinition,
         material: impl Into<Handle<M>>,
         top_left: Vec2,
         size: Vec2,
         z: f32,
+        visible: bool,
         scale: Vec2,
         uv_start: Vec2,
         uv_end: Vec2,
@@ -345,9 +347,15 @@ impl LevelAsset {
             [uv_start.x, uv_end.y],   //3
         ];
 
+        let visibility = if visible {
+            Visibility::Inherited
+        } else {
+            Visibility::Hidden
+        };
+
         parent.spawn(LayerVisibleBundle {
-            name: Name::from(name),
-            layer: Layer::new(name),
+            name: Name::from(layer.identifier.clone()),
+            layer: Layer::new(layer, layer_definition),
             mesh: MaterialMesh2dBundle {
                 mesh: meshes
                     .add(
@@ -366,6 +374,7 @@ impl LevelAsset {
                     scale: scale.extend(0.0),
                     ..default()
                 },
+                visibility,
                 ..default()
             },
         });
@@ -384,6 +393,10 @@ impl LevelAsset {
             .enumerate()
             .for_each(|(depth, layer)| {
                 let z = self.layer_separation * (depth + 2) as f32;
+                let layer_definition = project
+                    .layer_definitions()
+                    .get(&layer.layer_def_uid)
+                    .expect("bad layer definition?");
 
                 match layer.layer_instance_type.as_str() {
                     "Tiles" => self.spawn_tiles_layer(
@@ -393,6 +406,7 @@ impl LevelAsset {
                         materials,
                         images,
                         layer,
+                        layer_definition,
                         &layer.grid_tiles,
                         z,
                     ),
@@ -403,6 +417,7 @@ impl LevelAsset {
                         materials,
                         images,
                         layer,
+                        layer_definition,
                         &layer.auto_layer_tiles,
                         z,
                     ),
@@ -410,6 +425,7 @@ impl LevelAsset {
                         parent,
                         project,
                         layer,
+                        layer_definition,
                         &layer.entity_instances,
                         z,
                     ),
@@ -432,6 +448,7 @@ impl LevelAsset {
         materials: &mut Assets<ColorMaterial>,
         images: &mut Assets<Image>,
         layer: &ldtk::LayerInstance,
+        layer_definition: &ldtk::LayerDefinition,
         tiles: &[ldtk::TileInstance],
         z: f32,
     ) {
@@ -475,20 +492,24 @@ impl LevelAsset {
             overlay(&mut dynamic_image, &cropped, tile.px[0], tile.px[1]);
         });
 
+        let color = Color::rgba(0.0, 0.0, 0.0, layer.opacity as f32);
+
         let new_image = Image::from_dynamic(dynamic_image, true, RenderAssetUsages::default());
         let new_handle = images.add(new_image);
 
         self.spawn_generic_layer(
             parent,
             meshes,
-            &layer.identifier.clone(),
+            layer,
+            layer_definition,
             materials.add(ColorMaterial {
-                color: Color::WHITE,
+                color,
                 texture: Some(new_handle),
             }),
             Vec2::ZERO,
             self.size,
             z,
+            layer.visible,
             Vec2::ONE,
             Vec2::ZERO,
             Vec2::ONE,
@@ -501,13 +522,14 @@ impl LevelAsset {
         parent: &mut ChildBuilder,
         project: &ProjectAsset,
         layer: &ldtk::LayerInstance,
+        layer_definition: &ldtk::LayerDefinition,
         entities: &[ldtk::EntityInstance],
         z: f32,
     ) {
         parent
             .spawn(LdtkEntityLayerBundle {
                 name: Name::from(layer.identifier.clone()),
-                layer: Layer::new(&layer.identifier),
+                layer: Layer::new(layer, layer_definition),
                 spatial_bundle: SpatialBundle::from_transform(Transform::from_xyz(0.0, 0.0, z)),
                 // ..default()
             })

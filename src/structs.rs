@@ -26,7 +26,14 @@ pub struct BackgroundImage;
 /// A component attached to all level layers
 #[derive(Component, Default)]
 pub struct Layer {
+    grid_width: i64,
+    grid_height: i64,
+    grid_size: i64,
     identifier: String,
+    iid: String,
+    int_grid_csv: Vec<Option<ldtk::IntGridValueDefinition>>,
+    layer_def_uid: i64,
+    level_id: i64,
 }
 
 impl HasIdentifier for Layer {
@@ -36,10 +43,65 @@ impl HasIdentifier for Layer {
 }
 
 impl Layer {
-    pub(crate) fn new(identifier: &str) -> Self {
+    pub(crate) fn new(
+        layer: &ldtk::LayerInstance,
+        layer_definition: &ldtk::LayerDefinition,
+    ) -> Self {
         Self {
-            identifier: identifier.to_string(),
+            grid_width: layer.c_wid,
+            grid_height: layer.c_hei,
+            grid_size: layer.grid_size,
+            identifier: layer.identifier.clone(),
+            iid: layer.iid.clone(),
+            int_grid_csv: layer
+                .int_grid_csv
+                .iter()
+                .map(|i| {
+                    layer_definition
+                        .int_grid_values
+                        .iter()
+                        .find(|int_grid_value| int_grid_value.value == *i)
+                        .cloned()
+                })
+                .collect(),
+            layer_def_uid: layer.layer_def_uid,
+            level_id: layer.level_id,
         }
+    }
+
+    /// Returns the width of the cells in this layer
+    pub fn grid_width(&self) -> i64 {
+        self.grid_width
+    }
+
+    /// Returns the height of the cells in this layer
+    pub fn grid_height(&self) -> i64 {
+        self.grid_height
+    }
+
+    /// Returns the size in pixels of a grid square in this layer
+    pub fn grid_size(&self) -> i64 {
+        self.grid_size
+    }
+
+    /// Returns the integer identifier of this layer
+    pub fn iid(&self) -> &str {
+        self.iid.as_ref()
+    }
+
+    /// The array containing the int grids in this layer, if any
+    pub fn int_grid_csv(&self) -> &[Option<ldtk::IntGridValueDefinition>] {
+        self.int_grid_csv.as_ref()
+    }
+
+    /// The uid of the layer definition
+    pub fn layer_def_uid(&self) -> i64 {
+        self.layer_def_uid
+    }
+
+    /// The id of the level which contains this layer instance
+    pub fn level_id(&self) -> i64 {
+        self.level_id
     }
 }
 
