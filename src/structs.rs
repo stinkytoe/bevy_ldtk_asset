@@ -17,6 +17,12 @@ pub enum SpawnEntities {
     Everything,
 }
 
+#[derive(Component, Default)]
+pub struct BackgroundColor;
+
+#[derive(Component, Default)]
+pub struct BackgroundImage;
+
 /// A component attached to all level layers
 #[derive(Component, Default)]
 pub struct Layer {
@@ -120,6 +126,3 @@ impl LdtkEntity {
         self.tags.iter().any(|inner_tag| inner_tag == tag)
     }
 }
-
-#[derive(Component, Default)]
-pub struct TrackLocation;

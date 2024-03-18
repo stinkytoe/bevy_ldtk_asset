@@ -20,8 +20,9 @@ pub mod prelude {
     pub use crate::assets::world::WorldAsset;
     pub use crate::bundles::LevelBundle;
     pub use crate::bundles::WorldBundle;
+    pub use crate::interface::int_grid_at_location;
     pub use crate::interface::levels_at_location;
-    pub use crate::interface::LevelAtPositionQuery;
+    pub use crate::interface::LevelAtLocationQuery;
     pub use crate::plugin::BevyLdtkAssetPlugin;
     pub use crate::structs::Layer;
     pub use crate::structs::LdtkEntity;

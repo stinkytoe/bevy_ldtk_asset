@@ -37,7 +37,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     });
 }
 
-fn update(levels: Res<Assets<LevelAsset>>, levels_query: LevelAtPositionQuery) {
+fn update(levels: Res<Assets<LevelAsset>>, levels_query: LevelAtLocationQuery) {
     let _levels_at = levels_at_location(Vec2::ZERO, &levels, levels_query);
     // debug!("{levels_at:?}");
 }
@@ -64,16 +64,10 @@ fn register_player_by_tag(
 fn move_player(
     mut ldtk_entity_query: Query<(&mut Transform, &LdtkEntity)>,
     levels: Res<Assets<LevelAsset>>,
-    levels_at_position_query: LevelAtPositionQuery,
+    levels_at_position_query: LevelAtLocationQuery,
     player: Res<Player>,
     keys: Res<ButtonInput<KeyCode>>,
 ) {
-    // let level_handle: Handle<LevelAsset> = asset_server.load(LEVEL_PATH);
-    //
-    // let level = level_assets
-    //     .get(level_handle)
-    //     .expect("failed to get the level asset?");
-    //
     let Some((mut player_transform, player_ldtk_entity_component)) =
         player.0.map(|player_entity| {
             ldtk_entity_query
@@ -109,6 +103,8 @@ fn move_player(
     };
 
     let levels_at = levels_at_location(move_attempt.truncate(), &levels, levels_at_position_query);
+
+    // let int_grid_at = int_grid_at_location(move_attempt.truncate());
 
     debug!("Player standing on level: {levels_at:?}");
 

@@ -12,7 +12,7 @@ use crate::{
     bundles::{LayerVisibleBundle, LdtkEntityBundle, LdtkEntityLayerBundle},
     ldtk,
     prelude::LdtkEntity,
-    structs::Layer,
+    structs::{BackgroundColor, BackgroundImage, Layer},
     traits::{HasIdentifier, SpawnsEntities},
     util::bevy_color_from_ldtk,
 };
@@ -191,6 +191,132 @@ impl SpawnsEntities for LevelAsset {
 }
 
 impl LevelAsset {
+    fn spawn_bg_poly(
+        &self,
+        parent: &mut ChildBuilder,
+        meshes: &mut Assets<Mesh>,
+        materials: &mut Assets<ColorMaterial>,
+    ) {
+        let name = "background_color";
+        let size = self.size;
+        let material = materials.add(ColorMaterial {
+            color: self.background_color,
+            texture: None,
+        });
+
+        let indices = Indices::U32(vec![0, 1, 2, 0, 2, 3]);
+        let verts = vec![
+            [0.0, 0.0, 0.0],
+            [size.x, 0.0, 0.0],
+            [size.x, -size.y, 0.0],
+            [0.0, -size.y, 0.0],
+        ];
+
+        parent.spawn((
+            BackgroundColor,
+            Name::from(name),
+            MaterialMesh2dBundle {
+                mesh: meshes
+                    .add(
+                        Mesh::new(
+                            PrimitiveTopology::TriangleList,
+                            RenderAssetUsages::default(),
+                        )
+                        .with_inserted_indices(indices)
+                        .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, verts),
+                    )
+                    .into(),
+                material,
+                transform: Transform {
+                    translation: Vec3::ZERO,
+                    scale: Vec2::ONE.extend(0.0),
+                    ..default()
+                },
+                ..default()
+            },
+        ));
+    }
+
+    fn spawn_bg_image(
+        &self,
+        parent: &mut ChildBuilder,
+        project: &ProjectAsset,
+        meshes: &mut Assets<Mesh>,
+        materials: &mut Assets<ColorMaterial>,
+        images: &Assets<Image>,
+    ) {
+        let Some((path, bg_pos)) = &self.background else {
+            return;
+        };
+
+        let handle = project
+            .background_handles
+            .get(path)
+            .expect("bad image path?");
+        let image_size = images.get(handle).expect("bad handle?").size_f32();
+
+        let (crop_x, crop_y, crop_width, crop_height) = (
+            bg_pos.crop_rect[0] as f32,
+            bg_pos.crop_rect[1] as f32,
+            bg_pos.crop_rect[2] as f32,
+            bg_pos.crop_rect[3] as f32,
+        );
+
+        let name = "background_image";
+        let material = materials.add(ColorMaterial {
+            color: Color::WHITE,
+            texture: Some(handle.clone()),
+        });
+        let top_left = Vec2::new(bg_pos.top_left_px[0] as f32, -bg_pos.top_left_px[1] as f32);
+        let size = Vec2::new(crop_width, crop_height);
+        let z = self.layer_separation;
+        let scale = Vec2::new(bg_pos.scale[0] as f32, bg_pos.scale[1] as f32);
+        let uv_start = Vec2::new(crop_x / image_size.x, crop_y / image_size.y);
+        let uv_end = Vec2::new(
+            (crop_x + crop_width) / image_size.x,
+            (crop_y + crop_height) / image_size.y,
+        );
+
+        let indices = Indices::U32(vec![0, 1, 2, 0, 2, 3]);
+        let verts = vec![
+            [0.0, 0.0, 0.0],
+            [size.x, 0.0, 0.0],
+            [size.x, -size.y, 0.0],
+            [0.0, -size.y, 0.0],
+        ];
+        let uvs = vec![
+            [uv_start.x, uv_start.y], //0
+            [uv_end.x, uv_start.y],   //1
+            [uv_end.x, uv_end.y],     //2
+            [uv_start.x, uv_end.y],   //3
+        ];
+
+        parent.spawn((
+            Name::from(name),
+            BackgroundImage,
+            MaterialMesh2dBundle {
+                mesh: meshes
+                    .add(
+                        Mesh::new(
+                            PrimitiveTopology::TriangleList,
+                            RenderAssetUsages::default(),
+                        )
+                        .with_inserted_indices(indices)
+                        .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, verts)
+                        .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, uvs),
+                    )
+                    .into(),
+                material,
+                transform: Transform {
+                    translation: top_left.extend(z),
+                    scale: scale.extend(0.0),
+                    ..default()
+                },
+                ..default()
+            },
+        ));
+    }
+
     #[allow(clippy::too_many_arguments)]
     fn spawn_generic_layer<M: Material2d + Default>(
         &self,
@@ -245,81 +371,6 @@ impl LevelAsset {
         });
     }
 
-    fn spawn_bg_poly(
-        &self,
-        parent: &mut ChildBuilder,
-        meshes: &mut Assets<Mesh>,
-        materials: &mut Assets<ColorMaterial>,
-    ) {
-        self.spawn_generic_layer(
-            parent,
-            meshes,
-            "background_color",
-            materials.add(ColorMaterial {
-                color: self.background_color,
-                texture: None,
-            }),
-            Vec2::ZERO,
-            self.size,
-            0.0,
-            Vec2::ONE,
-            Vec2::ZERO,
-            Vec2::ONE,
-        );
-    }
-
-    fn spawn_bg_image(
-        &self,
-        parent: &mut ChildBuilder,
-        project: &ProjectAsset,
-        meshes: &mut Assets<Mesh>,
-        materials: &mut Assets<ColorMaterial>,
-        images: &Assets<Image>,
-    ) {
-        let Some((path, bg_pos)) = &self.background else {
-            return;
-        };
-
-        let handle = project
-            .background_handles
-            .get(path)
-            .expect("bad image path?");
-        let image_size = images.get(handle).expect("bad handle?").size_f32();
-
-        let (crop_x, crop_y, crop_width, crop_height) = (
-            bg_pos.crop_rect[0] as f32,
-            bg_pos.crop_rect[1] as f32,
-            bg_pos.crop_rect[2] as f32,
-            bg_pos.crop_rect[3] as f32,
-        );
-
-        let top_left = Vec2::new(bg_pos.top_left_px[0] as f32, -bg_pos.top_left_px[1] as f32);
-        let size = Vec2::new(crop_width, crop_height);
-        let z = self.layer_separation;
-        let scale = Vec2::new(bg_pos.scale[0] as f32, bg_pos.scale[1] as f32);
-        let uv_start = Vec2::new(crop_x / image_size.x, crop_y / image_size.y);
-        let uv_end = Vec2::new(
-            (crop_x + crop_width) / image_size.x,
-            (crop_y + crop_height) / image_size.y,
-        );
-
-        self.spawn_generic_layer(
-            parent,
-            meshes,
-            "background_image",
-            materials.add(ColorMaterial {
-                color: Color::WHITE,
-                texture: Some(handle.clone()),
-            }),
-            top_left,
-            size,
-            z,
-            scale,
-            uv_start,
-            uv_end,
-        );
-    }
-
     fn spawn_layers(
         &self,
         parent: &mut ChildBuilder,
@@ -355,7 +406,6 @@ impl LevelAsset {
                         &layer.auto_layer_tiles,
                         z,
                     ),
-                    // "Entities" => self.spawn_entities_layer(parent, layer, &layer.entity_instances),
                     "Entities" => self.spawn_entities_layer(
                         parent,
                         project,
@@ -434,7 +484,7 @@ impl LevelAsset {
             &layer.identifier.clone(),
             materials.add(ColorMaterial {
                 color: Color::WHITE,
-                texture: Some(new_handle.clone()),
+                texture: Some(new_handle),
             }),
             Vec2::ZERO,
             self.size,
