@@ -105,6 +105,15 @@ impl Layer {
     }
 }
 
+impl Layer {
+    /// Returns the size in pixels of this layer
+    pub fn size(&self) -> Vec2 {
+        Vec2::new(
+            (self.grid_width * self.grid_size) as f32,
+            (self.grid_height * self.grid_size) as f32,
+        )
+    }
+}
 /// A layer containing ldtk entities
 #[derive(Component, Default)]
 pub struct LdtkEntityLayer {}
