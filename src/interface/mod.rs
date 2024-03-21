@@ -25,16 +25,15 @@ pub fn levels_at_location(
 }
 
 #[allow(missing_docs)]
-pub type IntGridAtLocationQuery<'a, 'b> =
-    Query<'a, 'b, (&'static GlobalTransform, &'static Handle<LevelAsset>)>;
+pub type IntGridAtLocationQuery<'a, 'b> = Query<'a, 'b, (&'static GlobalTransform, &'static Layer)>;
 
 /// Finds the int grid value, if any, at a given global location
 pub fn int_grid_at_location(
-    _location: Vec2,
+    location: Vec2,
     // projects: &Assets<ProjectAsset>,
     // worlds: &Assets<WorldAsset>,
-    _levels: &Assets<LevelAsset>,
-    _int_grid_query: IntGridAtLocationQuery,
+    // _levels: &Assets<LevelAsset>,
+    int_grid_query: IntGridAtLocationQuery,
 ) -> Option<ldtk::IntGridValueDefinition> {
     // let mut level_handles = int_grid_query
     //     .iter()
@@ -59,5 +58,27 @@ pub fn int_grid_at_location(
     //     // if row > level.
     //     todo!()
     // });
+
+    let mut layers: Vec<_> = int_grid_query
+        .iter()
+        .filter(|(transform, layer)| {
+            let layer_position = transform.translation().truncate();
+            let layer_size = Vec2::new(1.0, -1.0) * layer.size();
+            Rect::from_corners(layer_position, layer_position - layer_size).contains(location)
+        })
+        .collect();
+
+    layers.sort_by(|(a, _), (b, _)| {
+        a.translation()
+            .z
+            .partial_cmp(&b.translation().z)
+            .expect("bad layer sort?")
+    });
+
+    layers.iter().rev().find(|(transform, layer)| {
+        let location_in_layer = location - transform.translation().truncate();
+        todo!()
+    });
+
     todo!()
 }
