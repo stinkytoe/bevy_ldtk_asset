@@ -3,9 +3,10 @@ use bevy::{
     render::{mesh::Indices, render_asset::RenderAssetUsages, render_resource::PrimitiveTopology},
     sprite::{Anchor, Material2d, MaterialMesh2dBundle},
 };
+use image::DynamicImage;
 use image::{
     imageops::{crop, flip_horizontal, flip_vertical, overlay},
-    ColorType, DynamicImage,
+    ColorType,
 };
 
 use crate::{
@@ -371,7 +372,7 @@ impl LevelAsset {
                 material: material.into(),
                 transform: Transform {
                     translation: top_left.extend(z),
-                    scale: scale.extend(0.0),
+                    scale: scale.extend(1.0),
                     ..default()
                 },
                 visibility,
@@ -492,7 +493,7 @@ impl LevelAsset {
             overlay(&mut dynamic_image, &cropped, tile.px[0], tile.px[1]);
         });
 
-        let color = Color::rgba(0.0, 0.0, 0.0, layer.opacity as f32);
+        let color = Color::rgba(1.0, 1.0, 1.0, layer.opacity as f32);
 
         let new_image = Image::from_dynamic(dynamic_image, true, RenderAssetUsages::default());
         let new_handle = images.add(new_image);
