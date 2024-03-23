@@ -16,7 +16,7 @@ fn main() {
         .insert_resource(Msaa::Off)
         .insert_resource(Player::default())
         .add_systems(Startup, setup)
-        .add_systems(Update, (register_player_by_tag, update, move_player))
+        .add_systems(Update, (register_player_by_tag, move_player))
         .run();
 }
 
@@ -35,11 +35,6 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         spawn_entities: SpawnEntities::Everything,
         ..default()
     });
-}
-
-fn update(levels: Res<Assets<LevelAsset>>, levels_query: LevelAtLocationQuery) {
-    let _levels_at = levels_at_location(Vec2::ZERO, &levels, levels_query);
-    // debug!("{levels_at:?}");
 }
 
 #[derive(Resource, Debug, Default)]
@@ -63,8 +58,7 @@ fn register_player_by_tag(
 
 fn move_player(
     mut ldtk_entity_query: Query<(&mut Transform, &LdtkEntity)>,
-    levels: Res<Assets<LevelAsset>>,
-    levels_at_position_query: LevelAtLocationQuery,
+    levels_at_location: LevelsAtLocation,
     player: Res<Player>,
     keys: Res<ButtonInput<KeyCode>>,
 ) {
@@ -102,26 +96,8 @@ fn move_player(
         return;
     };
 
-    let levels_at = levels_at_location(move_attempt.truncate(), &levels, levels_at_position_query);
-
-    // let int_grid_at = int_grid_at_location(move_attempt.truncate());
-
+    let levels_at = levels_at_location.find(move_attempt.truncate());
     debug!("Player standing on level: {levels_at:?}");
 
     player_transform.translation = move_attempt;
-
-    // if let Some(int_grid_value) =
-    //     level.get_int_grid_value_at_level_coordinate(move_attempt.truncate())
-    // {
-    //     match int_grid_value.identifier().as_deref() {
-    //         Some("water") => info!("collision with water!"),
-    //         Some(identifier) => {
-    //             info!("walking on: {identifier}");
-    //             player_transform.translation = move_attempt;
-    //         }
-    //         None => info!("no identifier"),
-    //     }
-    // } else {
-    //     info("no int grid at attempted move location. We don't know what we're going to be walking on!");
-    // }
 }
