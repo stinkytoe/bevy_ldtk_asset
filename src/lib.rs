@@ -20,6 +20,8 @@ pub mod prelude {
     pub use crate::assets::world::WorldAsset;
     pub use crate::bundles::LevelBundle;
     pub use crate::bundles::WorldBundle;
+    pub use crate::interface::int_grid_at_location::IntGridAtLocation;
+    pub use crate::interface::int_grid_at_location::IntGridAtLocationTrait;
     pub use crate::interface::ldtk_entities_with_tag::FindSingleError;
     pub use crate::interface::ldtk_entities_with_tag::LdtkEntitiesWithTag;
     pub use crate::interface::ldtk_entities_with_tag::LdtkEntitiesWithTagTrait;
@@ -31,6 +33,8 @@ pub mod prelude {
     pub use crate::structs::SpawnEntities;
     pub use crate::traits::HasIdentifier;
 
+    //
+    pub use crate::ldtk::IntGridValueDefinition;
     //
     pub use crate::ldtk::LayerInstance;
     //

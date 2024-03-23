@@ -8,7 +8,7 @@ use crate::{
 
 /// A component included in WorldBundle, which we will use to determine if a given
 /// asset should spawn its associated entities, or simply be loaded as data
-#[derive(Component, Default)]
+#[derive(Component, Debug, Default)]
 pub enum SpawnEntities {
     #[default]
     /// Load nothing
@@ -17,14 +17,14 @@ pub enum SpawnEntities {
     Everything,
 }
 
-#[derive(Component, Default)]
+#[derive(Component, Debug, Default)]
 pub struct BackgroundColor;
 
-#[derive(Component, Default)]
+#[derive(Component, Debug, Default)]
 pub struct BackgroundImage;
 
 /// A component attached to all level layers
-#[derive(Component, Default)]
+#[derive(Component, Debug, Default)]
 pub struct Layer {
     grid_width: i64,
     grid_height: i64,
@@ -115,11 +115,11 @@ impl Layer {
     }
 }
 /// A layer containing ldtk entities
-#[derive(Component, Default)]
+#[derive(Component, Debug, Default)]
 pub struct LdtkEntityLayer {}
 
 /// An LDtk entity as a Bevy component.
-#[derive(Component, Default)]
+#[derive(Component, Debug, Default)]
 pub struct LdtkEntity {
     project_handle: Handle<ProjectAsset>,
     identifier: String,

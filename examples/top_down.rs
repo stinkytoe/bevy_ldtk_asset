@@ -58,19 +58,18 @@ fn camera_follow_player(
 fn move_player(
     mut ldtk_entity_query: Query<(&GlobalTransform, &mut Transform, &LdtkEntity)>,
     ldtk_entities_with_tag: LdtkEntitiesWithTag,
+    int_grid_at_location: IntGridAtLocation,
     keys: Res<ButtonInput<KeyCode>>,
 ) {
     let Ok(player_entity) = ldtk_entities_with_tag.find_single("player") else {
         return;
     };
 
-    let Ok((_player_global_transform, mut player_transform, player_ldtk_entity_component)) =
+    let Ok((player_global_transform, mut player_transform, player_ldtk_entity_component)) =
         ldtk_entity_query.get_mut(player_entity)
     else {
         return;
     };
-
-    // let player_global_location = player_global_transform.translation().truncate();
 
     let move_attempt: Vec2 = {
         let entity_size = player_ldtk_entity_component.size();
@@ -89,5 +88,22 @@ fn move_player(
         .into()
     };
 
-    player_transform.translation += move_attempt.extend(0.0);
+    let player_global_location = player_global_transform.translation().truncate();
+
+    let int_grid_at = int_grid_at_location.top(player_global_location + move_attempt);
+
+    if let Some(IntGridValueDefinition {
+        identifier: Some(identifier),
+        ..
+    }) = int_grid_at
+    {
+        match identifier.as_ref() {
+            "bridge" | "dirt" | "grass" => {
+                info!("Walking on: {identifier}");
+                player_transform.translation += move_attempt.extend(0.0);
+            }
+            "water" => info!("Cannot walk on water!"),
+            _ => info!("Unknown int grid value: {identifier}"),
+        }
+    };
 }
