@@ -20,6 +20,9 @@ pub mod prelude {
     pub use crate::assets::world::WorldAsset;
     pub use crate::bundles::LevelBundle;
     pub use crate::bundles::WorldBundle;
+    pub use crate::interface::ldtk_entities_with_tag::FindSingleError;
+    pub use crate::interface::ldtk_entities_with_tag::LdtkEntitiesWithTag;
+    pub use crate::interface::ldtk_entities_with_tag::LdtkEntitiesWithTagTrait;
     pub use crate::interface::level_at_location::LevelsAtLocation;
     pub use crate::interface::level_at_location::LevelsAtLocationTrait;
     pub use crate::plugin::BevyLdtkAssetPlugin;

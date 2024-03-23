@@ -14,9 +14,8 @@ fn main() {
             BevyLdtkAssetPlugin,
         ))
         .insert_resource(Msaa::Off)
-        .insert_resource(Player::default())
         .add_systems(Startup, setup)
-        .add_systems(Update, (register_player_by_tag, move_player))
+        .add_systems(Update, move_player)
         .run();
 }
 
@@ -37,40 +36,27 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     });
 }
 
-#[derive(Resource, Debug, Default)]
-struct Player(Option<Entity>);
-
-fn register_player_by_tag(
-    new_entity_instance_query: Query<(Entity, &LdtkEntity), Added<LdtkEntity>>,
-    mut player: ResMut<Player>,
-) {
-    for (entity, ldtk_entity) in new_entity_instance_query.iter() {
-        if ldtk_entity.has_tag("player") {
-            if player.0.is_some() {
-                error!("There are more than one entities spawned with the \"player\" tag!");
-            } else {
-                debug!("Registering player: {}", ldtk_entity.identifier());
-                player.0 = Some(entity);
-            }
-        }
-    }
-}
-
 fn move_player(
     mut ldtk_entity_query: Query<(&mut Transform, &LdtkEntity)>,
+    ldtk_entities_with_tag: LdtkEntitiesWithTag,
     levels_at_location: LevelsAtLocation,
-    player: Res<Player>,
     keys: Res<ButtonInput<KeyCode>>,
 ) {
-    let Some((mut player_transform, player_ldtk_entity_component)) =
-        player.0.map(|player_entity| {
-            ldtk_entity_query
-                .get_mut(player_entity)
-                .expect("query failed!")
-        })
-    else {
-        return;
+    let player_entity = match ldtk_entities_with_tag.find_single("player") {
+        Ok(entity) => entity,
+        Err(FindSingleError::NoEntities(_)) => {
+            // It could be that the entity just isn't loaded yet...
+            return;
+        }
+        Err(FindSingleError::MultipleEntities(e)) => {
+            error!("Multiple ldtk entities with player tag!");
+            panic!("{e}");
+        }
     };
+
+    let (mut player_transform, player_ldtk_entity_component) = ldtk_entity_query
+        .get_mut(player_entity)
+        .expect("query failed!");
 
     let mut move_attempt = player_transform.translation;
 
