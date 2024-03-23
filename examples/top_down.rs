@@ -5,17 +5,19 @@ use bevy_ldtk_asset::prelude::*;
 fn main() {
     App::new()
         .add_plugins((
-            DefaultPlugins.set(LogPlugin {
-                level: bevy::log::Level::WARN,
-                filter: "bevy_ldtk_asset=debug,top_down=debug".into(),
-                ..default()
-            }),
+            DefaultPlugins
+                .set(LogPlugin {
+                    level: bevy::log::Level::WARN,
+                    filter: "bevy_ldtk_asset=debug,top_down=debug".into(),
+                    ..default()
+                })
+                .set(ImagePlugin::default_nearest()),
             WorldInspectorPlugin::default(),
             BevyLdtkAssetPlugin,
         ))
         .insert_resource(Msaa::Off)
         .add_systems(Startup, setup)
-        .add_systems(Update, move_player)
+        .add_systems(Update, (camera_follow_player, move_player))
         .run();
 }
 
@@ -23,7 +25,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(Camera2dBundle {
         transform: Transform {
             translation: (256.0, -256.0, 1000.0).into(),
-            scale: Vec2::splat(0.5).extend(1.0),
+            scale: Vec2::splat(0.2).extend(1.0),
             ..default()
         },
         ..default()
@@ -36,54 +38,56 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     });
 }
 
-fn move_player(
-    mut ldtk_entity_query: Query<(&mut Transform, &LdtkEntity)>,
+fn camera_follow_player(
+    mut camera_query: Query<&mut Transform, With<Camera2d>>,
+    ldtk_entity_query: Query<&GlobalTransform>,
     ldtk_entities_with_tag: LdtkEntitiesWithTag,
-    levels_at_location: LevelsAtLocation,
-    keys: Res<ButtonInput<KeyCode>>,
 ) {
-    let player_entity = match ldtk_entities_with_tag.find_single("player") {
-        Ok(entity) => entity,
-        Err(FindSingleError::NoEntities(_)) => {
-            // It could be that the entity just isn't loaded yet...
-            return;
-        }
-        Err(FindSingleError::MultipleEntities(e)) => {
-            error!("Multiple ldtk entities with player tag!");
-            panic!("{e}");
-        }
-    };
-
-    let (mut player_transform, player_ldtk_entity_component) = ldtk_entity_query
-        .get_mut(player_entity)
-        .expect("query failed!");
-
-    let mut move_attempt = player_transform.translation;
-
-    let entity_size = player_ldtk_entity_component.size();
-
-    if keys.just_pressed(KeyCode::ArrowRight) {
-        move_attempt.x += entity_size.x;
-    }
-
-    if keys.just_pressed(KeyCode::ArrowLeft) {
-        move_attempt.x -= entity_size.x;
-    }
-
-    if keys.just_pressed(KeyCode::ArrowUp) {
-        move_attempt.y += entity_size.y;
-    }
-
-    if keys.just_pressed(KeyCode::ArrowDown) {
-        move_attempt.y -= entity_size.y;
-    }
-
-    if move_attempt == player_transform.translation {
+    let Ok(player_entity) = ldtk_entities_with_tag.find_single("player") else {
         return;
     };
 
-    let levels_at = levels_at_location.find(move_attempt.truncate());
-    debug!("Player standing on level: {levels_at:?}");
+    let Ok(player_global_transform) = ldtk_entity_query.get(player_entity) else {
+        return;
+    };
 
-    player_transform.translation = move_attempt;
+    let mut camera_transform = camera_query.single_mut();
+    camera_transform.translation = player_global_transform.translation().xy().extend(1000.0);
+}
+
+fn move_player(
+    mut ldtk_entity_query: Query<(&GlobalTransform, &mut Transform, &LdtkEntity)>,
+    ldtk_entities_with_tag: LdtkEntitiesWithTag,
+    keys: Res<ButtonInput<KeyCode>>,
+) {
+    let Ok(player_entity) = ldtk_entities_with_tag.find_single("player") else {
+        return;
+    };
+
+    let Ok((_player_global_transform, mut player_transform, player_ldtk_entity_component)) =
+        ldtk_entity_query.get_mut(player_entity)
+    else {
+        return;
+    };
+
+    // let player_global_location = player_global_transform.translation().truncate();
+
+    let move_attempt: Vec2 = {
+        let entity_size = player_ldtk_entity_component.size();
+        match (
+            keys.just_pressed(KeyCode::ArrowUp),
+            keys.just_pressed(KeyCode::ArrowLeft),
+            keys.just_pressed(KeyCode::ArrowDown),
+            keys.just_pressed(KeyCode::ArrowRight),
+        ) {
+            (true, false, false, false) => (0.0, entity_size.y),
+            (false, true, false, false) => (-entity_size.x, 0.0),
+            (false, false, true, false) => (0.0, -entity_size.y),
+            (false, false, false, true) => (entity_size.x, 0.0),
+            _ => return,
+        }
+        .into()
+    };
+
+    player_transform.translation += move_attempt.extend(0.0);
 }

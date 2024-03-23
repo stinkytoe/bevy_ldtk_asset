@@ -2,7 +2,8 @@ use bevy::prelude::*;
 
 use crate::{
     ldtk,
-    prelude::{LevelBundle, SpawnEntities},
+    prelude::LevelBundle,
+    structs::SpawnEntities,
     traits::{HasIdentifier, SpawnsEntities},
 };
 
