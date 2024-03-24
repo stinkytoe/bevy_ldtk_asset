@@ -580,11 +580,7 @@ impl LevelAsset {
 
                 let top_left = Vec2::new(tileset_rect.x as f32, tileset_rect.y as f32);
                 let size = Vec2::new(tileset_rect.w as f32, tileset_rect.h as f32);
-                let offset = Vec3::new(
-                    (entity.width as f32) * (entity.pivot[0] as f32 - 1.0),
-                    -(entity.height as f32) * (entity.pivot[1] as f32 - 1.0),
-                    0.0,
-                );
+                let offset = Vec2::new(entity.pivot[0] as f32 - 0.5, 0.5 - entity.pivot[1] as f32);
 
                 parent.spawn(SpriteBundle {
                     sprite: Sprite {
@@ -593,10 +589,9 @@ impl LevelAsset {
                             min: top_left,
                             max: top_left + size,
                         }),
-                        anchor: Anchor::TopLeft,
+                        anchor: Anchor::Custom(offset),
                         ..default()
                     },
-                    transform: Transform::from_translation(offset),
                     texture: tileset_handle.clone(),
                     ..default()
                 });
