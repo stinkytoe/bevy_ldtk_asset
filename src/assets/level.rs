@@ -477,8 +477,8 @@ impl LevelAsset {
                 &mut tileset,
                 tile.src[0] as u32,
                 tile.src[1] as u32,
-                layer.c_wid as u32,
-                layer.c_hei as u32,
+                layer.grid_size as u32,
+                layer.grid_size as u32,
             )
             .to_image();
 
