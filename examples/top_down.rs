@@ -17,14 +17,14 @@ fn main() {
         ))
         .insert_resource(Msaa::Off)
         .add_systems(Startup, setup)
-        .add_systems(Update, (camera_follow_player, move_player))
+        .add_systems(Update, move_player)
         .run();
 }
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(Camera2dBundle {
         transform: Transform {
-            translation: (256.0, -256.0, 1000.0).into(),
+            translation: (136.0, -136.0, 1000.0).into(),
             scale: Vec2::splat(0.2).extend(1.0),
             ..default()
         },
@@ -38,25 +38,12 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     });
 }
 
-fn camera_follow_player(
-    mut camera_query: Query<&mut Transform, With<Camera2d>>,
-    ldtk_entity_query: Query<&GlobalTransform>,
-    ldtk_entities_with_tag: LdtkEntitiesWithTag,
-) {
-    let Ok(player_entity) = ldtk_entities_with_tag.find_single("player") else {
-        return;
-    };
-
-    let Ok(player_global_transform) = ldtk_entity_query.get(player_entity) else {
-        return;
-    };
-
-    let mut camera_transform = camera_query.single_mut();
-    camera_transform.translation = player_global_transform.translation().xy().extend(1000.0);
-}
-
 fn move_player(
-    mut ldtk_entity_query: Query<(&GlobalTransform, &mut Transform, &LdtkEntity)>,
+    mut ldtk_entity_query: Query<
+        (&GlobalTransform, &mut Transform, &LdtkEntity),
+        Without<Camera2d>,
+    >,
+    mut camera_query: Query<&mut Transform, With<Camera2d>>,
     ldtk_entities_with_tag: LdtkEntitiesWithTag,
     int_grid_at_location: IntGridAtLocation,
     keys: Res<ButtonInput<KeyCode>>,
@@ -90,19 +77,19 @@ fn move_player(
 
     let player_global_location = player_global_transform.translation().truncate();
 
-    let int_grid_at = int_grid_at_location.top(player_global_location + move_attempt);
-
     if let Some(IntGridValueDefinition {
         identifier: Some(identifier),
         ..
-    }) = int_grid_at
+    }) = int_grid_at_location.top(player_global_location + move_attempt)
     {
         match identifier.as_ref() {
             "bridge" | "dirt" | "grass" => {
                 info!("Walking on: {identifier}");
+                let mut camera_transform = camera_query.single_mut();
                 player_transform.translation += move_attempt.extend(0.0);
+                camera_transform.translation = (player_global_location + move_attempt).extend(0.0);
             }
-            "water" => info!("Cannot walk on water!"),
+            "water" => info!("Cannot walk on {identifier}!"),
             _ => info!("Unknown int grid value: {identifier}"),
         }
     };
