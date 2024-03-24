@@ -31,8 +31,8 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         ..default()
     });
 
-    commands.spawn(WorldBundle {
-        world: asset_server.load("ldtk/side_scroller.ldtk#World"),
+    commands.spawn(LevelBundle {
+        level: asset_server.load("ldtk/side_scroller.ldtk#World/The_Grotto"),
         spawn_entities: SpawnEntities::Everything,
         ..default()
     });
