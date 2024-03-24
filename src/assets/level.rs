@@ -470,7 +470,7 @@ impl LevelAsset {
             .expect("Unable to make dynamic image?");
 
         let mut dynamic_image =
-            DynamicImage::new(self.size.x as u32, self.size.y as u32, ColorType::Rgba32F);
+            DynamicImage::new(self.size.x as u32, self.size.y as u32, ColorType::Rgba8);
 
         tiles.iter().for_each(|tile| {
             let mut cropped = crop(
