@@ -5,20 +5,20 @@
 		"doc": "https://ldtk.io/json",
 		"schema": "https://ldtk.io/files/JSON_SCHEMA.json",
 		"appAuthor": "Sebastien 'deepnight' Benard",
-		"appVersion": "1.5.2",
+		"appVersion": "1.5.3",
 		"url": "https://ldtk.io"
 	},
 	"iid": "daa3bd90-8990-11ee-a89b-b7500526d35a",
-	"jsonVersion": "1.5.2",
-	"appBuildId": 473624,
+	"jsonVersion": "1.5.3",
+	"appBuildId": 473703,
 	"nextUid": 263,
 	"identifierStyle": "Capitalize",
 	"toc": [],
-	"worldLayout": "Free",
-	"worldGridWidth": 256,
-	"worldGridHeight": 256,
-	"defaultLevelWidth": 256,
-	"defaultLevelHeight": 256,
+	"worldLayout": null,
+	"worldGridWidth": null,
+	"worldGridHeight": null,
+	"defaultLevelWidth": null,
+	"defaultLevelHeight": null,
 	"defaultPivotX": 0,
 	"defaultPivotY": 0,
 	"defaultGridSize": 32,
@@ -30,8 +30,8 @@
 	"externalLevels": false,
 	"exportTiled": false,
 	"simplifiedExport": false,
-	"imageExportMode": "LayersAndLevels",
-	"exportLevelBg": true,
+	"imageExportMode": "None",
+	"exportLevelBg": false,
 	"pngFilePattern": null,
 	"backupOnSave": false,
 	"backupLimit": 10,
@@ -39,7 +39,7 @@
 	"levelNamePattern": "Level_%idx",
 	"tutorialDesc": null,
 	"customCommands": [],
-	"flags": ["ExportOldTableOfContentData"],
+	"flags": [ "ExportOldTableOfContentData", "MultiWorlds" ],
 	"defs": { "layers": [
 		{
 			"__type": "Entities",
@@ -1647,8 +1647,8 @@
 			"renderInWorldView": true,
 			"pxOffsetX": 0,
 			"pxOffsetY": 0,
-			"parallaxFactorX": 0.5,
-			"parallaxFactorY": 0.5,
+			"parallaxFactorX": 0.12,
+			"parallaxFactorY": 0.12,
 			"parallaxScaling": false,
 			"requiredTags": [],
 			"excludedTags": [],
@@ -1847,7 +1847,8 @@
 			}
 		}
 	], "enums": [], "externalEnums": [], "levelFields": [] },
-	"levels": [
+	"levels": [],
+	"worlds": [{ "iid": "daa3bd91-8990-11ee-a89b-25e2f0ba08e6", "identifier": "World", "defaultLevelWidth": 256, "defaultLevelHeight": 256, "worldGridWidth": 256, "worldGridHeight": 256, "worldLayout": "Free", "levels": [
 		{
 			"identifier": "The_Grotto",
 			"iid": "daa3e4a0-8990-11ee-a89b-69cf60a89496",
@@ -1895,7 +1896,7 @@
 					"entityInstances": [
 						{
 							"__identifier": "Crabby",
-							"__grid": [14,18],
+							"__grid": [15,20],
 							"__pivot": [0.5,1],
 							"__tags": [ "collider", "player" ],
 							"__tile": { "tilesetUid": 7, "x": 16, "y": 4, "w": 44, "h": 24 },
@@ -1904,13 +1905,13 @@
 							"width": 32,
 							"height": 16,
 							"defUid": 9,
-							"px": [464,608],
+							"px": [496,672],
 							"fieldInstances": [{ "__identifier": "aseprite", "__type": "FilePath", "__value": "../Treasure Hunters/The Crusty Crew/Aseprite/Crabby.aseprite", "__tile": null, "defUid": 260, "realEditorValues": [{
 								"id": "V_String",
 								"params": ["../Treasure Hunters/The Crusty Crew/Aseprite/Crabby.aseprite"]
 							}] }],
-							"__worldX": -48,
-							"__worldY": 224
+							"__worldX": -16,
+							"__worldY": 288
 						}
 					]
 				},
@@ -5595,7 +5596,6 @@
 			],
 			"__neighbours": []
 		}
-	],
-	"worlds": [],
+	] }],
 	"dummyWorldIid": "daa3bd91-8990-11ee-a89b-25e2f0ba08e6"
 }

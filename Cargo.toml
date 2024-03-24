@@ -18,5 +18,9 @@ serde_json = "1.0"
 name = "top_down"
 path = "examples/top_down.rs"
 
+[[example]]
+name = "side_scroller"
+path = "examples/side_scroller.rs"
+
 [dev-dependencies]
 bevy-inspector-egui = "0.23"

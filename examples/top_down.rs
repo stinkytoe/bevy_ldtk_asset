@@ -24,7 +24,7 @@ fn main() {
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(Camera2dBundle {
         transform: Transform {
-            translation: (136.0, -136.0, 1000.0).into(),
+            translation: (120.0, -136.0, 1000.0).into(),
             scale: Vec2::splat(0.2).extend(1.0),
             ..default()
         },
