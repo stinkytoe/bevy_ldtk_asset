@@ -204,15 +204,39 @@ impl AssetLoader for ProjectAssetLoader {
                 }
             };
 
+            let tileset_handles = value
+                .defs
+                .tilesets
+                .iter()
+                .filter_map(|tileset_definition| tileset_definition.rel_path.as_ref())
+                .map(|ldtk_path| {
+                    let asset_path = Path::new(&ldtk_path);
+                    let asset_path = ldtk_path_to_asset_path(&base_directory, asset_path);
+                    let asset_handle = load_context.load(asset_path);
+                    (ldtk_path.clone(), asset_handle)
+                })
+                .collect();
+
             let project_stub = ProjectStub {
                 value,
                 single_world,
                 external_levels,
             };
 
+            let background_handles = project_stub
+                .get_worlds()
+                .flat_map(|world| world.levels.iter())
+                .filter_map(|level| level.bg_rel_path.as_ref())
+                .map(|ldtk_path| {
+                    let asset_path = Path::new(&ldtk_path);
+                    let asset_path = ldtk_path_to_asset_path(&base_directory, asset_path);
+                    let asset_handle = load_context.load(asset_path);
+                    (ldtk_path.clone(), asset_handle)
+                })
+                .collect();
+
             let mut world_handles = HashMap::default();
             let mut level_handles = HashMap::default();
-
             project_stub.get_worlds().for_each(|world| {
                 let world_iid = world.iid.clone();
 
@@ -236,8 +260,7 @@ impl AssetLoader for ProjectAssetLoader {
                             iid: level_iid.clone(),
                         };
 
-                        let tag =
-                            format!("{}/{}", world.identifier.clone(), level.identifier.clone());
+                        let tag = format!("{}/{}", world.identifier, level.identifier);
 
                         let level_handle =
                             load_context.add_loaded_labeled_asset(tag, level_asset.into());
@@ -245,9 +268,6 @@ impl AssetLoader for ProjectAssetLoader {
                         level_handles.insert(level_iid, level_handle);
                     });
             });
-
-            let mut tileset_handles = HashMap::default();
-            let mut background_handles = HashMap::default();
 
             let project_asset = ProjectAsset {
                 value: project_stub.value,
