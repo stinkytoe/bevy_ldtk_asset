@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::ldtk;
+use crate::project::ProjectAsset;
 
 #[derive(Bundle, Debug, Default)]
 pub struct WorldBundle {
@@ -9,6 +9,6 @@ pub struct WorldBundle {
 
 #[derive(Asset, Debug, TypePath)]
 pub struct WorldAsset {
-    pub(crate) project_handle: Handle<crate::project::ProjectAsset>,
-    pub(crate) iid: String,
+    pub(crate) _project_handle: Handle<ProjectAsset>,
+    pub(crate) _iid: String,
 }

@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy::utils::thiserror;
 use thiserror::Error;
 
-use crate::ldtk::{self};
+use crate::ldtk;
 use crate::tileset_rectangle::TilesetRectangle;
 
 #[derive(Debug, Default)]

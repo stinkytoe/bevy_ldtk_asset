@@ -75,10 +75,10 @@ pub(crate) struct ProjectAsset {
     single_world: Vec<ldtk::World>,
     // If this is an external levels project, store the ldtk::level objects here
     external_levels: HashMap<String, Vec<ldtk::Level>>,
-    pub(crate) world_handles: HashMap<String, Handle<WorldAsset>>,
-    pub(crate) level_handles: HashMap<String, Handle<LevelAsset>>,
-    pub(crate) tileset_handles: HashMap<String, Handle<Image>>,
-    pub(crate) background_handles: HashMap<String, Handle<Image>>,
+    pub(crate) _world_handles: HashMap<String, Handle<WorldAsset>>,
+    pub(crate) _level_handles: HashMap<String, Handle<LevelAsset>>,
+    pub(crate) _tileset_handles: HashMap<String, Handle<Image>>,
+    pub(crate) _background_handles: HashMap<String, Handle<Image>>,
 }
 
 impl ProjectResolver for ProjectAsset {
@@ -241,8 +241,8 @@ impl AssetLoader for ProjectAssetLoader {
                 let world_iid = world.iid.clone();
 
                 let world_asset = WorldAsset {
-                    project_handle: project_handle.clone(),
-                    iid: world_iid.clone(),
+                    _project_handle: project_handle.clone(),
+                    _iid: world_iid.clone(),
                 };
 
                 let world_handle = load_context
@@ -256,8 +256,8 @@ impl AssetLoader for ProjectAssetLoader {
                         let level_iid = level.iid.clone();
 
                         let level_asset = LevelAsset {
-                            project_handle: project_handle.clone(),
-                            iid: level_iid.clone(),
+                            _project_handle: project_handle.clone(),
+                            _iid: level_iid.clone(),
                         };
 
                         let tag = format!("{}/{}", world.identifier, level.identifier);
@@ -273,10 +273,10 @@ impl AssetLoader for ProjectAssetLoader {
                 value: project_stub.value,
                 single_world: project_stub.single_world,
                 external_levels: project_stub.external_levels,
-                world_handles,
-                level_handles,
-                tileset_handles,
-                background_handles,
+                _world_handles: world_handles,
+                _level_handles: level_handles,
+                _tileset_handles: tileset_handles,
+                _background_handles: background_handles,
             };
 
             Ok(project_asset)

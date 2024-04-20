@@ -4,11 +4,11 @@ use core::f32;
 use std::path::PathBuf;
 use thiserror::Error;
 
+use crate::field_instance::FieldInstance;
+use crate::field_instance::FieldInstanceValueError;
 use crate::ldtk;
-use crate::{
-    field_instance::{FieldInstance, FieldInstanceValueError},
-    util::{bevy_color_from_ldtk, ColorParseError},
-};
+use crate::util::bevy_color_from_ldtk;
+use crate::util::ColorParseError;
 
 #[derive(Debug, Default)]
 #[cfg_attr(feature = "enable_typepath", derive(TypePath))]
@@ -261,6 +261,6 @@ pub struct LevelBundle {
 
 #[derive(Asset, Debug, TypePath)]
 pub struct LevelAsset {
-    pub(crate) project_handle: Handle<crate::project::ProjectAsset>,
-    pub(crate) iid: String,
+    pub(crate) _project_handle: Handle<crate::project::ProjectAsset>,
+    pub(crate) _iid: String,
 }

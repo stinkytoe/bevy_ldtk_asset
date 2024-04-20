@@ -2,7 +2,8 @@ use bevy::prelude::*;
 use bevy::utils::thiserror;
 use hex::FromHex;
 use path_clean::PathClean;
-use std::path::{Path, PathBuf};
+use std::path::Path;
+use std::path::PathBuf;
 use thiserror::Error;
 
 pub(crate) fn ldtk_path_to_asset_path(base_directory: &Path, ldtk_path: &Path) -> PathBuf {
