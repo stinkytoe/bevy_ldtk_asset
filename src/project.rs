@@ -14,7 +14,7 @@ use crate::level::LevelAsset;
 use crate::util::ldtk_path_to_asset_path;
 use crate::world::WorldAsset;
 
-pub trait ProjectResolver {
+pub(crate) trait ProjectResolver {
     fn value(&self) -> &ldtk::LdtkJson;
     fn single_world(&self) -> &Vec<ldtk::World>;
     fn levels(&self) -> &HashMap<String, Vec<ldtk::Level>>;
@@ -69,25 +69,24 @@ impl ProjectResolver for ProjectStub {
 
 #[derive(Asset, Debug)]
 #[cfg_attr(not(feature = "enable_reflect"), derive(TypePath))]
-#[cfg_attr(feature = "enable_reflect", derive(Reflect))]
-#[cfg_attr(feature = "enable_reflect", reflect(from_reflect = false))]
+#[cfg_attr(
+    feature = "enable_reflect",
+    derive(Reflect),
+    reflect(from_reflect = false)
+)]
 pub(crate) struct ProjectAsset {
-    #[reflect(ignore)]
+    #[cfg_attr(feature = "enable_reflect", reflect(ignore))]
     value: ldtk::LdtkJson,
     // If it's NOT a multi world project, then explicitly create an ldtk::World
     // and store it here
-    #[reflect(ignore)]
+    #[cfg_attr(feature = "enable_reflect", reflect(ignore))]
     single_world: Vec<ldtk::World>,
     // If this is an external levels project, store the ldtk::level objects here
-    #[reflect(ignore)]
+    #[cfg_attr(feature = "enable_reflect", reflect(ignore))]
     external_levels: HashMap<String, Vec<ldtk::Level>>,
-    #[reflect(ignore)]
     pub(crate) _world_handles: HashMap<String, Handle<WorldAsset>>,
-    #[reflect(ignore)]
     pub(crate) _level_handles: HashMap<String, Handle<LevelAsset>>,
-    #[reflect(ignore)]
     pub(crate) _tileset_handles: HashMap<String, Handle<Image>>,
-    #[reflect(ignore)]
     pub(crate) _background_handles: HashMap<String, Handle<Image>>,
 }
 

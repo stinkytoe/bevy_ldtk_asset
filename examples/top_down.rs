@@ -7,7 +7,7 @@ fn main() {
         .add_plugins((
             DefaultPlugins
                 .set(LogPlugin {
-                    level: bevy::log::Level::WARN,
+                    // level: bevy::log::Level::WARN,
                     filter: "bevy_ldtk_levels=trace,top_down=trace".into(),
                     ..default()
                 })

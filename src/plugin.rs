@@ -1,8 +1,6 @@
 use bevy::prelude::*;
 
 use crate::prelude::LevelAsset;
-use crate::prelude::WorldBundleLoadSettings;
-use crate::prelude::WorldComponent;
 use crate::project::ProjectAsset;
 use crate::project::ProjectAssetLoader;
 use crate::systems::respond_to_new_world_bundle;
@@ -21,11 +19,15 @@ impl Plugin for BevyLdtkLevelsPlugin {
             .add_systems(Update, respond_to_new_world_bundle.map(error));
 
         #[cfg(feature = "enable_reflect")]
-        app //
-            //.register_asset_reflect::<ProjectAsset>()
-            .register_asset_reflect::<WorldAsset>()
-            .register_asset_reflect::<LevelAsset>()
-            .register_type::<WorldComponent>()
-            .register_type::<WorldBundleLoadSettings>();
+        {
+            use crate::prelude::WorldBundleLoadSettings;
+            use crate::prelude::WorldComponent;
+            app //
+                //.register_asset_reflect::<ProjectAsset>()
+                .register_asset_reflect::<WorldAsset>()
+                .register_asset_reflect::<LevelAsset>()
+                .register_type::<WorldComponent>()
+                .register_type::<WorldBundleLoadSettings>();
+        }
     }
 }

@@ -9,9 +9,8 @@ use crate::world::WorldLayout;
 pub struct WorldComponent {
     identifier: String,
     iid: String,
-    // NOTE: how are we handling levels?
+    // TODO: how are we handling levels?
     world_grid_size: I64Vec2,
-    // #[reflect(ignore)]
     world_layout: Option<WorldLayout>,
 }
 
