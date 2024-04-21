@@ -11,9 +11,6 @@ use crate::level::Neighbour;
 use crate::level::NeighbourError;
 use crate::util::bevy_color_from_ldtk;
 use crate::util::ColorParseError;
-// use crate::level::
-// use crate::level::
-// use crate::level::
 
 #[derive(Debug, Error)]
 pub enum LevelComponentError {

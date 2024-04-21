@@ -14,7 +14,7 @@ use crate::level::LevelAsset;
 use crate::util::ldtk_path_to_asset_path;
 use crate::world::WorldAsset;
 
-trait ProjectResolver {
+pub trait ProjectResolver {
     fn value(&self) -> &ldtk::LdtkJson;
     fn single_world(&self) -> &Vec<ldtk::World>;
     fn levels(&self) -> &HashMap<String, Vec<ldtk::Level>>;
@@ -250,8 +250,8 @@ impl AssetLoader for ProjectAssetLoader {
                 let world_iid = world.iid.clone();
 
                 let world_asset = WorldAsset {
-                    _project_handle: project_handle.clone(),
-                    _iid: world_iid.clone(),
+                    project_handle: project_handle.clone(),
+                    iid: world_iid.clone(),
                 };
 
                 let world_handle = load_context
