@@ -270,8 +270,8 @@ impl AssetLoader for ProjectAssetLoader {
                         let level_iid = level.iid.clone();
 
                         let level_asset = LevelAsset {
-                            _project_handle: project_handle.clone(),
-                            _iid: level_iid.clone(),
+                            project_handle: project_handle.clone(),
+                            iid: level_iid.clone(),
                         };
 
                         let tag = format!("{}/{}", world.identifier, level.identifier);
