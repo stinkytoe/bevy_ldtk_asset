@@ -18,6 +18,8 @@ pub enum NewWorldBundleError {
     ProjectAssetLoadFail,
     #[error("IID not found in project! {0}")]
     IidNotFound(String),
+    #[error("Bad level handle in project, or bad level iid!")]
+    BadLevelIid,
 }
 
 pub(crate) fn respond_to_new_world_bundle(
@@ -46,6 +48,7 @@ pub(crate) fn respond_to_new_world_bundle(
 
             let mut entity_commands = commands.entity(entity);
 
+            // Level Children loading
             {
                 let levels = project_asset
                     .get_levels_by_world_iid(world_component.iid())
@@ -59,10 +62,18 @@ pub(crate) fn respond_to_new_world_bundle(
                     });
 
                 for level in levels {
-                    entity_commands.with_children(|parent| {
+                    let level = project_asset
+                        .level_handles
+                        .get(&level.iid)
+                        .ok_or(NewWorldBundleError::BadLevelIid)?
+                        .clone();
+
+                    let load_settings = load_settings.level_bundle_load_settings.clone();
+
+                    entity_commands.with_children(move |parent| {
                         parent.spawn(LevelBundle {
-                            level: project_asset.level_handles.get(&level.iid).unwrap().clone(),
-                            load_settings: load_settings.level_bundle_load_settings.clone(),
+                            level,
+                            load_settings,
                         });
                     });
                 }
