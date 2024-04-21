@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::world::WorldAsset;
+use crate::{prelude::LevelBundleLoadSettings, world::WorldAsset};
 
 #[derive(Debug, Default)]
 #[cfg_attr(feature = "enable_reflect", derive(Reflect))]
@@ -15,7 +15,8 @@ pub enum LoadLevels {
 #[derive(Component, Debug, Default)]
 #[cfg_attr(feature = "enable_reflect", derive(Reflect))]
 pub struct WorldBundleLoadSettings {
-    load_levels: LoadLevels,
+    pub load_levels: LoadLevels,
+    pub level_bundle_load_settings: LevelBundleLoadSettings,
 }
 
 #[derive(Bundle, Debug, Default)]

@@ -85,7 +85,7 @@ pub(crate) struct ProjectAsset {
     #[cfg_attr(feature = "enable_reflect", reflect(ignore))]
     external_levels: HashMap<String, Vec<ldtk::Level>>,
     pub(crate) _world_handles: HashMap<String, Handle<WorldAsset>>,
-    pub(crate) _level_handles: HashMap<String, Handle<LevelAsset>>,
+    pub(crate) level_handles: HashMap<String, Handle<LevelAsset>>,
     pub(crate) _tileset_handles: HashMap<String, Handle<Image>>,
     pub(crate) _background_handles: HashMap<String, Handle<Image>>,
 }
@@ -282,7 +282,7 @@ impl AssetLoader for ProjectAssetLoader {
                 single_world: project_stub.single_world,
                 external_levels: project_stub.external_levels,
                 _world_handles: world_handles,
-                _level_handles: level_handles,
+                level_handles,
                 _tileset_handles: tileset_handles,
                 _background_handles: background_handles,
             };

@@ -3,11 +3,12 @@ use bevy::prelude::*;
 use bevy::utils::thiserror;
 use thiserror::Error;
 
-use crate::prelude::WorldComponent;
+use crate::prelude::LevelBundle;
 use crate::project::ProjectAsset;
 use crate::project::ProjectResolver;
 use crate::world::WorldAsset;
 use crate::world::WorldBundleLoadSettings;
+use crate::world::WorldComponent;
 
 #[derive(Debug, Error)]
 pub enum NewWorldBundleError {
@@ -26,7 +27,7 @@ pub(crate) fn respond_to_new_world_bundle(
     world_assets: Res<Assets<WorldAsset>>,
     project_assets: Res<Assets<ProjectAsset>>,
 ) -> Result<(), NewWorldBundleError> {
-    for (entity, id, _load_settings) in new_world_query.iter() {
+    for (entity, id, load_settings) in new_world_query.iter() {
         if let Some(LoadState::Loaded) = asset_server.get_load_state(id) {
             debug!("WorldAsset loaded!");
 
@@ -43,8 +44,31 @@ pub(crate) fn respond_to_new_world_bundle(
                 .ok_or(NewWorldBundleError::IidNotFound(world_asset.iid.clone()))?
                 .into();
 
-            commands
-                .entity(entity)
+            let mut entity_commands = commands.entity(entity);
+
+            {
+                let levels = project_asset
+                    .get_levels_by_world_iid(world_component.iid())
+                    .filter(|level| match &load_settings.load_levels {
+                        crate::prelude::LoadLevels::None => false,
+                        crate::prelude::LoadLevels::ByIdentifiers(ids)
+                        | crate::prelude::LoadLevels::ByIids(ids) => {
+                            ids.contains(&level.identifier)
+                        }
+                        crate::prelude::LoadLevels::All => true,
+                    });
+
+                for level in levels {
+                    entity_commands.with_children(|parent| {
+                        parent.spawn(LevelBundle {
+                            level: project_asset.level_handles.get(&level.iid).unwrap().clone(),
+                            load_settings: load_settings.level_bundle_load_settings.clone(),
+                        });
+                    });
+                }
+            }
+
+            entity_commands
                 .insert((Name::from(world_component.identifier()), world_component))
                 .remove::<WorldBundleLoadSettings>();
         }

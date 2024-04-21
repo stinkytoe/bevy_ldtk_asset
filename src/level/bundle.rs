@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::level::LevelAsset;
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 #[cfg_attr(feature = "enable_reflect", derive(Reflect))]
 pub enum LoadLayers {
     None,
@@ -12,7 +12,7 @@ pub enum LoadLayers {
     All,
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 #[cfg_attr(feature = "enable_reflect", derive(Reflect))]
 pub enum LoadEntities {
     None,
@@ -23,7 +23,7 @@ pub enum LoadEntities {
     All,
 }
 
-#[derive(Component, Debug, Default)]
+#[derive(Clone, Component, Debug, Default)]
 #[cfg_attr(feature = "enable_reflect", derive(Reflect))]
 pub struct LevelBundleLoadSettings {
     load_layers: LoadLayers,
