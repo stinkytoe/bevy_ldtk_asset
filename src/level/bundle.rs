@@ -26,8 +26,8 @@ pub enum LoadEntities {
 #[derive(Clone, Component, Debug, Default)]
 #[cfg_attr(feature = "enable_reflect", derive(Reflect))]
 pub struct LevelBundleLoadSettings {
-    load_layers: LoadLayers,
-    load_entities: LoadEntities,
+    pub load_layers: LoadLayers,
+    pub load_entities: LoadEntities,
 }
 
 #[derive(Bundle, Debug, Default)]

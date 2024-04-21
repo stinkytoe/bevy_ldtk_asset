@@ -44,6 +44,12 @@ pub(crate) trait ProjectResolver {
             [].iter()
         }
     }
+
+    fn get_level_by_iid(&self, iid: &str) -> Option<&ldtk::Level> {
+        self.get_worlds()
+            .flat_map(|world| self.get_levels_by_world_iid(&world.iid))
+            .find(|level| level.iid == iid)
+    }
 }
 
 #[derive(Debug)]
