@@ -2,44 +2,32 @@ use bevy::prelude::*;
 
 use crate::level::LevelAsset;
 
-// This component is immediately removed,
-// and the appropriate assets/components/child entities/etc are added
-#[derive(Component, Debug)]
+#[derive(Debug, Default)]
+#[cfg_attr(feature = "enable_reflect", derive(Reflect))]
+pub enum LoadLayers {
+    None,
+    ByIdentifiers(Vec<String>),
+    ByIids(Vec<String>),
+    #[default]
+    All,
+}
+
+#[derive(Debug, Default)]
+#[cfg_attr(feature = "enable_reflect", derive(Reflect))]
+pub enum LoadEntities {
+    None,
+    ByIdentifiers(Vec<String>),
+    ByIids(Vec<String>),
+    ByTags(Vec<String>),
+    #[default]
+    All,
+}
+
+#[derive(Component, Debug, Default)]
 #[cfg_attr(feature = "enable_reflect", derive(Reflect))]
 pub struct LevelBundleLoadSettings {
-    bg_color: bool,
-    bg_image: bool,
-    layers: bool,
-    entities: bool,
-}
-
-impl LevelBundleLoadSettings {
-    pub fn bg_color(&self) -> bool {
-        self.bg_color
-    }
-
-    pub fn bg_image(&self) -> bool {
-        self.bg_image
-    }
-
-    pub fn layers(&self) -> bool {
-        self.layers
-    }
-
-    pub fn entities(&self) -> bool {
-        self.entities
-    }
-}
-
-impl Default for LevelBundleLoadSettings {
-    fn default() -> Self {
-        Self {
-            bg_color: true,
-            bg_image: true,
-            layers: true,
-            entities: true,
-        }
-    }
+    load_layers: LoadLayers,
+    load_entities: LoadEntities,
 }
 
 #[derive(Bundle, Debug, Default)]

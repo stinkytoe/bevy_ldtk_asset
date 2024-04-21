@@ -139,7 +139,7 @@ impl AssetLoader for ProjectAssetLoader {
         Box::pin(async move {
             let asset_path = load_context.path().to_path_buf();
 
-            debug!("Loading LDtk project file: {asset_path:?}");
+            info!("Loading LDtk project file: {asset_path:?}");
 
             let base_directory = asset_path
                 .parent()
