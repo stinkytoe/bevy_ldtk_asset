@@ -6,7 +6,7 @@ use crate::ldtk;
 use crate::tileset_rectangle::TilesetRectangle;
 
 #[derive(Debug, Default)]
-#[cfg_attr(feature = "enable_typepath", derive(TypePath))]
+#[cfg_attr(feature = "enable_reflect", derive(Reflect))]
 pub struct ReferenceToAnEntityInstance {
     entity_iid: String,
     layer_iid: String,
@@ -58,7 +58,7 @@ pub enum FieldInstanceValueError {
 }
 
 #[derive(Debug)]
-#[cfg_attr(feature = "enable_typepath", derive(TypePath))]
+#[cfg_attr(feature = "enable_reflect", derive(Reflect))]
 pub enum FieldInstanceValue {
     Int(i64),
     Float(f64),
@@ -74,7 +74,7 @@ pub enum FieldInstanceValue {
 }
 
 #[derive(Debug)]
-#[cfg_attr(feature = "enable_typepath", derive(TypePath))]
+#[cfg_attr(feature = "enable_reflect", derive(Reflect))]
 pub struct FieldInstance {
     identifier: String,
     tile: Option<TilesetRectangle>,

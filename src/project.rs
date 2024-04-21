@@ -67,17 +67,27 @@ impl ProjectResolver for ProjectStub {
     }
 }
 
-#[derive(Asset, Debug, TypePath)]
+#[derive(Asset, Debug)]
+#[cfg_attr(not(feature = "enable_reflect"), derive(TypePath))]
+#[cfg_attr(feature = "enable_reflect", derive(Reflect))]
+#[cfg_attr(feature = "enable_reflect", reflect(from_reflect = false))]
 pub(crate) struct ProjectAsset {
+    #[reflect(ignore)]
     value: ldtk::LdtkJson,
     // If it's NOT a multi world project, then explicitly create an ldtk::World
     // and store it here
+    #[reflect(ignore)]
     single_world: Vec<ldtk::World>,
     // If this is an external levels project, store the ldtk::level objects here
+    #[reflect(ignore)]
     external_levels: HashMap<String, Vec<ldtk::Level>>,
+    #[reflect(ignore)]
     pub(crate) _world_handles: HashMap<String, Handle<WorldAsset>>,
+    #[reflect(ignore)]
     pub(crate) _level_handles: HashMap<String, Handle<LevelAsset>>,
+    #[reflect(ignore)]
     pub(crate) _tileset_handles: HashMap<String, Handle<Image>>,
+    #[reflect(ignore)]
     pub(crate) _background_handles: HashMap<String, Handle<Image>>,
 }
 
@@ -112,7 +122,6 @@ pub(crate) enum ProjectAssetLoaderError {
 }
 
 #[derive(Debug, Default)]
-#[cfg_attr(feature = "enable_typepath", derive(TypePath))]
 pub(crate) struct ProjectAssetLoader;
 
 impl AssetLoader for ProjectAssetLoader {

@@ -15,8 +15,8 @@ path-clean = "1.0"
 image = "0.24"
 
 [features]
-# default = ["enable_typepath"]
-enable_typepath = []
+default = ["enable_reflect"]
+enable_reflect = []
 
 [[example]]
 name = "top_down"

@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use crate::ldtk;
 
 #[derive(Debug, Default)]
-#[cfg_attr(feature = "enable_typepath", derive(TypePath))]
+#[cfg_attr(feature = "enable_reflect", derive(Reflect))]
 pub struct TilesetRectangle {
     location: Vec2,
     size: Vec2,
