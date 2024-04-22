@@ -24,6 +24,18 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     commands.spawn(WorldBundle {
         world: asset_server.load("ldtk/top_down.ldtk#World"),
-        settings: WorldBundleLoadSettings::default(),
+        settings: WorldBundleLoadSettings {
+            load_levels: LoadLevels::All,
+            level_bundle_load_settings: LevelBundleLoadSettings {
+                // load_bg_color: false,
+                // load_bg_image: false,
+                // load_int_grids: (),
+                // load_layers: (),
+                // load_layer_settings: (),
+                // load_entities: (),
+                // load_entity_settings: (),
+                ..default()
+            },
+        },
     });
 }

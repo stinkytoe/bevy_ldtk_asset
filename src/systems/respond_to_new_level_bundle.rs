@@ -31,7 +31,7 @@ pub(crate) fn respond_to_new_level_bundle(
     level_assets: Res<Assets<LevelAsset>>,
     project_assets: Res<Assets<ProjectAsset>>,
 ) -> Result<(), NewLevelBundleError> {
-    for (entity, id, _load_settings) in new_level_query.iter() {
+    for (entity, id, load_settings) in new_level_query.iter() {
         if let Some(LoadState::Loaded) = asset_server.get_load_state(id) {
             debug!("LevelAsset loaded!");
 
@@ -50,6 +50,22 @@ pub(crate) fn respond_to_new_level_bundle(
             let level_component: LevelComponent = level_json.try_into()?;
 
             let mut entity_commands = commands.entity(entity);
+
+            if load_settings.load_bg_color {
+                entity_commands.with_children(|parent| {
+                    parent.spawn(Name::from("bg_color"));
+                });
+            }
+
+            if load_settings.load_bg_image {
+                entity_commands.with_children(|parent| {
+                    parent.spawn(Name::from("bg_image"));
+                });
+            }
+
+            {
+                // let layers = level_json.layer_instances.iter();
+            }
 
             entity_commands
                 .insert((Name::from(level_component.identifier()), level_component))

@@ -1,5 +1,8 @@
 use bevy::prelude::*;
 
+use crate::layer::LoadEntities;
+use crate::layer::LoadEntityLayerSettings;
+use crate::layer::LoadTileLayerSettings;
 use crate::level::LevelAsset;
 
 #[derive(Clone, Debug, Default)]
@@ -8,35 +11,10 @@ pub enum LoadLayers {
     None,
     ByIdentifiers(Vec<String>),
     ByIids(Vec<String>),
+    TileLayers,
+    EntityLayers,
     #[default]
     All,
-}
-
-#[derive(Clone, Debug, Default)]
-#[cfg_attr(feature = "enable_reflect", derive(Reflect))]
-pub enum LoadLayerMode {
-    ComponentOnly,
-    #[default]
-    Mesh,
-}
-
-#[derive(Clone, Debug, Default)]
-#[cfg_attr(feature = "enable_reflect", derive(Reflect))]
-pub enum LoadEntities {
-    None,
-    ByIdentifiers(Vec<String>),
-    ByIids(Vec<String>),
-    ByTags(Vec<String>),
-    #[default]
-    All,
-}
-
-#[derive(Clone, Debug, Default)]
-#[cfg_attr(feature = "enable_reflect", derive(Reflect))]
-pub enum LoadEntityMode {
-    ComponentOnly,
-    #[default]
-    Sprite,
 }
 
 #[derive(Clone, Component, Debug)]
@@ -44,10 +22,11 @@ pub enum LoadEntityMode {
 pub struct LevelBundleLoadSettings {
     pub load_bg_color: bool,
     pub load_bg_image: bool,
+    pub load_int_grids: bool,
     pub load_layers: LoadLayers,
-    pub load_layer_mode: LoadLayerMode,
+    pub load_layer_settings: LoadTileLayerSettings,
     pub load_entities: LoadEntities,
-    pub load_entity_mode: LoadEntityMode,
+    pub load_entity_settings: LoadEntityLayerSettings,
 }
 
 impl Default for LevelBundleLoadSettings {
@@ -55,10 +34,11 @@ impl Default for LevelBundleLoadSettings {
         Self {
             load_bg_color: true,
             load_bg_image: true,
+            load_int_grids: true,
             load_layers: Default::default(),
-            load_layer_mode: Default::default(),
+            load_layer_settings: Default::default(),
             load_entities: Default::default(),
-            load_entity_mode: Default::default(),
+            load_entity_settings: Default::default(),
         }
     }
 }
