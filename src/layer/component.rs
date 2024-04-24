@@ -43,6 +43,64 @@ pub struct LayerComponent {
     visible: bool,
 }
 
+impl LayerComponent {
+    pub fn grid_size(&self) -> I64Vec2 {
+        self.grid_size
+    }
+
+    pub fn grid_cell_size(&self) -> i64 {
+        self.grid_cell_size
+    }
+
+    pub fn identifier(&self) -> &str {
+        self.identifier.as_ref()
+    }
+
+    pub fn opacity(&self) -> f64 {
+        self.opacity
+    }
+
+    pub fn px_total_offset(&self) -> I64Vec2 {
+        self.px_total_offset
+    }
+
+    pub fn tileset_def_uid(&self) -> Option<i64> {
+        self.tileset_def_uid
+    }
+
+    pub fn tileset_rel_path(&self) -> Option<&PathBuf> {
+        self.tileset_rel_path.as_ref()
+    }
+
+    pub fn layer_type(&self) -> &LayerType {
+        &self.layer_type
+    }
+
+    pub fn iid(&self) -> &str {
+        self.iid.as_ref()
+    }
+
+    pub fn layer_def_uid(&self) -> i64 {
+        self.layer_def_uid
+    }
+
+    pub fn level_id(&self) -> i64 {
+        self.level_id
+    }
+
+    pub fn override_tileset_uid(&self) -> Option<i64> {
+        self.override_tileset_uid
+    }
+
+    pub fn px_offset(&self) -> I64Vec2 {
+        self.px_offset
+    }
+
+    pub fn visible(&self) -> bool {
+        self.visible
+    }
+}
+
 #[derive(Debug, Error)]
 pub enum LayerComponentError {
     #[error("Unknown LDtk layer type! {0}")]

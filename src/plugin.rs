@@ -27,13 +27,23 @@ impl Plugin for BevyLdtkLevelsPlugin {
 
         #[cfg(feature = "enable_reflect")]
         {
+            use crate::layer::LayerComponent;
+            use crate::layer::LoadEntityLayerSettings;
+            use crate::layer::LoadTileLayerSettings;
+            use crate::level::LevelBundleLoadSettings;
             use crate::level::LevelComponent;
+            use crate::world::WorldBundleLoadSettings;
             use crate::world::WorldComponent;
             app //
                 // .register_asset_reflect::<ProjectAsset>()
+                .register_type::<LayerComponent>()
                 .register_asset_reflect::<LevelAsset>()
                 .register_asset_reflect::<WorldAsset>()
+                .register_type::<LoadEntityLayerSettings>()
+                .register_type::<LoadTileLayerSettings>()
+                .register_type::<LevelBundleLoadSettings>()
                 .register_type::<LevelComponent>()
+                .register_type::<WorldBundleLoadSettings>()
                 .register_type::<WorldComponent>();
         }
     }
