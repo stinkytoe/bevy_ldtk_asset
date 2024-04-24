@@ -59,13 +59,14 @@ pub enum FieldInstanceValueError {
 
 #[derive(Debug)]
 #[cfg_attr(feature = "enable_reflect", derive(Reflect))]
+// TODO: fill me out!
 pub enum FieldInstanceValue {
     Int(i64),
     Float(f64),
-    String(String),
-    // Multilines(String),
-    // Enum(String),
-    // Bool(bool),
+    String(Option<String>),
+    Multilines(String),
+    Enum(String),
+    Bool(bool),
     // // from GridPoint
     // GridPoint(U64Vec2),
     // TilesetRect(TilesetRectangle),
@@ -100,6 +101,20 @@ impl FieldInstance {
     }
 }
 
+// { "__identifier": "Integer", "__type": "Int", "__value": 0, "__tile": null, "defUid": 312, "realEditorValues": [] },
+// { "__identifier": "Float", "__type": "Float", "__value": 0, "__tile": null, "defUid": 313, "realEditorValues": [] },
+// { "__identifier": "Boolean", "__type": "Bool", "__value": false, "__tile": null, "defUid": 316, "realEditorValues": [] },
+// { "__identifier": "String", "__type": "String", "__value": null, "__tile": null, "defUid": 314, "realEditorValues": [] },
+// { "__identifier": "Multilines", "__type": "String", "__value": null, "__tile": null, "defUid": 317, "realEditorValues": [] },
+// { "__identifier": "Color", "__type": "Color", "__value": "#000000", "__tile": null, "defUid": 318, "realEditorValues": [] },
+// { "__identifier": "File_path", "__type": "FilePath", "__value": null, "__tile": null, "defUid": 319, "realEditorValues": [] },
+// { "__identifier": "Tile", "__type": "Tile", "__value": null, "__tile": null, "defUid": 320, "realEditorValues": [] },
+// { "__identifier": "Entity_ref", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 321, "realEditorValues": [] },
+// { "__identifier": "Point", "__type": "Point", "__value": null, "__tile": null, "defUid": 322, "realEditorValues": [] },
+// { "__identifier": "Enum", "__type": "LocalEnum.Enum", "__value": null, "__tile": null, "defUid": 325, "realEditorValues": [] },
+// { "__identifier": "Integer2", "__type": "Array<Int>", "__value": [], "__tile": null, "defUid": 326, "realEditorValues": [] },
+// { "__identifier": "Float2", "__type": "Array<Float>", "__value": [], "__tile": null, "defUid": 327, "realEditorValues": [] }
+
 impl TryFrom<&ldtk::FieldInstance> for FieldInstance {
     type Error = FieldInstanceValueError;
 
@@ -120,7 +135,10 @@ impl TryFrom<&ldtk::FieldInstance> for FieldInstance {
                     "Float" => FieldInstanceValue::Float(
                         value.as_f64().ok_or(FieldInstanceValueError::BadFloat)?,
                     ),
-                    "String" => FieldInstanceValue::String(
+                    "String" => {
+                        FieldInstanceValue::String(value.as_str().map(|str| str.to_string()))
+                    }
+                    "Multilines" => FieldInstanceValue::Multilines(
                         value
                             .as_str()
                             .ok_or(FieldInstanceValueError::BadString)?
