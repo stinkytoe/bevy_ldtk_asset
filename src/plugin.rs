@@ -1,11 +1,11 @@
 use bevy::prelude::*;
 use bevy::utils::error;
 
+use crate::level::respond_to_new_level_bundle;
 use crate::level::LevelAsset;
 use crate::project::ProjectAsset;
 use crate::project::ProjectAssetLoader;
-use crate::systems::respond_to_new_level_bundle::respond_to_new_level_bundle;
-use crate::systems::respond_to_new_world_bundle::respond_to_new_world_bundle;
+use crate::world::respond_to_new_world_bundle;
 use crate::world::WorldAsset;
 
 pub struct BevyLdtkLevelsPlugin;

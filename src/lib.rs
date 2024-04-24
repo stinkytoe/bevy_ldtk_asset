@@ -6,7 +6,6 @@ mod ldtk;
 mod level;
 mod plugin;
 mod project;
-mod systems;
 mod tileset_rectangle;
 mod util;
 mod world;
