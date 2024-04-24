@@ -2,6 +2,20 @@
 name = "bevy_ldtk_levels"
 version = "0.1.0"
 edition = "2021"
+description = "" # — A description of the plugin
+repository = "" # — URL of the plugin source repository
+license = "" # — The plugin license
+keywords = [
+	"bevy",
+] # — Keywords for the plugin. "bevy" at least is a good idea here
+categories = [
+	"game-development",
+	"game-engines",
+] # — Categories of the plugin. See the full list on crates.io.
+exclude = [
+	"assets",
+	"examples",
+] # — Files to exclude from the released package. Excluding the assets folder that you may 
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
