@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+use crate::layer::LayerComponent;
 use crate::project::ProjectAsset;
 
 #[derive(Clone, Component, Debug, Default)]
@@ -10,9 +11,9 @@ pub enum LoadTileLayerSettings {
     Mesh,
 }
 
-#[derive(Bundle, Debug, Default)]
+#[derive(Bundle, Debug)]
 pub(crate) struct TileLayerBundle {
-    project: Handle<ProjectAsset>,
-    settings: LoadTileLayerSettings,
+    pub(crate) project: Handle<ProjectAsset>,
+    pub(crate) layer: LayerComponent,
+    pub(crate) settings: LoadTileLayerSettings,
 }
-

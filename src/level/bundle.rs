@@ -24,9 +24,9 @@ pub struct LevelBundleLoadSettings {
     pub load_bg_image: bool,
     pub load_int_grids: bool,
     pub load_layers: LoadLayers,
-    pub load_layer_settings: LoadTileLayerSettings,
+    pub load_tile_layer_settings: LoadTileLayerSettings,
     pub load_entities: LoadEntities,
-    pub load_entity_settings: LoadEntityLayerSettings,
+    pub load_entity_layer_settings: LoadEntityLayerSettings,
 }
 
 impl Default for LevelBundleLoadSettings {
@@ -36,9 +36,9 @@ impl Default for LevelBundleLoadSettings {
             load_bg_image: true,
             load_int_grids: true,
             load_layers: Default::default(),
-            load_layer_settings: Default::default(),
+            load_tile_layer_settings: Default::default(),
             load_entities: Default::default(),
-            load_entity_settings: Default::default(),
+            load_entity_layer_settings: Default::default(),
         }
     }
 }

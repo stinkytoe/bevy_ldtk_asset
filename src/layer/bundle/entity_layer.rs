@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+use crate::layer::LayerComponent;
 use crate::project::ProjectAsset;
 
 #[derive(Clone, Debug, Default)]
@@ -21,8 +22,9 @@ pub enum LoadEntityLayerSettings {
     Sprite,
 }
 
-#[derive(Bundle, Debug, Default)]
+#[derive(Bundle, Debug)]
 pub(crate) struct EntityLayerBundle {
-    project: Handle<ProjectAsset>,
-    settings: LoadEntityLayerSettings,
+    pub(crate) project: Handle<ProjectAsset>,
+    pub(crate) layer: LayerComponent,
+    pub(crate) settings: LoadEntityLayerSettings,
 }

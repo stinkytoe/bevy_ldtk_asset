@@ -1,12 +1,19 @@
 use bevy::asset::LoadState;
+use bevy::ecs::system::EntityCommands;
 use bevy::prelude::*;
 use bevy::utils::thiserror;
 use thiserror::Error;
 
+use crate::layer::LayerComponent;
+use crate::prelude::EntityLayerBundle;
+use crate::prelude::LayerComponentError;
+use crate::prelude::LayerType;
 use crate::prelude::LevelAsset;
 use crate::prelude::LevelBundleLoadSettings;
 use crate::prelude::LevelComponent;
 use crate::prelude::LevelComponentError;
+use crate::prelude::LoadLayers;
+use crate::prelude::TileLayerBundle;
 use crate::project::ProjectAsset;
 use crate::project::ProjectResolver;
 
@@ -20,6 +27,8 @@ pub enum NewLevelBundleError {
     IidNotFound(String),
     #[error("LevelComponentError: {0}")]
     LevelComponentError(#[from] LevelComponentError),
+    #[error("LayerComponentError: {0}")]
+    LayerComponentError(#[from] LayerComponentError),
     // #[error("Bad level handle in project, or bad level iid!")]
     // BadLevelIid,
 }
@@ -63,8 +72,70 @@ pub(crate) fn respond_to_new_level_bundle(
                 });
             }
 
-            {
-                // let layers = level_json.layer_instances.iter();
+            let spawn_tile_layer = move |entity_commands: &mut EntityCommands, layer| {
+                entity_commands.with_children(|parent| {
+                    parent.spawn(TileLayerBundle {
+                        project: level_asset.project_handle.clone(),
+                        layer,
+                        settings: load_settings.load_tile_layer_settings.clone(),
+                    });
+                });
+            };
+
+            let spawn_entity_layer = move |entity_commands: &mut EntityCommands, layer| {
+                entity_commands.with_children(|parent| {
+                    parent.spawn(EntityLayerBundle {
+                        project: level_asset.project_handle.clone(),
+                        layer,
+                        settings: load_settings.load_entity_layer_settings.clone(),
+                    });
+                });
+            };
+
+            if let Some(layer_instances) = level_json.layer_instances.as_ref() {
+                for layer_json in layer_instances.iter().rev() {
+                    let layer: LayerComponent = layer_json.try_into()?;
+
+                    match (&load_settings.load_layers, layer.layer_type()) {
+                        // Tile layer variants
+                        (
+                            LoadLayers::ByIdentifiers(ids),
+                            LayerType::Tiles | LayerType::IntGrid | LayerType::Autolayer,
+                        ) if ids.contains(&layer_json.identifier) => {
+                            spawn_tile_layer(&mut entity_commands, layer);
+                        }
+                        (
+                            LoadLayers::ByIids(ids),
+                            LayerType::Tiles | LayerType::IntGrid | LayerType::Autolayer,
+                        ) if ids.contains(&layer_json.identifier) => {
+                            spawn_tile_layer(&mut entity_commands, layer);
+                        }
+                        (
+                            LoadLayers::TileLayers | LoadLayers::All,
+                            LayerType::Tiles | LayerType::IntGrid | LayerType::Autolayer,
+                        ) => {
+                            spawn_tile_layer(&mut entity_commands, layer);
+                        }
+
+                        // Entity layer variants
+                        (LoadLayers::ByIdentifiers(ids), LayerType::Entities)
+                            if ids.contains(&layer_json.identifier) =>
+                        {
+                            spawn_entity_layer(&mut entity_commands, layer);
+                        }
+                        (LoadLayers::ByIids(ids), LayerType::Entities)
+                            if ids.contains(&layer_json.identifier) =>
+                        {
+                            spawn_entity_layer(&mut entity_commands, layer);
+                        }
+                        (LoadLayers::EntityLayers | LoadLayers::All, LayerType::Entities) => {
+                            spawn_entity_layer(&mut entity_commands, layer);
+                        }
+
+                        // ignore me!
+                        _ => (),
+                    };
+                }
             }
 
             entity_commands
