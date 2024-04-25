@@ -15,5 +15,6 @@ pub mod prelude {
     pub use crate::layer::*;
     pub use crate::level::*;
     pub use crate::plugin::*;
+    pub use crate::project::*;
     pub use crate::world::*;
 }

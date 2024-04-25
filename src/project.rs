@@ -301,3 +301,14 @@ impl AssetLoader for ProjectAssetLoader {
         &["ldtk"]
     }
 }
+
+#[derive(Debug, Default)]
+pub struct ProjectPlugin;
+
+impl Plugin for ProjectPlugin {
+    fn build(&self, app: &mut App) {
+        app //
+            .init_asset::<ProjectAsset>()
+            .init_asset_loader::<ProjectAssetLoader>();
+    }
+}

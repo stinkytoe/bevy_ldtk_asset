@@ -13,7 +13,7 @@ fn main() {
                 })
                 .set(ImagePlugin::default_nearest()),
             WorldInspectorPlugin::default(),
-            BevyLdtkLevelsPlugin,
+            LdtkLevelsPlugins,
         ))
         .add_systems(Startup, setup)
         .run();

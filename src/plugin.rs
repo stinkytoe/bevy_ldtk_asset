@@ -1,50 +1,20 @@
+use bevy::app::PluginGroupBuilder;
 use bevy::prelude::*;
-use bevy::utils::error;
 
-use crate::level::respond_to_new_level_bundle;
-use crate::level::LevelAsset;
-use crate::project::ProjectAsset;
-use crate::project::ProjectAssetLoader;
-use crate::world::respond_to_new_world_bundle;
-use crate::world::WorldAsset;
+use crate::layer::LayerPlugin;
+use crate::level::LevelPlugin;
+use crate::project::ProjectPlugin;
+use crate::world::WorldPlugin;
 
-pub struct BevyLdtkLevelsPlugin;
+#[derive(Debug, Default)]
+pub struct LdtkLevelsPlugins;
 
-impl Plugin for BevyLdtkLevelsPlugin {
-    fn build(&self, app: &mut App) {
-        app //
-            .init_asset::<ProjectAsset>()
-            .init_asset::<WorldAsset>()
-            .init_asset::<LevelAsset>()
-            .init_asset_loader::<ProjectAssetLoader>()
-            .add_systems(
-                Update,
-                (
-                    respond_to_new_level_bundle.map(error),
-                    respond_to_new_world_bundle.map(error),
-                ),
-            );
-
-        #[cfg(feature = "enable_reflect")]
-        {
-            use crate::layer::LayerComponent;
-            use crate::layer::LoadEntityLayerSettings;
-            use crate::layer::LoadTileLayerSettings;
-            use crate::level::LevelBundleLoadSettings;
-            use crate::level::LevelComponent;
-            use crate::world::WorldBundleLoadSettings;
-            use crate::world::WorldComponent;
-            app //
-                // .register_asset_reflect::<ProjectAsset>()
-                .register_type::<LayerComponent>()
-                .register_asset_reflect::<LevelAsset>()
-                .register_asset_reflect::<WorldAsset>()
-                .register_type::<LoadEntityLayerSettings>()
-                .register_type::<LoadTileLayerSettings>()
-                .register_type::<LevelBundleLoadSettings>()
-                .register_type::<LevelComponent>()
-                .register_type::<WorldBundleLoadSettings>()
-                .register_type::<WorldComponent>();
-        }
+impl PluginGroup for LdtkLevelsPlugins {
+    fn build(self) -> bevy::app::PluginGroupBuilder {
+        PluginGroupBuilder::start::<Self>()
+            .add(ProjectPlugin)
+            .add(WorldPlugin)
+            .add(LevelPlugin)
+            .add(LayerPlugin)
     }
 }
