@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
-use crate::{prelude::LevelBundleLoadSettings, world::WorldAsset};
+use crate::level::LevelBundleLoadSettings;
+use crate::world::WorldAsset;
 
 #[derive(Debug, Default)]
 #[cfg_attr(feature = "enable_reflect", derive(Reflect))]

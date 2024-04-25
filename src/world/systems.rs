@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use bevy::utils::thiserror;
 use thiserror::Error;
 
-use crate::prelude::LevelBundle;
+use crate::level::LevelBundle;
 use crate::project::ProjectAsset;
 use crate::project::ProjectResolver;
 use crate::world::WorldAsset;
