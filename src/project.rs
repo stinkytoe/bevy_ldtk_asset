@@ -49,6 +49,26 @@ pub(crate) trait ProjectResolver {
             .flat_map(|world| self.get_levels_by_world_iid(&world.iid))
             .find(|level| level.iid == iid)
     }
+
+    fn get_level_by_uid(&self, uid: i64) -> Option<&ldtk::Level> {
+        self.get_worlds()
+            .flat_map(|world| self.get_levels_by_world_iid(&world.iid))
+            .find(|level| level.uid == uid)
+    }
+
+    fn get_layer_instance_by_level_layer_iid(
+        &self,
+        level_iid: &str,
+        layer_iid: &str,
+    ) -> Option<&ldtk::LayerInstance> {
+        self.get_level_by_iid(level_iid)
+            .and_then(|level| level.layer_instances.as_ref())
+            .and_then(|layer_instances| {
+                layer_instances
+                    .iter()
+                    .find(|layer_instance| layer_instance.iid == layer_iid)
+            })
+    }
 }
 
 #[derive(Debug)]
