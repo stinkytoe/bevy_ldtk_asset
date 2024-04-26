@@ -18,6 +18,7 @@ impl Plugin for WorldPlugin {
             use crate::world::WorldBundleLoadSettings;
             use crate::world::WorldComponent;
             app //
+                .register_asset_reflect::<WorldAsset>()
                 .register_type::<WorldBundleLoadSettings>()
                 .register_type::<WorldComponent>();
         }
