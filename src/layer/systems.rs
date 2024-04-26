@@ -6,7 +6,6 @@ use crate::layer::LayerComponent;
 use crate::layer::LayerType;
 use crate::layer::LoadTileLayerSettings;
 use crate::project::ProjectAsset;
-use crate::project::ProjectResolver;
 
 #[derive(Debug, Error)]
 pub(crate) enum NewTileLayerBundleError {

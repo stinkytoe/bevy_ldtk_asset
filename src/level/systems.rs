@@ -15,7 +15,6 @@ use crate::level::LevelComponent;
 use crate::level::LevelComponentError;
 use crate::level::LoadLayers;
 use crate::project::ProjectAsset;
-use crate::project::ProjectResolver;
 
 #[derive(Debug, Error)]
 pub enum NewLevelBundleError {
@@ -59,7 +58,7 @@ pub(crate) fn level_bundle_loaded(
             .get(level_asset.project_handle.clone())
             .ok_or(NewLevelBundleError::ProjectAssetLoadFail)?;
 
-        debug!("LevelAsset loaded!");
+        debug!("LevelAsset loaded! {:?}", level_handle.path());
 
         let level_json = project_asset
             .get_level_by_iid(&level_asset.iid)

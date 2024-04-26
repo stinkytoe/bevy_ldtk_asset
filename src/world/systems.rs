@@ -48,7 +48,7 @@ pub(crate) fn world_bundle_loaded(
             .get(world_asset.project_handle.clone())
             .ok_or(NewWorldBundleError::ProjectAssetLoadFail)?;
 
-        debug!("WorldAsset loaded!");
+        debug!("WorldAsset loaded! {:?}", world_handle.path());
 
         let world_component: WorldComponent = project_asset
             .get_world_by_iid(&world_asset.iid)
@@ -70,8 +70,7 @@ pub(crate) fn world_bundle_loaded(
 
             for level in levels {
                 let level = project_asset
-                    .level_handles
-                    .get(&level.iid)
+                    .get_level_handle(&level.iid)
                     .ok_or(NewWorldBundleError::BadLevelIid)?
                     .clone();
 
@@ -81,6 +80,7 @@ pub(crate) fn world_bundle_loaded(
                     parent.spawn(LevelBundle {
                         level,
                         load_settings,
+                        spatial: SpatialBundle::default(),
                     });
                 });
             }

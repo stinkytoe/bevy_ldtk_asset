@@ -47,4 +47,5 @@ impl Default for LevelBundleLoadSettings {
 pub struct LevelBundle {
     pub level: Handle<LevelAsset>,
     pub load_settings: LevelBundleLoadSettings,
+    pub spatial: SpatialBundle,
 }

@@ -43,32 +43,6 @@ pub(crate) trait ProjectResolver {
             [].iter()
         }
     }
-
-    fn get_level_by_iid(&self, iid: &str) -> Option<&ldtk::Level> {
-        self.get_worlds()
-            .flat_map(|world| self.get_levels_by_world_iid(&world.iid))
-            .find(|level| level.iid == iid)
-    }
-
-    fn get_level_by_uid(&self, uid: i64) -> Option<&ldtk::Level> {
-        self.get_worlds()
-            .flat_map(|world| self.get_levels_by_world_iid(&world.iid))
-            .find(|level| level.uid == uid)
-    }
-
-    fn get_layer_instance_by_level_layer_iid(
-        &self,
-        level_iid: &str,
-        layer_iid: &str,
-    ) -> Option<&ldtk::LayerInstance> {
-        self.get_level_by_iid(level_iid)
-            .and_then(|level| level.layer_instances.as_ref())
-            .and_then(|layer_instances| {
-                layer_instances
-                    .iter()
-                    .find(|layer_instance| layer_instance.iid == layer_iid)
-            })
-    }
 }
 
 #[derive(Debug)]
@@ -109,10 +83,10 @@ pub(crate) struct ProjectAsset {
     // If this is an external levels project, store the ldtk::level objects here
     #[cfg_attr(feature = "enable_reflect", reflect(ignore))]
     external_levels: HashMap<String, Vec<ldtk::Level>>,
-    pub(crate) _world_handles: HashMap<String, Handle<WorldAsset>>,
-    pub(crate) level_handles: HashMap<String, Handle<LevelAsset>>,
-    pub(crate) _tileset_handles: HashMap<String, Handle<Image>>,
-    pub(crate) _background_handles: HashMap<String, Handle<Image>>,
+    _world_handles: HashMap<String, Handle<WorldAsset>>,
+    level_handles: HashMap<String, Handle<LevelAsset>>,
+    _tileset_handles: HashMap<String, Handle<Image>>,
+    _background_handles: HashMap<String, Handle<Image>>,
 }
 
 impl ProjectResolver for ProjectAsset {
@@ -126,6 +100,38 @@ impl ProjectResolver for ProjectAsset {
 
     fn levels(&self) -> &HashMap<String, Vec<ldtk::Level>> {
         &self.external_levels
+    }
+}
+
+impl ProjectAsset {
+    pub(crate) fn get_level_by_iid(&self, iid: &str) -> Option<&ldtk::Level> {
+        self.get_worlds()
+            .flat_map(|world| self.get_levels_by_world_iid(&world.iid))
+            .find(|level| level.iid == iid)
+    }
+
+    pub(crate) fn get_level_by_uid(&self, uid: i64) -> Option<&ldtk::Level> {
+        self.get_worlds()
+            .flat_map(|world| self.get_levels_by_world_iid(&world.iid))
+            .find(|level| level.uid == uid)
+    }
+
+    pub(crate) fn get_layer_instance_by_level_layer_iid(
+        &self,
+        level_iid: &str,
+        layer_iid: &str,
+    ) -> Option<&ldtk::LayerInstance> {
+        self.get_level_by_iid(level_iid)
+            .and_then(|level| level.layer_instances.as_ref())
+            .and_then(|layer_instances| {
+                layer_instances
+                    .iter()
+                    .find(|layer_instance| layer_instance.iid == layer_iid)
+            })
+    }
+
+    pub(crate) fn get_level_handle(&self, level_iid: &str) -> Option<&Handle<LevelAsset>> {
+        self.level_handles.get(level_iid)
     }
 }
 

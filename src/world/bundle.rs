@@ -24,4 +24,5 @@ pub struct WorldBundleLoadSettings {
 pub struct WorldBundle {
     pub world: Handle<WorldAsset>,
     pub settings: WorldBundleLoadSettings,
+    pub spatial: SpatialBundle,
 }
