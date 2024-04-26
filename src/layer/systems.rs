@@ -33,7 +33,7 @@ pub(crate) fn new_tile_layer_bundle(
     >,
     project_assets: Res<Assets<ProjectAsset>>,
 ) -> Result<(), NewTileLayerBundleError> {
-    for (entity, project_handle, layer_component, settings) in new_tile_layer_query.iter() {
+    for (entity, project_handle, layer_component, _settings) in new_tile_layer_query.iter() {
         let project_asset = project_assets
             .get(project_handle)
             .ok_or(NewTileLayerBundleError::BadProjectHandle)?;
@@ -48,9 +48,9 @@ pub(crate) fn new_tile_layer_bundle(
             .get_layer_instance_by_level_layer_iid(&level_json.iid, layer_component.iid())
             .ok_or(NewTileLayerBundleError::MissingLayerComponent)?;
 
-        let tiles = match layer_component.layer_type() {
+        let _tiles = match layer_component.layer_type() {
             LayerType::IntGrid | LayerType::Autolayer => &layer_instance_json.auto_layer_tiles,
-            LayerType::Entities => return Err(NewTileLayerBundleError::MissingLayerComponent),
+            LayerType::Entities => return Err(NewTileLayerBundleError::UnexpectedEntityLayer),
             LayerType::Tiles => &layer_instance_json.grid_tiles,
         };
 
