@@ -22,67 +22,73 @@ pub enum NewWorldBundleError {
     BadLevelIid,
 }
 
-pub(crate) fn respond_to_new_world_bundle(
+pub(crate) fn world_bundle_loaded(
     mut commands: Commands,
     new_world_query: Query<(Entity, &Handle<WorldAsset>, &WorldBundleLoadSettings)>,
     asset_server: Res<AssetServer>,
     world_assets: Res<Assets<WorldAsset>>,
     project_assets: Res<Assets<ProjectAsset>>,
 ) -> Result<(), NewWorldBundleError> {
-    for (entity, id, load_settings) in new_world_query.iter() {
-        if let Some(LoadState::Loaded) = asset_server.get_load_state(id) {
-            debug!("WorldAsset loaded!");
+    for (entity, world_handle, load_settings) in new_world_query.iter() {
+        let Some(LoadState::Loaded) = asset_server.get_load_state(world_handle) else {
+            return Ok(());
+        };
 
-            let world_asset = world_assets
-                .get(id)
-                .ok_or(NewWorldBundleError::WorldAssetLoadFail)?;
+        let world_asset = world_assets
+            .get(world_handle)
+            .ok_or(NewWorldBundleError::WorldAssetLoadFail)?;
 
-            let project_asset = project_assets
-                .get(world_asset.project_handle.clone())
-                .ok_or(NewWorldBundleError::ProjectAssetLoadFail)?;
+        // This is probably paranoia
+        let Some(LoadState::Loaded) = asset_server.get_load_state(&world_asset.project_handle)
+        else {
+            return Ok(());
+        };
 
-            let world_component: WorldComponent = project_asset
-                .get_world_by_iid(&world_asset.iid)
-                .ok_or(NewWorldBundleError::IidNotFound(world_asset.iid.clone()))?
-                .into();
+        let project_asset = project_assets
+            .get(world_asset.project_handle.clone())
+            .ok_or(NewWorldBundleError::ProjectAssetLoadFail)?;
 
-            let mut entity_commands = commands.entity(entity);
+        debug!("WorldAsset loaded!");
 
-            // Level Children loading
-            {
-                let levels = project_asset
-                    .get_levels_by_world_iid(world_component.iid())
-                    .filter(|level| match &load_settings.load_levels {
-                        crate::prelude::LoadLevels::None => false,
-                        crate::prelude::LoadLevels::ByIdentifiers(ids)
-                        | crate::prelude::LoadLevels::ByIids(ids) => {
-                            ids.contains(&level.identifier)
-                        }
-                        crate::prelude::LoadLevels::All => true,
+        let world_component: WorldComponent = project_asset
+            .get_world_by_iid(&world_asset.iid)
+            .ok_or(NewWorldBundleError::IidNotFound(world_asset.iid.clone()))?
+            .into();
+
+        let mut entity_commands = commands.entity(entity);
+
+        // Level Children loading
+        {
+            let levels = project_asset
+                .get_levels_by_world_iid(world_component.iid())
+                .filter(|level| match &load_settings.load_levels {
+                    crate::prelude::LoadLevels::None => false,
+                    crate::prelude::LoadLevels::ByIdentifiers(ids)
+                    | crate::prelude::LoadLevels::ByIids(ids) => ids.contains(&level.identifier),
+                    crate::prelude::LoadLevels::All => true,
+                });
+
+            for level in levels {
+                let level = project_asset
+                    .level_handles
+                    .get(&level.iid)
+                    .ok_or(NewWorldBundleError::BadLevelIid)?
+                    .clone();
+
+                let load_settings = load_settings.level_bundle_load_settings.clone();
+
+                entity_commands.with_children(move |parent| {
+                    parent.spawn(LevelBundle {
+                        level,
+                        load_settings,
                     });
-
-                for level in levels {
-                    let level = project_asset
-                        .level_handles
-                        .get(&level.iid)
-                        .ok_or(NewWorldBundleError::BadLevelIid)?
-                        .clone();
-
-                    let load_settings = load_settings.level_bundle_load_settings.clone();
-
-                    entity_commands.with_children(move |parent| {
-                        parent.spawn(LevelBundle {
-                            level,
-                            load_settings,
-                        });
-                    });
-                }
+                });
             }
-
-            entity_commands
-                .insert((Name::from(world_component.identifier()), world_component))
-                .remove::<WorldBundleLoadSettings>();
         }
+
+        entity_commands
+            .insert((Name::from(world_component.identifier()), world_component))
+            .remove::<WorldBundleLoadSettings>();
     }
 
     Ok(())
