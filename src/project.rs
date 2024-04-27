@@ -318,6 +318,8 @@ impl AssetLoader for ProjectAssetLoader {
                 _background_handles: background_handles,
             };
 
+            info!("LDtk project file loaded!: {asset_path:?}");
+
             Ok(project_asset)
         })
     }
