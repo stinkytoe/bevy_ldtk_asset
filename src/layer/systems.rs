@@ -5,6 +5,7 @@ use thiserror::Error;
 use crate::layer::LayerComponent;
 use crate::layer::LayerType;
 use crate::layer::LoadTileLayerSettings;
+use crate::prelude::ProjectResolver;
 use crate::project::ProjectAsset;
 
 #[derive(Debug, Error)]
@@ -32,7 +33,7 @@ pub(crate) fn new_tile_layer_bundle(
     >,
     project_assets: Res<Assets<ProjectAsset>>,
 ) -> Result<(), NewTileLayerBundleError> {
-    for (entity, project_handle, layer_component, _settings) in new_tile_layer_query.iter() {
+    for (entity, project_handle, layer_component, settings) in new_tile_layer_query.iter() {
         let project_asset = project_assets
             .get(project_handle)
             .ok_or(NewTileLayerBundleError::BadProjectHandle)?;
@@ -55,10 +56,15 @@ pub(crate) fn new_tile_layer_bundle(
 
         debug!("TileLayerBundle loaded! {}", layer_component.identifier());
 
-        // match settings {
-        //     LoadTileLayerSettings::ComponentOnly => todo!(),
-        //     LoadTileLayerSettings::Mesh => todo!(),
-        // };
+        match settings {
+            LoadTileLayerSettings::ComponentOnly => {}
+            LoadTileLayerSettings::Mesh => match project_asset.value().image_export_mode {
+                crate::ldtk::ImageExportMode::None
+                | crate::ldtk::ImageExportMode::OneImagePerLevel => {}
+                crate::ldtk::ImageExportMode::LayersAndLevels
+                | crate::ldtk::ImageExportMode::OneImagePerLayer => {}
+            },
+        };
 
         commands
             .entity(entity)
