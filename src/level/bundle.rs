@@ -27,6 +27,8 @@ pub struct LevelBundleLoadSettings {
     pub load_tile_layer_settings: LoadTileLayerSettings,
     pub load_entities: LoadEntities,
     pub load_entity_layer_settings: LoadEntityLayerSettings,
+    pub level_separation: f32,
+    pub layer_separation: f32,
 }
 
 impl Default for LevelBundleLoadSettings {
@@ -39,6 +41,8 @@ impl Default for LevelBundleLoadSettings {
             load_tile_layer_settings: Default::default(),
             load_entities: Default::default(),
             load_entity_layer_settings: Default::default(),
+            level_separation: 10.0,
+            layer_separation: 0.1,
         }
     }
 }

@@ -46,15 +46,20 @@ pub(crate) fn new_level_bundle(
 
 pub(crate) fn level_bundle_loaded(
     mut commands: Commands,
-    new_level_query: Query<
-        (Entity, &Handle<LevelAsset>, &LevelBundleLoadSettings),
+    mut new_level_query: Query<
+        (
+            Entity,
+            &Handle<LevelAsset>,
+            &mut Transform,
+            &LevelBundleLoadSettings,
+        ),
         With<LevelBundleLoadStub>,
     >,
     asset_server: Res<AssetServer>,
     level_assets: Res<Assets<LevelAsset>>,
     project_assets: Res<Assets<ProjectAsset>>,
 ) -> Result<(), NewLevelBundleError> {
-    for (entity, level_handle, load_settings) in new_level_query.iter() {
+    for (entity, level_handle, mut transform, load_settings) in new_level_query.iter_mut() {
         let Some(LoadState::Loaded) = asset_server.get_load_state(level_handle) else {
             return Ok(());
         };
@@ -95,30 +100,31 @@ pub(crate) fn level_bundle_loaded(
             });
         }
 
-        let spawn_tile_layer = move |entity_commands: &mut EntityCommands, layer| {
+        let spawn_tile_layer = move |entity_commands: &mut EntityCommands, layer, index| {
             entity_commands.with_children(|parent| {
                 parent.spawn(TileLayerBundle {
                     project: level_asset.project_handle.clone(),
                     layer,
                     settings: load_settings.load_tile_layer_settings.clone(),
-                    spatial: SpatialBundle::default(),
+                    spatial: SpatialBundle::from_transform(Transform::from_xyz(0.0, 0.0, index)),
                 });
             });
         };
 
-        let spawn_entity_layer = move |entity_commands: &mut EntityCommands, layer| {
+        let spawn_entity_layer = move |entity_commands: &mut EntityCommands, layer, index| {
             entity_commands.with_children(|parent| {
                 parent.spawn(EntityLayerBundle {
                     project: level_asset.project_handle.clone(),
                     layer,
                     settings: load_settings.load_entity_layer_settings.clone(),
-                    spatial: SpatialBundle::default(),
+                    spatial: SpatialBundle::from_transform(Transform::from_xyz(0.0, 0.0, index)),
                 });
             });
         };
 
         if let Some(layer_instances) = level_json.layer_instances.as_ref() {
-            for layer_json in layer_instances.iter().rev() {
+            for (index, layer_json) in layer_instances.iter().rev().enumerate() {
+                let index = load_settings.layer_separation * (index + 2) as f32;
                 let layer: LayerComponent = layer_json.try_into()?;
 
                 match (&load_settings.load_layers, layer.layer_type()) {
@@ -127,34 +133,34 @@ pub(crate) fn level_bundle_loaded(
                         LoadLayers::ByIdentifiers(ids),
                         LayerType::Tiles | LayerType::IntGrid | LayerType::Autolayer,
                     ) if ids.contains(&layer_json.identifier) => {
-                        spawn_tile_layer(&mut entity_commands, layer);
+                        spawn_tile_layer(&mut entity_commands, layer, index);
                     }
                     (
                         LoadLayers::ByIids(ids),
                         LayerType::Tiles | LayerType::IntGrid | LayerType::Autolayer,
                     ) if ids.contains(&layer_json.identifier) => {
-                        spawn_tile_layer(&mut entity_commands, layer);
+                        spawn_tile_layer(&mut entity_commands, layer, index);
                     }
                     (
                         LoadLayers::TileLayers | LoadLayers::All,
                         LayerType::Tiles | LayerType::IntGrid | LayerType::Autolayer,
                     ) => {
-                        spawn_tile_layer(&mut entity_commands, layer);
+                        spawn_tile_layer(&mut entity_commands, layer, index);
                     }
 
                     // Entity layer variants
                     (LoadLayers::ByIdentifiers(ids), LayerType::Entities)
                         if ids.contains(&layer_json.identifier) =>
                     {
-                        spawn_entity_layer(&mut entity_commands, layer);
+                        spawn_entity_layer(&mut entity_commands, layer, index);
                     }
                     (LoadLayers::ByIids(ids), LayerType::Entities)
                         if ids.contains(&layer_json.identifier) =>
                     {
-                        spawn_entity_layer(&mut entity_commands, layer);
+                        spawn_entity_layer(&mut entity_commands, layer, index);
                     }
                     (LoadLayers::EntityLayers | LoadLayers::All, LayerType::Entities) => {
-                        spawn_entity_layer(&mut entity_commands, layer);
+                        spawn_entity_layer(&mut entity_commands, layer, index);
                     }
 
                     // ignore me!
@@ -162,6 +168,9 @@ pub(crate) fn level_bundle_loaded(
                 };
             }
         }
+
+        transform.translation =
+            level_component.world_location() * Vec3::new(1.0, 1.0, load_settings.level_separation);
 
         entity_commands
             .insert((Name::from(level_component.identifier()), level_component))
