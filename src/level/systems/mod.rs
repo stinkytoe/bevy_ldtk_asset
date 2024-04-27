@@ -1,6 +1,11 @@
 use bevy::asset::LoadState;
 use bevy::ecs::system::EntityCommands;
 use bevy::prelude::*;
+use bevy::render::mesh::Indices;
+use bevy::render::render_asset::RenderAssetUsages;
+use bevy::render::render_resource::PrimitiveTopology;
+use bevy::sprite::MaterialMesh2dBundle;
+use bevy::sprite::Mesh2dHandle;
 use bevy::utils::thiserror;
 use thiserror::Error;
 
@@ -58,6 +63,8 @@ pub(crate) fn level_bundle_loaded(
     asset_server: Res<AssetServer>,
     level_assets: Res<Assets<LevelAsset>>,
     project_assets: Res<Assets<ProjectAsset>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+    mut meshes: ResMut<Assets<Mesh>>,
 ) -> Result<(), NewLevelBundleError> {
     for (entity, level_handle, mut transform, load_settings) in new_level_query.iter_mut() {
         let Some(LoadState::Loaded) = asset_server.get_load_state(level_handle) else {
@@ -89,8 +96,24 @@ pub(crate) fn level_bundle_loaded(
         let mut entity_commands = commands.entity(entity);
 
         if load_settings.load_bg_color {
+            let mesh: Mesh2dHandle = bevy::sprite::Mesh2dHandle(
+                meshes.add(create_bg_color_mesh(level_component.size())),
+            );
+
+            let material = materials.add(ColorMaterial {
+                color: level_component.bg_color(),
+                ..default()
+            });
+
             entity_commands.with_children(|parent| {
-                parent.spawn(Name::from("bg_color"));
+                parent.spawn((
+                    Name::from("bg_color"),
+                    MaterialMesh2dBundle {
+                        mesh,
+                        material,
+                        ..default()
+                    },
+                ));
             });
         }
 
@@ -178,4 +201,21 @@ pub(crate) fn level_bundle_loaded(
     }
 
     Ok(())
+}
+
+fn create_bg_color_mesh(size: Vec2) -> Mesh {
+    Mesh::new(
+        PrimitiveTopology::TriangleList,
+        RenderAssetUsages::MAIN_WORLD | RenderAssetUsages::RENDER_WORLD,
+    )
+    .with_inserted_indices(Indices::U32(vec![0, 1, 2, 0, 2, 3]))
+    .with_inserted_attribute(
+        Mesh::ATTRIBUTE_POSITION,
+        vec![
+            [0.0, 0.0, 0.0],
+            [size.x, 0.0, 0.0],
+            [size.x, -size.y, 0.0],
+            [0.0, -size.y, 0.0],
+        ],
+    )
 }
