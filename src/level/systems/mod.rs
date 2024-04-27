@@ -15,6 +15,7 @@ use crate::layer::LayerComponentError;
 use crate::layer::LayerType;
 use crate::layer::TileLayerBundle;
 use crate::level::LevelAsset;
+use crate::level::LevelBackgroundPosition;
 use crate::level::LevelBundleLoadSettings;
 use crate::level::LevelComponent;
 use crate::level::LevelComponentError;
@@ -36,6 +37,14 @@ pub enum NewLevelBundleError {
     LevelComponentError(#[from] LevelComponentError),
     #[error("LayerComponentError: {0}")]
     LayerComponentError(#[from] LayerComponentError),
+    #[error("bg_rel_path cannot resolve to a string?")]
+    BadBgRelPath,
+    #[error("bg_rel_path not found in project's background handles?")]
+    MissingBgRelPath,
+    #[error("bg_pos is None when there should be a background texture?")]
+    MissingBgPos,
+    #[error("Image handle not valid!")]
+    BadImageHandle,
     // #[error("Bad level handle in project, or bad level iid!")]
     // BadLevelIid,
 }
@@ -49,6 +58,7 @@ pub(crate) fn new_level_bundle(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub(crate) fn level_bundle_loaded(
     mut commands: Commands,
     mut new_level_query: Query<
@@ -63,6 +73,7 @@ pub(crate) fn level_bundle_loaded(
     asset_server: Res<AssetServer>,
     level_assets: Res<Assets<LevelAsset>>,
     project_assets: Res<Assets<ProjectAsset>>,
+    images: Res<Assets<Image>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut meshes: ResMut<Assets<Mesh>>,
 ) -> Result<(), NewLevelBundleError> {
@@ -96,14 +107,12 @@ pub(crate) fn level_bundle_loaded(
         let mut entity_commands = commands.entity(entity);
 
         if load_settings.load_bg_color {
-            let mesh: Mesh2dHandle = bevy::sprite::Mesh2dHandle(
-                meshes.add(create_bg_color_mesh(level_component.size())),
-            );
+            let mesh: Mesh2dHandle =
+                Mesh2dHandle(meshes.add(create_bg_color_mesh(level_component.size())));
 
-            let material = materials.add(ColorMaterial {
-                color: level_component.bg_color(),
-                ..default()
-            });
+            let color = level_component.bg_color();
+
+            let material = materials.add(ColorMaterial { color, ..default() });
 
             entity_commands.with_children(|parent| {
                 parent.spawn((
@@ -118,9 +127,51 @@ pub(crate) fn level_bundle_loaded(
         }
 
         if load_settings.load_bg_image {
-            entity_commands.with_children(|parent| {
-                parent.spawn(Name::from("bg_image"));
-            });
+            if let Some(bg_rel_path) = level_component.bg_rel_path() {
+                let color = level_component.bg_color();
+
+                let (image, texture) = {
+                    let texture = project_asset
+                        .get_background_handle(
+                            bg_rel_path
+                                .to_str()
+                                .ok_or(NewLevelBundleError::BadBgRelPath)?,
+                        )
+                        .ok_or(NewLevelBundleError::MissingBgRelPath)?
+                        .clone();
+
+                    let image = images
+                        .get(texture.clone())
+                        .ok_or(NewLevelBundleError::BadImageHandle)?;
+
+                    (image, Some(texture))
+                };
+
+                let bg_pos = level_component
+                    .bg_pos()
+                    .ok_or(NewLevelBundleError::MissingBgPos)?;
+
+                let mesh: Mesh2dHandle =
+                    Mesh2dHandle(meshes.add(create_bg_image_mesh(image.size(), bg_pos)));
+
+                let material = materials.add(ColorMaterial { color, texture });
+
+                entity_commands.with_children(|parent| {
+                    parent.spawn((
+                        Name::from("bg_image"),
+                        MaterialMesh2dBundle {
+                            mesh,
+                            material,
+                            transform: Transform::from_xyz(
+                                0.0,
+                                0.0,
+                                load_settings.layer_separation,
+                            ),
+                            ..default()
+                        },
+                    ));
+                });
+            }
         }
 
         let spawn_tile_layer = move |entity_commands: &mut EntityCommands, layer, index| {
@@ -216,6 +267,44 @@ fn create_bg_color_mesh(size: Vec2) -> Mesh {
             [size.x, 0.0, 0.0],
             [size.x, -size.y, 0.0],
             [0.0, -size.y, 0.0],
+        ],
+    )
+}
+
+fn create_bg_image_mesh(image_size: UVec2, bg_pos: &LevelBackgroundPosition) -> Mesh {
+    let crop_location = bg_pos.crop_location();
+    let crop_size = bg_pos.crop_size();
+    let scale = bg_pos.scale();
+    let top_left = bg_pos.top_left();
+
+    let image_size = Vec2::new(image_size.x as f32, image_size.y as f32);
+
+    let uv_top_left = crop_location / image_size;
+    let uv_bottom_right = (crop_location + crop_size) / image_size;
+
+    let bottom_right = top_left + (image_size * scale);
+
+    Mesh::new(
+        PrimitiveTopology::TriangleList,
+        RenderAssetUsages::MAIN_WORLD | RenderAssetUsages::RENDER_WORLD,
+    )
+    .with_inserted_indices(Indices::U32(vec![0, 1, 2, 0, 2, 3]))
+    .with_inserted_attribute(
+        Mesh::ATTRIBUTE_POSITION,
+        vec![
+            [top_left.x, -top_left.y, 0.0],
+            [top_left.x, -bottom_right.y, 0.0],
+            [bottom_right.x, -bottom_right.y, 0.0],
+            [bottom_right.x, -top_left.y, 0.0],
+        ],
+    )
+    .with_inserted_attribute(
+        Mesh::ATTRIBUTE_UV_0,
+        vec![
+            [uv_top_left.x, uv_top_left.y],
+            [uv_top_left.x, uv_bottom_right.y],
+            [uv_bottom_right.x, uv_bottom_right.y],
+            [uv_bottom_right.x, uv_top_left.y],
         ],
     )
 }

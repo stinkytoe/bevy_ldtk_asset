@@ -86,7 +86,7 @@ pub(crate) struct ProjectAsset {
     _world_handles: HashMap<String, Handle<WorldAsset>>,
     level_handles: HashMap<String, Handle<LevelAsset>>,
     _tileset_handles: HashMap<String, Handle<Image>>,
-    _background_handles: HashMap<String, Handle<Image>>,
+    background_handles: HashMap<String, Handle<Image>>,
 }
 
 impl ProjectResolver for ProjectAsset {
@@ -132,6 +132,10 @@ impl ProjectAsset {
 
     pub(crate) fn get_level_handle(&self, level_iid: &str) -> Option<&Handle<LevelAsset>> {
         self.level_handles.get(level_iid)
+    }
+
+    pub(crate) fn get_background_handle(&self, path: &str) -> Option<&Handle<Image>> {
+        self.background_handles.get(path)
     }
 }
 
@@ -315,7 +319,7 @@ impl AssetLoader for ProjectAssetLoader {
                 _world_handles: world_handles,
                 level_handles,
                 _tileset_handles: tileset_handles,
-                _background_handles: background_handles,
+                background_handles,
             };
 
             info!("LDtk project file loaded!: {asset_path:?}");
