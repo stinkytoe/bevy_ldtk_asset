@@ -10,6 +10,9 @@ use crate::world::WorldAsset;
 use crate::world::WorldBundleLoadSettings;
 use crate::world::WorldComponent;
 
+#[derive(Component, Debug)]
+pub(crate) struct WorldBundleLoadStub;
+
 #[derive(Debug, Error)]
 pub enum NewWorldBundleError {
     #[error("Failed to load world asset after receiving LoadState::Loaded?")]
@@ -22,9 +25,21 @@ pub enum NewWorldBundleError {
     BadLevelIid,
 }
 
+pub(crate) fn new_world_bundle(
+    mut commands: Commands,
+    new_world_query: Query<Entity, Added<WorldBundleLoadSettings>>,
+) {
+    for entity in &new_world_query {
+        commands.entity(entity).insert(WorldBundleLoadStub);
+    }
+}
+
 pub(crate) fn world_bundle_loaded(
     mut commands: Commands,
-    new_world_query: Query<(Entity, &Handle<WorldAsset>, &WorldBundleLoadSettings)>,
+    new_world_query: Query<
+        (Entity, &Handle<WorldAsset>, &WorldBundleLoadSettings),
+        With<WorldBundleLoadStub>,
+    >,
     asset_server: Res<AssetServer>,
     world_assets: Res<Assets<WorldAsset>>,
     project_assets: Res<Assets<ProjectAsset>>,
@@ -88,7 +103,7 @@ pub(crate) fn world_bundle_loaded(
 
         entity_commands
             .insert((Name::from(world_component.identifier()), world_component))
-            .remove::<WorldBundleLoadSettings>();
+            .remove::<WorldBundleLoadStub>();
     }
 
     Ok(())

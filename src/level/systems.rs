@@ -16,6 +16,9 @@ use crate::level::LevelComponentError;
 use crate::level::LoadLayers;
 use crate::project::ProjectAsset;
 
+#[derive(Component, Debug)]
+pub(crate) struct LevelBundleLoadStub;
+
 #[derive(Debug, Error)]
 pub enum NewLevelBundleError {
     #[error("Failed to load level asset after receiving LoadState::Loaded?")]
@@ -32,9 +35,21 @@ pub enum NewLevelBundleError {
     // BadLevelIid,
 }
 
+pub(crate) fn new_level_bundle(
+    mut commands: Commands,
+    new_world_query: Query<Entity, Added<LevelBundleLoadSettings>>,
+) {
+    for entity in &new_world_query {
+        commands.entity(entity).insert(LevelBundleLoadStub);
+    }
+}
+
 pub(crate) fn level_bundle_loaded(
     mut commands: Commands,
-    new_level_query: Query<(Entity, &Handle<LevelAsset>, &LevelBundleLoadSettings)>,
+    new_level_query: Query<
+        (Entity, &Handle<LevelAsset>, &LevelBundleLoadSettings),
+        With<LevelBundleLoadStub>,
+    >,
     asset_server: Res<AssetServer>,
     level_assets: Res<Assets<LevelAsset>>,
     project_assets: Res<Assets<ProjectAsset>>,
@@ -86,6 +101,7 @@ pub(crate) fn level_bundle_loaded(
                     project: level_asset.project_handle.clone(),
                     layer,
                     settings: load_settings.load_tile_layer_settings.clone(),
+                    spatial: SpatialBundle::default(),
                 });
             });
         };
@@ -96,6 +112,7 @@ pub(crate) fn level_bundle_loaded(
                     project: level_asset.project_handle.clone(),
                     layer,
                     settings: load_settings.load_entity_layer_settings.clone(),
+                    spatial: SpatialBundle::default(),
                 });
             });
         };
@@ -148,49 +165,8 @@ pub(crate) fn level_bundle_loaded(
 
         entity_commands
             .insert((Name::from(level_component.identifier()), level_component))
-            .remove::<LevelBundleLoadSettings>();
+            .remove::<LevelBundleLoadStub>();
     }
-    //         debug!("WorldAsset loaded!");
-    //
-    //
-    //         let mut entity_commands = commands.entity(entity);
-    //
-    //         // Level Children loading
-    //         {
-    //             let levels = project_asset
-    //                 .get_levels_by_world_iid(world_component.iid())
-    //                 .filter(|level| match &load_settings.load_levels {
-    //                     crate::prelude::LoadLevels::None => false,
-    //                     crate::prelude::LoadLevels::ByIdentifiers(ids)
-    //                     | crate::prelude::LoadLevels::ByIids(ids) => {
-    //                         ids.contains(&level.identifier)
-    //                     }
-    //                     crate::prelude::LoadLevels::All => true,
-    //                 });
-    //
-    //             for level in levels {
-    //                 let level = project_asset
-    //                     .level_handles
-    //                     .get(&level.iid)
-    //                     .ok_or(NewWorldBundleError::BadLevelIid)?
-    //                     .clone();
-    //
-    //                 let load_settings = load_settings.level_bundle_load_settings.clone();
-    //
-    //                 entity_commands.with_children(move |parent| {
-    //                     parent.spawn(LevelBundle {
-    //                         level,
-    //                         load_settings,
-    //                     });
-    //                 });
-    //             }
-    //         }
-    //
-    //         entity_commands
-    //             .insert((Name::from(world_component.identifier()), world_component))
-    //             .remove::<WorldBundleLoadSettings>();
-    //     }
-    // }
 
     Ok(())
 }
