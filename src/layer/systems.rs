@@ -53,6 +53,8 @@ pub(crate) fn new_tile_layer_bundle(
             LayerType::Tiles => &layer_instance_json.grid_tiles,
         };
 
+        debug!("TileLayerBundle loaded! {}", layer_component.identifier());
+
         // match settings {
         //     LoadTileLayerSettings::ComponentOnly => todo!(),
         //     LoadTileLayerSettings::Mesh => todo!(),
