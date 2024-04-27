@@ -27,4 +27,5 @@ pub(crate) struct EntityLayerBundle {
     pub(crate) project: Handle<ProjectAsset>,
     pub(crate) layer: LayerComponent,
     pub(crate) settings: LoadEntityLayerSettings,
+    pub(crate) spatial: SpatialBundle,
 }

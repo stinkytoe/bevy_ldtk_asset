@@ -16,4 +16,5 @@ pub(crate) struct TileLayerBundle {
     pub(crate) project: Handle<ProjectAsset>,
     pub(crate) layer: LayerComponent,
     pub(crate) settings: LoadTileLayerSettings,
+    pub(crate) spatial: SpatialBundle,
 }
