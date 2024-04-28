@@ -85,7 +85,7 @@ pub(crate) struct ProjectAsset {
     external_levels: HashMap<String, Vec<ldtk::Level>>,
     _world_handles: HashMap<String, Handle<WorldAsset>>,
     level_handles: HashMap<String, Handle<LevelAsset>>,
-    _tileset_handles: HashMap<String, Handle<Image>>,
+    tileset_handles: HashMap<String, Handle<Image>>,
     background_handles: HashMap<String, Handle<Image>>,
 }
 
@@ -132,6 +132,10 @@ impl ProjectAsset {
 
     pub(crate) fn get_level_handle(&self, level_iid: &str) -> Option<&Handle<LevelAsset>> {
         self.level_handles.get(level_iid)
+    }
+
+    pub(crate) fn get_tileset_handle(&self, path: &str) -> Option<&Handle<Image>> {
+        self.tileset_handles.get(path)
     }
 
     pub(crate) fn get_background_handle(&self, path: &str) -> Option<&Handle<Image>> {
@@ -318,7 +322,7 @@ impl AssetLoader for ProjectAssetLoader {
                 external_levels: project_stub.external_levels,
                 _world_handles: world_handles,
                 level_handles,
-                _tileset_handles: tileset_handles,
+                tileset_handles,
                 background_handles,
             };
 
