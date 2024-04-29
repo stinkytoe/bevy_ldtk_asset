@@ -2,7 +2,6 @@ use bevy::prelude::*;
 use bevy::render::mesh::Indices;
 use bevy::render::render_asset::RenderAssetUsages;
 use bevy::render::render_resource::PrimitiveTopology;
-use bevy::sprite::MaterialMesh2dBundle;
 use bevy::sprite::Mesh2dHandle;
 use bevy::utils::thiserror;
 use image::imageops::crop;
@@ -70,8 +69,8 @@ pub(crate) fn new_tile_layer_bundle(
 
         debug!("TileLayerBundle loaded! {}", layer_component.identifier());
 
-        match settings {
-            LoadTileLayerSettings::ComponentOnly => {}
+        if let Some(material) = match settings {
+            LoadTileLayerSettings::ComponentOnly => None,
             LoadTileLayerSettings::Mesh => match project_asset.value().image_export_mode {
                 crate::ldtk::ImageExportMode::None
                 | crate::ldtk::ImageExportMode::OneImagePerLevel => {
@@ -103,8 +102,8 @@ pub(crate) fn new_tile_layer_bundle(
                             .expect("couldn't convert bevy image to dynamic image!");
 
                         let mut dynamic_image = DynamicImage::new(
-                            tileset_image.size().x,
-                            tileset_image.size().y,
+                            level_json.px_wid as u32,
+                            level_json.px_hei as u32,
                             ColorType::Rgba8,
                         );
 
@@ -134,35 +133,26 @@ pub(crate) fn new_tile_layer_bundle(
                         let new_image =
                             Image::from_dynamic(dynamic_image, true, RenderAssetUsages::default());
 
-                        let mesh: Mesh2dHandle =
-                            Mesh2dHandle(meshes.add(create_tile_layer_mesh(new_image.size())));
-
                         let texture = Some(images.add(new_image));
 
-                        let material = materials.add(ColorMaterial { color, texture });
-
-                        commands.entity(entity).with_children(|parent| {
-                            parent.spawn((
-                                Name::from("bg_image"),
-                                MaterialMesh2dBundle {
-                                    mesh,
-                                    material,
-                                    // transform: Transform::from_xyz(
-                                    //     0.0,
-                                    //     0.0,
-                                    //     load_settings.layer_separation,
-                                    // ),
-                                    ..default()
-                                },
-                            ));
-                        });
+                        Some(materials.add(ColorMaterial { color, texture }))
+                    } else {
+                        None
                     }
                 }
                 crate::ldtk::ImageExportMode::LayersAndLevels
                 | crate::ldtk::ImageExportMode::OneImagePerLayer => {
                     // can pull the image from assets
+                    todo!()
                 }
             },
+        } {
+            let mesh: Mesh2dHandle = Mesh2dHandle(meshes.add(create_tile_layer_mesh(UVec2::new(
+                level_json.px_wid as u32,
+                level_json.px_hei as u32,
+            ))));
+
+            commands.entity(entity).insert((mesh, material));
         };
 
         commands
