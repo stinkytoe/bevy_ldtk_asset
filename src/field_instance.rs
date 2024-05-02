@@ -55,6 +55,8 @@ pub enum FieldInstanceValueError {
     BadFloat,
     #[error("Unable to parse as a string?!")]
     BadString,
+    #[error("Unable to parse as a boolean?!")]
+    BadBool,
 }
 
 #[derive(Debug)]
@@ -143,6 +145,9 @@ impl TryFrom<&ldtk::FieldInstance> for FieldInstance {
                             .as_str()
                             .ok_or(FieldInstanceValueError::BadString)?
                             .to_owned(),
+                    ),
+                    "Bool" => FieldInstanceValue::Bool(
+                        value.as_bool().ok_or(FieldInstanceValueError::BadBool)?,
                     ),
                     // TODO: finish me!
                     _ => {
