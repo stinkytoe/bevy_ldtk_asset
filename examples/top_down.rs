@@ -1,6 +1,6 @@
 use bevy::{log::LogPlugin, prelude::*};
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
-use bevy_ldtk_levels::prelude::*;
+use bevy_ldtk_asset::prelude::*;
 
 fn main() {
     App::new()
@@ -8,7 +8,7 @@ fn main() {
             DefaultPlugins
                 .set(LogPlugin {
                     // level: bevy::log::Level::WARN,
-                    filter: "bevy_ldtk_levels=trace,top_down=trace".into(),
+                    filter: "bevy_ldtk_asset=trace,top_down=trace".into(),
                     ..default()
                 })
                 .set(ImagePlugin::default_nearest()),
