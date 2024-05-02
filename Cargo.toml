@@ -1,6 +1,6 @@
 [package]
-name = "bevy_ldtk_levels"
-version = "0.1.0"
+name = "bevy_ldtk_asset"
+version = "0.4.0"
 edition = "2021"
 description = "" # — A description of the plugin
 repository = "" # — URL of the plugin source repository

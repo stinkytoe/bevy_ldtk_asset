@@ -147,7 +147,7 @@ pub(crate) fn new_tile_layer_bundle(
                 }
             },
         } {
-            let mesh: Mesh2dHandle = Mesh2dHandle(meshes.add(create_tile_layer_mesh(UVec2::new(
+            let mesh = Mesh2dHandle(meshes.add(create_tile_layer_mesh(UVec2::new(
                 level_json.px_wid as u32,
                 level_json.px_hei as u32,
             ))));

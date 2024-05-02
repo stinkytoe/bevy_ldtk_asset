@@ -742,8 +742,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "bevy_ldtk_levels"
-version = "0.1.0"
+name = "bevy_ldtk_asset"
+version = "0.4.0"
 dependencies = [
  "bevy",
  "bevy-inspector-egui",
