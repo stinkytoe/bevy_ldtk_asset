@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy::utils::error;
 
+use crate::layer::new_entity_layer_bundle;
 use crate::layer::new_tile_layer_bundle;
 
 #[derive(Debug, Default)]
@@ -9,7 +10,13 @@ pub struct LayerPlugin;
 impl Plugin for LayerPlugin {
     fn build(&self, app: &mut App) {
         app //
-            .add_systems(Update, new_tile_layer_bundle.map(error));
+            .add_systems(
+                Update,
+                (
+                    new_entity_layer_bundle.map(error),
+                    new_tile_layer_bundle.map(error),
+                ),
+            );
 
         #[cfg(feature = "enable_reflect")]
         {

@@ -1,5 +1,6 @@
 // #![warn(missing_docs)]
 
+mod entity;
 mod field_instance;
 mod layer;
 mod ldtk;
@@ -11,6 +12,7 @@ mod util;
 mod world;
 
 pub mod prelude {
+    pub use crate::entity::*;
     pub use crate::field_instance::*;
     pub use crate::layer::*;
     pub use crate::level::*;
