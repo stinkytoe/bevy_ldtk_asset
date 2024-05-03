@@ -1,5 +1,8 @@
-use bevy::{ecs::system::SystemParam, log::LogPlugin, prelude::*, render::primitives::Aabb};
-use bevy_inspector_egui::quick::WorldInspectorPlugin;
+// use bevy::ecs::system::SystemParam;
+use bevy::log::LogPlugin;
+use bevy::prelude::*;
+// use bevy::render::primitives::Aabb;
+// use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_ldtk_asset::prelude::*;
 
 #[derive(Debug, Default, Resource)]
@@ -15,7 +18,7 @@ fn main() {
                     ..default()
                 })
                 .set(ImagePlugin::default_nearest()),
-            WorldInspectorPlugin::default(),
+            // WorldInspectorPlugin::default(),
             LdtkLevelsPlugins,
         ))
         .insert_resource(PlayerEntity::default())
@@ -63,13 +66,14 @@ fn identify_player_entity(
     }
 }
 
-#[derive(SystemParam)]
-struct MySysParam<'w, 's> {
-    pub world_assets: Res<'w, Assets<WorldAsset>>,
-    // pub query: Query<'w, 's, Entity, With<EntityComponent>>,
-    layer_query: Query<'w, 's, (&'static Aabb, Entity, &'static LayerComponent)>,
-}
+// #[derive(SystemParam)]
+// struct MySysParam<'w, 's> {
+//     pub world_assets: Res<'w, Assets<WorldAsset>>,
+//     // pub query: Query<'w, 's, Entity, With<EntityComponent>>,
+//     layer_query: Query<'w, 's, (&'static Aabb, Entity, &'static LayerComponent)>,
+// }
 
-fn update(my_sys_param: MySysParam) {
-    for x in my_sys_param.layer_query.iter() {}
+fn update(// my_sys_param: MySysParam
+) {
+    // for x in my_sys_param.layer_query.iter() {}
 }

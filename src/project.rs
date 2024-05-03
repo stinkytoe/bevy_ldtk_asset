@@ -3,7 +3,6 @@ use bevy::asset::AsyncReadExt;
 use bevy::asset::ReadAssetBytesError;
 use bevy::prelude::*;
 use bevy::utils::hashbrown::HashMap;
-use bevy::utils::thiserror;
 use std::path::Path;
 use std::path::PathBuf;
 use thiserror::Error;

@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy::utils::thiserror;
 use std::path::PathBuf;
 use thiserror::Error;
 

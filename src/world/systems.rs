@@ -1,6 +1,5 @@
 use bevy::asset::LoadState;
 use bevy::prelude::*;
-use bevy::utils::thiserror;
 use thiserror::Error;
 
 use crate::level::LevelBundle;
@@ -60,7 +59,7 @@ pub(crate) fn world_bundle_loaded(
         };
 
         let project_asset = project_assets
-            .get(world_asset.project_handle.clone())
+            .get(&world_asset.project_handle)
             .ok_or(NewWorldBundleError::ProjectAssetLoadFail)?;
 
         debug!("WorldAsset loaded! {:?}", world_handle.path());

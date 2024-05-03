@@ -1,6 +1,5 @@
 use bevy::math::I64Vec2;
 use bevy::prelude::*;
-use bevy::utils::thiserror;
 use std::path::PathBuf;
 use thiserror::Error;
 

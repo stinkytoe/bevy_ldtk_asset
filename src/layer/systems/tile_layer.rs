@@ -3,7 +3,6 @@ use bevy::render::mesh::Indices;
 use bevy::render::render_asset::RenderAssetUsages;
 use bevy::render::render_resource::PrimitiveTopology;
 use bevy::sprite::Mesh2dHandle;
-use bevy::utils::thiserror;
 use image::imageops::crop;
 use image::imageops::flip_horizontal;
 use image::imageops::flip_vertical;
@@ -128,7 +127,7 @@ pub(crate) fn new_tile_layer_bundle(
                             overlay(&mut dynamic_image, &cropped, tile.px[0], tile.px[1]);
                         });
 
-                        let color = Color::rgba(1.0, 1.0, 1.0, layer_instance_json.opacity as f32);
+                        let color = Color::srgba(1.0, 1.0, 1.0, layer_instance_json.opacity as f32);
 
                         let new_image =
                             Image::from_dynamic(dynamic_image, true, RenderAssetUsages::default());

@@ -20,14 +20,15 @@ exclude = [
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = "0.13"
-# bevy = { git = "https://github.com/bevyengine/bevy.git", branch = "main" }
+# bevy = "0.13"
+bevy = { git = "https://github.com/bevyengine/bevy.git", branch = "main" }
 serde = "1.0"
 serde_json = "1.0"
 hex = "0.4"
 futures-either = "0.1"
 path-clean = "1.0"
-image = "0.24"
+image = "0.25"
+thiserror = "1.0"
 
 [features]
 default = ["enable_reflect"]

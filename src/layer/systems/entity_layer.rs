@@ -1,6 +1,5 @@
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
-use bevy::utils::thiserror;
 use thiserror::Error;
 
 use crate::entity::EntityComponent;

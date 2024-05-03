@@ -6,7 +6,6 @@ use bevy::render::render_asset::RenderAssetUsages;
 use bevy::render::render_resource::PrimitiveTopology;
 use bevy::sprite::MaterialMesh2dBundle;
 use bevy::sprite::Mesh2dHandle;
-use bevy::utils::thiserror;
 use thiserror::Error;
 
 use crate::layer::EntityLayerBundle;
@@ -93,7 +92,7 @@ pub(crate) fn level_bundle_loaded(
         };
 
         let project_asset = project_assets
-            .get(level_asset.project_handle.clone())
+            .get(&level_asset.project_handle)
             .ok_or(NewLevelBundleError::ProjectAssetLoadFail)?;
 
         debug!("LevelAsset loaded! {:?}", level_handle.path());
@@ -141,7 +140,7 @@ pub(crate) fn level_bundle_loaded(
                         .clone();
 
                     let image = images
-                        .get(texture.clone())
+                        .get(&texture)
                         .ok_or(NewLevelBundleError::BadImageHandle)?;
 
                     (image, Some(texture))
