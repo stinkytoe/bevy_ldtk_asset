@@ -128,7 +128,7 @@ pub(crate) fn level_bundle_loaded(
 
         if load_settings.load_bg_image {
             if let Some(bg_rel_path) = level_component.bg_rel_path() {
-                let color = level_component.bg_color();
+                let color = Color::WHITE;
 
                 let (image, texture) = {
                     let texture = project_asset
