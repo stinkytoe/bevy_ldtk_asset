@@ -141,6 +141,17 @@ impl ProjectAsset {
     pub(crate) fn get_background_handle(&self, path: &str) -> Option<&Handle<Image>> {
         self.background_handles.get(path)
     }
+
+    pub(crate) fn get_tileset_definition_by_uid(
+        &self,
+        uid: i64,
+    ) -> Option<&ldtk::TilesetDefinition> {
+        self.value
+            .defs
+            .tilesets
+            .iter()
+            .find(|tileset_def| tileset_def.uid == uid)
+    }
 }
 
 #[derive(Debug, Error)]

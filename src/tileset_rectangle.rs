@@ -27,7 +27,7 @@ impl TilesetRectangle {
 impl From<&ldtk::TilesetRectangle> for TilesetRectangle {
     fn from(value: &ldtk::TilesetRectangle) -> Self {
         Self {
-            location: (value.x as f32, -value.y as f32).into(),
+            location: (value.x as f32, value.y as f32).into(),
             size: (value.w as f32, value.h as f32).into(),
             tileset_uid: value.tileset_uid,
         }

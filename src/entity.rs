@@ -120,3 +120,16 @@ impl TryFrom<&ldtk::EntityInstance> for EntityComponent {
         })
     }
 }
+
+#[derive(Debug, Default)]
+pub struct EntityPlugin;
+
+impl Plugin for EntityPlugin {
+    fn build(&self, _app: &mut App) {
+        #[cfg(feature = "enable_reflect")]
+        {
+            _app //
+                .register_type::<EntityComponent>();
+        }
+    }
+}
