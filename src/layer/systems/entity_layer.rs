@@ -3,10 +3,10 @@ use bevy::sprite::Anchor;
 use bevy::utils::thiserror;
 use thiserror::Error;
 
+use crate::entity::EntityComponent;
+use crate::entity::EntityComponentError;
 use crate::layer::LayerComponent;
 use crate::layer::LoadEntityLayerSettings;
-use crate::prelude::EntityComponent;
-use crate::prelude::EntityComponentError;
 use crate::project::ProjectAsset;
 
 #[derive(Debug, Error)]
@@ -39,9 +39,6 @@ pub(crate) fn new_entity_layer_bundle(
         Added<LoadEntityLayerSettings>,
     >,
     project_assets: Res<Assets<ProjectAsset>>,
-    // images: ResMut<Assets<Image>>,
-    // mut meshes: ResMut<Assets<Mesh>>,
-    // mut materials: ResMut<Assets<ColorMaterial>>,
 ) -> Result<(), NewEntityLayerBundleError> {
     for (layer_entity, project_handle, layer_component, settings) in new_entity_layer_query.iter() {
         let project_asset = project_assets

@@ -87,6 +87,13 @@ impl EntityComponent {
     }
 }
 
+impl EntityComponent {
+    pub fn has_tag(&self, tag: &str) -> bool {
+        // using .iter().any(...) instead of .contains(...) to avoid allocations
+        self.tags.iter().any(|inner_tag| inner_tag == tag)
+    }
+}
+
 impl TryFrom<&ldtk::EntityInstance> for EntityComponent {
     type Error = EntityComponentError;
 
