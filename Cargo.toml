@@ -21,7 +21,8 @@ exclude = [
 
 [dependencies]
 # bevy = "0.13"
-bevy = { git = "https://github.com/bevyengine/bevy.git", branch = "main" }
+# bevy = { git = "https://github.com/bevyengine/bevy.git", branch = "main" }
+bevy = { git = "https://github.com/stinkytoe/bevy.git", branch = "main" }
 serde = "1.0"
 serde_json = "1.0"
 hex = "0.4"

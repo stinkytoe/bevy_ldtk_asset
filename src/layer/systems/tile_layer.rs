@@ -14,6 +14,7 @@ use thiserror::Error;
 use crate::layer::LayerComponent;
 use crate::layer::LayerType;
 use crate::layer::LoadTileLayerSettings;
+use crate::ldtk;
 use crate::prelude::ProjectResolver;
 use crate::project::ProjectAsset;
 
@@ -31,8 +32,8 @@ pub(crate) enum NewTileLayerBundleError {
     BadTilesetPath,
     #[error("Tileset handle not found!")]
     BadTilesetHandle,
-    // #[error("Fail to convert Bevy image to dynamic image! {0}")]
-    // XXIntoDynamicImageError(#[from] IntoDynamicImageError),
+    #[error("Fail to convert Bevy image to dynamic image! {0:?}")]
+    IntoDynamicImageError(#[from] IntoDynamicImageError),
 }
 
 pub(crate) fn new_tile_layer_bundle(
@@ -71,8 +72,7 @@ pub(crate) fn new_tile_layer_bundle(
         if let Some(material) = match settings {
             LoadTileLayerSettings::ComponentOnly => None,
             LoadTileLayerSettings::Mesh => match project_asset.value().image_export_mode {
-                crate::ldtk::ImageExportMode::None
-                | crate::ldtk::ImageExportMode::OneImagePerLevel => {
+                ldtk::ImageExportMode::None | ldtk::ImageExportMode::OneImagePerLevel => {
                     if let Some(tileset_rel_path) = &layer_instance_json.tileset_rel_path {
                         // Need to construct the image
                         let tiles = match layer_component.layer_type() {
@@ -93,12 +93,7 @@ pub(crate) fn new_tile_layer_bundle(
                             .get(tileset_handle)
                             .ok_or(NewTileLayerBundleError::BadTilesetHandle)?;
 
-                        // had to use .expect(..) because IntoDynamicImageError isn't re-exported
-                        // public
-                        let mut tileset = tileset_image
-                            .clone()
-                            .try_into_dynamic()
-                            .expect("couldn't convert bevy image to dynamic image!");
+                        let mut tileset = tileset_image.clone().try_into_dynamic()?;
 
                         let mut dynamic_image = DynamicImage::new(
                             level_json.px_wid as u32,
@@ -139,8 +134,8 @@ pub(crate) fn new_tile_layer_bundle(
                         None
                     }
                 }
-                crate::ldtk::ImageExportMode::LayersAndLevels
-                | crate::ldtk::ImageExportMode::OneImagePerLayer => {
+                ldtk::ImageExportMode::LayersAndLevels
+                | ldtk::ImageExportMode::OneImagePerLayer => {
                     // can pull the image from assets
                     todo!()
                 }
