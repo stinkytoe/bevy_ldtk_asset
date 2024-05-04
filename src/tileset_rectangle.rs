@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::ldtk;
 
-#[derive(Component, Debug, Default)]
+#[derive(Clone, Component, Debug, Default)]
 #[cfg_attr(feature = "enable_reflect", derive(Reflect))]
 pub struct TilesetRectangle {
     location: Vec2,

@@ -1,4 +1,6 @@
 use bevy::prelude::*;
+use bevy::sprite::Anchor;
+use bevy::utils::error;
 use thiserror::Error;
 
 use crate::field_instance::FieldInstance;
@@ -134,7 +136,7 @@ pub struct EntityPlugin;
 impl Plugin for EntityPlugin {
     fn build(&self, app: &mut App) {
         app //
-            .add_systems(Update, tileset_rectangle_added_to_entity);
+            .add_systems(Update, tileset_rectangle_changed_in_entity.map(error));
 
         #[cfg(feature = "enable_reflect")]
         {
@@ -144,8 +146,23 @@ impl Plugin for EntityPlugin {
     }
 }
 
-pub(crate) fn tileset_rectangle_added_to_entity(
+#[derive(Debug, Error)]
+pub(crate) enum EntityComponentChangedTilesetRectangleError {
+    #[error("Bad project handle!")]
+    BadProjectHandle,
+    #[error("Bad tileset definition uid!")]
+    BadTilesetDefinitionUid(i64),
+    #[error("EntityComponentError: {0}")]
+    EntityComponentError(#[from] EntityComponentError),
+    #[error("No tileset path?")]
+    MissingTilesetPath,
+    #[error("BadTilesetPath")]
+    BadTilesetPath,
+}
+
+pub(crate) fn tileset_rectangle_changed_in_entity(
     mut commands: Commands,
+    project_assets: Res<Assets<ProjectAsset>>,
     query: Query<
         (
             Entity,
@@ -153,7 +170,63 @@ pub(crate) fn tileset_rectangle_added_to_entity(
             &EntityComponent,
             &TilesetRectangle,
         ),
-        Added<TilesetRectangle>,
+        Changed<TilesetRectangle>,
     >,
-) {
+) -> Result<(), EntityComponentChangedTilesetRectangleError> {
+    for (entity, project_handle, entity_component, tileset_rectangle) in &query {
+        debug!(
+            "TilesetRectangle added/changed for: {}!",
+            entity_component.identifier()
+        );
+        let project_asset = project_assets
+            .get(project_handle)
+            .ok_or(EntityComponentChangedTilesetRectangleError::BadProjectHandle)?;
+
+        let color = Color::WHITE;
+
+        let custom_size = Some(entity_component.size());
+
+        let tileset_definition = project_asset
+            .get_tileset_definition_by_uid(tileset_rectangle.tileset_uid())
+            .ok_or(
+                EntityComponentChangedTilesetRectangleError::BadTilesetDefinitionUid(
+                    tileset_rectangle.tileset_uid(),
+                ),
+            )?;
+
+        let rect = Some(Rect::from_corners(
+            tileset_rectangle.location(),
+            tileset_rectangle.location() + tileset_rectangle.size(),
+        ));
+
+        let anchor = Anchor::Custom(Vec2::new(
+            entity_component.pivot().x - 0.5,
+            0.5 - entity_component.pivot().y,
+        ));
+
+        let texture = project_asset
+            .get_tileset_handle(
+                tileset_definition
+                    .rel_path
+                    .as_ref()
+                    .ok_or(EntityComponentChangedTilesetRectangleError::MissingTilesetPath)?,
+            )
+            .ok_or(EntityComponentChangedTilesetRectangleError::BadTilesetPath)?
+            .clone();
+
+        let sprite = Sprite {
+            color,
+            custom_size,
+            rect,
+            anchor,
+            ..default()
+        };
+
+        commands
+            .entity(entity)
+            .remove::<(Handle<Image>, Sprite)>()
+            .insert((texture, sprite));
+    }
+
+    Ok(())
 }
