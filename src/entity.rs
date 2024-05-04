@@ -3,6 +3,7 @@ use thiserror::Error;
 
 use crate::field_instance::FieldInstance;
 use crate::field_instance::FieldInstanceValueError;
+use crate::prelude::ProjectAsset;
 use crate::tileset_rectangle::TilesetRectangle;
 use crate::util::bevy_color_from_ldtk;
 use crate::util::ColorParseError;
@@ -131,11 +132,28 @@ impl TryFrom<&ldtk::EntityInstance> for EntityComponent {
 pub struct EntityPlugin;
 
 impl Plugin for EntityPlugin {
-    fn build(&self, _app: &mut App) {
+    fn build(&self, app: &mut App) {
+        app //
+            .add_systems(Update, tileset_rectangle_added_to_entity);
+
         #[cfg(feature = "enable_reflect")]
         {
-            _app //
+            app //
                 .register_type::<EntityComponent>();
         }
     }
+}
+
+pub(crate) fn tileset_rectangle_added_to_entity(
+    mut commands: Commands,
+    query: Query<
+        (
+            Entity,
+            &Handle<ProjectAsset>,
+            &EntityComponent,
+            &TilesetRectangle,
+        ),
+        Added<TilesetRectangle>,
+    >,
+) {
 }

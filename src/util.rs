@@ -42,7 +42,7 @@ pub(crate) fn bevy_color_from_ldtk(color: &str) -> Result<Color, ColorParseError
         Ok(byte[0] as f32 / 255.0)
     };
 
-    Ok(Color::srgb(
+    Ok(Color::rgb(
         hex_to_float(red_hex)?,
         hex_to_float(green_hex)?,
         hex_to_float(blue_hex)?,
