@@ -78,6 +78,10 @@ pub(crate) fn new_entity_layer_bundle(
                 };
             });
         }
+
+        commands
+            .entity(layer_entity)
+            .insert(Name::from(layer_component.identifier()));
     }
 
     Ok(())
