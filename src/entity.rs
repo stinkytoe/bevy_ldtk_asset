@@ -5,15 +5,18 @@ use thiserror::Error;
 
 use crate::field_instance::FieldInstance;
 use crate::field_instance::FieldInstanceValueParseError;
+use crate::ldtk;
 use crate::project::ProjectAsset;
 use crate::tileset_rectangle::TilesetRectangle;
+use crate::util::bevy_anchor_from_ldtk;
 use crate::util::bevy_color_from_ldtk;
+use crate::util::AnchorIntoError;
 use crate::util::ColorParseError;
-
-use crate::ldtk;
 
 #[derive(Debug, Error)]
 pub enum EntityComponentError {
+    #[error("AnchorIntoError {0}")]
+    AnchorIntoError(#[from] AnchorIntoError),
     #[error("ColorParseError {0}")]
     ColorParseError(#[from] ColorParseError),
     #[error("WorldCoordMixedOptionError")]
@@ -27,7 +30,7 @@ pub enum EntityComponentError {
 pub struct EntityComponent {
     grid: IVec2,
     identifier: String,
-    pivot: Vec2,
+    anchor: Anchor,
     smart_color: Color,
     tags: Vec<String>,
     tile: Option<TilesetRectangle>,
@@ -48,8 +51,8 @@ impl EntityComponent {
         self.identifier.as_ref()
     }
 
-    pub fn pivot(&self) -> Vec2 {
-        self.pivot
+    pub fn anchor(&self) -> Anchor {
+        self.anchor
     }
 
     pub fn smart_color(&self) -> Color {
@@ -109,7 +112,7 @@ impl TryFrom<&ldtk::EntityInstance> for EntityComponent {
         Ok(Self {
             grid: (value.grid[0] as i32, value.grid[1] as i32).into(),
             identifier: value.identifier.clone(),
-            pivot: (value.pivot[0] as f32, value.pivot[1] as f32).into(),
+            anchor: bevy_anchor_from_ldtk(&value.pivot)?,
             smart_color: bevy_color_from_ldtk(&value.smart_color)?,
             tags: value.tags.clone(),
             tile: value
@@ -205,10 +208,7 @@ pub(crate) fn tileset_rectangle_changed_in_entity(
             tileset_rectangle.location() + tileset_rectangle.size(),
         ));
 
-        let anchor = Anchor::Custom(Vec2::new(
-            entity_component.pivot().x - 0.5,
-            0.5 - entity_component.pivot().y,
-        ));
+        let anchor = entity_component.anchor();
 
         let texture = project_asset
             .get_tileset_handle(

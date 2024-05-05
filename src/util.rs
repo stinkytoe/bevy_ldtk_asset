@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy::sprite::Anchor;
 use hex::FromHex;
 use path_clean::PathClean;
 use std::path::Path;
@@ -47,4 +48,21 @@ pub(crate) fn bevy_color_from_ldtk(color: &str) -> Result<Color, ColorParseError
         hex_to_float(green_hex)?,
         hex_to_float(blue_hex)?,
     ))
+}
+
+#[derive(Debug, Error)]
+pub enum AnchorIntoError {
+    #[error("Provided array not four numbers!")]
+    BadArrayLength,
+}
+
+pub(crate) fn bevy_anchor_from_ldtk(pivot: &[f64]) -> Result<Anchor, AnchorIntoError> {
+    if pivot.len() != 2 {
+        return Err(AnchorIntoError::BadArrayLength);
+    }
+
+    Ok(Anchor::Custom(Vec2::new(
+        pivot[0] as f32 - 0.5,
+        0.5 - pivot[1] as f32,
+    )))
 }
