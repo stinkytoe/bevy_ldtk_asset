@@ -5,6 +5,7 @@ use crate::entity::EntityPlugin;
 use crate::layer::LayerPlugin;
 use crate::level::LevelPlugin;
 use crate::project::ProjectPlugin;
+use crate::tileset_rectangle::TilesetRectanglePlugin;
 use crate::world::WorldPlugin;
 
 #[derive(Debug, Default)]
@@ -17,6 +18,7 @@ impl PluginGroup for LdtkLevelsPlugins {
             .add(LayerPlugin)
             .add(LevelPlugin)
             .add(ProjectPlugin)
+            .add(TilesetRectanglePlugin)
             .add(WorldPlugin)
     }
 }

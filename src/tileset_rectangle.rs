@@ -33,3 +33,15 @@ impl From<&ldtk::TilesetRectangle> for TilesetRectangle {
         }
     }
 }
+
+pub struct TilesetRectanglePlugin;
+
+impl Plugin for TilesetRectanglePlugin {
+    fn build(&self, _app: &mut App) {
+        #[cfg(feature = "enable_reflect")]
+        {
+            _app //
+                .register_type::<TilesetRectangle>();
+        }
+    }
+}
