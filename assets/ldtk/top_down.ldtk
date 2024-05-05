@@ -14,7 +14,7 @@
 	"nextUid": 330,
 	"identifierStyle": "Capitalize",
 	"toc": [],
-	"worldLayout": "GridVania",
+	"worldLayout": "Free",
 	"worldGridWidth": 256,
 	"worldGridHeight": 256,
 	"defaultLevelWidth": 256,
@@ -2200,8 +2200,8 @@
 			"identifier": "Island_of_Thieves",
 			"iid": "d5ab0642-8990-11ee-a83b-b50c1be5a2ca",
 			"uid": 0,
-			"worldX": 0,
-			"worldY": 0,
+			"worldX": -256,
+			"worldY": -128,
 			"worldDepth": 0,
 			"pxWid": 256,
 			"pxHei": 256,
@@ -2285,8 +2285,8 @@
 							"defUid": 302,
 							"px": [88,184],
 							"fieldInstances": [],
-							"__worldX": 88,
-							"__worldY": 184
+							"__worldX": -168,
+							"__worldY": 56
 						},
 						{
 							"__identifier": "Axe_Man",
@@ -2301,8 +2301,8 @@
 							"defUid": 287,
 							"px": [120,144],
 							"fieldInstances": [{ "__identifier": "Swing", "__type": "Tile", "__value": { "tilesetUid": 288, "x": 24, "y": 56, "w": 48, "h": 32 }, "__tile": null, "defUid": 329, "realEditorValues": [] }],
-							"__worldX": 120,
-							"__worldY": 144
+							"__worldX": -136,
+							"__worldY": 16
 						}
 					]
 				},
@@ -2642,8 +2642,8 @@
 			"identifier": "Isthmus_of_Pain",
 			"iid": "ba96b5b0-8990-11ee-b369-6bec2cf1cf1a",
 			"uid": 305,
-			"worldX": 256,
-			"worldY": 0,
+			"worldX": 0,
+			"worldY": -128,
 			"worldDepth": 0,
 			"pxWid": 256,
 			"pxHei": 256,
