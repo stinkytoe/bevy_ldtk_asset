@@ -4,8 +4,8 @@ use bevy::utils::error;
 use thiserror::Error;
 
 use crate::field_instance::FieldInstance;
-use crate::field_instance::FieldInstanceValueError;
-use crate::prelude::ProjectAsset;
+use crate::field_instance::FieldInstanceValueParseError;
+use crate::project::ProjectAsset;
 use crate::tileset_rectangle::TilesetRectangle;
 use crate::util::bevy_color_from_ldtk;
 use crate::util::ColorParseError;
@@ -19,7 +19,7 @@ pub enum EntityComponentError {
     #[error("WorldCoordMixedOptionError")]
     WorldCoordMixedOptionError,
     #[error("FieldInstanceValueError {0}")]
-    FieldInstanceValueError(#[from] FieldInstanceValueError),
+    FieldInstanceValueError(#[from] FieldInstanceValueParseError),
 }
 
 #[derive(Component, Debug)]
@@ -93,6 +93,12 @@ impl EntityComponent {
     pub fn has_tag(&self, tag: &str) -> bool {
         // using .iter().any(...) instead of .contains(...) to avoid allocations
         self.tags.iter().any(|inner_tag| inner_tag == tag)
+    }
+
+    pub fn get_field_instance_by_identifier(&self, identifier: &str) -> Option<&FieldInstance> {
+        self.field_instances
+            .iter()
+            .find(|field_instance| field_instance.identifier() == identifier)
     }
 }
 
@@ -182,10 +188,6 @@ pub(crate) fn tileset_rectangle_changed_in_entity(
             .get(project_handle)
             .ok_or(EntityComponentChangedTilesetRectangleError::BadProjectHandle)?;
 
-        let color = Color::WHITE;
-
-        let custom_size = Some(entity_component.size());
-
         let tileset_definition = project_asset
             .get_tileset_definition_by_uid(tileset_rectangle.tileset_uid())
             .ok_or(
@@ -193,6 +195,10 @@ pub(crate) fn tileset_rectangle_changed_in_entity(
                     tileset_rectangle.tileset_uid(),
                 ),
             )?;
+
+        let color = Color::WHITE;
+
+        let custom_size = Some(tileset_rectangle.size());
 
         let rect = Some(Rect::from_corners(
             tileset_rectangle.location(),

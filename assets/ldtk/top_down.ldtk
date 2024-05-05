@@ -11,7 +11,7 @@
 	"iid": "d5ab0640-8990-11ee-a83b-7da29036a93f",
 	"jsonVersion": "1.5.3",
 	"appBuildId": 473703,
-	"nextUid": 329,
+	"nextUid": 330,
 	"identifierStyle": "Capitalize",
 	"toc": [],
 	"worldLayout": "GridVania",
@@ -2037,7 +2037,7 @@
 			"renderMode": "Tile",
 			"showName": true,
 			"tilesetId": 288,
-			"tileRenderMode": "FitInside",
+			"tileRenderMode": "FullSizeUncropped",
 			"tileRect": { "tilesetUid": 288, "x": 8, "y": 8, "w": 16, "h": 16 },
 			"uiTileRect": null,
 			"nineSliceBorders": [],
@@ -2045,8 +2045,49 @@
 			"limitScope": "PerWorld",
 			"limitBehavior": "MoveLastOne",
 			"pivotX": 0.5,
-			"pivotY": 0.5,
-			"fieldDefs": []
+			"pivotY": 1,
+			"fieldDefs": [
+				{
+					"identifier": "Swing",
+					"doc": null,
+					"__type": "Tile",
+					"uid": 329,
+					"type": "F_Tile",
+					"isArray": false,
+					"canBeNull": true,
+					"arrayMinLength": null,
+					"arrayMaxLength": null,
+					"editorDisplayMode": "Hidden",
+					"editorDisplayScale": 1,
+					"editorDisplayPos": "Above",
+					"editorLinkStyle": "StraightArrow",
+					"editorDisplayColor": null,
+					"editorAlwaysShow": false,
+					"editorShowInWorld": true,
+					"editorCutLongValues": true,
+					"editorTextSuffix": null,
+					"editorTextPrefix": null,
+					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
+					"min": null,
+					"max": null,
+					"regex": null,
+					"acceptFileTypes": null,
+					"defaultOverride": {
+						"id": "V_String",
+						"params": ["24,56,48,32"]
+					},
+					"textLanguageMode": null,
+					"symmetricalRef": false,
+					"autoChainRef": true,
+					"allowOutOfLevelRef": true,
+					"allowedRefs": "OnlySame",
+					"allowedRefsEntityUid": null,
+					"allowedRefTags": [],
+					"tilesetUid": 288
+				}
+			]
 		},
 		{
 			"identifier": "Thief",
@@ -2250,7 +2291,7 @@
 						{
 							"__identifier": "Axe_Man",
 							"__grid": [7,8],
-							"__pivot": [0.5,0.5],
+							"__pivot": [0.5,1],
 							"__tags": ["player"],
 							"__tile": { "tilesetUid": 288, "x": 8, "y": 8, "w": 16, "h": 16 },
 							"__smartColor": "#BE4A2F",
@@ -2258,10 +2299,10 @@
 							"width": 16,
 							"height": 16,
 							"defUid": 287,
-							"px": [120,136],
-							"fieldInstances": [],
+							"px": [120,144],
+							"fieldInstances": [{ "__identifier": "Swing", "__type": "Tile", "__value": { "tilesetUid": 288, "x": 24, "y": 56, "w": 48, "h": 32 }, "__tile": null, "defUid": 329, "realEditorValues": [] }],
 							"__worldX": 120,
-							"__worldY": 136
+							"__worldY": 144
 						}
 					]
 				},

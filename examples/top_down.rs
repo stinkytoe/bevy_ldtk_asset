@@ -16,10 +16,9 @@ fn main() {
                     ..default()
                 })
                 .set(ImagePlugin::default_nearest()),
-            // WorldInspectorPlugin::default(),
+            WorldInspectorPlugin::default(),
             LdtkLevelsPlugins,
         ))
-        .add_plugins(WorldInspectorPlugin::new())
         .insert_resource(PlayerEntity::default())
         .add_systems(Startup, setup)
         .add_systems(Update, (identify_player_entity, update))
@@ -65,16 +64,18 @@ fn identify_player_entity(
     }
 }
 
-// #[derive(SystemParam)]
-// struct MySysParam<'w, 's> {
-//     pub world_assets: Res<'w, Assets<WorldAsset>>,
-//     // pub query: Query<'w, 's, Entity, With<EntityComponent>>,
-//     layer_query: Query<'w, 's, (&'static Aabb, Entity, &'static LayerComponent)>,
-// }
-
-fn update(//my_sys_param: MySysParam
+fn update(
+    player_entity: Res<PlayerEntity>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut my_sys_param: EntityComponentTileset,
 ) {
-    // for (_, _, layer_component) in my_sys_param.layer_query.iter() {
-    // info!("LayerComponent: {layer_component:?}");
-    // }
+    if keyboard_input.just_pressed(KeyCode::Space) {
+        let Some(player_entity) = player_entity.0 else {
+            return;
+        };
+
+        my_sys_param
+            .set_tileset_rectangle_to_field_instance(player_entity, "Swing")
+            .expect("Couldn't set tile!");
+    }
 }

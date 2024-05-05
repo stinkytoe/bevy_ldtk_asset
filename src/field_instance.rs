@@ -43,7 +43,7 @@ impl From<&ldtk::ReferenceToAnEntityInstance> for ReferenceToAnEntityInstance {
 }
 
 #[derive(Debug, Error)]
-pub enum FieldInstanceValueError {
+pub enum FieldInstanceValueParseError {
     #[error("Given unknown field instance type from LDtk project! {0}")]
     UnknownFieldInstanceType(String),
     #[error("value is None!")]
@@ -56,6 +56,16 @@ pub enum FieldInstanceValueError {
     BadString,
     #[error("Unable to parse as a boolean?!")]
     BadBool,
+    #[error("Unable to parse as a TilesetRectangle? serde_json error: {0:?}")]
+    BadTile(#[from] serde_json::error::Error),
+}
+
+#[derive(Debug, Error)]
+pub enum FieldInstanceValueAsError {
+    #[error("Parse error! {0:?}")]
+    ParseError(#[from] FieldInstanceValueParseError),
+    #[error("Wrong type!")]
+    WrongType,
 }
 
 #[derive(Debug)]
@@ -68,11 +78,11 @@ pub enum FieldInstanceValue {
     Multilines(String),
     Enum(String),
     Bool(bool),
-    // // from GridPoint
-    // GridPoint(U64Vec2),
-    // TilesetRect(TilesetRectangle),
-    // EntityReferenceInfo(ReferenceToAnEntityInstance),
-    // Array(Vec<FieldInstanceValue>),
+    Tile(TilesetRectangle), // // from GridPoint
+                            // GridPoint(U64Vec2),
+                            // TilesetRect(TilesetRectangle),
+                            // EntityReferenceInfo(ReferenceToAnEntityInstance),
+                            // Array(Vec<FieldInstanceValue>),
 }
 
 #[derive(Debug)]
@@ -102,6 +112,16 @@ impl FieldInstance {
     }
 }
 
+impl FieldInstance {
+    pub fn as_tile(&self) -> Result<&TilesetRectangle, FieldInstanceValueAsError> {
+        if let FieldInstanceValue::Tile(tile) = &self.value {
+            Ok(tile)
+        } else {
+            Err(FieldInstanceValueAsError::WrongType)
+        }
+    }
+}
+
 // { "__identifier": "Integer", "__type": "Int", "__value": 0, "__tile": null, "defUid": 312, "realEditorValues": [] },
 // { "__identifier": "Float", "__type": "Float", "__value": 0, "__tile": null, "defUid": 313, "realEditorValues": [] },
 // { "__identifier": "Boolean", "__type": "Bool", "__value": false, "__tile": null, "defUid": 316, "realEditorValues": [] },
@@ -117,7 +137,7 @@ impl FieldInstance {
 // { "__identifier": "Float2", "__type": "Array<Float>", "__value": [], "__tile": null, "defUid": 327, "realEditorValues": [] }
 
 impl TryFrom<&ldtk::FieldInstance> for FieldInstance {
-    type Error = FieldInstanceValueError;
+    type Error = FieldInstanceValueParseError;
 
     fn try_from(value: &ldtk::FieldInstance) -> Result<Self, Self::Error> {
         Ok(Self {
@@ -128,13 +148,15 @@ impl TryFrom<&ldtk::FieldInstance> for FieldInstance {
                 let value = value
                     .value
                     .as_ref()
-                    .ok_or(FieldInstanceValueError::ValueIsNone)?;
+                    .ok_or(FieldInstanceValueParseError::ValueIsNone)?;
                 match field_instance_type {
                     "Int" => FieldInstanceValue::Int(
-                        value.as_i64().ok_or(FieldInstanceValueError::BadInt)?,
+                        value.as_i64().ok_or(FieldInstanceValueParseError::BadInt)?,
                     ),
                     "Float" => FieldInstanceValue::Float(
-                        value.as_f64().ok_or(FieldInstanceValueError::BadFloat)?,
+                        value
+                            .as_f64()
+                            .ok_or(FieldInstanceValueParseError::BadFloat)?,
                     ),
                     "String" => {
                         FieldInstanceValue::String(value.as_str().map(|str| str.to_string()))
@@ -142,15 +164,23 @@ impl TryFrom<&ldtk::FieldInstance> for FieldInstance {
                     "Multilines" => FieldInstanceValue::Multilines(
                         value
                             .as_str()
-                            .ok_or(FieldInstanceValueError::BadString)?
+                            .ok_or(FieldInstanceValueParseError::BadString)?
                             .to_owned(),
                     ),
                     "Bool" => FieldInstanceValue::Bool(
-                        value.as_bool().ok_or(FieldInstanceValueError::BadBool)?,
+                        value
+                            .as_bool()
+                            .ok_or(FieldInstanceValueParseError::BadBool)?,
                     ),
+                    "Tile" => {
+                        let ldtk_tile: ldtk::TilesetRectangle =
+                            serde_json::from_value(value.clone())?;
+                        let tile = (&ldtk_tile).into();
+                        FieldInstanceValue::Tile(tile)
+                    }
                     // TODO: finish me!
                     _ => {
-                        return Err(FieldInstanceValueError::UnknownFieldInstanceType(
+                        return Err(FieldInstanceValueParseError::UnknownFieldInstanceType(
                             field_instance_type.to_owned(),
                         ))
                     }

@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use thiserror::Error;
 
 use crate::field_instance::FieldInstance;
-use crate::field_instance::FieldInstanceValueError;
+use crate::field_instance::FieldInstanceValueParseError;
 use crate::ldtk;
 use crate::level::LevelBackgroundPosition;
 use crate::level::Neighbour;
@@ -18,7 +18,7 @@ pub enum LevelComponentError {
     #[error("ColorParseError {0}")]
     ColorParseError(#[from] ColorParseError),
     #[error("FieldInstanceError {0}")]
-    FieldInstanceValueError(#[from] FieldInstanceValueError),
+    FieldInstanceValueError(#[from] FieldInstanceValueParseError),
 }
 
 #[derive(Component, Debug, Default)]
