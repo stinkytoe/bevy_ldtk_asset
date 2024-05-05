@@ -145,7 +145,13 @@ pub struct EntityPlugin;
 impl Plugin for EntityPlugin {
     fn build(&self, app: &mut App) {
         app //
-            .add_systems(Update, tileset_rectangle_changed_in_entity.map(error));
+            .add_systems(
+                Update,
+                (
+                    tileset_rectangle_added_in_entity.map(error),
+                    tileset_rectangle_changed_in_entity.map(error),
+                ),
+            );
 
         #[cfg(feature = "enable_reflect")]
         {
@@ -169,22 +175,22 @@ pub(crate) enum EntityComponentChangedTilesetRectangleError {
     BadTilesetPath,
 }
 
-pub(crate) fn tileset_rectangle_changed_in_entity(
+pub(crate) fn tileset_rectangle_added_in_entity(
     mut commands: Commands,
     project_assets: Res<Assets<ProjectAsset>>,
-    query: Query<
+    with_sprite_query: Query<
         (
             Entity,
             &Handle<ProjectAsset>,
             &EntityComponent,
             &TilesetRectangle,
         ),
-        Changed<TilesetRectangle>,
+        Added<TilesetRectangle>,
     >,
 ) -> Result<(), EntityComponentChangedTilesetRectangleError> {
-    for (entity, project_handle, entity_component, tileset_rectangle) in &query {
+    for (entity, project_handle, entity_component, tileset_rectangle) in with_sprite_query.iter() {
         debug!(
-            "TilesetRectangle added/changed for: {}!",
+            "TilesetRectangle added for: {}!",
             entity_component.identifier()
         );
         let project_asset = project_assets
@@ -232,6 +238,65 @@ pub(crate) fn tileset_rectangle_changed_in_entity(
             .entity(entity)
             .remove::<(Handle<Image>, Sprite)>()
             .insert((texture, sprite));
+    }
+
+    Ok(())
+}
+
+#[allow(clippy::type_complexity)]
+pub(crate) fn tileset_rectangle_changed_in_entity(
+    project_assets: Res<Assets<ProjectAsset>>,
+    mut with_sprite_query: Query<
+        (
+            &Handle<ProjectAsset>,
+            &EntityComponent,
+            &TilesetRectangle,
+            &mut Handle<Image>,
+            &mut Sprite,
+        ),
+        Changed<TilesetRectangle>,
+    >,
+) -> Result<(), EntityComponentChangedTilesetRectangleError> {
+    for (project_handle, entity_component, tileset_rectangle, mut image_handle, mut sprite) in
+        with_sprite_query.iter_mut()
+    {
+        debug!(
+            "TilesetRectangle changed for: {}!",
+            entity_component.identifier()
+        );
+
+        let project_asset = project_assets
+            .get(project_handle)
+            .ok_or(EntityComponentChangedTilesetRectangleError::BadProjectHandle)?;
+
+        let tileset_definition = project_asset
+            .get_tileset_definition_by_uid(tileset_rectangle.tileset_uid())
+            .ok_or(
+                EntityComponentChangedTilesetRectangleError::BadTilesetDefinitionUid(
+                    tileset_rectangle.tileset_uid(),
+                ),
+            )?;
+
+        let custom_size = Some(tileset_rectangle.size());
+
+        let rect = Some(Rect::from_corners(
+            tileset_rectangle.location(),
+            tileset_rectangle.location() + tileset_rectangle.size(),
+        ));
+
+        let texture = project_asset
+            .get_tileset_handle(
+                tileset_definition
+                    .rel_path
+                    .as_ref()
+                    .ok_or(EntityComponentChangedTilesetRectangleError::MissingTilesetPath)?,
+            )
+            .ok_or(EntityComponentChangedTilesetRectangleError::BadTilesetPath)?
+            .clone();
+
+        *image_handle = texture;
+        sprite.custom_size = custom_size;
+        sprite.rect = rect;
     }
 
     Ok(())
