@@ -5,6 +5,7 @@ use thiserror::Error;
 use crate::level::LevelBundle;
 use crate::project::ProjectAsset;
 use crate::project::ProjectResolver;
+use crate::world::LoadLevels;
 use crate::world::WorldAsset;
 use crate::world::WorldBundleLoadSettings;
 use crate::world::WorldComponent;
@@ -76,10 +77,11 @@ pub(crate) fn world_bundle_loaded(
             let levels = project_asset
                 .get_levels_by_world_iid(world_component.iid())
                 .filter(|level| match &load_settings.load_levels {
-                    crate::prelude::LoadLevels::None => false,
-                    crate::prelude::LoadLevels::ByIdentifiers(ids)
-                    | crate::prelude::LoadLevels::ByIids(ids) => ids.contains(&level.identifier),
-                    crate::prelude::LoadLevels::All => true,
+                    LoadLevels::None => false,
+                    LoadLevels::ByIdentifiers(ids) | LoadLevels::ByIids(ids) => {
+                        ids.contains(&level.identifier)
+                    }
+                    LoadLevels::All => true,
                 });
 
             for level in levels {
