@@ -67,14 +67,14 @@ fn identify_player_entity(
 fn update(
     player_entity: Res<PlayerEntity>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
-    mut my_sys_param: EntityComponentTileset,
+    mut entity_component_tileset: EntityComponentTileset,
 ) {
     if keyboard_input.just_pressed(KeyCode::Space) {
         let Some(player_entity) = player_entity.0 else {
             return;
         };
 
-        my_sys_param
+        entity_component_tileset
             .set_tileset_rectangle_to_field_instance(player_entity, "Swing")
             .expect("Couldn't set tile!");
     }
