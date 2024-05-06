@@ -78,11 +78,13 @@ pub enum FieldInstanceValue {
     Multilines(String),
     Enum(String),
     Bool(bool),
-    Tile(TilesetRectangle), // // from GridPoint
-                            // GridPoint(U64Vec2),
-                            // TilesetRect(TilesetRectangle),
-                            // EntityReferenceInfo(ReferenceToAnEntityInstance),
-                            // Array(Vec<FieldInstanceValue>),
+    Tile(TilesetRectangle),
+    ArrayTile(Vec<TilesetRectangle>),
+    // from GridPoint
+    // GridPoint(U64Vec2),
+    // TilesetRect(TilesetRectangle),
+    // EntityReferenceInfo(ReferenceToAnEntityInstance),
+    // Array(Vec<FieldInstanceValue>),
 }
 
 #[derive(Debug)]
@@ -177,6 +179,15 @@ impl TryFrom<&ldtk::FieldInstance> for FieldInstance {
                             serde_json::from_value(value.clone())?;
                         let tile = (&ldtk_tile).into();
                         FieldInstanceValue::Tile(tile)
+                    }
+                    "Array<Tile>" => {
+                        let ldtk_tile_vec: Vec<ldtk::TilesetRectangle> =
+                            serde_json::from_value(value.clone())?;
+                        let array_tile = ldtk_tile_vec
+                            .iter()
+                            .map(|ldtk_tile| ldtk_tile.into())
+                            .collect();
+                        FieldInstanceValue::ArrayTile(array_tile)
                     }
                     // TODO: finish me!
                     _ => {
