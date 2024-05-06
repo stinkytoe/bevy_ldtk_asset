@@ -17,13 +17,7 @@ pub enum EntityComponentTilesetError {
 #[derive(SystemParam)]
 pub struct EntityComponentTileset<'w, 's> {
     commands: Commands<'w, 's>,
-    query_with_rect: Query<
-        'w,
-        's,
-        (&'static EntityComponent, &'static mut TilesetRectangle),
-        With<TilesetRectangle>,
-    >,
-    query_without_rect: Query<'w, 's, &'static EntityComponent, Without<TilesetRectangle>>,
+    query: Query<'w, 's, &'static EntityComponent>,
 }
 
 impl EntityComponentTileset<'_, '_> {
@@ -32,26 +26,18 @@ impl EntityComponentTileset<'_, '_> {
         entity: Entity,
         identifier: &str,
     ) -> Result<(), EntityComponentTilesetError> {
-        let tile_stub = |entity_component: &EntityComponent,
-                         identifier: &str|
-         -> Result<TilesetRectangle, EntityComponentTilesetError> {
-            Ok(entity_component
+        if let Ok(entity_component) = self.query.get(entity) {
+            let tile = entity_component
                 .get_field_instance_by_identifier(identifier)
                 .ok_or(EntityComponentTilesetError::BadIdentifier)?
                 .as_tile()?
-                .clone())
+                .clone();
+
+            self.commands
+                .entity(entity)
+                .remove::<TilesetRectangle>()
+                .insert(tile);
         };
-
-        if let Ok((entity_component, mut tileset_rectangle)) = self.query_with_rect.get_mut(entity)
-        {
-            let tile = tile_stub(entity_component, identifier)?;
-
-            *tileset_rectangle = tile.clone();
-        } else if let Ok(entity_component) = self.query_without_rect.get(entity) {
-            let tile = tile_stub(entity_component, identifier)?;
-
-            self.commands.entity(entity).insert(tile.clone());
-        }
 
         Ok(())
     }
