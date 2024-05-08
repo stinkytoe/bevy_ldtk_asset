@@ -61,7 +61,7 @@ pub enum FieldInstanceValueParseError {
 }
 
 #[derive(Debug, Error)]
-pub enum FieldInstanceValueAsError {
+pub enum FieldInstanceValueAsTileError {
     #[error("Parse error! {0:?}")]
     ParseError(#[from] FieldInstanceValueParseError),
     #[error("Wrong type!")]
@@ -115,11 +115,11 @@ impl FieldInstance {
 }
 
 impl FieldInstance {
-    pub fn as_tile(&self) -> Result<&TilesetRectangle, FieldInstanceValueAsError> {
+    pub fn as_tile(&self) -> Result<&TilesetRectangle, FieldInstanceValueAsTileError> {
         if let FieldInstanceValue::Tile(tile) = &self.value {
             Ok(tile)
         } else {
-            Err(FieldInstanceValueAsError::WrongType)
+            Err(FieldInstanceValueAsTileError::WrongType)
         }
     }
 }

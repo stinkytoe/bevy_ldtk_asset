@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use thiserror::Error;
 
 use crate::entity::EntityComponent;
-use crate::field_instance::FieldInstanceValueAsError;
+use crate::field_instance::FieldInstanceValueAsTileError;
 use crate::tileset_rectangle::TilesetRectangle;
 
 #[derive(Debug, Error)]
@@ -11,7 +11,7 @@ pub enum EntityComponentTilesetError {
     #[error("No field instance with given identidier!")]
     BadIdentifier,
     #[error("The field instance with given identifier exists, but is not a Tile!")]
-    NotATile(#[from] FieldInstanceValueAsError),
+    FieldInstanceValueAsTileError(#[from] FieldInstanceValueAsTileError),
 }
 
 #[derive(SystemParam)]
