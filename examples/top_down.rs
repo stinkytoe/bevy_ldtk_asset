@@ -3,8 +3,8 @@ use bevy::prelude::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_ldtk_asset::prelude::*;
 
-#[derive(Debug, Default, Resource)]
-struct PlayerEntity(Option<Entity>);
+#[derive(Debug, Resource)]
+struct PlayerEntity(Entity);
 
 fn main() {
     App::new()
@@ -19,7 +19,6 @@ fn main() {
             WorldInspectorPlugin::default(),
             LdtkLevelsPlugins,
         ))
-        .insert_resource(PlayerEntity::default())
         .add_systems(Startup, setup)
         .add_systems(Update, (identify_player_entity, update))
         .run();
@@ -41,14 +40,12 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 fn identify_player_entity(
-    mut player_entity: ResMut<PlayerEntity>,
-    new_entity_component_query: Query<(Entity, &EntityComponent), Added<EntityComponent>>,
+    mut commands: Commands,
+    player_entity: Option<Res<PlayerEntity>>,
+    new_entities_with_tag: NewEntitiesWithTag,
 ) {
-    for (entity, entity_component) in new_entity_component_query
-        .iter()
-        .filter(|(_, ec)| ec.has_tag("player"))
-    {
-        if player_entity.0.is_some() {
+    for (entity, entity_component) in new_entities_with_tag.with_tag("player") {
+        if player_entity.is_some() {
             error!(
                 "An entity with \"player\" tag already registered! {} will be ignored!",
                 entity_component.identifier()
@@ -58,23 +55,23 @@ fn identify_player_entity(
                 "Registering new player entity: {}",
                 entity_component.identifier()
             );
-            player_entity.0 = Some(entity);
-        }
+            commands.insert_resource(PlayerEntity(entity))
+        };
     }
 }
 
 fn update(
-    player_entity: Res<PlayerEntity>,
+    player_entity: Option<Res<PlayerEntity>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut entity_component_tileset: EntityComponentTileset,
 ) {
     if keyboard_input.just_pressed(KeyCode::Space) {
-        let Some(player_entity) = player_entity.0 else {
+        let Some(player_entity) = player_entity else {
             return;
         };
 
         entity_component_tileset
-            .set_tileset_rectangle_to_field_instance(player_entity, "Swing")
+            .set_tileset_rectangle_to_field_instance(player_entity.0, "Swing")
             .expect("Couldn't set tile!");
     }
 }
