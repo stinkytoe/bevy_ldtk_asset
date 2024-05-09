@@ -56,6 +56,8 @@ pub(crate) fn new_entity_layer_bundle(
                 (entity_component.location() * Vec2::new(1.0, -1.0)).extend(0.0),
             );
 
+            debug!("EntityBundle {} loaded!", entity_component.identifier());
+
             commands.entity(layer_entity).with_children(|parent| {
                 let tileset_rectangle = entity_component.tile().cloned();
 

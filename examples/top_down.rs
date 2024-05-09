@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_ldtk_asset::prelude::*;
 
-#[derive(Debug, Resource)]
+#[derive(Clone, Copy, Debug, Resource)]
 struct PlayerEntity(Entity);
 
 fn main() {
@@ -42,10 +42,12 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
 fn identify_player_entity(
     mut commands: Commands,
     player_entity: Option<Res<PlayerEntity>>,
-    new_entities_with_tag: NewEntitiesWithTag,
+    entity_component_query: EntityComponentQuery,
 ) {
-    for (entity, entity_component) in new_entities_with_tag.with_tag("player") {
-        if player_entity.is_some() {
+    let mut new_player: Option<PlayerEntity> = player_entity.map(|player_entity| *player_entity);
+
+    for (entity, entity_component) in entity_component_query.with_tag("player") {
+        if new_player.is_some() {
             error!(
                 "An entity with \"player\" tag already registered! {} will be ignored!",
                 entity_component.identifier()
@@ -55,22 +57,27 @@ fn identify_player_entity(
                 "Registering new player entity: {}",
                 entity_component.identifier()
             );
-            commands.insert_resource(PlayerEntity(entity))
+            // commands.insert_resource(PlayerEntity(entity))
+            new_player = Some(PlayerEntity(entity));
         };
+    }
+
+    if let Some(new_player) = new_player {
+        commands.insert_resource(new_player);
     }
 }
 
 fn update(
     player_entity: Option<Res<PlayerEntity>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
-    mut entity_component_tileset: EntityComponentTileset,
+    mut entity_component_query: EntityComponentQuery,
 ) {
     if keyboard_input.just_pressed(KeyCode::Space) {
         let Some(player_entity) = player_entity else {
             return;
         };
 
-        entity_component_tileset
+        entity_component_query
             .set_tileset_rectangle_to_field_instance(player_entity.0, "Swing")
             .expect("Couldn't set tile!");
     }
