@@ -40,7 +40,7 @@ impl<'w> EntityComponentQuery<'w, '_> {
             .filter(|(_, entity_component)| entity_component.has_tag(tag))
     }
 
-    pub fn set_tileset_rectangle_to_field_instance(
+    pub fn set_tile_to_field_instance(
         &mut self,
         entity: Entity,
         identifier: &str,

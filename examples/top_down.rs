@@ -46,7 +46,7 @@ fn identify_player_entity(
 ) {
     let mut new_player: Option<PlayerEntity> = player_entity.map(|player_entity| *player_entity);
 
-    for (entity, entity_component) in entity_component_query.with_tag("player") {
+    for (entity, entity_component) in entity_component_query.new_with_tag("player") {
         if new_player.is_some() {
             error!(
                 "An entity with \"player\" tag already registered! {} will be ignored!",
@@ -78,7 +78,7 @@ fn update(
         };
 
         entity_component_query
-            .set_tileset_rectangle_to_field_instance(player_entity.0, "Swing")
+            .set_tile_to_field_instance(player_entity.0, "Swing")
             .expect("Couldn't set tile!");
     }
 }
