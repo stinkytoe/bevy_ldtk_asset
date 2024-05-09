@@ -1,5 +1,6 @@
 use bevy::log::LogPlugin;
 use bevy::prelude::*;
+use bevy_fps_counter::FpsCounterPlugin;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_ldtk_asset::prelude::*;
 
@@ -18,6 +19,7 @@ fn main() {
                 .set(ImagePlugin::default_nearest()),
             WorldInspectorPlugin::default(),
             LdtkLevelsPlugins,
+            FpsCounterPlugin,
         ))
         .add_systems(Startup, setup)
         .add_systems(Update, (identify_player_entity, update))

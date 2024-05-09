@@ -41,3 +41,4 @@ path = "examples/top_down.rs"
 
 [dev-dependencies]
 bevy-inspector-egui = "0.24"
+bevy-fps-counter = "0.4.0"

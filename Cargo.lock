@@ -315,6 +315,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy-fps-counter"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "de338980a3c2e0ee90bd5322626034e037800b5f9431839197000471cf5fd557"
+dependencies = [
+ "bevy",
+]
+
+[[package]]
 name = "bevy-inspector-egui"
 version = "0.24.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -745,6 +754,7 @@ name = "bevy_ldtk_asset"
 version = "0.4.0"
 dependencies = [
  "bevy",
+ "bevy-fps-counter",
  "bevy-inspector-egui",
  "futures-either",
  "hex",
