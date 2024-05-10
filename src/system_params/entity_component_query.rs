@@ -7,7 +7,7 @@ use crate::field_instance::FieldInstanceValueAsTileError;
 use crate::tileset_rectangle::TilesetRectangle;
 
 #[derive(Debug, Error)]
-pub enum EntityComponentTilesetError {
+pub enum EntityComponentQueryError {
     #[error("No field instance with given identidier!")]
     BadIdentifier,
     #[error("The field instance with given identifier exists, but is not a Tile!")]
@@ -44,11 +44,11 @@ impl<'w> EntityComponentQuery<'w, '_> {
         &mut self,
         entity: Entity,
         identifier: &str,
-    ) -> Result<(), EntityComponentTilesetError> {
+    ) -> Result<(), EntityComponentQueryError> {
         if let Ok((_, entity_component)) = self.with_ec_query.get(entity) {
             let tile = entity_component
                 .get_field_instance_by_identifier(identifier)
-                .ok_or(EntityComponentTilesetError::BadIdentifier)?
+                .ok_or(EntityComponentQueryError::BadIdentifier)?
                 .as_tile()?
                 .clone();
 
