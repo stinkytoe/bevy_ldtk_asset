@@ -17,21 +17,17 @@ impl<'w> LevelComponentQuery<'w, '_> {
     ) -> impl Iterator<Item = (Entity, &LevelComponent)> + 'w {
         self.levels_query
             .iter()
-            .filter_map(
-                |(entity, level_component)| match self.levels_transform_query.get(entity) {
-                    Ok(transform) => Some((entity, level_component, transform)),
-                    Err(_) => None,
-                },
-            )
-            .filter_map(move |(entity, level_component, transform)| {
+            .filter_map(|(entity, level_component)| {
+                self.levels_transform_query
+                    .get(entity)
+                    .ok()
+                    .map(|transform| (entity, level_component, transform))
+            })
+            .filter(move |(_, level_component, transform)| {
                 let top_right = transform.translation.truncate();
                 let bottom_left = top_right + Vec2::new(1.0, -1.0) * level_component.size();
-
-                if Rect::from_corners(top_right, bottom_left).contains(location) {
-                    Some((entity, level_component))
-                } else {
-                    None
-                }
+                Rect::from_corners(top_right, bottom_left).contains(location)
             })
+            .map(|(entity, level_component, _)| (entity, level_component))
     }
 }
