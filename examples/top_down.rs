@@ -35,8 +35,12 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         ..default()
     });
 
-    commands.spawn(WorldBundle {
-        world: asset_server.load("ldtk/top_down.ldtk#World"),
+    // commands.spawn(WorldBundle {
+    //     world: asset_server.load("ldtk/top_down.ldtk#World"),
+    //     ..default()
+    // });
+    commands.spawn(ProjectBundle {
+        project: asset_server.load("ldtk/top_down.ldtk"),
         ..default()
     });
 }

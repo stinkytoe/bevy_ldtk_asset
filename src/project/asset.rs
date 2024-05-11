@@ -75,7 +75,7 @@ pub struct ProjectAsset {
     // If this is an external levels project, store the ldtk::level objects here
     #[cfg_attr(feature = "enable_reflect", reflect(ignore))]
     pub(crate) external_levels: HashMap<String, Vec<ldtk::Level>>,
-    pub(crate) _world_handles: HashMap<String, Handle<WorldAsset>>,
+    pub(crate) world_handles: HashMap<String, Handle<WorldAsset>>,
     pub(crate) level_handles: HashMap<String, Handle<LevelAsset>>,
     pub(crate) tileset_handles: HashMap<String, Handle<Image>>,
     pub(crate) background_handles: HashMap<String, Handle<Image>>,
@@ -120,6 +120,10 @@ impl ProjectAsset {
                     .iter()
                     .find(|layer_instance| layer_instance.iid == layer_iid)
             })
+    }
+
+    pub(crate) fn get_world_handle(&self, world_iid: &str) -> Option<&Handle<WorldAsset>> {
+        self.world_handles.get(world_iid)
     }
 
     pub(crate) fn get_level_handle(&self, level_iid: &str) -> Option<&Handle<LevelAsset>> {

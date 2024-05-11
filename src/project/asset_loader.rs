@@ -193,7 +193,7 @@ impl AssetLoader for ProjectAssetLoader {
                 value: project_stub.value,
                 single_world: project_stub.single_world,
                 external_levels: project_stub.external_levels,
-                _world_handles: world_handles,
+                world_handles,
                 level_handles,
                 tileset_handles,
                 background_handles,
