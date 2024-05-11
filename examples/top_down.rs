@@ -59,13 +59,12 @@ fn identify_player_entity(
                 "Registering new player entity: {}",
                 entity_component.identifier()
             );
-            // commands.insert_resource(PlayerEntity(entity))
             new_player = Some(PlayerEntity(entity));
         };
     }
 
-    if let Some(new_player) = new_player {
-        commands.insert_resource(new_player);
+    if let Some(player_entity) = new_player {
+        commands.insert_resource(player_entity);
     }
 }
 
