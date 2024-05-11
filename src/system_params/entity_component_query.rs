@@ -22,7 +22,7 @@ impl<'w> EntityComponentQuery<'w, '_> {
             .filter(|(_, entity_component)| entity_component.has_tag(tag))
     }
 
-    pub fn new_with_tag(
+    pub fn added_with_tag(
         &'w self,
         tag: &'static str,
     ) -> impl Iterator<Item = (Entity, &EntityComponent)> + 'w {

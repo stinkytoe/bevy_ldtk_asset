@@ -48,7 +48,7 @@ fn identify_player_entity(
 ) {
     let mut new_player: Option<PlayerEntity> = player_entity.map(|player_entity| *player_entity);
 
-    for (entity, entity_component) in entity_component_query.new_with_tag("player") {
+    for (entity, entity_component) in entity_component_query.added_with_tag("player") {
         if new_player.is_some() {
             error!(
                 "An entity with \"player\" tag already registered! {} will be ignored!",
