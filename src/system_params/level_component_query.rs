@@ -11,6 +11,18 @@ pub struct LevelComponentQuery<'w, 's> {
 }
 
 impl<'w> LevelComponentQuery<'w, '_> {
+    pub fn with_identifier(&self, identifier: &str) -> Option<(Entity, &LevelComponent)> {
+        self.levels_query
+            .iter()
+            .find(|(_, level_component)| level_component.identifier() == identifier)
+    }
+
+    pub fn with_iid(&self, iid: &str) -> Option<(Entity, &LevelComponent)> {
+        self.levels_query
+            .iter()
+            .find(|(_, level_component)| level_component.iid() == iid)
+    }
+
     pub fn levels_at_world_location(
         &'w self,
         location: Vec2,
