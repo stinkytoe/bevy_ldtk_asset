@@ -124,6 +124,12 @@ impl FieldInstance {
     }
 }
 
+impl From<FieldInstance> for FieldInstanceValue {
+    fn from(val: FieldInstance) -> Self {
+        val.value
+    }
+}
+
 // { "__identifier": "Integer", "__type": "Int", "__value": 0, "__tile": null, "defUid": 312, "realEditorValues": [] },
 // { "__identifier": "Float", "__type": "Float", "__value": 0, "__tile": null, "defUid": 313, "realEditorValues": [] },
 // { "__identifier": "Boolean", "__type": "Bool", "__value": false, "__tile": null, "defUid": 316, "realEditorValues": [] },

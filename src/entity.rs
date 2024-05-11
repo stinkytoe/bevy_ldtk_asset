@@ -98,7 +98,7 @@ impl EntityComponent {
         self.tags.iter().any(|inner_tag| inner_tag == tag)
     }
 
-    pub fn get_field_instance_by_identifier(&self, identifier: &str) -> Option<&FieldInstance> {
+    pub fn get_field_instance(&self, identifier: &str) -> Option<&FieldInstance> {
         self.field_instances
             .iter()
             .find(|field_instance| field_instance.identifier() == identifier)
