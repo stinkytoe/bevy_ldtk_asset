@@ -76,35 +76,23 @@ fn update(
     entity_global_transform_query: Query<&GlobalTransform>,
     level_component_query: LevelComponentQuery,
 ) {
-    let Some(player_entity) = player_entity else {
+    let Some(PlayerEntity(player_entity)) = player_entity.map(|player_entity| *player_entity)
+    else {
         return;
     };
 
-    let player_global_transform = match entity_global_transform_query.get(player_entity.0) {
-        Ok(player_global_transform) => player_global_transform,
-        Err(e) => {
-            error!("Player doesn't have a global transform? {e:?}");
-            return;
-        }
-    };
+    let player_global_transform = entity_global_transform_query
+        .get(player_entity)
+        .expect("Player doesn't have a global transform? {e:?}");
 
     if keyboard_input.just_pressed(KeyCode::Space) {
-        let Some(swing_field_instance) =
-            entity_component_query.get_field_instance(player_entity.0, "Swing")
-        else {
-            error!("No field instance named \"Swing\"?");
-            return;
-        };
+        let tile = entity_component_query
+            .get_field_instance(player_entity, "Swing")
+            .expect("No field instance named \"Swing\"?")
+            .as_tile()
+            .expect("Field Instance \"Swing\" exists, but isn't a tile! {e:?}");
 
-        let tile = match swing_field_instance.as_tile() {
-            Ok(tile) => tile,
-            Err(e) => {
-                error!("Field Instance \"Swing\" exists, but isn't a tile! {e:?}");
-                return;
-            }
-        };
-
-        entity_component_query.set_tile(player_entity.0, tile.clone());
+        entity_component_query.set_tile(player_entity, tile.clone());
     }
 
     if keyboard_input.just_pressed(KeyCode::KeyQ) {
@@ -117,10 +105,14 @@ fn update(
         );
     }
 
-    let up = keyboard_input.just_pressed(KeyCode::ArrowUp);
-    let left = keyboard_input.just_pressed(KeyCode::ArrowLeft);
-    let down = keyboard_input.just_pressed(KeyCode::ArrowDown);
-    let right = keyboard_input.just_pressed(KeyCode::ArrowRight);
+    let up =
+        keyboard_input.just_pressed(KeyCode::ArrowUp) | keyboard_input.just_pressed(KeyCode::KeyW);
+    let left = keyboard_input.just_pressed(KeyCode::ArrowLeft)
+        | keyboard_input.just_pressed(KeyCode::KeyA);
+    let down = keyboard_input.just_pressed(KeyCode::ArrowDown)
+        | keyboard_input.just_pressed(KeyCode::KeyS);
+    let right = keyboard_input.just_pressed(KeyCode::ArrowRight)
+        | keyboard_input.just_pressed(KeyCode::KeyD);
 
     match (up, left, down, right) {
         (true, false, false, false) /* ↑ */ => todo!(),
