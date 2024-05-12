@@ -9,7 +9,8 @@ use crate::tileset_rectangle::TilesetRectangle;
 pub struct EntityComponentQuery<'w, 's> {
     commands: Commands<'w, 's>,
     added_ec_query: Query<'w, 's, (Entity, &'static EntityComponent), Added<EntityComponent>>,
-    with_ec_query: Query<'w, 's, (Entity, &'static EntityComponent)>,
+    ec_query: Query<'w, 's, (Entity, &'static EntityComponent)>,
+    with_tileset_rectangle: Query<'w, 's, &'static mut TilesetRectangle, With<EntityComponent>>,
 }
 
 impl<'w> EntityComponentQuery<'w, '_> {
@@ -17,7 +18,7 @@ impl<'w> EntityComponentQuery<'w, '_> {
         &'w self,
         tag: &'static str,
     ) -> impl Iterator<Item = (Entity, &EntityComponent)> + 'w {
-        self.with_ec_query
+        self.ec_query
             .iter()
             .filter(|(_, entity_component)| entity_component.has_tag(tag))
     }
@@ -32,16 +33,17 @@ impl<'w> EntityComponentQuery<'w, '_> {
     }
 
     pub fn get_field_instance(&self, entity: Entity, identifier: &str) -> Option<&FieldInstance> {
-        self.with_ec_query
+        self.ec_query
             .get(entity)
             .ok()
             .and_then(|(_, entity_component)| entity_component.get_field_instance(identifier))
     }
 
     pub fn set_tile(&mut self, entity: Entity, tile: TilesetRectangle) {
-        self.commands
-            .entity(entity)
-            .remove::<TilesetRectangle>()
-            .insert(tile);
+        if let Ok(mut tileset_rectangle) = self.with_tileset_rectangle.get_mut(entity) {
+            *tileset_rectangle = tile.clone();
+        } else {
+            self.commands.entity(entity).insert(tile);
+        }
     }
 }
