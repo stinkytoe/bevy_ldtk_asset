@@ -41,7 +41,7 @@ impl<'w> EntityComponentQuery<'w, '_> {
 
     pub fn set_tile(&mut self, entity: Entity, tile: TilesetRectangle) {
         if let Ok(mut tileset_rectangle) = self.with_tileset_rectangle.get_mut(entity) {
-            *tileset_rectangle = tile.clone();
+            *tileset_rectangle = tile;
         } else {
             self.commands.entity(entity).insert(tile);
         }
