@@ -205,10 +205,8 @@ pub(crate) fn level_bundle_loaded(
                     (
                         LoadLayers::ByIdentifiers(ids),
                         LayerType::Tiles | LayerType::IntGrid | LayerType::Autolayer,
-                    ) if ids.contains(&layer_json.identifier) => {
-                        spawn_tile_layer(&mut entity_commands, layer, index);
-                    }
-                    (
+                    )
+                    | (
                         LoadLayers::ByIids(ids),
                         LayerType::Tiles | LayerType::IntGrid | LayerType::Autolayer,
                     ) if ids.contains(&layer_json.identifier) => {
@@ -223,11 +221,7 @@ pub(crate) fn level_bundle_loaded(
 
                     // Entity layer variants
                     (LoadLayers::ByIdentifiers(ids), LayerType::Entities)
-                        if ids.contains(&layer_json.identifier) =>
-                    {
-                        spawn_entity_layer(&mut entity_commands, layer, index);
-                    }
-                    (LoadLayers::ByIids(ids), LayerType::Entities)
+                    | (LoadLayers::ByIids(ids), LayerType::Entities)
                         if ids.contains(&layer_json.identifier) =>
                     {
                         spawn_entity_layer(&mut entity_commands, layer, index);
