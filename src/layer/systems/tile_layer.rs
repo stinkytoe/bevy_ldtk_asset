@@ -33,8 +33,8 @@ pub(crate) enum NewTileLayerBundleError {
     BadTilesetPath,
     #[error("Tileset handle not found!")]
     BadTilesetHandle,
-    // #[error("Fail to convert Bevy image to dynamic image! {0:?}")]
-    // IntoDynamicImageError(#[from] IntoDynamicImageError),
+    #[error("Fail to convert Bevy image to dynamic image! {0:?}")]
+    IntoDynamicImageError(#[from] IntoDynamicImageError),
 }
 
 pub(crate) fn new_tile_layer_bundle(
@@ -94,11 +94,11 @@ pub(crate) fn new_tile_layer_bundle(
                             .get(tileset_handle)
                             .ok_or(NewTileLayerBundleError::BadTilesetHandle)?;
 
-                        // let mut tileset = tileset_image.clone().try_into_dynamic()?;
-                        let mut tileset = tileset_image
-                            .clone()
-                            .try_into_dynamic()
-                            .expect("try_into_dynamic fail!");
+                        let mut tileset = tileset_image.clone().try_into_dynamic()?;
+                        // let mut tileset = tileset_image
+                        //     .clone()
+                        //     .try_into_dynamic()
+                        //     .expect("try_into_dynamic fail!");
 
                         let mut dynamic_image = DynamicImage::new(
                             level_json.px_wid as u32,
@@ -127,7 +127,7 @@ pub(crate) fn new_tile_layer_bundle(
                             overlay(&mut dynamic_image, &cropped, tile.px[0], tile.px[1]);
                         });
 
-                        let color = Color::rgba(1.0, 1.0, 1.0, layer_instance_json.opacity as f32);
+                        let color = Color::srgba(1.0, 1.0, 1.0, layer_instance_json.opacity as f32);
 
                         let new_image =
                             Image::from_dynamic(dynamic_image, true, RenderAssetUsages::default());
