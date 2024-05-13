@@ -22,11 +22,13 @@ impl Plugin for LayerPlugin {
         {
             use crate::layer::LayerComponent;
             use crate::layer::LoadEntityLayerSettings;
+            use crate::layer::LoadTileLayerMeshSettings;
             use crate::layer::LoadTileLayerSettings;
             app //
                 // .register_asset_reflect::<ProjectAsset>()
                 .register_type::<LayerComponent>()
                 .register_type::<LoadEntityLayerSettings>()
+                .register_type::<LoadTileLayerMeshSettings>()
                 .register_type::<LoadTileLayerSettings>();
         }
     }

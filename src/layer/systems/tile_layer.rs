@@ -13,6 +13,7 @@ use thiserror::Error;
 
 use crate::layer::LayerComponent;
 use crate::layer::LayerType;
+use crate::layer::LoadTileLayerMeshSettings;
 use crate::layer::LoadTileLayerSettings;
 use crate::ldtk;
 use crate::project::ProjectAsset;
@@ -69,9 +70,9 @@ pub(crate) fn new_tile_layer_bundle(
 
         debug!("TileLayerBundle loaded! {}", layer_component.identifier());
 
-        if let Some(material) = match settings {
-            LoadTileLayerSettings::ComponentOnly => None,
-            LoadTileLayerSettings::Mesh => match project_asset.value().image_export_mode {
+        if let Some(material) = match settings.mesh_settings {
+            LoadTileLayerMeshSettings::ComponentOnly => None,
+            LoadTileLayerMeshSettings::Mesh => match project_asset.value().image_export_mode {
                 ldtk::ImageExportMode::None | ldtk::ImageExportMode::OneImagePerLevel => {
                     if let Some(tileset_rel_path) = &layer_instance_json.tileset_rel_path {
                         // Need to construct the image

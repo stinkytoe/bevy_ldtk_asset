@@ -5,10 +5,26 @@ use crate::project::ProjectAsset;
 
 #[derive(Clone, Component, Debug, Default)]
 #[cfg_attr(feature = "enable_reflect", derive(Reflect))]
-pub enum LoadTileLayerSettings {
+pub enum LoadTileLayerMeshSettings {
     ComponentOnly,
     #[default]
     Mesh,
+}
+
+#[derive(Clone, Component, Debug)]
+#[cfg_attr(feature = "enable_reflect", derive(Reflect))]
+pub struct LoadTileLayerSettings {
+    pub load_int_grids: bool,
+    pub mesh_settings: LoadTileLayerMeshSettings,
+}
+
+impl Default for LoadTileLayerSettings {
+    fn default() -> Self {
+        Self {
+            load_int_grids: true,
+            mesh_settings: Default::default(),
+        }
+    }
 }
 
 #[derive(Bundle, Debug)]

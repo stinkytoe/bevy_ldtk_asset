@@ -22,7 +22,6 @@ pub enum LoadLayers {
 pub struct LevelBundleLoadSettings {
     pub load_bg_color: bool,
     pub load_bg_image: bool,
-    pub load_int_grids: bool,
     pub load_layers: LoadLayers,
     pub load_tile_layer_settings: LoadTileLayerSettings,
     pub load_entities: LoadEntities,
@@ -36,7 +35,6 @@ impl Default for LevelBundleLoadSettings {
         Self {
             load_bg_color: true,
             load_bg_image: true,
-            load_int_grids: true,
             load_layers: Default::default(),
             load_tile_layer_settings: Default::default(),
             load_entities: Default::default(),
