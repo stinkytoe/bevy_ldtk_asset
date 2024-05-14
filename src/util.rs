@@ -61,7 +61,6 @@ pub(crate) fn bevy_anchor_from_ldtk(pivot: &[f64]) -> Result<Anchor, AnchorIntoE
         return Err(AnchorIntoError::BadArrayLength);
     }
 
-    #[allow(illegal_floating_point_literal_pattern)]
     Ok(match (pivot[0] as f32, pivot[1] as f32) {
         (0.0, 0.0) => Anchor::TopLeft,
         (0.0, 0.5) => Anchor::CenterLeft,
