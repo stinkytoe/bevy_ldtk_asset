@@ -1,2 +1,3 @@
 /target
 shell.nix
+Cargo.lock
