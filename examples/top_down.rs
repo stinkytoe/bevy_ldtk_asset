@@ -4,9 +4,6 @@ use bevy_fps_counter::FpsCounterPlugin;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_ldtk_asset::prelude::*;
 
-#[derive(Clone, Copy, Debug, Resource)]
-struct PlayerEntity(Entity);
-
 fn main() {
     App::new()
         .add_plugins((
@@ -22,7 +19,7 @@ fn main() {
             FpsCounterPlugin,
         ))
         .add_systems(Startup, setup)
-        .add_systems(Update, (identify_player_entity, update))
+        .add_systems(Update, update)
         .run();
 }
 
@@ -35,52 +32,19 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         ..default()
     });
 
-    // commands.spawn(WorldBundle {
-    //     world: asset_server.load("ldtk/top_down.ldtk#World"),
-    //     ..default()
-    // });
     commands.spawn(ProjectBundle {
         project: asset_server.load("ldtk/top_down.ldtk"),
         ..default()
     });
 }
 
-fn identify_player_entity(
-    mut commands: Commands,
-    player_entity: Option<Res<PlayerEntity>>,
-    entity_component_query: EntityComponentQuery,
-) {
-    let mut new_player: Option<PlayerEntity> = player_entity.map(|player_entity| *player_entity);
-
-    for (entity, entity_component) in entity_component_query.added_with_tag("player") {
-        if new_player.is_some() {
-            error!(
-                "An entity with \"player\" tag already registered! {} will be ignored!",
-                entity_component.identifier()
-            );
-        } else {
-            info!(
-                "Registering new player entity: {}",
-                entity_component.identifier()
-            );
-            new_player = Some(PlayerEntity(entity));
-        };
-    }
-
-    if let Some(player_entity) = new_player {
-        commands.insert_resource(player_entity);
-    }
-}
-
 fn update(
-    player_entity: Option<Res<PlayerEntity>>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut entity_component_query: EntityComponentQuery,
     entity_global_transform_query: Query<&GlobalTransform>,
     level_component_query: LevelComponentQuery,
 ) {
-    let Some(PlayerEntity(player_entity)) = player_entity.map(|player_entity| *player_entity)
-    else {
+    let Some((player_entity, _)) = entity_component_query.with_identifier("Axe_Man") else {
         return;
     };
 
