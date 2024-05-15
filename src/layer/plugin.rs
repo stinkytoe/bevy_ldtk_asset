@@ -3,6 +3,7 @@ use bevy::utils::error;
 
 use crate::layer::new_entity_layer_bundle;
 use crate::layer::new_tile_layer_bundle;
+use crate::layer::new_tiles;
 
 #[derive(Debug, Default)]
 pub struct LayerPlugin;
@@ -15,6 +16,7 @@ impl Plugin for LayerPlugin {
                 (
                     new_entity_layer_bundle.map(error),
                     new_tile_layer_bundle.map(error),
+                    new_tiles.map(error),
                 ),
             );
 
@@ -24,12 +26,17 @@ impl Plugin for LayerPlugin {
             use crate::layer::LoadEntityLayerSettings;
             use crate::layer::LoadTileLayerMeshSettings;
             use crate::layer::LoadTileLayerSettings;
+            use crate::layer::Tile;
+            use crate::layer::Tiles;
+
             app //
                 // .register_asset_reflect::<ProjectAsset>()
                 .register_type::<LayerComponent>()
                 .register_type::<LoadEntityLayerSettings>()
                 .register_type::<LoadTileLayerMeshSettings>()
-                .register_type::<LoadTileLayerSettings>();
+                .register_type::<LoadTileLayerSettings>()
+                .register_type::<Tile>()
+                .register_type::<Tiles>();
         }
     }
 }

@@ -1,23 +1,11 @@
 use bevy::prelude::*;
-use bevy::render::mesh::Indices;
-use bevy::render::render_asset::RenderAssetUsages;
-use bevy::render::render_resource::PrimitiveTopology;
-use bevy::sprite::Mesh2dHandle;
-use image::imageops::crop;
-use image::imageops::flip_horizontal;
-use image::imageops::flip_vertical;
-use image::imageops::overlay;
-use image::ColorType;
-use image::DynamicImage;
 use thiserror::Error;
 
 use crate::layer::LayerComponent;
 use crate::layer::LayerType;
-use crate::layer::LoadTileLayerMeshSettings;
 use crate::layer::LoadTileLayerSettings;
-use crate::ldtk;
+use crate::layer::Tiles;
 use crate::project::ProjectAsset;
-use crate::project::ProjectResolver;
 
 #[derive(Debug, Error)]
 pub(crate) enum NewTileLayerBundleError {
@@ -29,31 +17,17 @@ pub(crate) enum NewTileLayerBundleError {
     MissingLayerComponent,
     #[error("Entity layer in TileLayerBundle?")]
     UnexpectedEntityLayer,
-    #[error("Tileset path not found in project asset!")]
-    BadTilesetPath,
-    #[error("Tileset handle not found!")]
-    BadTilesetHandle,
-    // #[error("Fail to convert Bevy image to dynamic image! {0:?}")]
-    // IntoDynamicImageError(#[from] IntoDynamicImageError),
 }
 
 pub(crate) fn new_tile_layer_bundle(
     mut commands: Commands,
     new_tile_layer_query: Query<
-        (
-            Entity,
-            &Handle<ProjectAsset>,
-            &LayerComponent,
-            &LoadTileLayerSettings,
-        ),
+        (Entity, &Handle<ProjectAsset>, &LayerComponent),
         Added<LoadTileLayerSettings>,
     >,
     project_assets: Res<Assets<ProjectAsset>>,
-    mut images: ResMut<Assets<Image>>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
 ) -> Result<(), NewTileLayerBundleError> {
-    for (entity, project_handle, layer_component, settings) in new_tile_layer_query.iter() {
+    for (entity, project_handle, layer_component) in new_tile_layer_query.iter() {
         let project_asset = project_assets
             .get(project_handle)
             .ok_or(NewTileLayerBundleError::BadProjectHandle)?;
@@ -70,117 +44,23 @@ pub(crate) fn new_tile_layer_bundle(
 
         debug!("TileLayerBundle loaded! {}", layer_component.identifier());
 
-        if let Some(material) = match settings.mesh_settings {
-            LoadTileLayerMeshSettings::ComponentOnly => None,
-            LoadTileLayerMeshSettings::Mesh => match project_asset.value().image_export_mode {
-                ldtk::ImageExportMode::None | ldtk::ImageExportMode::OneImagePerLevel => {
-                    if let Some(tileset_rel_path) = &layer_instance_json.tileset_rel_path {
-                        // Need to construct the image
-                        let tiles = match layer_component.layer_type() {
-                            LayerType::IntGrid | LayerType::Autolayer => {
-                                &layer_instance_json.auto_layer_tiles
-                            }
-                            LayerType::Entities => {
-                                return Err(NewTileLayerBundleError::UnexpectedEntityLayer);
-                            }
-                            LayerType::Tiles => &layer_instance_json.grid_tiles,
-                        };
-
-                        let tileset_handle = project_asset
-                            .get_tileset_handle(tileset_rel_path)
-                            .ok_or(NewTileLayerBundleError::BadTilesetPath)?;
-
-                        let tileset_image = images
-                            .get(tileset_handle)
-                            .ok_or(NewTileLayerBundleError::BadTilesetHandle)?;
-
-                        // let mut tileset = tileset_image.clone().try_into_dynamic()?;
-                        let mut tileset = tileset_image
-                            .clone()
-                            .try_into_dynamic()
-                            .expect("try_into_dynamic fail!");
-
-                        let mut dynamic_image = DynamicImage::new(
-                            level_json.px_wid as u32,
-                            level_json.px_hei as u32,
-                            ColorType::Rgba8,
-                        );
-
-                        tiles.iter().for_each(|tile| {
-                            let mut cropped = crop(
-                                &mut tileset,
-                                tile.src[0] as u32,
-                                tile.src[1] as u32,
-                                layer_instance_json.c_wid as u32,
-                                layer_instance_json.c_hei as u32,
-                            )
-                            .to_image();
-
-                            if tile.f & 0x1 == 0x1 {
-                                cropped = flip_horizontal(&cropped);
-                            }
-
-                            if tile.f & 0x2 == 0x2 {
-                                cropped = flip_vertical(&cropped);
-                            }
-
-                            overlay(&mut dynamic_image, &cropped, tile.px[0], tile.px[1]);
-                        });
-
-                        let color = Color::rgba(1.0, 1.0, 1.0, layer_instance_json.opacity as f32);
-
-                        let new_image =
-                            Image::from_dynamic(dynamic_image, true, RenderAssetUsages::default());
-
-                        let texture = Some(images.add(new_image));
-
-                        Some(materials.add(ColorMaterial { color, texture }))
-                    } else {
-                        None
-                    }
-                }
-                ldtk::ImageExportMode::LayersAndLevels
-                | ldtk::ImageExportMode::OneImagePerLayer => {
-                    // can pull the image from assets
-                    todo!()
-                }
-            },
-        } {
-            let mesh = Mesh2dHandle(meshes.add(create_tile_layer_mesh(UVec2::new(
-                level_json.px_wid as u32,
-                level_json.px_hei as u32,
-            ))));
-
-            commands.entity(entity).insert((mesh, material));
-        };
-
         commands
             .entity(entity)
             .insert(Name::from(layer_component.identifier()));
+
+        let tiles = match layer_component.layer_type() {
+            LayerType::IntGrid | LayerType::Autolayer => &layer_instance_json.auto_layer_tiles,
+            LayerType::Entities => {
+                return Err(NewTileLayerBundleError::UnexpectedEntityLayer);
+            }
+            LayerType::Tiles => &layer_instance_json.grid_tiles,
+        }
+        .iter()
+        .map(|tile| tile.into())
+        .collect();
+
+        commands.entity(entity).insert(Tiles { tiles });
     }
 
     Ok(())
-}
-
-fn create_tile_layer_mesh(size: UVec2) -> Mesh {
-    let size = Vec2::new(size.x as f32, size.y as f32);
-
-    Mesh::new(
-        PrimitiveTopology::TriangleList,
-        RenderAssetUsages::MAIN_WORLD | RenderAssetUsages::RENDER_WORLD,
-    )
-    .with_inserted_indices(Indices::U32(vec![0, 1, 2, 0, 2, 3]))
-    .with_inserted_attribute(
-        Mesh::ATTRIBUTE_POSITION,
-        vec![
-            [0.0, 0.0, 0.0],
-            [size.x, 0.0, 0.0],
-            [size.x, -size.y, 0.0],
-            [0.0, -size.y, 0.0],
-        ],
-    )
-    .with_inserted_attribute(
-        Mesh::ATTRIBUTE_UV_0,
-        vec![[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]],
-    )
 }
