@@ -2,8 +2,7 @@ use bevy::prelude::*;
 
 use crate::ldtk;
 
-#[derive(Clone, Component, Debug, Default)]
-#[cfg_attr(feature = "enable_reflect", derive(Reflect))]
+#[derive(Clone, Component, Debug, Default, Reflect)]
 pub struct TilesetRectangle {
     location: Vec2,
     size: Vec2,
@@ -37,11 +36,8 @@ impl From<&ldtk::TilesetRectangle> for TilesetRectangle {
 pub struct TilesetRectanglePlugin;
 
 impl Plugin for TilesetRectanglePlugin {
-    fn build(&self, _app: &mut App) {
-        #[cfg(feature = "enable_reflect")]
-        {
-            _app //
-                .register_type::<TilesetRectangle>();
-        }
+    fn build(&self, app: &mut App) {
+        app //
+            .register_type::<TilesetRectangle>();
     }
 }

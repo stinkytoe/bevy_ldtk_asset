@@ -4,31 +4,12 @@ use thiserror::Error;
 use crate::ldtk;
 use crate::tileset_rectangle::TilesetRectangle;
 
-#[derive(Debug, Default)]
-#[cfg_attr(feature = "enable_reflect", derive(Reflect))]
+#[derive(Debug, Default, Reflect)]
 pub struct ReferenceToAnEntityInstance {
-    entity_iid: String,
-    layer_iid: String,
-    level_iid: String,
-    world_iid: String,
-}
-
-impl ReferenceToAnEntityInstance {
-    pub fn entity_iid(&self) -> &str {
-        self.entity_iid.as_ref()
-    }
-
-    pub fn layer_iid(&self) -> &str {
-        self.layer_iid.as_ref()
-    }
-
-    pub fn level_iid(&self) -> &str {
-        self.level_iid.as_ref()
-    }
-
-    pub fn world_iid(&self) -> &str {
-        self.world_iid.as_ref()
-    }
+    pub entity_iid: String,
+    pub layer_iid: String,
+    pub level_iid: String,
+    pub world_iid: String,
 }
 
 impl From<&ldtk::ReferenceToAnEntityInstance> for ReferenceToAnEntityInstance {
@@ -68,8 +49,7 @@ pub enum FieldInstanceValueAsTileError {
     WrongType,
 }
 
-#[derive(Debug)]
-#[cfg_attr(feature = "enable_reflect", derive(Reflect))]
+#[derive(Clone, Debug, Reflect)]
 // TODO: fill me out!
 pub enum FieldInstanceValue {
     Int(i64),
@@ -82,13 +62,11 @@ pub enum FieldInstanceValue {
     ArrayTile(Vec<TilesetRectangle>),
     // from GridPoint
     // GridPoint(U64Vec2),
-    // TilesetRect(TilesetRectangle),
     // EntityReferenceInfo(ReferenceToAnEntityInstance),
     // Array(Vec<FieldInstanceValue>),
 }
 
-#[derive(Debug)]
-#[cfg_attr(feature = "enable_reflect", derive(Reflect))]
+#[derive(Clone, Debug, Reflect)]
 pub struct FieldInstance {
     identifier: String,
     tile: Option<TilesetRectangle>,
@@ -189,10 +167,7 @@ impl TryFrom<&ldtk::FieldInstance> for FieldInstance {
                     "Array<Tile>" => {
                         let ldtk_tile_vec: Vec<ldtk::TilesetRectangle> =
                             serde_json::from_value(value.clone())?;
-                        let array_tile = ldtk_tile_vec
-                            .iter()
-                            .map(|ldtk_tile| ldtk_tile.into())
-                            .collect();
+                        let array_tile = ldtk_tile_vec.iter().map(TilesetRectangle::from).collect();
                         FieldInstanceValue::ArrayTile(array_tile)
                     }
                     // TODO: finish me!
@@ -206,4 +181,9 @@ impl TryFrom<&ldtk::FieldInstance> for FieldInstance {
             def_uid: value.def_uid,
         })
     }
+}
+
+#[derive(Clone, Component, Debug, Reflect)]
+pub struct FieldInstances {
+    pub field_instances: Vec<FieldInstance>,
 }

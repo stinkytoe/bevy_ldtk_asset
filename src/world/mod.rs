@@ -9,4 +9,5 @@ pub use bundle::WorldBundle;
 pub use bundle::WorldsToLoad;
 pub use component::WorldComponent;
 
+pub(crate) use asset::NewWorldAssetError;
 pub(crate) use plugin::WorldPlugin;

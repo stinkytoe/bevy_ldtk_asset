@@ -1,27 +1,45 @@
 use bevy::asset::AssetLoader;
 use bevy::asset::AsyncReadExt;
+use bevy::asset::ReadAssetBytesError;
 use bevy::prelude::*;
 use bevy::utils::HashMap;
+use std::path::Path;
 use std::path::PathBuf;
 use thiserror::Error;
 
+use crate::layer::LayerTypeError;
 use crate::ldtk;
+use crate::level::LevelAsset;
+use crate::level::NewLevelAssetError;
+use crate::prelude::LayerAsset;
 use crate::project::ProjectAsset;
 use crate::project::ProjectSettings;
 use crate::util::bevy_color_from_ldtk;
+use crate::util::ldtk_path_to_asset_path;
 use crate::util::ColorParseError;
+use crate::world::NewWorldAssetError;
 use crate::world::WorldAsset;
 
 #[derive(Debug, Error)]
 pub(crate) enum ProjectAssetLoaderError {
-    #[error("IO error! {0}")]
+    #[error("{0}")]
     Io(#[from] std::io::Error),
-    #[error("JSON Parse error! {0}")]
+    #[error("{0}")]
     SerdeJson(#[from] serde_json::Error),
+    #[error("{0}")]
+    ColorParseError(#[from] ColorParseError),
+    #[error("{0}")]
+    NewWorldAssetError(#[from] NewWorldAssetError),
+    #[error("{0}")]
+    NewLevelAssetError(#[from] NewLevelAssetError),
+    #[error("{0}")]
+    ReadAssetBytesError(#[from] ReadAssetBytesError),
+    #[error("{0}")]
+    LayerTypeError(#[from] LayerTypeError),
     #[error("Could not get project directory? {0}")]
     BadProjectDirectory(PathBuf),
-    #[error("ColorParseError! {0}")]
-    ColorParseError(#[from] ColorParseError),
+    #[error("externalRelPath is None when external levels is true?")]
+    ExternalRelPathIsNone,
 }
 
 #[derive(Debug, Default)]
@@ -69,56 +87,86 @@ impl AssetLoader for ProjectAssetLoader {
             let mut tileset_assets = HashMap::default();
             let mut background_assets = HashMap::default();
 
-            let world_tuples: Box<dyn Iterator<Item = (WorldAsset, String, &Vec<ldtk::Level>)>> =
-                if value.worlds.is_empty() {
-                    Box::new(
-                        [(
-                            WorldAsset {
-                                project: project_handle.clone(),
-                                iid: value.iid.clone(),
-                            },
-                            "World".to_owned(),
-                            &value.levels,
-                        )]
-                        .into_iter(),
-                    )
-                } else {
-                    Box::new(value.worlds.iter().map(|world| {
-                        (
-                            WorldAsset {
-                                project: project_handle.clone(),
-                                iid: world.iid.clone(),
-                            },
+            let world_tuples: Vec<_> = if value.worlds.is_empty() {
+                vec![(
+                    WorldAsset::new_from_project(&value, project_handle.clone())?,
+                    "World".to_owned(),
+                    &value.levels,
+                )]
+            } else {
+                value
+                    .worlds
+                    .iter()
+                    .map(|world| {
+                        Ok((
+                            WorldAsset::new_from_world(world, project_handle.clone())?,
                             world.identifier.clone(),
                             &world.levels,
-                        )
-                    }))
-                };
+                        ))
+                    })
+                    .collect::<Result<Vec<_>, ProjectAssetLoaderError>>()?
+            };
 
             for (world_asset, world_identifier, levels) in world_tuples {
                 let iid = world_asset.iid.clone();
-                let world_handle =
-                    load_context.add_loaded_labeled_asset(world_identifier, world_asset.into());
-                world_assets.insert(iid, world_handle);
-            }
+                let world_handle = load_context
+                    .add_loaded_labeled_asset(world_identifier.clone(), world_asset.into());
 
-            // let levels: Box<dyn Iterator<Item = &ldtk::Level>> = if value.worlds.is_empty() {
-            //     Box::new(value.levels.iter())
-            // } else {
-            //     Box::new(value.worlds.iter().flat_map(|world| world.levels.iter()))
-            // };
-            //
-            // for level in levels {
-            //     let level_asset = LevelAsset {
-            //         project: project_handle,
-            //         iid: level.iid.clone(),
-            //     };
-            //
-            //     let tag = format!("{}/{}", world.identifier, level.identifier);
-            //
-            //     let level_handle = load_context.add_loaded_labeled_asset(tag, level_asset.into());
-            //     level_assets.insert(level.iid, level_handle);
-            // }
+                debug!("Added new WorldAsset!");
+                debug!("identifier: {world_identifier}");
+                debug!("iid: {iid}");
+
+                world_assets.insert(iid, world_handle);
+
+                for level in levels.iter() {
+                    let iid = level.iid.clone();
+                    let level_asset = LevelAsset::new(level, project_handle.clone())?;
+                    let level_label = format!("{}/{}", world_identifier, level.identifier);
+                    let level_handle =
+                        load_context.add_loaded_labeled_asset(level_label, level_asset.into());
+
+                    debug!("Added new LevelAsset!");
+                    debug!("identifier: {}", level.identifier);
+                    debug!("iid: {iid}");
+
+                    level_assets.insert(iid, level_handle);
+
+                    let Some(layer_instances) = ({
+                        if !value.external_levels {
+                            level.layer_instances.clone()
+                        } else {
+                            let level_path = level
+                                .external_rel_path
+                                .as_ref()
+                                .ok_or(ProjectAssetLoaderError::ExternalRelPathIsNone)?;
+                            let level_path = Path::new(level_path);
+                            let level_path = ldtk_path_to_asset_path(&base_directory, level_path);
+                            let bytes = load_context.read_asset_bytes(level_path).await?;
+                            let level_json: ldtk::Level = serde_json::from_slice(&bytes)?;
+                            level_json.layer_instances
+                        }
+                    }) else {
+                        break;
+                    };
+
+                    for layer_instance in layer_instances.iter().rev() {
+                        let iid = layer_instance.iid.clone();
+                        let layer_asset = LayerAsset::new(layer_instance, project_handle.clone())?;
+                        let layer_label = format!(
+                            "{}/{}/{}",
+                            world_identifier, level.identifier, layer_instance.identifier
+                        );
+                        let layer_handle =
+                            load_context.add_loaded_labeled_asset(layer_label, layer_asset.into());
+
+                        debug!("Added new LayerAsset!");
+                        debug!("identifier: {}", layer_instance.identifier);
+                        debug!("iid: {iid}");
+
+                        layer_assets.insert(iid, layer_handle);
+                    }
+                }
+            }
 
             Ok(ProjectAsset {
                 bg_color: bevy_color_from_ldtk(&value.bg_color)?,
