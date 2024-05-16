@@ -1,28 +1,21 @@
 use bevy::prelude::*;
+use bevy::utils::HashMap;
 
-use crate::level::LevelBundleLoadSettings;
+use crate::level::LevelsToLoad;
 use crate::world::WorldAsset;
 
-#[derive(Clone, Debug, Default)]
-#[cfg_attr(feature = "enable_reflect", derive(Reflect))]
-pub enum LoadLevels {
+#[derive(Component, Debug, Default, Reflect)]
+pub enum WorldsToLoad {
     None,
-    ByIdentifiers(Vec<String>),
-    ByIids(Vec<String>),
+    ByIdentifiers(HashMap<String, LevelsToLoad>),
+    ByIids(HashMap<String, LevelsToLoad>),
     #[default]
     All,
 }
 
-#[derive(Clone, Component, Debug, Default)]
-#[cfg_attr(feature = "enable_reflect", derive(Reflect))]
-pub struct WorldBundleLoadSettings {
-    pub load_levels: LoadLevels,
-    pub level_bundle_load_settings: LevelBundleLoadSettings,
-}
-
 #[derive(Bundle, Debug, Default)]
 pub struct WorldBundle {
-    pub world: Handle<WorldAsset>,
-    pub settings: WorldBundleLoadSettings,
-    pub spatial: SpatialBundle,
+    pub(crate) world: Handle<WorldAsset>,
+    pub(crate) levels_to_load: LevelsToLoad,
+    pub(crate) spatial: SpatialBundle,
 }

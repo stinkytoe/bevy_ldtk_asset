@@ -4,11 +4,9 @@ mod component;
 mod plugin;
 mod systems;
 
-pub use asset::*;
-pub use bundle::*;
-pub use component::*;
-pub use plugin::*;
-pub use systems::*;
+pub use asset::WorldAsset;
+pub use bundle::WorldBundle;
+pub use bundle::WorldsToLoad;
+pub use component::WorldComponent;
 
-// re-exports
-pub use crate::ldtk::WorldLayout;
+pub(crate) use plugin::WorldPlugin;
