@@ -7,11 +7,14 @@ use std::path::Path;
 use std::path::PathBuf;
 use thiserror::Error;
 
+use crate::entity::EntityAsset;
+use crate::entity::NewEntityAssetError;
+use crate::layer::LayerAsset;
+use crate::layer::LayerType;
 use crate::layer::LayerTypeError;
 use crate::ldtk;
 use crate::level::LevelAsset;
 use crate::level::NewLevelAssetError;
-use crate::prelude::LayerAsset;
 use crate::project::ProjectAsset;
 use crate::project::ProjectSettings;
 use crate::util::bevy_color_from_ldtk;
@@ -36,10 +39,16 @@ pub(crate) enum ProjectAssetLoaderError {
     ReadAssetBytesError(#[from] ReadAssetBytesError),
     #[error("{0}")]
     LayerTypeError(#[from] LayerTypeError),
+    #[error("{0}")]
+    NewEntityAssetError(#[from] NewEntityAssetError),
     #[error("Could not get project directory? {0}")]
     BadProjectDirectory(PathBuf),
     #[error("externalRelPath is None when external levels is true?")]
     ExternalRelPathIsNone,
+    #[error("entity instances in non-entity type layer!")]
+    NonEntityLayerWithEntities,
+    #[error("tile instances in entity type layer!")]
+    NonTileLayerWithTiles,
 }
 
 #[derive(Debug, Default)]
@@ -152,6 +161,7 @@ impl AssetLoader for ProjectAssetLoader {
                     for layer_instance in layer_instances.iter().rev() {
                         let iid = layer_instance.iid.clone();
                         let layer_asset = LayerAsset::new(layer_instance, project_handle.clone())?;
+                        let layer_type = layer_asset.layer_type;
                         let layer_label = format!(
                             "{}/{}/{}",
                             world_identifier, level.identifier, layer_instance.identifier
@@ -164,6 +174,49 @@ impl AssetLoader for ProjectAssetLoader {
                         debug!("iid: {iid}");
 
                         layer_assets.insert(iid, layer_handle);
+
+                        match (
+                            layer_type,
+                            layer_instance.entity_instances.len(),
+                            layer_instance.grid_tiles.len(),
+                            layer_instance.auto_layer_tiles.len(),
+                        ) {
+                            (LayerType::Tiles, n, _, _)
+                            | (LayerType::IntGrid, n, _, _)
+                            | (LayerType::Autolayer, n, _, _)
+                                if n != 0 =>
+                            {
+                                return Err(ProjectAssetLoaderError::NonEntityLayerWithEntities);
+                            }
+                            (LayerType::Entities, _, n, m) if n != 0 || m != 0 => {
+                                return Err(ProjectAssetLoaderError::NonTileLayerWithTiles);
+                            }
+                            (LayerType::Entities, _, _, _) => {
+                                for entity_instance in &layer_instance.entity_instances {
+                                    let iid = entity_instance.iid.clone();
+                                    let entity_asset =
+                                        EntityAsset::new(entity_instance, project_handle.clone())?;
+                                    let entity_label = format!(
+                                        "{}/{}/{}/{}",
+                                        world_identifier,
+                                        level.identifier,
+                                        layer_instance.identifier,
+                                        entity_instance.identifier
+                                    );
+                                    let entity_handle = load_context.add_loaded_labeled_asset(
+                                        entity_label,
+                                        entity_asset.into(),
+                                    );
+
+                                    debug!("Added new EntityAsset!");
+                                    debug!("identifier: {}", entity_instance.identifier);
+                                    debug!("iid: {iid}");
+
+                                    entity_assets.insert(iid, entity_handle);
+                                }
+                            }
+                            _ => (),
+                        }
                     }
                 }
             }

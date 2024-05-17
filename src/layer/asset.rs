@@ -12,7 +12,7 @@ pub enum LayerTypeError {
     UnknownLayerType(String),
 }
 
-#[derive(Debug, Reflect)]
+#[derive(Clone, Copy, Debug, Reflect)]
 pub enum LayerType {
     IntGrid,
     Entities,

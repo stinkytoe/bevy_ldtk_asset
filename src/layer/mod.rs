@@ -8,5 +8,6 @@ pub use asset::LayerAsset;
 pub use asset::LayerType;
 pub use asset::LayerTypeError;
 pub use bundle::LayersToLoad;
+pub use component::LayerComponent;
 
 pub(crate) use plugin::LayerPlugin;
