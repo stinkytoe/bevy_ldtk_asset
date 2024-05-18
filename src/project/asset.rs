@@ -14,11 +14,17 @@ pub struct ProjectAsset {
     pub iid: String,
     pub json_version: String,
 
+    // Indexed by identifier
+    pub(crate) world_assets_by_identifier: HashMap<String, Handle<WorldAsset>>,
+    pub(crate) level_assets_by_identifier: HashMap<String, Handle<LevelAsset>>,
+    pub(crate) layer_assets_by_identifier: HashMap<String, Handle<LayerAsset>>,
+    pub(crate) entity_assets_by_identifier: HashMap<String, Handle<EntityAsset>>,
+
     // Indexed by iid
-    pub(crate) world_assets: HashMap<String, Handle<WorldAsset>>,
-    pub(crate) level_assets: HashMap<String, Handle<LevelAsset>>,
-    pub(crate) layer_assets: HashMap<String, Handle<LayerAsset>>,
-    pub(crate) entity_assets: HashMap<String, Handle<EntityAsset>>,
+    pub(crate) world_assets_by_iid: HashMap<String, Handle<WorldAsset>>,
+    pub(crate) level_assets_by_iid: HashMap<String, Handle<LevelAsset>>,
+    pub(crate) layer_assets_by_iid: HashMap<String, Handle<LayerAsset>>,
+    pub(crate) entity_assets_by_iid: HashMap<String, Handle<EntityAsset>>,
 
     // indexed by LDtk provided path
     pub(crate) tileset_assets: HashMap<String, Handle<Image>>,

@@ -8,11 +8,13 @@ mod level;
 mod plugins;
 mod project;
 // mod system_params;
+mod common_components;
 mod tileset_rectangle;
 mod util;
 mod world;
 
 pub mod prelude {
+    pub use crate::common_components::*;
     pub use crate::entity::*;
     pub use crate::field_instance::*;
     pub use crate::layer::*;

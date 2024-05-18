@@ -1,6 +1,7 @@
 use bevy::app::PluginGroupBuilder;
 use bevy::prelude::*;
 
+use crate::common_components::CommonComponentsPlugin;
 use crate::entity::EntityPlugin;
 use crate::layer::LayerPlugin;
 use crate::level::LevelPlugin;
@@ -14,6 +15,7 @@ pub struct LdtkLevelsPlugins;
 impl PluginGroup for LdtkLevelsPlugins {
     fn build(self) -> bevy::app::PluginGroupBuilder {
         PluginGroupBuilder::start::<Self>()
+            .add(CommonComponentsPlugin)
             .add(EntityPlugin)
             .add(LayerPlugin)
             .add(LevelPlugin)

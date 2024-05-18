@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::entity::EntityAsset;
 
-#[derive(Component, Debug, Default, Reflect)]
+#[derive(Clone, Component, Debug, Default, Reflect)]
 pub enum EntitiesToLoad {
     None,
     ByIdentifiers(Vec<String>),

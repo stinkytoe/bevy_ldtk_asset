@@ -4,7 +4,7 @@ use bevy::utils::HashMap;
 use crate::layer::LayersToLoad;
 use crate::level::LevelAsset;
 
-#[derive(Component, Debug, Default, Reflect)]
+#[derive(Clone, Component, Debug, Default, Reflect)]
 pub enum LevelsToLoad {
     None,
     ByIdentifiers(HashMap<String, LayersToLoad>),

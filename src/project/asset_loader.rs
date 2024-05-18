@@ -88,10 +88,15 @@ impl AssetLoader for ProjectAssetLoader {
                 serde_json::from_slice(&bytes)?
             };
 
-            let mut world_assets = HashMap::default();
-            let mut level_assets = HashMap::default();
-            let mut layer_assets = HashMap::default();
-            let mut entity_assets = HashMap::default();
+            let mut world_assets_by_identifier = HashMap::default();
+            let mut level_assets_by_identifier = HashMap::default();
+            let mut layer_assets_by_identifier = HashMap::default();
+            let mut entity_assets_by_identifier = HashMap::default();
+
+            let mut world_assets_by_iid = HashMap::default();
+            let mut level_assets_by_iid = HashMap::default();
+            let mut layer_assets_by_iid = HashMap::default();
+            let mut entity_assets_by_iid = HashMap::default();
 
             let mut tileset_assets = HashMap::default();
             let mut background_assets = HashMap::default();
@@ -125,7 +130,8 @@ impl AssetLoader for ProjectAssetLoader {
                 debug!("identifier: {world_identifier}");
                 debug!("iid: {iid}");
 
-                world_assets.insert(iid, world_handle);
+                world_assets_by_identifier.insert(world_identifier.clone(), world_handle.clone());
+                world_assets_by_iid.insert(iid, world_handle);
 
                 for level in levels.iter() {
                     let iid = level.iid.clone();
@@ -138,7 +144,9 @@ impl AssetLoader for ProjectAssetLoader {
                     debug!("identifier: {}", level.identifier);
                     debug!("iid: {iid}");
 
-                    level_assets.insert(iid, level_handle);
+                    level_assets_by_identifier
+                        .insert(level.identifier.clone(), level_handle.clone());
+                    level_assets_by_iid.insert(iid, level_handle);
 
                     let Some(layer_instances) = ({
                         if !value.external_levels {
@@ -173,7 +181,9 @@ impl AssetLoader for ProjectAssetLoader {
                         debug!("identifier: {}", layer_instance.identifier);
                         debug!("iid: {iid}");
 
-                        layer_assets.insert(iid, layer_handle);
+                        layer_assets_by_identifier
+                            .insert(layer_instance.identifier.clone(), layer_handle.clone());
+                        layer_assets_by_iid.insert(iid, layer_handle);
 
                         match (
                             layer_type,
@@ -212,7 +222,11 @@ impl AssetLoader for ProjectAssetLoader {
                                     debug!("identifier: {}", entity_instance.identifier);
                                     debug!("iid: {iid}");
 
-                                    entity_assets.insert(iid, entity_handle);
+                                    entity_assets_by_identifier.insert(
+                                        entity_instance.identifier.clone(),
+                                        entity_handle.clone(),
+                                    );
+                                    entity_assets_by_iid.insert(iid, entity_handle);
                                 }
                             }
                             _ => (),
@@ -226,10 +240,14 @@ impl AssetLoader for ProjectAssetLoader {
                 external_levels: value.external_levels,
                 iid: value.iid.clone(),
                 json_version: value.json_version.clone(),
-                world_assets,
-                level_assets,
-                layer_assets,
-                entity_assets,
+                world_assets_by_identifier,
+                level_assets_by_identifier,
+                layer_assets_by_identifier,
+                entity_assets_by_identifier,
+                world_assets_by_iid,
+                level_assets_by_iid,
+                layer_assets_by_iid,
+                entity_assets_by_iid,
                 tileset_assets,
                 background_assets,
                 settings: settings.clone(),
