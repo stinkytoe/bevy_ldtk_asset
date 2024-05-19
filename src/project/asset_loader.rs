@@ -98,9 +98,6 @@ impl AssetLoader for ProjectAssetLoader {
             let mut layer_assets_by_iid = HashMap::default();
             let mut entity_assets_by_iid = HashMap::default();
 
-            let mut tileset_assets = HashMap::default();
-            let mut background_assets = HashMap::default();
-
             let world_tuples: Vec<_> = if value.worlds.is_empty() {
                 vec![(
                     WorldAsset::new_from_project(&value, project_handle.clone())?,
@@ -120,6 +117,18 @@ impl AssetLoader for ProjectAssetLoader {
                     })
                     .collect::<Result<Vec<_>, ProjectAssetLoaderError>>()?
             };
+
+            let background_assets = world_tuples
+                .iter()
+                .flat_map(|(_, _, levels)| levels.iter())
+                .filter_map(|level| level.bg_rel_path.as_ref())
+                .map(|ldtk_path| {
+                    let asset_path = Path::new(&ldtk_path);
+                    let asset_path = ldtk_path_to_asset_path(&base_directory, asset_path);
+                    let asset_handle = load_context.load(asset_path);
+                    (ldtk_path.clone(), asset_handle)
+                })
+                .collect();
 
             for (world_asset, world_identifier, levels) in world_tuples {
                 let iid = world_asset.iid.clone();
@@ -234,6 +243,19 @@ impl AssetLoader for ProjectAssetLoader {
                     }
                 }
             }
+
+            let tileset_assets = value
+                .defs
+                .tilesets
+                .iter()
+                .filter_map(|tileset_definition| tileset_definition.rel_path.as_ref())
+                .map(|ldtk_path| {
+                    let asset_path = Path::new(&ldtk_path);
+                    let asset_path = ldtk_path_to_asset_path(&base_directory, asset_path);
+                    let asset_handle = load_context.load(asset_path);
+                    (ldtk_path.clone(), asset_handle)
+                })
+                .collect();
 
             Ok(ProjectAsset {
                 bg_color: bevy_color_from_ldtk(&value.bg_color)?,
