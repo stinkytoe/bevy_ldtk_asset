@@ -21,6 +21,7 @@ exclude = [
 
 [dependencies]
 bevy = "0.13"
+# bevy = { version = "0.13", features = ["file_watcher"] }
 # bevy = { git = "https://github.com/bevyengine/bevy.git", branch = "main" }
 # bevy = { git = "https://github.com/stinkytoe/bevy.git", branch = "main" }
 serde = "1.0"
@@ -40,5 +41,6 @@ name = "top_down"
 path = "examples/top_down.rs"
 
 [dev-dependencies]
+bevy = { version = "0.13", features = ["file_watcher"] }
 bevy-inspector-egui = "0.24"
 bevy-fps-counter = "0.4.0"

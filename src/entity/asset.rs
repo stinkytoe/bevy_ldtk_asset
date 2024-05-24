@@ -39,7 +39,7 @@ pub struct EntityAsset {
     iid: String,
     location: Vec2,
     #[reflect(ignore)]
-    project: Handle<ProjectAsset>,
+    _project: Handle<ProjectAsset>,
 }
 
 impl EntityAsset {
@@ -70,7 +70,7 @@ impl EntityAsset {
             size: (value.width as f32, value.height as f32).into(),
             iid: value.iid.clone(),
             location: (value.px[0] as f32, -value.px[1] as f32).into(),
-            project,
+            _project: project,
         })
     }
 }
