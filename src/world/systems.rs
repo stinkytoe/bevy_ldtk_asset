@@ -1,9 +1,8 @@
 use bevy::prelude::*;
 use thiserror::Error;
 
-use crate::prelude::Iid;
-
-use super::WorldAsset;
+use crate::common_components::Iid;
+use crate::world::WorldAsset;
 
 #[derive(Debug, Error)]
 pub enum NewWorldAssetSystemError {
