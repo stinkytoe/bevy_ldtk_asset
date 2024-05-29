@@ -1,8 +1,16 @@
 use bevy::prelude::*;
 use thiserror::Error;
 
-use crate::ldtk::{self, WorldLayout};
+use crate::layer::LayersToLoad;
+use crate::ldtk;
+use crate::ldtk::WorldLayout;
+use crate::level::LevelAsset;
+use crate::level::LevelBundle;
 use crate::project::ProjectAsset;
+use crate::traits::AssetProvidesProjectHandle;
+use crate::traits::DependencyLoader;
+
+use super::component::LevelsToLoad;
 
 #[derive(Debug, Error)]
 pub(crate) enum NewWorldAssetError {
@@ -75,4 +83,81 @@ impl WorldAsset {
             project,
         })
     }
+}
+
+impl AssetProvidesProjectHandle for WorldAsset {
+    fn project_handle(&self) -> &Handle<ProjectAsset> {
+        &self.project
+    }
+}
+
+impl DependencyLoader for WorldAsset {
+    type Child = LevelAsset;
+    type ChildrenToLoad = LevelsToLoad;
+    type GrandchildrenToLoad = LayersToLoad;
+
+    fn next_tier(
+        &self,
+        project_asset: &ProjectAsset,
+        to_load: &Self::ChildrenToLoad,
+    ) -> Result<
+        bevy::utils::HashMap<Handle<Self::Child>, Self::GrandchildrenToLoad>,
+        crate::traits::DependencyLoaderError,
+    > {
+        match to_load {
+            LevelsToLoad::None => Self::merge_empty(),
+            LevelsToLoad::ByIdentifiers(ids) => {
+                Self::merge_filtered(ids, &project_asset.level_assets_by_identifier)
+            }
+            LevelsToLoad::ByIids(ids) => {
+                Self::merge_filtered(ids, &project_asset.level_assets_by_iid)
+            }
+            LevelsToLoad::All(levels_to_load) => {
+                Self::merge_all(levels_to_load, &project_asset.level_assets_by_iid)
+            }
+        }
+    }
+
+    fn spawn_child(
+        child_builder: &mut ChildBuilder,
+        level: Handle<Self::Child>,
+        layers_to_load: Self::GrandchildrenToLoad,
+    ) {
+        child_builder.spawn(LevelBundle {
+            level,
+            layers_to_load,
+            spatial: SpatialBundle::default(),
+        });
+    }
+
+    // fn next_tier(
+    //     &self,
+    //     project_asset: &ProjectAsset,
+    //     to_load: &LevelsToLoad,
+    // ) -> Result<HashMap<Handle<WorldAsset>, LevelsToLoad>, ToLoadError> {
+    //     match to_load {
+    //         WorldsToLoad::None => Self::merge_empty(),
+    //         WorldsToLoad::ByIdentifiers(ids) => {
+    //             Self::merge_filtered(ids, &project_asset.world_assets_by_identifier)
+    //         }
+    //         WorldsToLoad::ByIids(ids) => {
+    //             Self::merge_filtered(ids, &project_asset.world_assets_by_iid)
+    //         }
+    //         WorldsToLoad::All(levels_to_load) => {
+    //             Self::merge_all(levels_to_load, &project_asset.world_assets_by_iid)
+    //         }
+    //     }
+    // }
+
+    // fn spawn_child(
+    //     child_builder: &mut ChildBuilder,
+    //     world: Handle<Self::Child>,
+    //     levels_to_load: Self::GrandchildrenToLoad,
+    // ) {
+    //     child_builder.spawn(WorldBundle {
+    //         world,
+    //         levels_to_load,
+    //         spatial: SpatialBundle::default(),
+    //     });
+    // }
 }

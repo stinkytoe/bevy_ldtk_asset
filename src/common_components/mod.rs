@@ -12,3 +12,8 @@ impl Plugin for CommonComponentsPlugin {
         app.register_type::<Iid>();
     }
 }
+
+#[derive(Component, Debug, PartialEq, Reflect)]
+pub struct Size {
+    pub size: Vec2,
+}

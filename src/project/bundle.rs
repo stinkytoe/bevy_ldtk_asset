@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::project::ProjectAsset;
-use crate::world::WorldsToLoad;
+use crate::project::WorldsToLoad;
 
 #[derive(Bundle, Debug, Default)]
 pub struct ProjectBundle {

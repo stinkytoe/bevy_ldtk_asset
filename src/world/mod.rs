@@ -6,7 +6,7 @@ mod systems;
 
 pub use asset::WorldAsset;
 pub use bundle::WorldBundle;
-pub use bundle::WorldsToLoad;
+pub use component::LevelsToLoad;
 pub use component::WorldComponent;
 
 pub(crate) use asset::NewWorldAssetError;

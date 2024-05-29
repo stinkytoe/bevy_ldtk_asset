@@ -1,11 +1,10 @@
 use bevy::prelude::*;
 use bevy::utils::error;
 
-use crate::traits::ToLoad;
-use crate::world::WorldAsset;
-use crate::world::WorldsToLoad;
-
+use crate::project::WorldsToLoad;
+use crate::traits::DependencyLoader;
 use crate::world::new_world_asset;
+use crate::world::WorldAsset;
 
 #[derive(Debug, Default)]
 pub struct WorldPlugin;
@@ -20,7 +19,7 @@ impl Plugin for WorldPlugin {
                 Update,
                 (
                     new_world_asset.map(error),
-                    WorldsToLoad::to_load_changed_system.map(error),
+                    WorldAsset::to_load_changed_system.map(error),
                 ),
             );
     }

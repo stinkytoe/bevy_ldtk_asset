@@ -30,10 +30,6 @@ pub(crate) fn new_world_asset(
                     .iter_mut()
                     .filter(|(_, handle, _, _)| handle.id() == *id)
                 {
-                    let project_asset = world_assets
-                        .get(*id)
-                        .ok_or(NewWorldAssetSystemError::BadWorldHandle)?;
-
                     let world_asset = world_assets
                         .get(*id)
                         .ok_or(NewWorldAssetSystemError::BadWorldHandle)?;
@@ -49,7 +45,7 @@ pub(crate) fn new_world_asset(
                     };
 
                     if let Some(mut iid) = iid {
-                        iid.iid.clone_from(&project_asset.iid);
+                        iid.iid.clone_from(&world_asset.iid);
                     } else {
                         commands.entity(entity).insert(Iid {
                             iid: world_asset.iid.clone(),

@@ -79,7 +79,7 @@ impl AssetLoader for ProjectAssetLoader {
                 ))?
                 .to_path_buf();
 
-            let project_handle: Handle<ProjectAsset> =
+            let self_handle: Handle<ProjectAsset> =
                 load_context.load(load_context.path().to_path_buf());
 
             let value: ldtk::LdtkJson = {
@@ -100,7 +100,7 @@ impl AssetLoader for ProjectAssetLoader {
 
             let world_tuples: Vec<_> = if value.worlds.is_empty() {
                 vec![(
-                    WorldAsset::new_from_project(&value, project_handle.clone())?,
+                    WorldAsset::new_from_project(&value, self_handle.clone())?,
                     "World".to_owned(),
                     &value.levels,
                 )]
@@ -110,7 +110,7 @@ impl AssetLoader for ProjectAssetLoader {
                     .iter()
                     .map(|world| {
                         Ok((
-                            WorldAsset::new_from_world(world, project_handle.clone())?,
+                            WorldAsset::new_from_world(world, self_handle.clone())?,
                             world.identifier.clone(),
                             &world.levels,
                         ))
@@ -144,7 +144,7 @@ impl AssetLoader for ProjectAssetLoader {
 
                 for level in levels.iter() {
                     let iid = level.iid.clone();
-                    let level_asset = LevelAsset::new(level, project_handle.clone())?;
+                    let level_asset = LevelAsset::new(level, self_handle.clone())?;
                     let level_label = format!("{}/{}", world_identifier, level.identifier);
                     let level_handle =
                         load_context.add_loaded_labeled_asset(level_label, level_asset.into());
@@ -177,7 +177,7 @@ impl AssetLoader for ProjectAssetLoader {
 
                     for layer_instance in layer_instances.iter().rev() {
                         let iid = layer_instance.iid.clone();
-                        let layer_asset = LayerAsset::new(layer_instance, project_handle.clone())?;
+                        let layer_asset = LayerAsset::new(layer_instance, self_handle.clone())?;
                         let layer_type = layer_asset.layer_type;
                         let layer_label = format!(
                             "{}/{}/{}",
@@ -214,7 +214,7 @@ impl AssetLoader for ProjectAssetLoader {
                                 for entity_instance in &layer_instance.entity_instances {
                                     let iid = entity_instance.iid.clone();
                                     let entity_asset =
-                                        EntityAsset::new(entity_instance, project_handle.clone())?;
+                                        EntityAsset::new(entity_instance, self_handle.clone())?;
                                     let entity_label = format!(
                                         "{}/{}/{}/{}",
                                         world_identifier,
@@ -273,6 +273,7 @@ impl AssetLoader for ProjectAssetLoader {
                 tileset_assets,
                 background_assets,
                 settings: settings.clone(),
+                self_handle,
             })
         })
     }
