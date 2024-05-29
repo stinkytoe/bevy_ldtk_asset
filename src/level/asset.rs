@@ -2,17 +2,24 @@ use bevy::prelude::*;
 use std::path::PathBuf;
 use thiserror::Error;
 
+use crate::entity::EntitiesToLoad;
 use crate::field_instance::FieldInstance;
 use crate::field_instance::FieldInstanceValueParseError;
 use crate::field_instance::FieldInstances;
+use crate::layer::LayerAsset;
+use crate::layer::LayerBundle;
 use crate::ldtk;
 use crate::level::LevelBackgroundPosition;
 use crate::level::Neighbour;
 use crate::level::NeighbourError;
 use crate::level::Neighbours;
 use crate::project::ProjectAsset;
+use crate::traits::AssetProvidesProjectHandle;
+use crate::traits::DependencyLoader;
 use crate::util::bevy_color_from_ldtk;
 use crate::util::ColorParseError;
+
+use super::component::LayersToLoad;
 
 #[derive(Debug, Error)]
 pub enum NewLevelAssetError {
@@ -74,5 +81,55 @@ impl LevelAsset {
             ),
             project,
         })
+    }
+}
+
+impl AssetProvidesProjectHandle for LevelAsset {
+    fn project_handle(&self) -> &Handle<ProjectAsset> {
+        &self.project
+    }
+}
+
+impl DependencyLoader for LevelAsset {
+    type Child = LayerAsset;
+
+    type ChildrenToLoad = LayersToLoad;
+
+    type GrandchildrenToLoad = EntitiesToLoad;
+
+    fn next_tier(
+        &self,
+        project_asset: &ProjectAsset,
+        to_load: &Self::ChildrenToLoad,
+    ) -> Result<
+        bevy::utils::HashMap<Handle<Self::Child>, Self::GrandchildrenToLoad>,
+        crate::traits::DependencyLoaderError,
+    > {
+        match to_load {
+            LayersToLoad::None => Self::merge_empty(),
+            LayersToLoad::ByIdentifiers(ids) => {
+                Self::merge_filtered(ids, &project_asset.layer_assets_by_identifier)
+            }
+            LayersToLoad::ByIids(ids) => {
+                Self::merge_filtered(ids, &project_asset.layer_assets_by_iid)
+            }
+            LayersToLoad::TileLayersOnly => todo!(),
+            LayersToLoad::EntityLayersOnly => todo!(),
+            LayersToLoad::All(entities_to_load) => {
+                Self::merge_all(entities_to_load, &project_asset.layer_assets_by_iid)
+            }
+        }
+    }
+
+    fn spawn_child(
+        child_builder: &mut ChildBuilder,
+        layer: Handle<Self::Child>,
+        entities_to_load: Self::GrandchildrenToLoad,
+    ) {
+        child_builder.spawn(LayerBundle {
+            layer,
+            entities_to_load,
+            spatial: SpatialBundle::default(),
+        });
     }
 }

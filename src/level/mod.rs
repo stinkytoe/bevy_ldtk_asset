@@ -7,6 +7,7 @@ mod systems;
 pub use asset::LevelAsset;
 pub use asset::NewLevelAssetError;
 pub use bundle::LevelBundle;
+pub use component::LayersToLoad;
 pub use component::LevelBackgroundPosition;
 pub use component::LevelComponent;
 pub use component::Neighbour;

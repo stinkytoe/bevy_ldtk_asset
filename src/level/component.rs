@@ -1,10 +1,27 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, utils::HashMap};
 use thiserror::Error;
 
+use crate::entity::EntitiesToLoad;
 use crate::ldtk;
 
 #[derive(Component, Debug, Default, Reflect)]
 pub struct LevelComponent {}
+
+#[derive(Clone, Component, Debug, Reflect)]
+pub enum LayersToLoad {
+    None,
+    ByIdentifiers(HashMap<String, EntitiesToLoad>),
+    ByIids(HashMap<String, EntitiesToLoad>),
+    TileLayersOnly,
+    EntityLayersOnly,
+    All(EntitiesToLoad),
+}
+
+impl Default for LayersToLoad {
+    fn default() -> Self {
+        Self::All(EntitiesToLoad::default())
+    }
+}
 
 #[derive(Clone, Component, Debug, Default, Reflect)]
 pub struct LevelBackgroundPosition {

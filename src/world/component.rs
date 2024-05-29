@@ -1,6 +1,6 @@
 use bevy::{prelude::*, utils::HashMap};
 
-use crate::layer::LayersToLoad;
+use crate::level::LayersToLoad;
 
 #[derive(Component, Debug, Default, Reflect)]
 pub struct WorldComponent {}

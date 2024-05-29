@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::layer::LayersToLoad;
+use crate::level::LayersToLoad;
 use crate::level::LevelAsset;
 
 #[derive(Bundle, Debug, Default)]

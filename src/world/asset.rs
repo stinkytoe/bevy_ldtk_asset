@@ -1,9 +1,9 @@
 use bevy::prelude::*;
 use thiserror::Error;
 
-use crate::layer::LayersToLoad;
 use crate::ldtk;
 use crate::ldtk::WorldLayout;
+use crate::level::LayersToLoad;
 use crate::level::LevelAsset;
 use crate::level::LevelBundle;
 use crate::project::ProjectAsset;
@@ -129,35 +129,4 @@ impl DependencyLoader for WorldAsset {
             spatial: SpatialBundle::default(),
         });
     }
-
-    // fn next_tier(
-    //     &self,
-    //     project_asset: &ProjectAsset,
-    //     to_load: &LevelsToLoad,
-    // ) -> Result<HashMap<Handle<WorldAsset>, LevelsToLoad>, ToLoadError> {
-    //     match to_load {
-    //         WorldsToLoad::None => Self::merge_empty(),
-    //         WorldsToLoad::ByIdentifiers(ids) => {
-    //             Self::merge_filtered(ids, &project_asset.world_assets_by_identifier)
-    //         }
-    //         WorldsToLoad::ByIids(ids) => {
-    //             Self::merge_filtered(ids, &project_asset.world_assets_by_iid)
-    //         }
-    //         WorldsToLoad::All(levels_to_load) => {
-    //             Self::merge_all(levels_to_load, &project_asset.world_assets_by_iid)
-    //         }
-    //     }
-    // }
-
-    // fn spawn_child(
-    //     child_builder: &mut ChildBuilder,
-    //     world: Handle<Self::Child>,
-    //     levels_to_load: Self::GrandchildrenToLoad,
-    // ) {
-    //     child_builder.spawn(WorldBundle {
-    //         world,
-    //         levels_to_load,
-    //         spatial: SpatialBundle::default(),
-    //     });
-    // }
 }
