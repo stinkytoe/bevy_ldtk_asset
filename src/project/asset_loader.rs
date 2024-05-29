@@ -25,21 +25,21 @@ use crate::world::WorldAsset;
 
 #[derive(Debug, Error)]
 pub(crate) enum ProjectAssetLoaderError {
-    #[error("{0}")]
+    #[error(transparent)]
     Io(#[from] std::io::Error),
-    #[error("{0}")]
+    #[error(transparent)]
     SerdeJson(#[from] serde_json::Error),
-    #[error("{0}")]
+    #[error(transparent)]
     ColorParseError(#[from] ColorParseError),
-    #[error("{0}")]
+    #[error(transparent)]
     NewWorldAssetError(#[from] NewWorldAssetError),
-    #[error("{0}")]
+    #[error(transparent)]
     NewLevelAssetError(#[from] NewLevelAssetError),
-    #[error("{0}")]
+    #[error(transparent)]
     ReadAssetBytesError(#[from] ReadAssetBytesError),
-    #[error("{0}")]
+    #[error(transparent)]
     LayerTypeError(#[from] LayerTypeError),
-    #[error("{0}")]
+    #[error(transparent)]
     NewEntityAssetError(#[from] NewEntityAssetError),
     #[error("Could not get project directory? {0}")]
     BadProjectDirectory(PathBuf),

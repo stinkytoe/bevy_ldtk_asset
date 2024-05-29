@@ -16,11 +16,11 @@ use crate::util::ColorParseError;
 
 #[derive(Debug, Error)]
 pub enum NewLevelAssetError {
-    #[error("{0}")]
+    #[error(transparent)]
     ColorParseError(#[from] ColorParseError),
-    #[error("{0}")]
+    #[error(transparent)]
     NeighbourError(#[from] NeighbourError),
-    #[error("{0}")]
+    #[error(transparent)]
     FieldInstanceValueParseError(#[from] FieldInstanceValueParseError),
 }
 

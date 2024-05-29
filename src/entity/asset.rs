@@ -14,11 +14,11 @@ use crate::util::ColorParseError;
 
 #[derive(Debug, Error)]
 pub enum NewEntityAssetError {
-    #[error("{0}")]
+    #[error(transparent)]
     AnchorIntoError(#[from] AnchorIntoError),
-    #[error("{0}")]
+    #[error(transparent)]
     ColorParseError(#[from] ColorParseError),
-    #[error("{0}")]
+    #[error(transparent)]
     FieldInstanceValueError(#[from] FieldInstanceValueParseError),
     #[error("One world coord is Some(...) and the other is None!")]
     WorldCoordMixedOption,
