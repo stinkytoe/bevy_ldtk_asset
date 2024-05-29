@@ -11,3 +11,4 @@ pub use component::WorldComponent;
 
 pub(crate) use asset::NewWorldAssetError;
 pub(crate) use plugin::WorldPlugin;
+pub(crate) use systems::new_world_asset;

@@ -12,7 +12,7 @@ pub(crate) enum NewWorldAssetError {
     MissingWorldLayout,
 }
 
-#[derive(Asset, Debug, Reflect)]
+#[derive(Asset, Clone, Debug, Reflect)]
 pub struct WorldAsset {
     pub identifier: String,
     pub iid: String,
@@ -41,14 +41,16 @@ impl WorldAsset {
                 ))? as f32,
         );
 
+        let world_layout = value
+            .world_layout
+            .clone()
+            .ok_or(NewWorldAssetError::MissingWorldLayout)?;
+
         Ok(Self {
             identifier: "World".to_string(),
             iid: value.iid.clone(),
             world_grid_size,
-            world_layout: value
-                .world_layout
-                .clone()
-                .ok_or(NewWorldAssetError::MissingWorldLayout)?,
+            world_layout,
             project,
         })
     }
