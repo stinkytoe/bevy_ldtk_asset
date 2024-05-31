@@ -2,9 +2,10 @@ use bevy::prelude::*;
 use bevy::utils::HashMap;
 use serde::{Deserialize, Serialize};
 
-use crate::entity::EntityAsset;
-use crate::layer::LayerAsset;
-use crate::level::LevelAsset;
+use crate::project::defs::EntityDefinition;
+use crate::project::defs::EnumDefinition;
+use crate::project::defs::LayerDefinition;
+use crate::project::defs::TilesetDefinition;
 use crate::project::WorldsToLoad;
 use crate::traits::AssetProvidesProjectHandle;
 use crate::traits::DependencyLoader;
@@ -13,31 +14,27 @@ use crate::world::LevelsToLoad;
 use crate::world::WorldAsset;
 use crate::world::WorldBundle;
 
-#[derive(Asset, Clone, Debug, Reflect)]
+#[derive(Asset, Debug, Reflect)]
 pub struct ProjectAsset {
     pub bg_color: Color,
     pub external_levels: bool,
     pub iid: String,
     pub json_version: String,
 
-    // Indexed by identifier
     pub(crate) world_assets_by_identifier: HashMap<String, Handle<WorldAsset>>,
-    pub(crate) level_assets_by_identifier: HashMap<String, Handle<LevelAsset>>,
-    pub(crate) layer_assets_by_identifier: HashMap<String, Handle<LayerAsset>>,
-    pub(crate) entity_assets_by_identifier: HashMap<String, Handle<EntityAsset>>,
-
-    // Indexed by iid
     pub(crate) world_assets_by_iid: HashMap<String, Handle<WorldAsset>>,
-    pub(crate) level_assets_by_iid: HashMap<String, Handle<LevelAsset>>,
-    pub(crate) layer_assets_by_iid: HashMap<String, Handle<LayerAsset>>,
-    pub(crate) entity_assets_by_iid: HashMap<String, Handle<EntityAsset>>,
 
     // indexed by LDtk provided path
     pub(crate) tileset_assets: HashMap<String, Handle<Image>>,
     pub(crate) background_assets: HashMap<String, Handle<Image>>,
 
-    //
+    pub(crate) layer_defs: HashMap<i64, LayerDefinition>,
+    pub(crate) entity_defs: HashMap<i64, EntityDefinition>,
+    pub(crate) tileset_defs: HashMap<i64, TilesetDefinition>,
+    pub(crate) enum_defs: HashMap<i64, EnumDefinition>,
+
     pub(crate) settings: ProjectSettings,
+    #[reflect(ignore)]
     pub(crate) self_handle: Handle<ProjectAsset>,
 }
 

@@ -19,6 +19,7 @@ pub struct TilesetDefinition {
     pub spacing: i64,
     pub tags: Vec<String>,
     pub tile_grid_size: i64,
+    pub uid: i64,
 }
 
 impl From<&ldtk::TilesetDefinition> for TilesetDefinition {
@@ -38,6 +39,7 @@ impl From<&ldtk::TilesetDefinition> for TilesetDefinition {
             spacing: value.spacing,
             tags: value.tags.clone(),
             tile_grid_size: value.tile_grid_size,
+            uid: value.uid,
         }
     }
 }

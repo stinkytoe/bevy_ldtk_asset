@@ -5,8 +5,8 @@ use crate::common_components::CommonComponentsPlugin;
 use crate::entity::EntityPlugin;
 use crate::layer::LayerPlugin;
 use crate::level::LevelPlugin;
+use crate::project::defs::TilesetRectanglePlugin;
 use crate::project::ProjectPlugin;
-use crate::tileset_rectangle::TilesetRectanglePlugin;
 use crate::world::WorldPlugin;
 
 #[derive(Debug, Default)]

@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy::utils::HashMap;
 use thiserror::Error;
 
 use crate::ldtk;
@@ -26,46 +27,18 @@ pub struct WorldAsset {
     pub iid: String,
     pub world_grid_size: Vec2,
     pub world_layout: WorldLayout,
-
     #[reflect(ignore)]
     pub project: Handle<ProjectAsset>,
+    pub level_assets_by_identifier: HashMap<String, Handle<LevelAsset>>,
+    pub level_assets_by_iid: HashMap<String, Handle<LevelAsset>>,
 }
 
 impl WorldAsset {
-    pub(crate) fn new_from_project(
-        value: &ldtk::LdtkJson,
-        project: Handle<ProjectAsset>,
-    ) -> Result<Self, NewWorldAssetError> {
-        let world_grid_size = Vec2::new(
-            value
-                .world_grid_width
-                .ok_or(NewWorldAssetError::NoneInSingleWorldProject(
-                    "world_grid_width".to_string(),
-                ))? as f32,
-            value
-                .world_grid_height
-                .ok_or(NewWorldAssetError::NoneInSingleWorldProject(
-                    "world_grid_height".to_string(),
-                ))? as f32,
-        );
-
-        let world_layout = value
-            .world_layout
-            .clone()
-            .ok_or(NewWorldAssetError::MissingWorldLayout)?;
-
-        Ok(Self {
-            identifier: "World".to_string(),
-            iid: value.iid.clone(),
-            world_grid_size,
-            world_layout,
-            project,
-        })
-    }
-
-    pub(crate) fn new_from_world(
+    pub(crate) fn new(
         value: &ldtk::World,
         project: Handle<ProjectAsset>,
+        level_assets_by_identifier: HashMap<String, Handle<LevelAsset>>,
+        level_assets_by_iid: HashMap<String, Handle<LevelAsset>>,
     ) -> Result<Self, NewWorldAssetError> {
         let world_grid_size = Vec2::new(
             value.world_grid_width as f32,
@@ -81,6 +54,8 @@ impl WorldAsset {
                 .clone()
                 .ok_or(NewWorldAssetError::MissingWorldLayout)?,
             project,
+            level_assets_by_identifier,
+            level_assets_by_iid,
         })
     }
 }
@@ -104,18 +79,19 @@ impl DependencyLoader for WorldAsset {
         bevy::utils::HashMap<Handle<Self::Child>, Self::GrandchildrenToLoad>,
         crate::traits::DependencyLoaderError,
     > {
-        match to_load {
-            LevelsToLoad::None => Self::merge_empty(),
-            LevelsToLoad::ByIdentifiers(ids) => {
-                Self::merge_filtered(ids, &project_asset.level_assets_by_identifier)
-            }
-            LevelsToLoad::ByIids(ids) => {
-                Self::merge_filtered(ids, &project_asset.level_assets_by_iid)
-            }
-            LevelsToLoad::All(levels_to_load) => {
-                Self::merge_all(levels_to_load, &project_asset.level_assets_by_iid)
-            }
-        }
+        // match to_load {
+        //     LevelsToLoad::None => Self::merge_empty(),
+        //     LevelsToLoad::ByIdentifiers(ids) => {
+        //         Self::merge_filtered(ids, &project_asset.level_assets_by_identifier)
+        //     }
+        //     LevelsToLoad::ByIids(ids) => {
+        //         Self::merge_filtered(ids, &project_asset.level_assets_by_iid)
+        //     }
+        //     LevelsToLoad::All(levels_to_load) => {
+        //         Self::merge_all(levels_to_load, &project_asset.level_assets_by_iid)
+        //     }
+        // }
+        todo!()
     }
 
     fn spawn_child(

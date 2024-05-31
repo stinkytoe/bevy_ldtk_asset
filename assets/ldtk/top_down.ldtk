@@ -14,11 +14,11 @@
 	"nextUid": 334,
 	"identifierStyle": "Capitalize",
 	"toc": [],
-	"worldLayout": "Free",
-	"worldGridWidth": 256,
-	"worldGridHeight": 256,
-	"defaultLevelWidth": 256,
-	"defaultLevelHeight": 256,
+	"worldLayout": null,
+	"worldGridWidth": null,
+	"worldGridHeight": null,
+	"defaultLevelWidth": null,
+	"defaultLevelHeight": null,
 	"defaultPivotX": 0.5,
 	"defaultPivotY": 0.5,
 	"defaultGridSize": 16,
@@ -39,7 +39,7 @@
 	"levelNamePattern": "Level_%idx",
 	"tutorialDesc": null,
 	"customCommands": [],
-	"flags": ["ExportOldTableOfContentData"],
+	"flags": [ "ExportOldTableOfContentData", "MultiWorlds" ],
 	"defs": { "layers": [
 		{
 			"__type": "Tiles",
@@ -2327,7 +2327,8 @@
 			"tilesetUid": null
 		}
 	] },
-	"levels": [
+	"levels": [],
+	"worlds": [{ "iid": "d5ab0641-8990-11ee-a83b-7372587b9dbc", "identifier": "MyWorld", "defaultLevelWidth": 256, "defaultLevelHeight": 256, "worldGridWidth": 256, "worldGridHeight": 256, "worldLayout": "Free", "levels": [
 		{
 			"identifier": "Island_of_Thieves",
 			"iid": "d5ab0642-8990-11ee-a83b-b50c1be5a2ca",
@@ -3209,7 +3210,6 @@
 			],
 			"__neighbours": [{ "levelIid": "d5ab0642-8990-11ee-a83b-b50c1be5a2ca", "dir": "w" }]
 		}
-	],
-	"worlds": [],
+	] }],
 	"dummyWorldIid": "d5ab0641-8990-11ee-a83b-7372587b9dbc"
 }

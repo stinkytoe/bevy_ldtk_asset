@@ -1,9 +1,11 @@
 use bevy::math::I64Vec2;
 use bevy::prelude::*;
+use bevy::utils::HashMap;
 use std::path::PathBuf;
 use thiserror::Error;
 
 use crate::ldtk;
+use crate::prelude::EntityAsset;
 use crate::project::ProjectAsset;
 
 #[derive(Debug, Error)]
@@ -20,20 +22,28 @@ pub enum LayerType {
     Autolayer,
 }
 
+impl LayerType {
+    pub fn new(ldtk_type: &str) -> Result<LayerType, LayerTypeError> {
+        Ok(match ldtk_type {
+            "IntGrid" => LayerType::IntGrid,
+            "Entities" => LayerType::Entities,
+            "Tiles" => LayerType::Tiles,
+            "AutoLayer" => LayerType::Autolayer,
+            _ => return Err(LayerTypeError::UnknownLayerType(ldtk_type.to_string())),
+        })
+    }
+}
+
 #[derive(Asset, Debug, Reflect)]
 pub struct LayerAsset {
-    // Grid size of layer
-    // from c_wid, c_hei
+    // from LDtk
     pub grid_size: I64Vec2,
-    // size in pixels of a grid cell
-    // from grid_size
     pub grid_cell_size: i64,
     pub identifier: String,
     pub opacity: f64,
     pub px_total_offset: I64Vec2,
     pub tileset_def_uid: Option<i64>,
     pub tileset_rel_path: Option<PathBuf>,
-    // from type
     pub layer_type: LayerType,
     pub iid: String,
     pub layer_def_uid: i64,
@@ -41,14 +51,22 @@ pub struct LayerAsset {
     pub override_tileset_uid: Option<i64>,
     pub px_offset: I64Vec2,
     pub visible: bool,
+
+    // for us!
+    pub index: usize,
     #[reflect(ignore)]
     pub project: Handle<ProjectAsset>,
+    pub entity_assets_by_identifier: HashMap<String, Handle<EntityAsset>>,
+    pub entity_assets_by_iid: HashMap<String, Handle<EntityAsset>>,
 }
 
 impl LayerAsset {
     pub(crate) fn new(
         value: &ldtk::LayerInstance,
         project: Handle<ProjectAsset>,
+        index: usize,
+        entity_assets_by_identifier: HashMap<String, Handle<EntityAsset>>,
+        entity_assets_by_iid: HashMap<String, Handle<EntityAsset>>,
     ) -> Result<Self, LayerTypeError> {
         Ok(Self {
             grid_size: (value.c_wid, value.c_hei).into(),
@@ -58,24 +76,17 @@ impl LayerAsset {
             px_total_offset: (value.px_total_offset_x, value.px_total_offset_y).into(),
             tileset_def_uid: value.tileset_def_uid,
             tileset_rel_path: value.tileset_rel_path.as_ref().map(PathBuf::from),
-            layer_type: match value.layer_instance_type.as_str() {
-                "IntGrid" => LayerType::IntGrid,
-                "Entities" => LayerType::Entities,
-                "Tiles" => LayerType::Tiles,
-                "AutoLayer" => LayerType::Autolayer,
-                _ => {
-                    return Err(LayerTypeError::UnknownLayerType(
-                        value.layer_instance_type.clone(),
-                    ))
-                }
-            },
+            layer_type: LayerType::new(&value.layer_instance_type)?,
             iid: value.iid.clone(),
             layer_def_uid: value.layer_def_uid,
             level_id: value.level_id,
             override_tileset_uid: value.override_tileset_uid,
             px_offset: (value.px_offset_x, value.px_offset_y).into(),
             visible: value.visible,
+            index,
             project,
+            entity_assets_by_identifier,
+            entity_assets_by_iid,
         })
     }
 }

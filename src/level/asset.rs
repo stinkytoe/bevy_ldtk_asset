@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy::utils::HashMap;
 use std::path::PathBuf;
 use thiserror::Error;
 
@@ -46,12 +47,16 @@ pub struct LevelAsset {
     world_location: Vec3,
     #[reflect(ignore)]
     pub project: Handle<ProjectAsset>,
+    pub layer_assets_by_identifier: HashMap<String, Handle<LayerAsset>>,
+    pub layer_assets_by_iid: HashMap<String, Handle<LayerAsset>>,
 }
 
 impl LevelAsset {
     pub(crate) fn new(
         value: &ldtk::Level,
         project: Handle<ProjectAsset>,
+        layer_assets_by_identifier: HashMap<String, Handle<LayerAsset>>,
+        layer_assets_by_iid: HashMap<String, Handle<LayerAsset>>,
     ) -> Result<Self, NewLevelAssetError> {
         Ok(Self {
             bg_color: bevy_color_from_ldtk(&value.bg_color)?,
@@ -80,6 +85,8 @@ impl LevelAsset {
                 value.world_depth as f32,
             ),
             project,
+            layer_assets_by_identifier,
+            layer_assets_by_iid,
         })
     }
 }
@@ -105,20 +112,21 @@ impl DependencyLoader for LevelAsset {
         bevy::utils::HashMap<Handle<Self::Child>, Self::GrandchildrenToLoad>,
         crate::traits::DependencyLoaderError,
     > {
-        match to_load {
-            LayersToLoad::None => Self::merge_empty(),
-            LayersToLoad::ByIdentifiers(ids) => {
-                Self::merge_filtered(ids, &project_asset.layer_assets_by_identifier)
-            }
-            LayersToLoad::ByIids(ids) => {
-                Self::merge_filtered(ids, &project_asset.layer_assets_by_iid)
-            }
-            LayersToLoad::TileLayersOnly => todo!(),
-            LayersToLoad::EntityLayersOnly => todo!(),
-            LayersToLoad::All(entities_to_load) => {
-                Self::merge_all(entities_to_load, &project_asset.layer_assets_by_iid)
-            }
-        }
+        // match to_load {
+        //     LayersToLoad::None => Self::merge_empty(),
+        //     LayersToLoad::ByIdentifiers(ids) => {
+        //         Self::merge_filtered(ids, &project_asset.layer_assets_by_identifier)
+        //     }
+        //     LayersToLoad::ByIids(ids) => {
+        //         Self::merge_filtered(ids, &project_asset.layer_assets_by_iid)
+        //     }
+        //     LayersToLoad::TileLayersOnly => todo!(),
+        //     LayersToLoad::EntityLayersOnly => todo!(),
+        //     LayersToLoad::All(entities_to_load) => {
+        //         Self::merge_all(entities_to_load, &project_asset.layer_assets_by_iid)
+        //     }
+        // }
+        todo!()
     }
 
     fn spawn_child(

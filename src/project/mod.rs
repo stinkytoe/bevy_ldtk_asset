@@ -2,6 +2,7 @@ mod asset;
 mod asset_loader;
 mod bundle;
 mod component;
+pub mod defs;
 mod plugin;
 mod systems;
 

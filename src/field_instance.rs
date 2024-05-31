@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use thiserror::Error;
 
 use crate::ldtk;
-use crate::tileset_rectangle::TilesetRectangle;
+use crate::project::defs::TilesetRectangle;
 
 #[derive(Debug, Default, Reflect)]
 pub struct ReferenceToAnEntityInstance {
