@@ -12,12 +12,14 @@ use crate::entity::NewEntityAssetError;
 use crate::layer::LayerAsset;
 use crate::layer::LayerType;
 use crate::layer::LayerTypeError;
+use crate::layer::Tile;
 use crate::ldtk;
 use crate::level::LevelAsset;
 use crate::level::NewLevelAssetError;
-use crate::prelude::defs::EnumDefinition;
-use crate::prelude::defs::LayerDefinition;
-use crate::prelude::defs::TilesetDefinition;
+use crate::project::defs::EntityDefinitionFromError;
+use crate::project::defs::EnumDefinition;
+use crate::project::defs::LayerDefinitionFromError;
+use crate::project::defs::TilesetDefinition;
 use crate::project::ProjectAsset;
 use crate::project::ProjectSettings;
 use crate::util::bevy_color_from_ldtk;
@@ -25,9 +27,6 @@ use crate::util::ldtk_path_to_asset_path;
 use crate::util::ColorParseError;
 use crate::world::NewWorldAssetError;
 use crate::world::WorldAsset;
-
-use super::defs::EntityDefinitionFromError;
-use super::defs::LayerDefinitionFromError;
 
 #[derive(Debug, Error)]
 pub(crate) enum ProjectAssetLoaderError {
@@ -55,8 +54,6 @@ pub(crate) enum ProjectAssetLoaderError {
     BadProjectDirectory(PathBuf),
     #[error("externalRelPath is None when external levels is true?")]
     ExternalRelPathIsNone,
-    #[error("entity instances in non-entity type layer!")]
-    NonEntityLayerWithEntities,
     #[error("tile instances in entity type layer!")]
     NonTileLayerWithTiles,
     #[error("Value is None in a single world project?")]
@@ -211,6 +208,8 @@ impl AssetLoader for ProjectAssetLoader {
                             (LayerType::Tiles, _, _, _) => SublayerToLoad::Tile(&layer.grid_tiles),
                         };
 
+                        let mut tiles = Vec::new();
+
                         match sublayer_to_spawn {
                             SublayerToLoad::Entity(entities) => {
                                 for entity in entities.iter() {
@@ -236,13 +235,16 @@ impl AssetLoader for ProjectAssetLoader {
                                     debug!("iid: {}", entity.iid);
                                 }
                             }
-                            SublayerToLoad::Tile(_) => {}
+                            SublayerToLoad::Tile(inner_tiles) => {
+                                tiles = inner_tiles.iter().map(Tile::from).collect();
+                            }
                         };
 
                         let asset = LayerAsset::new(
                             layer,
                             self_handle.clone(),
                             index,
+                            tiles,
                             entity_assets_by_identifier,
                             entity_assets_by_iid,
                         )?;
@@ -313,152 +315,6 @@ impl AssetLoader for ProjectAssetLoader {
                 })
                 .collect();
 
-            // let world_tuples: Vec<_> = if value.worlds.is_empty() {
-            //     vec![(
-            //         WorldAsset::new_from_project(&value, self_handle.clone())?,
-            //         "World".to_owned(),
-            //         &value.levels,
-            //     )]
-            // } else {
-            //     value
-            //         .worlds
-            //         .iter()
-            //         .map(|world| {
-            //             Ok((
-            //                 WorldAsset::new_from_world(world, self_handle.clone())?,
-            //                 world.identifier.clone(),
-            //                 &world.levels,
-            //             ))
-            //         })
-            //         .collect::<Result<Vec<_>, ProjectAssetLoaderError>>()?
-            // };
-            //
-            // let background_assets = world_tuples
-            //     .iter()
-            //     .flat_map(|(_, _, levels)| levels.iter())
-            //     .filter_map(|level| level.bg_rel_path.as_ref())
-            //     .map(|ldtk_path| {
-            //         let asset_path = Path::new(&ldtk_path);
-            //         let asset_path = ldtk_path_to_asset_path(&base_directory, asset_path);
-            //         let asset_handle = load_context.load(asset_path);
-            //         (ldtk_path.clone(), asset_handle)
-            //     })
-            //     .collect();
-            //
-            // for (world_asset, world_identifier, levels) in world_tuples {
-            //     let iid = world_asset.iid.clone();
-            //     let world_handle = load_context
-            //         .add_loaded_labeled_asset(world_identifier.clone(), world_asset.into());
-            //
-            //     debug!("Added new WorldAsset!");
-            //     debug!("identifier: {world_identifier}");
-            //     debug!("iid: {iid}");
-            //
-            //     world_assets_by_identifier.insert(world_identifier.clone(), world_handle.clone());
-            //     world_assets_by_iid.insert(iid, world_handle);
-            //
-            //     for level in levels.iter() {
-            //         let iid = level.iid.clone();
-            //         let level_asset = LevelAsset::new(level, self_handle.clone())?;
-            //         let level_label = format!("{}/{}", world_identifier, level.identifier);
-            //         let level_handle =
-            //             load_context.add_loaded_labeled_asset(level_label, level_asset.into());
-            //
-            //         debug!("Added new LevelAsset!");
-            //         debug!("identifier: {}", level.identifier);
-            //         debug!("iid: {iid}");
-            //
-            //         level_assets_by_identifier
-            //             .insert(level.identifier.clone(), level_handle.clone());
-            //         level_assets_by_iid.insert(iid, level_handle);
-            //
-            //         let Some(layer_instances) = ({
-            //             if !value.external_levels {
-            //                 level.layer_instances.clone()
-            //             } else {
-            //                 let level_path = level
-            //                     .external_rel_path
-            //                     .as_ref()
-            //                     .ok_or(ProjectAssetLoaderError::ExternalRelPathIsNone)?;
-            //                 let level_path = Path::new(level_path);
-            //                 let level_path = ldtk_path_to_asset_path(&base_directory, level_path);
-            //                 let bytes = load_context.read_asset_bytes(level_path).await?;
-            //                 let level_json: ldtk::Level = serde_json::from_slice(&bytes)?;
-            //                 level_json.layer_instances
-            //             }
-            //         }) else {
-            //             break;
-            //         };
-            //
-            //         for layer_instance in layer_instances.iter().rev() {
-            //             let iid = layer_instance.iid.clone();
-            //             let layer_asset = LayerAsset::new(layer_instance, self_handle.clone())?;
-            //             let layer_type = layer_asset.layer_type;
-            //             let layer_label = format!(
-            //                 "{}/{}/{}",
-            //                 world_identifier, level.identifier, layer_instance.identifier
-            //             );
-            //             let layer_handle =
-            //                 load_context.add_loaded_labeled_asset(layer_label, layer_asset.into());
-            //
-            //             debug!("Added new LayerAsset!");
-            //             debug!("identifier: {}", layer_instance.identifier);
-            //             debug!("iid: {iid}");
-            //
-            //             layer_assets_by_identifier
-            //                 .insert(layer_instance.identifier.clone(), layer_handle.clone());
-            //             layer_assets_by_iid.insert(iid, layer_handle);
-            //
-            //             match (
-            //                 layer_type,
-            //                 layer_instance.entity_instances.len(),
-            //                 layer_instance.grid_tiles.len(),
-            //                 layer_instance.auto_layer_tiles.len(),
-            //             ) {
-            //                 (LayerType::Tiles, n, _, _)
-            //                 | (LayerType::IntGrid, n, _, _)
-            //                 | (LayerType::Autolayer, n, _, _)
-            //                     if n != 0 =>
-            //                 {
-            //                     return Err(ProjectAssetLoaderError::NonEntityLayerWithEntities);
-            //                 }
-            //                 (LayerType::Entities, _, n, m) if n != 0 || m != 0 => {
-            //                     return Err(ProjectAssetLoaderError::NonTileLayerWithTiles);
-            //                 }
-            //                 (LayerType::Entities, _, _, _) => {
-            //                     for entity_instance in &layer_instance.entity_instances {
-            //                         let iid = entity_instance.iid.clone();
-            //                         let entity_asset =
-            //                             EntityAsset::new(entity_instance, self_handle.clone())?;
-            //                         let entity_label = format!(
-            //                             "{}/{}/{}/{}",
-            //                             world_identifier,
-            //                             level.identifier,
-            //                             layer_instance.identifier,
-            //                             entity_instance.identifier
-            //                         );
-            //                         let entity_handle = load_context.add_loaded_labeled_asset(
-            //                             entity_label,
-            //                             entity_asset.into(),
-            //                         );
-            //
-            //                         debug!("Added new EntityAsset!");
-            //                         debug!("identifier: {}", entity_instance.identifier);
-            //                         debug!("iid: {iid}");
-            //
-            //                         entity_assets_by_identifier.insert(
-            //                             entity_instance.identifier.clone(),
-            //                             entity_handle.clone(),
-            //                         );
-            //                         entity_assets_by_iid.insert(iid, entity_handle);
-            //                     }
-            //                 }
-            //                 _ => (),
-            //             }
-            //         }
-            //     }
-            // }
-            //
             let tileset_assets = value
                 .defs
                 .tilesets

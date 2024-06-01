@@ -4,6 +4,7 @@ use bevy::utils::HashMap;
 use std::path::PathBuf;
 use thiserror::Error;
 
+use crate::layer::Tile;
 use crate::ldtk;
 use crate::prelude::EntityAsset;
 use crate::project::ProjectAsset;
@@ -54,6 +55,7 @@ pub struct LayerAsset {
 
     // for us!
     pub index: usize,
+    pub tiles: Vec<Tile>,
     #[reflect(ignore)]
     pub project: Handle<ProjectAsset>,
     pub entity_assets_by_identifier: HashMap<String, Handle<EntityAsset>>,
@@ -65,6 +67,7 @@ impl LayerAsset {
         value: &ldtk::LayerInstance,
         project: Handle<ProjectAsset>,
         index: usize,
+        tiles: Vec<Tile>,
         entity_assets_by_identifier: HashMap<String, Handle<EntityAsset>>,
         entity_assets_by_iid: HashMap<String, Handle<EntityAsset>>,
     ) -> Result<Self, LayerTypeError> {
@@ -84,6 +87,7 @@ impl LayerAsset {
             px_offset: (value.px_offset_x, value.px_offset_y).into(),
             visible: value.visible,
             index,
+            tiles,
             project,
             entity_assets_by_identifier,
             entity_assets_by_iid,
