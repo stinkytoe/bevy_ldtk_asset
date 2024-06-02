@@ -3,6 +3,7 @@ mod asset_loader;
 mod bundle;
 mod component;
 pub mod defs;
+mod impls;
 mod plugin;
 mod systems;
 
