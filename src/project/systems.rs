@@ -1,11 +1,11 @@
-use bevy::ecs::query::{QueryData, QueryEntityError};
 use bevy::ecs::system::EntityCommands;
 use bevy::prelude::*;
 
 use crate::common_components::Iid;
 use crate::project::ProjectAsset;
+use crate::traits::ModifiedQueryResult;
+use crate::traits::NewAssetEntitySystem;
 use crate::traits::NewAssetEntitySystemError;
-use crate::traits::{ModifiedQueryResult, NewAssetEntitySystem};
 
 impl NewAssetEntitySystem for ProjectAsset {
     type ModifiedQueryData = (Entity, &'static mut Iid);

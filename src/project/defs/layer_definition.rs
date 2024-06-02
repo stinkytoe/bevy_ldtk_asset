@@ -2,8 +2,8 @@ use bevy::prelude::*;
 use thiserror::Error;
 
 use crate::layer::LayerType;
+use crate::layer::LayerTypeError;
 use crate::ldtk;
-use crate::prelude::LayerTypeError;
 use crate::project::defs::IntGridValue;
 use crate::project::defs::IntGridValueFromError;
 use crate::project::defs::IntGridValueGroup;

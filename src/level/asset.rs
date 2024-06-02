@@ -10,6 +10,7 @@ use crate::field_instance::FieldInstances;
 use crate::layer::LayerAsset;
 use crate::layer::LayerBundle;
 use crate::ldtk;
+use crate::level::LayersToLoad;
 use crate::level::LevelBackgroundPosition;
 use crate::level::Neighbour;
 use crate::level::NeighbourError;
@@ -19,8 +20,6 @@ use crate::traits::AssetProvidesProjectHandle;
 use crate::traits::ChildrenEntityLoader;
 use crate::util::bevy_color_from_ldtk;
 use crate::util::ColorParseError;
-
-use super::component::LayersToLoad;
 
 #[derive(Debug, Error)]
 pub enum NewLevelAssetError {

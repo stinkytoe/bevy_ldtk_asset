@@ -4,9 +4,9 @@ use bevy::utils::HashMap;
 use std::path::PathBuf;
 use thiserror::Error;
 
+use crate::entity::EntityAsset;
 use crate::layer::Tile;
 use crate::ldtk;
-use crate::prelude::EntityAsset;
 use crate::project::ProjectAsset;
 
 #[derive(Debug, Error)]

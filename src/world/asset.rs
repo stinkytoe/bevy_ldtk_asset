@@ -10,13 +10,12 @@ use crate::level::LevelBundle;
 use crate::project::ProjectAsset;
 use crate::traits::AssetProvidesProjectHandle;
 use crate::traits::ChildrenEntityLoader;
-
-use super::component::LevelsToLoad;
+use crate::world::LevelsToLoad;
 
 #[derive(Debug, Error)]
 pub(crate) enum NewWorldAssetError {
-    #[error("Field is None when parsing a single world project? field: {0}")]
-    NoneInSingleWorldProject(String),
+    // #[error("Field is None when parsing a single world project? field: {0}")]
+    // NoneInSingleWorldProject(String),
     #[error("Missing worldLayout?")]
     MissingWorldLayout,
 }
