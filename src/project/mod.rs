@@ -13,4 +13,3 @@ pub use component::WorldsToLoad;
 
 pub(crate) use asset_loader::ProjectAssetLoader;
 pub(crate) use plugin::ProjectPlugin;
-pub(crate) use systems::new_project_asset;

@@ -9,7 +9,7 @@ use crate::level::LevelAsset;
 use crate::level::LevelBundle;
 use crate::project::ProjectAsset;
 use crate::traits::AssetProvidesProjectHandle;
-use crate::traits::DependencyLoader;
+use crate::traits::ChildrenEntityLoader;
 
 use super::component::LevelsToLoad;
 
@@ -66,32 +66,29 @@ impl AssetProvidesProjectHandle for WorldAsset {
     }
 }
 
-impl DependencyLoader for WorldAsset {
+impl ChildrenEntityLoader for WorldAsset {
     type Child = LevelAsset;
     type ChildrenToLoad = LevelsToLoad;
     type GrandchildrenToLoad = LayersToLoad;
 
     fn next_tier(
         &self,
-        project_asset: &ProjectAsset,
+        _project_asset: &ProjectAsset,
         to_load: &Self::ChildrenToLoad,
     ) -> Result<
         bevy::utils::HashMap<Handle<Self::Child>, Self::GrandchildrenToLoad>,
-        crate::traits::DependencyLoaderError,
+        crate::traits::ChildrenEntityLoaderError,
     > {
-        // match to_load {
-        //     LevelsToLoad::None => Self::merge_empty(),
-        //     LevelsToLoad::ByIdentifiers(ids) => {
-        //         Self::merge_filtered(ids, &project_asset.level_assets_by_identifier)
-        //     }
-        //     LevelsToLoad::ByIids(ids) => {
-        //         Self::merge_filtered(ids, &project_asset.level_assets_by_iid)
-        //     }
-        //     LevelsToLoad::All(levels_to_load) => {
-        //         Self::merge_all(levels_to_load, &project_asset.level_assets_by_iid)
-        //     }
-        // }
-        todo!()
+        match to_load {
+            LevelsToLoad::None => Self::merge_empty(),
+            LevelsToLoad::ByIdentifiers(ids) => {
+                Self::merge_filtered(ids, &self.level_assets_by_identifier)
+            }
+            LevelsToLoad::ByIids(ids) => Self::merge_filtered(ids, &self.level_assets_by_iid),
+            LevelsToLoad::All(levels_to_load) => {
+                Self::merge_all(levels_to_load, &self.level_assets_by_iid)
+            }
+        }
     }
 
     fn spawn_child(

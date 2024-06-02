@@ -1,18 +1,14 @@
 use bevy::prelude::*;
 use bevy::utils::error;
 
-use crate::project::new_project_asset;
+use crate::project::defs::EntityDefinition;
+use crate::project::defs::EnumDefinition;
+use crate::project::defs::LayerDefinition;
+use crate::project::defs::TilesetDefinition;
 use crate::project::ProjectAsset;
 use crate::project::ProjectAssetLoader;
-use crate::traits::DependencyLoader;
-
-use super::defs::EntityDefinition;
-use super::defs::EnumDefinition;
-use super::defs::LayerDefinition;
-use super::defs::TilesetDefinition;
-
-// use super::systems::ToLoad;
-// use super::systems::WorldsToLoad2;
+use crate::traits::ChildrenEntityLoader;
+use crate::traits::NewAssetEntitySystem;
 
 #[derive(Debug, Default)]
 pub struct ProjectPlugin;
@@ -27,15 +23,12 @@ impl Plugin for ProjectPlugin {
             .register_type::<EntityDefinition>()
             .register_type::<TilesetDefinition>()
             .register_type::<EnumDefinition>()
-        // .add_systems(
-        //     Update,
-        //     (
-        //         new_project_asset.map(error),
-        //         ProjectAsset::to_load_changed_system.map(error),
-        //         // project_asset_worlds_to_load_changed.map(error),
-        //         // WorldsToLoad2::to_load_changed_system.map(error),
-        //     ),
-        // )
-        ;
+            .add_systems(
+                Update,
+                (
+                    ProjectAsset::new_asset_entity_system.map(error),
+                    ProjectAsset::to_load_changed_system.map(error),
+                ),
+            );
     }
 }

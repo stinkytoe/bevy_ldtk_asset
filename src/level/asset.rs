@@ -16,7 +16,7 @@ use crate::level::NeighbourError;
 use crate::level::Neighbours;
 use crate::project::ProjectAsset;
 use crate::traits::AssetProvidesProjectHandle;
-use crate::traits::DependencyLoader;
+use crate::traits::ChildrenEntityLoader;
 use crate::util::bevy_color_from_ldtk;
 use crate::util::ColorParseError;
 
@@ -97,7 +97,7 @@ impl AssetProvidesProjectHandle for LevelAsset {
     }
 }
 
-impl DependencyLoader for LevelAsset {
+impl ChildrenEntityLoader for LevelAsset {
     type Child = LayerAsset;
 
     type ChildrenToLoad = LayersToLoad;
@@ -106,27 +106,24 @@ impl DependencyLoader for LevelAsset {
 
     fn next_tier(
         &self,
-        project_asset: &ProjectAsset,
+        _project_asset: &ProjectAsset,
         to_load: &Self::ChildrenToLoad,
     ) -> Result<
         bevy::utils::HashMap<Handle<Self::Child>, Self::GrandchildrenToLoad>,
-        crate::traits::DependencyLoaderError,
+        crate::traits::ChildrenEntityLoaderError,
     > {
-        // match to_load {
-        //     LayersToLoad::None => Self::merge_empty(),
-        //     LayersToLoad::ByIdentifiers(ids) => {
-        //         Self::merge_filtered(ids, &project_asset.layer_assets_by_identifier)
-        //     }
-        //     LayersToLoad::ByIids(ids) => {
-        //         Self::merge_filtered(ids, &project_asset.layer_assets_by_iid)
-        //     }
-        //     LayersToLoad::TileLayersOnly => todo!(),
-        //     LayersToLoad::EntityLayersOnly => todo!(),
-        //     LayersToLoad::All(entities_to_load) => {
-        //         Self::merge_all(entities_to_load, &project_asset.layer_assets_by_iid)
-        //     }
-        // }
-        todo!()
+        match to_load {
+            LayersToLoad::None => Self::merge_empty(),
+            LayersToLoad::ByIdentifiers(ids) => {
+                Self::merge_filtered(ids, &self.layer_assets_by_identifier)
+            }
+            LayersToLoad::ByIids(ids) => Self::merge_filtered(ids, &self.layer_assets_by_iid),
+            LayersToLoad::TileLayersOnly => todo!(),
+            LayersToLoad::EntityLayersOnly => todo!(),
+            LayersToLoad::All(entities_to_load) => {
+                Self::merge_all(entities_to_load, &self.layer_assets_by_iid)
+            }
+        }
     }
 
     fn spawn_child(

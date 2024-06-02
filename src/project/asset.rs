@@ -8,8 +8,8 @@ use crate::project::defs::LayerDefinition;
 use crate::project::defs::TilesetDefinition;
 use crate::project::WorldsToLoad;
 use crate::traits::AssetProvidesProjectHandle;
-use crate::traits::DependencyLoader;
-use crate::traits::DependencyLoaderError;
+use crate::traits::ChildrenEntityLoader;
+use crate::traits::ChildrenEntityLoaderError;
 use crate::world::LevelsToLoad;
 use crate::world::WorldAsset;
 use crate::world::WorldBundle;
@@ -44,7 +44,7 @@ impl AssetProvidesProjectHandle for ProjectAsset {
     }
 }
 
-impl DependencyLoader for ProjectAsset {
+impl ChildrenEntityLoader for ProjectAsset {
     type Child = WorldAsset;
     type ChildrenToLoad = WorldsToLoad;
     type GrandchildrenToLoad = LevelsToLoad;
@@ -53,7 +53,7 @@ impl DependencyLoader for ProjectAsset {
         &self,
         project_asset: &ProjectAsset,
         to_load: &WorldsToLoad,
-    ) -> Result<HashMap<Handle<WorldAsset>, LevelsToLoad>, DependencyLoaderError> {
+    ) -> Result<HashMap<Handle<WorldAsset>, LevelsToLoad>, ChildrenEntityLoaderError> {
         match to_load {
             WorldsToLoad::None => Self::merge_empty(),
             WorldsToLoad::ByIdentifiers(ids) => {

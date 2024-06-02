@@ -1,76 +1,47 @@
+use bevy::ecs::query::{QueryData, QueryEntityError};
+use bevy::ecs::system::EntityCommands;
 use bevy::prelude::*;
-use std::fmt::Debug;
-use thiserror::Error;
 
 use crate::common_components::Iid;
 use crate::project::ProjectAsset;
+use crate::traits::NewAssetEntitySystemError;
+use crate::traits::{ModifiedQueryResult, NewAssetEntitySystem};
 
-#[derive(Debug, Error)]
-pub enum NewProjectAssetSystemError {
-    #[error("Bad project handle!")]
-    BadProjectHandle,
-    #[error("Bad project asset path!")]
-    BadProjectAssetPath,
-}
+impl NewAssetEntitySystem for ProjectAsset {
+    type ModifiedQueryData = (Entity, &'static mut Iid);
 
-pub(crate) fn new_project_asset(
-    mut events: EventReader<AssetEvent<ProjectAsset>>,
-    mut commands: Commands,
-    new_project_query: Query<(Entity, &Handle<ProjectAsset>)>,
-    mut modified_project_query: Query<(&Handle<ProjectAsset>, &mut Iid)>,
-    removed_project_query: Query<(Entity, &Handle<ProjectAsset>)>,
-    project_assets: Res<Assets<ProjectAsset>>,
-) -> Result<(), NewProjectAssetSystemError> {
-    for event in events.read() {
-        match event {
-            AssetEvent::Added { id } | AssetEvent::LoadedWithDependencies { id } => {
-                for (entity, project_handle) in new_project_query
-                    .iter()
-                    .filter(|(_, handle)| handle.id() == *id)
-                {
-                    let project_asset = project_assets
-                        .get(*id)
-                        .ok_or(NewProjectAssetSystemError::BadProjectHandle)?;
+    fn finalize(
+        &self,
+        mut entity_commands: EntityCommands,
+    ) -> Result<(), NewAssetEntitySystemError> {
+        entity_commands.insert((
+            Name::from(
+                self.self_handle
+                    .path()
+                    .ok_or(NewAssetEntitySystemError::FailedFinalize(
+                        "ProjectAsset",
+                        "bad self_handle?",
+                    ))?
+                    .to_string(),
+            ),
+            Iid {
+                iid: self.iid.clone(),
+            },
+        ));
 
-                    debug!("Adding components for: {:?}", project_handle.path());
-
-                    commands.entity(entity).insert((
-                        Name::from(
-                            project_handle
-                                .path()
-                                .ok_or(NewProjectAssetSystemError::BadProjectAssetPath)?
-                                .to_string(),
-                        ),
-                        Iid {
-                            iid: project_asset.iid.clone(),
-                        },
-                    ));
-                }
-            }
-            AssetEvent::Modified { id } => {
-                for (project_handle, mut iid) in modified_project_query
-                    .iter_mut()
-                    .filter(|(handle, _)| handle.id() == *id)
-                {
-                    let project_asset = project_assets
-                        .get(*id)
-                        .ok_or(NewProjectAssetSystemError::BadProjectHandle)?;
-
-                    debug!("Modifying components for: {:?}", project_handle.path());
-
-                    iid.iid.clone_from(&project_asset.iid);
-                }
-            }
-            AssetEvent::Removed { id } | AssetEvent::Unused { id } => {
-                for (entity, _) in removed_project_query
-                    .iter()
-                    .filter(|(_, handle)| handle.id() == *id)
-                {
-                    commands.entity(entity).despawn_recursive();
-                }
-            }
-        }
+        Ok(())
     }
 
-    Ok(())
+    fn modify(
+        &self,
+        modified_query_result: ModifiedQueryResult<Self>,
+    ) -> Result<(), NewAssetEntitySystemError> {
+        let (_entity, mut iid) = modified_query_result;
+
+        if iid.iid != self.iid {
+            iid.iid.clone_from(&self.iid);
+        }
+
+        Ok(())
+    }
 }

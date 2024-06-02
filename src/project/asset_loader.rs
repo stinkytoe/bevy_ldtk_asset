@@ -129,18 +129,6 @@ impl AssetLoader for ProjectAssetLoader {
                 value.worlds
             };
 
-            let tile_definitions: HashMap<i64, String> = value
-                .defs
-                .tilesets
-                .iter()
-                .filter_map(|tileset_def| {
-                    tileset_def
-                        .rel_path
-                        .as_ref()
-                        .map(|path| (tileset_def.uid, path.clone()))
-                })
-                .collect();
-
             for world in worlds.iter() {
                 let mut level_assets_by_identifier = HashMap::default();
                 let mut level_assets_by_iid = HashMap::default();

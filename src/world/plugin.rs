@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy::utils::error;
 
 use crate::project::WorldsToLoad;
-use crate::traits::DependencyLoader;
+use crate::traits::ChildrenEntityLoader;
 use crate::world::new_world_asset;
 use crate::world::WorldAsset;
 
@@ -18,7 +18,7 @@ impl Plugin for WorldPlugin {
             .add_systems(
                 Update,
                 (
-                    new_world_asset.map(error),
+                    // new_world_asset.map(error),
                     WorldAsset::to_load_changed_system.map(error),
                 ),
             );

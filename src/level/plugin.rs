@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy::utils::error;
 
 use crate::level::LevelAsset;
-use crate::traits::DependencyLoader;
+use crate::traits::ChildrenEntityLoader;
 use crate::world::LevelsToLoad;
 
 #[derive(Debug, Default)]
@@ -14,13 +14,13 @@ impl Plugin for LevelPlugin {
             .init_asset::<LevelAsset>()
             .register_asset_reflect::<LevelAsset>()
             .register_type::<LevelsToLoad>()
-            .add_systems(
-                Update,
-                (
+            // .add_systems(
+            //     Update,
+                // (
                     // new_level_asset.map(error),
-                    // LevelsToLoad::to_load_changed_system.map(error),
-                    LevelAsset::to_load_changed_system.map(error),
-                ),
-            );
+                    // LevelAsset::to_load_changed_system.map(error),
+                // ),
+            // )
+        ;
     }
 }
