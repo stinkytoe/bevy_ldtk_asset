@@ -5,21 +5,13 @@ use bevy::{prelude::*, utils::HashMap};
 use std::fmt::Debug;
 use thiserror::Error;
 
-use crate::project::ProjectAsset;
-
-pub(crate) trait AssetProvidesProjectHandle: Asset {
-    fn project_handle(&self) -> &Handle<ProjectAsset>;
-}
-
 #[derive(Debug, Error)]
 pub(crate) enum ChildrenEntityLoaderError {
     #[error("Bad Self Handle!")]
     BadSelfHandle,
-    #[error("Bad Project Handle!")]
-    BadProjectHandle,
 }
 
-pub(crate) trait ChildrenEntityLoader: Asset + AssetProvidesProjectHandle + Sized {
+pub(crate) trait ChildrenEntityLoader: Asset + /*AssetProvidesProjectHandle +*/ Sized {
     type Child: Asset;
     type ChildrenToLoad: Clone + Component + Debug;
     type GrandchildrenToLoad: Clone + Component + Debug;
@@ -32,7 +24,6 @@ pub(crate) trait ChildrenEntityLoader: Asset + AssetProvidesProjectHandle + Size
             Changed<Self::ChildrenToLoad>,
         >,
         loaded_query: Query<(Entity, &Handle<Self::Child>)>,
-        project_assets: Res<Assets<ProjectAsset>>,
         self_assets: Res<Assets<Self>>,
     ) -> Result<(), ChildrenEntityLoaderError> {
         for (entity, self_handle, children_to_load) in changed_query.iter() {
@@ -40,13 +31,7 @@ pub(crate) trait ChildrenEntityLoader: Asset + AssetProvidesProjectHandle + Size
                 .get(self_handle)
                 .ok_or(ChildrenEntityLoaderError::BadSelfHandle)?;
 
-            let project_handle = self_asset.project_handle();
-
-            let project_asset = project_assets
-                .get(project_handle)
-                .ok_or(ChildrenEntityLoaderError::BadProjectHandle)?;
-
-            let mut to_load = self_asset.next_tier(project_asset, children_to_load)?;
+            let mut to_load = self_asset.next_tier( children_to_load)?;
 
             for (entity, child_handle) in loaded_query.iter() {
                 if to_load.get(child_handle).is_some() {
@@ -102,7 +87,6 @@ pub(crate) trait ChildrenEntityLoader: Asset + AssetProvidesProjectHandle + Size
 
     fn next_tier(
         &self,
-        project_asset: &ProjectAsset,
         to_load: &Self::ChildrenToLoad,
     ) -> Result<HashMap<Handle<Self::Child>, Self::GrandchildrenToLoad>, ChildrenEntityLoaderError>;
 

@@ -7,7 +7,6 @@ use crate::project::defs::EnumDefinition;
 use crate::project::defs::LayerDefinition;
 use crate::project::defs::TilesetDefinition;
 use crate::project::WorldsToLoad;
-use crate::traits::AssetProvidesProjectHandle;
 use crate::traits::ChildrenEntityLoader;
 use crate::traits::ChildrenEntityLoaderError;
 use crate::world::LevelsToLoad;
@@ -38,12 +37,6 @@ pub struct ProjectAsset {
     pub(crate) self_handle: Handle<ProjectAsset>,
 }
 
-impl AssetProvidesProjectHandle for ProjectAsset {
-    fn project_handle(&self) -> &Handle<ProjectAsset> {
-        &self.self_handle
-    }
-}
-
 impl ChildrenEntityLoader for ProjectAsset {
     type Child = WorldAsset;
     type ChildrenToLoad = WorldsToLoad;
@@ -51,19 +44,16 @@ impl ChildrenEntityLoader for ProjectAsset {
 
     fn next_tier(
         &self,
-        project_asset: &ProjectAsset,
         to_load: &WorldsToLoad,
     ) -> Result<HashMap<Handle<WorldAsset>, LevelsToLoad>, ChildrenEntityLoaderError> {
         match to_load {
             WorldsToLoad::None => Self::merge_empty(),
             WorldsToLoad::ByIdentifiers(ids) => {
-                Self::merge_filtered(ids, &project_asset.world_assets_by_identifier)
+                Self::merge_filtered(ids, &self.world_assets_by_identifier)
             }
-            WorldsToLoad::ByIids(ids) => {
-                Self::merge_filtered(ids, &project_asset.world_assets_by_iid)
-            }
+            WorldsToLoad::ByIids(ids) => Self::merge_filtered(ids, &self.world_assets_by_iid),
             WorldsToLoad::All(levels_to_load) => {
-                Self::merge_all(levels_to_load, &project_asset.world_assets_by_iid)
+                Self::merge_all(levels_to_load, &self.world_assets_by_iid)
             }
         }
     }

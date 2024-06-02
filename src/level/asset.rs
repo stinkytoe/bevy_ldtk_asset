@@ -16,7 +16,6 @@ use crate::level::Neighbour;
 use crate::level::NeighbourError;
 use crate::level::Neighbours;
 use crate::project::ProjectAsset;
-use crate::traits::AssetProvidesProjectHandle;
 use crate::traits::ChildrenEntityLoader;
 use crate::util::bevy_color_from_ldtk;
 use crate::util::ColorParseError;
@@ -90,12 +89,6 @@ impl LevelAsset {
     }
 }
 
-impl AssetProvidesProjectHandle for LevelAsset {
-    fn project_handle(&self) -> &Handle<ProjectAsset> {
-        &self.project
-    }
-}
-
 impl ChildrenEntityLoader for LevelAsset {
     type Child = LayerAsset;
 
@@ -105,7 +98,6 @@ impl ChildrenEntityLoader for LevelAsset {
 
     fn next_tier(
         &self,
-        _project_asset: &ProjectAsset,
         to_load: &Self::ChildrenToLoad,
     ) -> Result<
         bevy::utils::HashMap<Handle<Self::Child>, Self::GrandchildrenToLoad>,

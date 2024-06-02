@@ -4,8 +4,6 @@ use crate::common_components::Iid;
 use crate::level::LayersToLoad;
 use crate::level::LevelAsset;
 use crate::level::LevelBundle;
-use crate::project::ProjectAsset;
-use crate::traits::AssetProvidesProjectHandle;
 use crate::traits::ChildrenEntityLoader;
 use crate::traits::NewAssetEntitySystem;
 use crate::world::LevelsToLoad;
@@ -39,12 +37,6 @@ impl NewAssetEntitySystem for WorldAsset {
     }
 }
 
-impl AssetProvidesProjectHandle for WorldAsset {
-    fn project_handle(&self) -> &Handle<ProjectAsset> {
-        &self.project
-    }
-}
-
 impl ChildrenEntityLoader for WorldAsset {
     type Child = LevelAsset;
     type ChildrenToLoad = LevelsToLoad;
@@ -52,7 +44,6 @@ impl ChildrenEntityLoader for WorldAsset {
 
     fn next_tier(
         &self,
-        _project_asset: &ProjectAsset,
         to_load: &Self::ChildrenToLoad,
     ) -> Result<
         bevy::utils::HashMap<Handle<Self::Child>, Self::GrandchildrenToLoad>,
