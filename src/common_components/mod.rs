@@ -16,6 +16,12 @@ pub struct Size {
     pub size: Vec2,
 }
 
+impl Size {
+    pub fn new(size: Vec2) -> Self {
+        Self { size }
+    }
+}
+
 pub(crate) struct CommonComponentsPlugin;
 
 impl Plugin for CommonComponentsPlugin {

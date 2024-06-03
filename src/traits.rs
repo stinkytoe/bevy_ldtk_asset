@@ -1,6 +1,9 @@
+use bevy::asset::LoadState;
 use bevy::ecs::query::QueryData;
 use bevy::ecs::query::QueryEntityError;
+use bevy::ecs::query::WorldQuery;
 use bevy::ecs::system::EntityCommands;
+use bevy::reflect::Map;
 use bevy::{prelude::*, utils::HashMap};
 use std::fmt::Debug;
 use thiserror::Error;
@@ -27,6 +30,8 @@ pub(crate) trait ChildrenEntityLoader: Asset + /*AssetProvidesProjectHandle +*/ 
         self_assets: Res<Assets<Self>>,
     ) -> Result<(), ChildrenEntityLoaderError> {
         for (entity, self_handle, children_to_load) in changed_query.iter() {
+            debug!("Loading Children Entities for: {entity:?}");
+
             let self_asset = self_assets
                 .get(self_handle)
                 .ok_or(ChildrenEntityLoaderError::BadSelfHandle)?;
@@ -110,12 +115,52 @@ pub(crate) enum NewAssetEntitySystemError {
 }
 
 pub(crate) type ModifiedQueryResult<'a, T> =
-    <<T as NewAssetEntitySystem>::ModifiedQueryData as bevy::ecs::query::WorldQuery>::Item<'a>;
+    <<T as NewAssetEntitySystem>::ModifiedQueryData as WorldQuery>::Item<'a>;
+
+#[derive(Component, Debug)]
+pub(crate) struct NewAssetEntityLoadStub;
 
 pub(crate) trait NewAssetEntitySystem: Asset + Sized {
     type ModifiedQueryData: QueryData;
 
     fn new_asset_entity_system(
+        mut commands: Commands,
+        added_query: Query<(Entity, &Handle<Self>), Added<Handle<Self>>>,
+    ) {
+        for (entity, handle) in added_query.iter() {
+            debug!("Added entity: {entity:?} with handle: {:?}", handle.path());
+            commands.entity(entity).insert(NewAssetEntityLoadStub);
+        }
+    }
+
+    fn bundle_loaded(
+        mut commands: Commands,
+        new_asset_entity_loaded: Query<(Entity, &Handle<Self>), With<NewAssetEntityLoadStub>>,
+        assets: Res<Assets<Self>>,
+        asset_server: Res<AssetServer>,
+    ) -> Result<(), NewAssetEntitySystemError> {
+        for (entity, handle) in new_asset_entity_loaded.iter() {
+            let Some(LoadState::Loaded) = asset_server.get_load_state(handle) else {
+                return Ok(());
+            };
+
+            debug!("Finalizing: {entity:?}");
+
+            let asset = assets
+                .get(handle)
+                .ok_or(NewAssetEntitySystemError::BadHandle)?;
+
+            let mut entity_commands = commands.entity(entity);
+
+            entity_commands.remove::<NewAssetEntityLoadStub>();
+
+            asset.finalize(entity_commands)?;
+        }
+
+        Ok(())
+    }
+
+    fn asset_modified_or_removed_system(
         mut commands: Commands,
         mut events: EventReader<AssetEvent<Self>>,
         entities_query: Query<(Entity, &Handle<Self>)>,
@@ -124,21 +169,27 @@ pub(crate) trait NewAssetEntitySystem: Asset + Sized {
     ) -> Result<(), NewAssetEntitySystemError> {
         for event in events.read() {
             match event {
-                AssetEvent::Added { id } | AssetEvent::LoadedWithDependencies { id } => {
-                    for (entity, handle) in entities_query
-                        .iter()
-                        .filter(|(_, handle)| handle.id() == *id)
-                    {
-                        let asset = assets
-                            .get(handle)
-                            .ok_or(NewAssetEntitySystemError::BadHandle)?;
-
-                        let entity_commands = commands.entity(entity);
-
-                        asset.finalize(entity_commands)?;
-                    }
+                AssetEvent::Added { id } => {
+                    debug!("AssetEvent::Added AssetEntitySystem: {id:?}");
+                    // for (entity, handle) in entities_query
+                    //     .iter()
+                    //     .filter(|(_, handle)| handle.id() == *id)
+                    // {
+                    // let asset = assets
+                    //     .get(handle)
+                    //     .ok_or(NewAssetEntitySystemError::BadHandle)?;
+                    //
+                    // let entity_commands = commands.entity(entity);
+                    //
+                    // asset.finalize(entity_commands)?;
+                    // }
+                }
+                AssetEvent::LoadedWithDependencies { id } => {
+                    debug!("AssetEvent::LoadedWithDependencies AssetEntitySystem: {id:?}");
                 }
                 AssetEvent::Modified { id } => {
+                    // debug!("Modified AssetEntitySystem: {id:?}");
+                    debug!("AssetEvent::Modified AssetEntitySystem: {id:?}");
                     for (entity, handle) in entities_query
                         .iter()
                         .filter(|(_, handle)| handle.id() == *id)
@@ -153,6 +204,7 @@ pub(crate) trait NewAssetEntitySystem: Asset + Sized {
                     }
                 }
                 AssetEvent::Removed { id } | AssetEvent::Unused { id } => {
+                    debug!("AssetEvent::Removed AssetEntitySystem: {id:?}");
                     for (entity, _) in entities_query
                         .iter()
                         .filter(|(_, handle)| handle.id() == *id)

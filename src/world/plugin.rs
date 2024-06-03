@@ -18,8 +18,10 @@ impl Plugin for WorldPlugin {
             .add_systems(
                 Update,
                 (
+                    WorldAsset::new_asset_entity_system,
+                    WorldAsset::bundle_loaded.map(error),
+                    WorldAsset::asset_modified_or_removed_system.map(error),
                     WorldAsset::to_load_changed_system.map(error),
-                    WorldAsset::new_asset_entity_system.map(error),
                 ),
             );
     }

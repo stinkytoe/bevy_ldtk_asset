@@ -3,20 +3,16 @@ use bevy::utils::HashMap;
 use std::path::PathBuf;
 use thiserror::Error;
 
-use crate::entity::EntitiesToLoad;
 use crate::field_instance::FieldInstance;
 use crate::field_instance::FieldInstanceValueParseError;
 use crate::field_instance::FieldInstances;
 use crate::layer::LayerAsset;
-use crate::layer::LayerBundle;
 use crate::ldtk;
-use crate::level::LayersToLoad;
 use crate::level::LevelBackgroundPosition;
 use crate::level::Neighbour;
 use crate::level::NeighbourError;
 use crate::level::Neighbours;
 use crate::project::ProjectAsset;
-use crate::traits::ChildrenEntityLoader;
 use crate::util::bevy_color_from_ldtk;
 use crate::util::ColorParseError;
 
@@ -42,7 +38,7 @@ pub struct LevelAsset {
     pub size: Vec2,
     // (worldX, worldY, and worldDepth)
     // In Bevy coordinate system, not necessarily the same as Bevy transform!
-    world_location: Vec3,
+    pub world_location: Vec3,
     #[reflect(ignore)]
     pub project: Handle<ProjectAsset>,
     pub layer_assets_by_identifier: HashMap<String, Handle<LayerAsset>>,
@@ -86,46 +82,5 @@ impl LevelAsset {
             layer_assets_by_identifier,
             layer_assets_by_iid,
         })
-    }
-}
-
-impl ChildrenEntityLoader for LevelAsset {
-    type Child = LayerAsset;
-
-    type ChildrenToLoad = LayersToLoad;
-
-    type GrandchildrenToLoad = EntitiesToLoad;
-
-    fn next_tier(
-        &self,
-        to_load: &Self::ChildrenToLoad,
-    ) -> Result<
-        bevy::utils::HashMap<Handle<Self::Child>, Self::GrandchildrenToLoad>,
-        crate::traits::ChildrenEntityLoaderError,
-    > {
-        match to_load {
-            LayersToLoad::None => Self::merge_empty(),
-            LayersToLoad::ByIdentifiers(ids) => {
-                Self::merge_filtered(ids, &self.layer_assets_by_identifier)
-            }
-            LayersToLoad::ByIids(ids) => Self::merge_filtered(ids, &self.layer_assets_by_iid),
-            LayersToLoad::TileLayersOnly => todo!(),
-            LayersToLoad::EntityLayersOnly => todo!(),
-            LayersToLoad::All(entities_to_load) => {
-                Self::merge_all(entities_to_load, &self.layer_assets_by_iid)
-            }
-        }
-    }
-
-    fn spawn_child(
-        child_builder: &mut ChildBuilder,
-        layer: Handle<Self::Child>,
-        entities_to_load: Self::GrandchildrenToLoad,
-    ) {
-        child_builder.spawn(LayerBundle {
-            layer,
-            entities_to_load,
-            spatial: SpatialBundle::default(),
-        });
     }
 }

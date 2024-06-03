@@ -26,7 +26,9 @@ impl Plugin for ProjectPlugin {
             .add_systems(
                 Update,
                 (
-                    ProjectAsset::new_asset_entity_system.map(error),
+                    ProjectAsset::new_asset_entity_system,
+                    ProjectAsset::bundle_loaded.map(error),
+                    ProjectAsset::asset_modified_or_removed_system.map(error),
                     ProjectAsset::to_load_changed_system.map(error),
                 ),
             );
