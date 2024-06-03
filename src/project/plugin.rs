@@ -7,6 +7,7 @@ use crate::project::defs::LayerDefinition;
 use crate::project::defs::TilesetDefinition;
 use crate::project::ProjectAsset;
 use crate::project::ProjectAssetLoader;
+use crate::project::WorldsToLoad;
 use crate::traits::ChildrenEntityLoader;
 use crate::traits::NewAssetEntitySystem;
 
@@ -23,6 +24,7 @@ impl Plugin for ProjectPlugin {
             .register_type::<EntityDefinition>()
             .register_type::<TilesetDefinition>()
             .register_type::<EnumDefinition>()
+            .register_type::<WorldsToLoad>()
             .add_systems(
                 Update,
                 (

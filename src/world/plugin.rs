@@ -4,6 +4,7 @@ use bevy::utils::error;
 use crate::project::WorldsToLoad;
 use crate::traits::ChildrenEntityLoader;
 use crate::traits::NewAssetEntitySystem;
+use crate::world::LevelsToLoad;
 use crate::world::WorldAsset;
 
 #[derive(Debug, Default)]
@@ -15,6 +16,7 @@ impl Plugin for WorldPlugin {
             .init_asset::<WorldAsset>()
             .register_asset_reflect::<WorldAsset>()
             .register_type::<WorldsToLoad>()
+            .register_type::<LevelsToLoad>()
             .add_systems(
                 Update,
                 (

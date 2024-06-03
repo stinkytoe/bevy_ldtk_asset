@@ -1,7 +1,7 @@
 use bevy::{prelude::*, utils::HashMap};
 use thiserror::Error;
 
-use crate::entity::EntitiesToLoad;
+use crate::layer::EntitiesToLoad;
 use crate::ldtk;
 
 #[derive(Component, Debug, Default, Reflect)]

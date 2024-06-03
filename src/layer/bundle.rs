@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::entity::EntitiesToLoad;
+use crate::layer::EntitiesToLoad;
 use crate::layer::LayerAsset;
 
 #[derive(Bundle, Debug, Default)]

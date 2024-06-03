@@ -3,7 +3,6 @@ use bevy::ecs::query::QueryData;
 use bevy::ecs::query::QueryEntityError;
 use bevy::ecs::query::WorldQuery;
 use bevy::ecs::system::EntityCommands;
-use bevy::reflect::Map;
 use bevy::{prelude::*, utils::HashMap};
 use std::fmt::Debug;
 use thiserror::Error;
@@ -110,8 +109,6 @@ pub(crate) enum NewAssetEntitySystemError {
     BadHandle,
     #[error("Finalize failed! {0}: {1}")]
     FailedFinalize(&'static str, &'static str),
-    // #[error("Modify failed! {0}: {1}")]
-    // FailedModify(&'static str, &'static str),
 }
 
 pub(crate) type ModifiedQueryResult<'a, T> =
@@ -171,18 +168,6 @@ pub(crate) trait NewAssetEntitySystem: Asset + Sized {
             match event {
                 AssetEvent::Added { id } => {
                     debug!("AssetEvent::Added AssetEntitySystem: {id:?}");
-                    // for (entity, handle) in entities_query
-                    //     .iter()
-                    //     .filter(|(_, handle)| handle.id() == *id)
-                    // {
-                    // let asset = assets
-                    //     .get(handle)
-                    //     .ok_or(NewAssetEntitySystemError::BadHandle)?;
-                    //
-                    // let entity_commands = commands.entity(entity);
-                    //
-                    // asset.finalize(entity_commands)?;
-                    // }
                 }
                 AssetEvent::LoadedWithDependencies { id } => {
                     debug!("AssetEvent::LoadedWithDependencies AssetEntitySystem: {id:?}");

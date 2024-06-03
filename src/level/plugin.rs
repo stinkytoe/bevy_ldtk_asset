@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy::utils::error;
 
+use crate::level::LayersToLoad;
 use crate::level::LevelAsset;
 use crate::traits::ChildrenEntityLoader;
 use crate::traits::NewAssetEntitySystem;
@@ -15,6 +16,7 @@ impl Plugin for LevelPlugin {
             .init_asset::<LevelAsset>()
             .register_asset_reflect::<LevelAsset>()
             .register_type::<LevelsToLoad>()
+            .register_type::<LayersToLoad>()
             .add_systems(
                 Update,
                 (

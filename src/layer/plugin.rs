@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 
+use crate::layer::EntitiesToLoad;
 use crate::layer::LayerAsset;
 use crate::layer::Tile;
 use crate::layer::Tiles;
@@ -13,6 +14,7 @@ impl Plugin for LayerPlugin {
             .init_asset::<LayerAsset>()
             .register_asset_reflect::<LayerAsset>()
             .register_type::<Tile>()
+            .register_type::<EntitiesToLoad>()
             .register_type::<Tiles>();
     }
 }

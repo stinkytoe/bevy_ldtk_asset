@@ -2,11 +2,11 @@ use bevy::prelude::*;
 
 use crate::common_components::Iid;
 use crate::common_components::Size;
+use crate::layer::EntitiesToLoad;
+use crate::layer::LayerAsset;
+use crate::layer::LayerBundle;
 use crate::level::LayersToLoad;
 use crate::level::LevelAsset;
-use crate::prelude::EntitiesToLoad;
-use crate::prelude::LayerAsset;
-use crate::prelude::LayerBundle;
 use crate::traits::ChildrenEntityLoader;
 use crate::traits::NewAssetEntitySystem;
 
