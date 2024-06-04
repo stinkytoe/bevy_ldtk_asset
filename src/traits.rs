@@ -7,13 +7,19 @@ use bevy::{prelude::*, utils::HashMap};
 use std::fmt::Debug;
 use thiserror::Error;
 
+use crate::prelude::ProjectAsset;
+
+pub(crate) trait AssetProvidesProjectHandle {
+    fn project_handle(&self) -> Handle<ProjectAsset>;
+}
+
 #[derive(Debug, Error)]
 pub(crate) enum ChildrenEntityLoaderError {
     #[error("Bad Self Handle!")]
     BadSelfHandle,
 }
 
-pub(crate) trait ChildrenEntityLoader: Asset + /*AssetProvidesProjectHandle +*/ Sized {
+pub(crate) trait ChildrenEntityLoader: Asset + AssetProvidesProjectHandle + Sized {
     type Child: Asset;
     type ChildrenToLoad: Clone + Component + Debug;
     type GrandchildrenToLoad: Clone + Component + Debug;
@@ -35,7 +41,7 @@ pub(crate) trait ChildrenEntityLoader: Asset + /*AssetProvidesProjectHandle +*/ 
                 .get(self_handle)
                 .ok_or(ChildrenEntityLoaderError::BadSelfHandle)?;
 
-            let mut to_load = self_asset.next_tier( children_to_load)?;
+            let mut to_load = self_asset.next_tier(children_to_load)?;
 
             for (entity, child_handle) in loaded_query.iter() {
                 if to_load.get(child_handle).is_some() {
@@ -117,7 +123,10 @@ pub(crate) type ModifiedQueryResult<'a, T> =
 #[derive(Component, Debug)]
 pub(crate) struct NewAssetEntityLoadStub;
 
-pub(crate) trait NewAssetEntitySystem: Asset + Sized {
+#[derive(Clone, Component, Debug, Reflect)]
+pub struct NilToLoad;
+
+pub(crate) trait NewAssetEntitySystem: Asset + AssetProvidesProjectHandle + Sized {
     type ModifiedQueryData: QueryData;
 
     fn new_asset_entity_system(
@@ -135,6 +144,7 @@ pub(crate) trait NewAssetEntitySystem: Asset + Sized {
         new_asset_entity_loaded: Query<(Entity, &Handle<Self>), With<NewAssetEntityLoadStub>>,
         assets: Res<Assets<Self>>,
         asset_server: Res<AssetServer>,
+        project_assets: Res<Assets<ProjectAsset>>,
     ) -> Result<(), NewAssetEntitySystemError> {
         for (entity, handle) in new_asset_entity_loaded.iter() {
             let Some(LoadState::Loaded) = asset_server.get_load_state(handle) else {
@@ -147,11 +157,15 @@ pub(crate) trait NewAssetEntitySystem: Asset + Sized {
                 .get(handle)
                 .ok_or(NewAssetEntitySystemError::BadHandle)?;
 
+            let project_asset = project_assets
+                .get(asset.project_handle())
+                .ok_or(NewAssetEntitySystemError::BadHandle)?;
+
             let mut entity_commands = commands.entity(entity);
 
             entity_commands.remove::<NewAssetEntityLoadStub>();
 
-            asset.finalize(entity_commands)?;
+            asset.finalize(entity_commands, project_asset)?;
         }
 
         Ok(())
@@ -163,6 +177,7 @@ pub(crate) trait NewAssetEntitySystem: Asset + Sized {
         entities_query: Query<(Entity, &Handle<Self>)>,
         mut modified_query: Query<Self::ModifiedQueryData>,
         assets: Res<Assets<Self>>,
+        project_assets: Res<Assets<ProjectAsset>>,
     ) -> Result<(), NewAssetEntitySystemError> {
         for event in events.read() {
             match event {
@@ -179,13 +194,19 @@ pub(crate) trait NewAssetEntitySystem: Asset + Sized {
                         .iter()
                         .filter(|(_, handle)| handle.id() == *id)
                     {
+                        let entity_commands = commands.entity(entity);
+
                         let asset = assets
                             .get(handle)
                             .ok_or(NewAssetEntitySystemError::BadHandle)?;
 
                         let modified_query_data = modified_query.get_mut(entity)?;
 
-                        asset.modify(modified_query_data)?;
+                        let project_asset = project_assets
+                            .get(asset.project_handle())
+                            .ok_or(NewAssetEntitySystemError::BadHandle)?;
+
+                        asset.modify(entity_commands, modified_query_data, project_asset)?;
                     }
                 }
                 AssetEvent::Removed { id } | AssetEvent::Unused { id } => {
@@ -203,9 +224,16 @@ pub(crate) trait NewAssetEntitySystem: Asset + Sized {
         Ok(())
     }
 
-    fn finalize(&self, entity_commands: EntityCommands) -> Result<(), NewAssetEntitySystemError>;
+    fn finalize(
+        &self,
+        entity_commands: EntityCommands,
+        project_asset: &ProjectAsset,
+    ) -> Result<(), NewAssetEntitySystemError>;
+
     fn modify(
         &self,
+        entity_commands: EntityCommands,
         modified_query_result: ModifiedQueryResult<Self>,
+        project_asset: &ProjectAsset,
     ) -> Result<(), NewAssetEntitySystemError>;
 }

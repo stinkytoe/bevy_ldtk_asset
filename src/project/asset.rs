@@ -73,8 +73,8 @@ impl ChildrenEntityLoader for ProjectAsset {
 
 #[derive(Component, Clone, Debug, Reflect, Serialize, Deserialize)]
 pub struct ProjectSettings {
-    level_separation: f32,
-    layer_separation: f32,
+    pub level_separation: f32,
+    pub layer_separation: f32,
 }
 
 impl Default for ProjectSettings {

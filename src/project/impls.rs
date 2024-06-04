@@ -3,9 +3,16 @@ use bevy::prelude::*;
 
 use crate::common_components::Iid;
 use crate::project::ProjectAsset;
+use crate::traits::AssetProvidesProjectHandle;
 use crate::traits::ModifiedQueryResult;
 use crate::traits::NewAssetEntitySystem;
 use crate::traits::NewAssetEntitySystemError;
+
+impl AssetProvidesProjectHandle for ProjectAsset {
+    fn project_handle(&self) -> Handle<ProjectAsset> {
+        self.self_handle.clone()
+    }
+}
 
 impl NewAssetEntitySystem for ProjectAsset {
     type ModifiedQueryData = (Entity, &'static mut Iid);
@@ -13,6 +20,7 @@ impl NewAssetEntitySystem for ProjectAsset {
     fn finalize(
         &self,
         mut entity_commands: EntityCommands,
+        _project_asset: &ProjectAsset,
     ) -> Result<(), NewAssetEntitySystemError> {
         entity_commands.insert((
             Name::from(
@@ -34,7 +42,9 @@ impl NewAssetEntitySystem for ProjectAsset {
 
     fn modify(
         &self,
+        _entity_commands: EntityCommands,
         modified_query_result: ModifiedQueryResult<Self>,
+        _project_asset: &ProjectAsset,
     ) -> Result<(), NewAssetEntitySystemError> {
         let (_entity, mut iid) = modified_query_result;
 

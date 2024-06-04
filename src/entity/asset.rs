@@ -26,20 +26,20 @@ pub enum NewEntityAssetError {
 
 #[derive(Asset, Debug, Reflect)]
 pub struct EntityAsset {
-    grid: IVec2,
-    identifier: String,
-    anchor: Anchor,
-    smart_color: Color,
-    tags: Vec<String>,
-    tile: Option<TilesetRectangle>,
-    world_location: Option<Vec2>,
-    def_uid: i64,
-    field_instances: Vec<FieldInstance>,
-    size: Vec2,
-    iid: String,
-    location: Vec2,
+    pub grid: IVec2,
+    pub identifier: String,
+    pub anchor: Anchor,
+    pub smart_color: Color,
+    pub tags: Vec<String>,
+    pub tile: Option<TilesetRectangle>,
+    pub world_location: Option<Vec2>,
+    pub def_uid: i64,
+    pub field_instances: Vec<FieldInstance>,
+    pub size: Vec2,
+    pub iid: String,
+    pub location: Vec2,
     #[reflect(ignore)]
-    _project: Handle<ProjectAsset>,
+    pub project: Handle<ProjectAsset>,
 }
 
 impl EntityAsset {
@@ -70,7 +70,7 @@ impl EntityAsset {
             size: (value.width as f32, value.height as f32).into(),
             iid: value.iid.clone(),
             location: (value.px[0] as f32, -value.px[1] as f32).into(),
-            _project: project,
+            project,
         })
     }
 }

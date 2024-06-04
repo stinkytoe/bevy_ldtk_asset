@@ -1,13 +1,22 @@
+use bevy::ecs::system::EntityCommands;
 use bevy::prelude::*;
 
 use crate::common_components::Iid;
 use crate::level::LayersToLoad;
 use crate::level::LevelAsset;
 use crate::level::LevelBundle;
+use crate::prelude::ProjectAsset;
+use crate::traits::AssetProvidesProjectHandle;
 use crate::traits::ChildrenEntityLoader;
 use crate::traits::NewAssetEntitySystem;
 use crate::world::LevelsToLoad;
 use crate::world::WorldAsset;
+
+impl AssetProvidesProjectHandle for WorldAsset {
+    fn project_handle(&self) -> Handle<crate::prelude::ProjectAsset> {
+        self.project.clone()
+    }
+}
 
 impl NewAssetEntitySystem for WorldAsset {
     type ModifiedQueryData = (&'static mut Name, &'static mut Iid);
@@ -15,6 +24,7 @@ impl NewAssetEntitySystem for WorldAsset {
     fn finalize(
         &self,
         mut entity_commands: bevy::ecs::system::EntityCommands,
+        _project_asset: &ProjectAsset,
     ) -> Result<(), crate::traits::NewAssetEntitySystemError> {
         entity_commands.insert((
             Name::from(self.identifier.clone()),
@@ -25,7 +35,9 @@ impl NewAssetEntitySystem for WorldAsset {
 
     fn modify(
         &self,
+        _entity_commands: EntityCommands,
         modified_query_result: crate::traits::ModifiedQueryResult<Self>,
+        _project_asset: &ProjectAsset,
     ) -> Result<(), crate::traits::NewAssetEntitySystemError> {
         let (mut name, mut iid) = modified_query_result;
 

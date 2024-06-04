@@ -2,7 +2,7 @@ use bevy::{math::I64Vec2, prelude::*};
 
 use crate::ldtk;
 
-#[derive(Debug, Reflect)]
+#[derive(Clone, Debug, Reflect)]
 pub struct Tile {
     pub alpha: f32,
     pub flip_h: bool,

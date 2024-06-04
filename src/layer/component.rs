@@ -1,10 +1,12 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, utils::HashMap};
+
+use crate::traits::NilToLoad;
 
 #[derive(Clone, Component, Debug, Default, Reflect)]
 pub enum EntitiesToLoad {
     None,
-    ByIdentifiers(Vec<String>),
-    ByIids(Vec<String>),
+    ByIdentifiers(HashMap<String, NilToLoad>),
+    ByIids(HashMap<String, NilToLoad>),
     #[default]
     All,
 }
