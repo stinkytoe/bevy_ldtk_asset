@@ -35,7 +35,7 @@ pub(crate) fn build_image_from_tiles(
     let mut dynamic_image = DynamicImage::new(canvas_size.x, canvas_size.y, ColorType::Rgba8);
 
     tiles.tiles.iter().for_each(|tile| {
-        trace!("Tile loaded! {tile:?}");
+        // trace!("Tile loaded! {tile:?}");
         let mut cropped = crop_imm(
             &tileset,
             tile.source.x,

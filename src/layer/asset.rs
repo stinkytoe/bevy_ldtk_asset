@@ -1,7 +1,6 @@
 use bevy::math::I64Vec2;
 use bevy::prelude::*;
 use bevy::utils::HashMap;
-use std::path::PathBuf;
 use thiserror::Error;
 
 use crate::entity::EntityAsset;
@@ -44,7 +43,7 @@ pub struct LayerAsset {
     pub opacity: f64,
     pub px_total_offset: I64Vec2,
     pub tileset_def_uid: Option<i64>,
-    pub tileset_rel_path: Option<PathBuf>,
+    pub tileset_rel_path: Option<String>,
     pub layer_type: LayerType,
     pub iid: String,
     pub layer_def_uid: i64,
@@ -78,7 +77,7 @@ impl LayerAsset {
             opacity: value.opacity,
             px_total_offset: (value.px_total_offset_x, -value.px_total_offset_y).into(),
             tileset_def_uid: value.tileset_def_uid,
-            tileset_rel_path: value.tileset_rel_path.as_ref().map(PathBuf::from),
+            tileset_rel_path: value.tileset_rel_path.clone(),
             layer_type: LayerType::new(&value.layer_instance_type)?,
             iid: value.iid.clone(),
             layer_def_uid: value.layer_def_uid,

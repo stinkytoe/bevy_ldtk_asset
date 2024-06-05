@@ -8,6 +8,8 @@ use crate::layer::Tiles;
 use crate::traits::ChildrenEntityLoader;
 use crate::traits::NewAssetEntitySystem;
 
+use super::systems::handle_layer_tiles;
+
 #[derive(Debug, Default)]
 pub struct LayerPlugin;
 
@@ -26,6 +28,7 @@ impl Plugin for LayerPlugin {
                     LayerAsset::bundle_loaded.map(error),
                     LayerAsset::asset_modified_or_removed_system.map(error),
                     LayerAsset::to_load_changed_system.map(error),
+                    handle_layer_tiles.map(error),
                 ),
             );
     }
