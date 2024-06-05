@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy::render::mesh::Indices;
 use bevy::render::mesh::PrimitiveTopology;
 use bevy::render::render_asset::RenderAssetUsages;
-use image::imageops::crop;
+use image::imageops::crop_imm;
 use image::imageops::flip_horizontal;
 use image::imageops::flip_vertical;
 use image::imageops::overlay;
@@ -27,7 +27,7 @@ pub(crate) fn build_image_from_tiles(
     tile_size: UVec2,
     tiles: &Tiles,
 ) -> Result<Image, BuildImageFromTilesError> {
-    let mut tileset = tileset
+    let tileset = tileset
         .clone()
         .try_into_dynamic()
         .map_err(|_| BuildImageFromTilesError::TryIntoDynamicFailed)?;
@@ -36,8 +36,8 @@ pub(crate) fn build_image_from_tiles(
 
     tiles.tiles.iter().for_each(|tile| {
         trace!("Tile loaded! {tile:?}");
-        let mut cropped = crop(
-            &mut tileset,
+        let mut cropped = crop_imm(
+            &tileset,
             tile.source.x,
             tile.source.y,
             tile_size.x,
