@@ -1,6 +1,5 @@
-use std::path::PathBuf;
-
-use bevy::{math::I64Vec2, prelude::*};
+use bevy::math::I64Vec2;
+use bevy::prelude::*;
 
 use crate::ldtk;
 use crate::project::defs::EnumTagValue;
@@ -15,7 +14,7 @@ pub struct TilesetDefinition {
     pub identifier: String,
     pub padding: i64,
     pub size: Vec2,
-    pub rel_path: Option<PathBuf>,
+    pub rel_path: Option<String>,
     pub spacing: i64,
     pub tags: Vec<String>,
     pub tile_grid_size: i64,
@@ -35,7 +34,7 @@ impl From<&ldtk::TilesetDefinition> for TilesetDefinition {
             identifier: value.identifier.clone(),
             padding: value.padding,
             size: (value.px_wid as f32, value.px_hei as f32).into(),
-            rel_path: value.rel_path.as_ref().map(PathBuf::from),
+            rel_path: value.rel_path.clone(),
             spacing: value.spacing,
             tags: value.tags.clone(),
             tile_grid_size: value.tile_grid_size,

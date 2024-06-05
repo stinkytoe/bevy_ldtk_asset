@@ -11,3 +11,4 @@ pub use bundle::EntityBundle;
 pub use component::EntityComponent;
 
 pub(crate) use plugin::EntityPlugin;
+pub(crate) use systems::handle_entity_sprite;
