@@ -5,6 +5,7 @@ mod impls;
 mod plugin;
 mod systems;
 mod tile;
+mod util;
 
 pub use asset::LayerAsset;
 pub use asset::LayerType;
