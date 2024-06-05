@@ -5,7 +5,7 @@ use crate::common_components::Iid;
 use crate::level::LayersToLoad;
 use crate::level::LevelAsset;
 use crate::level::LevelBundle;
-use crate::prelude::ProjectAsset;
+use crate::project::ProjectAsset;
 use crate::traits::AssetProvidesProjectHandle;
 use crate::traits::ChildrenEntityLoader;
 use crate::traits::NewAssetEntitySystem;
@@ -13,7 +13,7 @@ use crate::world::LevelsToLoad;
 use crate::world::WorldAsset;
 
 impl AssetProvidesProjectHandle for WorldAsset {
-    fn project_handle(&self) -> Handle<crate::prelude::ProjectAsset> {
+    fn project_handle(&self) -> Handle<ProjectAsset> {
         self.project.clone()
     }
 }

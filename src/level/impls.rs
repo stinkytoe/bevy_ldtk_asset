@@ -8,13 +8,13 @@ use crate::layer::LayerAsset;
 use crate::layer::LayerBundle;
 use crate::level::LayersToLoad;
 use crate::level::LevelAsset;
-use crate::prelude::ProjectAsset;
+use crate::project::ProjectAsset;
 use crate::traits::AssetProvidesProjectHandle;
 use crate::traits::ChildrenEntityLoader;
 use crate::traits::NewAssetEntitySystem;
 
 impl AssetProvidesProjectHandle for LevelAsset {
-    fn project_handle(&self) -> Handle<crate::prelude::ProjectAsset> {
+    fn project_handle(&self) -> Handle<ProjectAsset> {
         self.project.clone()
     }
 }

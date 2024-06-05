@@ -7,7 +7,7 @@ use bevy::{prelude::*, utils::HashMap};
 use std::fmt::Debug;
 use thiserror::Error;
 
-use crate::prelude::ProjectAsset;
+use crate::project::ProjectAsset;
 
 pub(crate) trait AssetProvidesProjectHandle {
     fn project_handle(&self) -> Handle<ProjectAsset>;

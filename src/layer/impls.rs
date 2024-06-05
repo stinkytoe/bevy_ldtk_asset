@@ -1,20 +1,20 @@
 use bevy::ecs::system::EntityCommands;
 use bevy::prelude::*;
 
+use crate::common_components::Iid;
+use crate::entity::EntityAsset;
+use crate::entity::EntityBundle;
 use crate::layer::EntitiesToLoad;
 use crate::layer::LayerAsset;
 use crate::layer::Tiles;
-use crate::prelude::EntityAsset;
-use crate::prelude::EntityBundle;
-use crate::prelude::Iid;
-use crate::prelude::ProjectAsset;
+use crate::project::ProjectAsset;
 use crate::traits::AssetProvidesProjectHandle;
 use crate::traits::ChildrenEntityLoader;
 use crate::traits::NewAssetEntitySystem;
 use crate::traits::NilToLoad;
 
 impl AssetProvidesProjectHandle for LayerAsset {
-    fn project_handle(&self) -> Handle<crate::prelude::ProjectAsset> {
+    fn project_handle(&self) -> Handle<ProjectAsset> {
         self.project.clone()
     }
 }

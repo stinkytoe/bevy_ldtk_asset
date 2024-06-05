@@ -4,11 +4,13 @@ use bevy::prelude::*;
 use crate::common_components::Iid;
 use crate::entity::EntityAsset;
 use crate::project::defs::TilesetRectangle;
+use crate::project::ProjectAsset;
 use crate::traits::AssetProvidesProjectHandle;
 use crate::traits::NewAssetEntitySystem;
+use crate::traits::NewAssetEntitySystemError;
 
 impl AssetProvidesProjectHandle for EntityAsset {
-    fn project_handle(&self) -> Handle<crate::prelude::ProjectAsset> {
+    fn project_handle(&self) -> Handle<ProjectAsset> {
         self.project.clone()
     }
 }
@@ -24,8 +26,8 @@ impl NewAssetEntitySystem for EntityAsset {
     fn finalize(
         &self,
         mut entity_commands: bevy::ecs::system::EntityCommands,
-        _project_asset: &crate::prelude::ProjectAsset,
-    ) -> Result<(), crate::traits::NewAssetEntitySystemError> {
+        _project_asset: &ProjectAsset,
+    ) -> Result<(), NewAssetEntitySystemError> {
         entity_commands.insert((
             Name::new(self.identifier.clone()),
             Iid::new(self.iid.clone()),
@@ -43,7 +45,7 @@ impl NewAssetEntitySystem for EntityAsset {
         &self,
         mut entity_commands: EntityCommands,
         modified_query_result: crate::traits::ModifiedQueryResult<Self>,
-        _project_asset: &crate::prelude::ProjectAsset,
+        _project_asset: &ProjectAsset,
     ) -> Result<(), crate::traits::NewAssetEntitySystemError> {
         let (mut name, mut iid, tile, mut transform) = modified_query_result;
 
@@ -58,7 +60,7 @@ impl NewAssetEntitySystem for EntityAsset {
             }
             (Some(_), None) => {
                 entity_commands.remove::<TilesetRectangle>();
-            } // (Some(tile), Some(asset_tile)) => ,
+            }
         };
 
         transform.translation = self.location.extend(0.0);
