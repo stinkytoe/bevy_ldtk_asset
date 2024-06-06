@@ -68,28 +68,10 @@ pub enum FieldInstanceValue {
 
 #[derive(Clone, Debug, Reflect)]
 pub struct FieldInstance {
-    identifier: String,
-    tile: Option<TilesetRectangle>,
-    value: FieldInstanceValue,
-    def_uid: i64,
-}
-
-impl FieldInstance {
-    pub fn identifier(&self) -> &str {
-        self.identifier.as_ref()
-    }
-
-    pub fn tile(&self) -> Option<&TilesetRectangle> {
-        self.tile.as_ref()
-    }
-
-    pub fn value(&self) -> &FieldInstanceValue {
-        &self.value
-    }
-
-    pub fn def_uid(&self) -> i64 {
-        self.def_uid
-    }
+    pub identifier: String,
+    pub tile: Option<TilesetRectangle>,
+    pub value: FieldInstanceValue,
+    pub def_uid: i64,
 }
 
 impl FieldInstance {

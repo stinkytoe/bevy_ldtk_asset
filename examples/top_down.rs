@@ -38,19 +38,21 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     });
 }
 
-fn update(// keyboard_input: Res<ButtonInput<KeyCode>>,
+fn update(
+    // keyboard_input: Res<ButtonInput<KeyCode>>,
+    ldtk_entities: LdtkEntities,
     // mut entity_component_query: EntityComponentQuery,
-    // entity_global_transform_query: Query<&GlobalTransform>,
+    entity_global_transform_query: Query<&GlobalTransform>,
     // level_component_query: LevelComponentQuery,
 ) {
-    // let Some((player_entity, _)) = entity_component_query.with_identifier("Axe_Man") else {
-    //     return;
-    // };
-    //
-    // let player_global_transform = entity_global_transform_query
-    //     .get(player_entity)
-    //     .expect("Player doesn't have a global transform? {e:?}");
-    //
+    let Some(player_entity) = ldtk_entities.iter().with_identifier("Axe_Man") else {
+        return;
+    };
+
+    let player_global_transform = entity_global_transform_query
+        .get(player_entity)
+        .expect("Player doesn't have a global transform? {e:?}");
+
     // if keyboard_input.just_pressed(KeyCode::Space) {
     //     let tile = entity_component_query
     //         .get_field_instance(player_entity, "Swing")
