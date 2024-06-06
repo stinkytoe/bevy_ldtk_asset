@@ -7,6 +7,7 @@ use bevy::{prelude::*, utils::HashMap};
 use std::fmt::Debug;
 use thiserror::Error;
 
+use crate::layer::NewIntGridError;
 use crate::project::ProjectAsset;
 
 pub(crate) trait AssetProvidesProjectHandle {
@@ -110,9 +111,13 @@ pub(crate) trait ChildrenEntityLoader: Asset + AssetProvidesProjectHandle + Size
 #[derive(Debug, Error)]
 pub(crate) enum NewAssetEntitySystemError {
     #[error(transparent)]
+    NewIntGridError(#[from] NewIntGridError),
+    #[error(transparent)]
     QueryEntityError(#[from] QueryEntityError),
     #[error("Bad handle!")]
     BadHandle,
+    #[error("Bad uid!")]
+    BadUid,
     #[error("Finalize failed! {0}: {1}")]
     FailedFinalize(&'static str, &'static str),
 }

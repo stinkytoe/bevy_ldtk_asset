@@ -5,7 +5,7 @@ use crate::ldtk;
 use crate::project::defs::TilesetRectangle;
 use crate::util::{bevy_color_from_ldtk, ColorParseError};
 
-#[derive(Debug, Default, Reflect)]
+#[derive(Clone, Debug, Default, Reflect)]
 pub struct IntGridValue {
     pub color: Color,
     pub group_uid: i64,

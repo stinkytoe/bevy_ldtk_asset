@@ -1,14 +1,14 @@
 use bevy::prelude::*;
 use bevy::utils::error;
 
+use crate::layer::int_grid::IntGrid;
+use crate::layer::systems::handle_layer_tiles;
 use crate::layer::EntitiesToLoad;
 use crate::layer::LayerAsset;
 use crate::layer::Tile;
 use crate::layer::Tiles;
 use crate::traits::ChildrenEntityLoader;
 use crate::traits::NewAssetEntitySystem;
-
-use super::systems::handle_layer_tiles;
 
 #[derive(Debug, Default)]
 pub struct LayerPlugin;
@@ -21,6 +21,7 @@ impl Plugin for LayerPlugin {
             .register_type::<Tile>()
             .register_type::<EntitiesToLoad>()
             .register_type::<Tiles>()
+            .register_type::<IntGrid>()
             .add_systems(
                 Update,
                 (

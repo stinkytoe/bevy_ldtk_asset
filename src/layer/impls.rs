@@ -5,12 +5,14 @@ use crate::common_components::Iid;
 use crate::entity::EntityAsset;
 use crate::entity::EntityBundle;
 use crate::layer::EntitiesToLoad;
+use crate::layer::IntGrid;
 use crate::layer::LayerAsset;
 use crate::layer::Tiles;
 use crate::project::ProjectAsset;
 use crate::traits::AssetProvidesProjectHandle;
 use crate::traits::ChildrenEntityLoader;
 use crate::traits::NewAssetEntitySystem;
+use crate::traits::NewAssetEntitySystemError;
 use crate::traits::NilToLoad;
 
 impl AssetProvidesProjectHandle for LayerAsset {
@@ -24,6 +26,7 @@ impl NewAssetEntitySystem for LayerAsset {
         &'static mut Name,
         &'static mut Iid,
         &'static mut Tiles,
+        Option<&'static mut IntGrid>,
         &'static mut Transform,
     );
 
@@ -34,12 +37,21 @@ impl NewAssetEntitySystem for LayerAsset {
     ) -> Result<(), crate::traits::NewAssetEntitySystemError> {
         let settings = &project_asset.settings;
 
+        let int_grid_values = &project_asset
+            .layer_defs
+            .get(&self.layer_def_uid)
+            .ok_or(NewAssetEntitySystemError::BadUid)?
+            .int_grid_values;
+
+        let int_grid = IntGrid::new(&self.int_grid_csv, int_grid_values)?;
+
         entity_commands.insert((
             Name::new(self.identifier.clone()),
             Iid::new(self.identifier.clone()),
             Tiles {
                 tiles: self.tiles.clone(),
             },
+            int_grid,
             Transform::from_translation(
                 self.px_total_offset
                     .as_vec2()
@@ -52,19 +64,39 @@ impl NewAssetEntitySystem for LayerAsset {
 
     fn modify(
         &self,
-        _entity_commands: EntityCommands,
+        mut entity_commands: EntityCommands,
         modified_query_result: crate::traits::ModifiedQueryResult<Self>,
         project_asset: &ProjectAsset,
     ) -> Result<(), crate::traits::NewAssetEntitySystemError> {
-        let (mut name, mut iid, mut tiles, mut transform) = modified_query_result;
+        let (mut name, mut iid, mut tiles, int_grid, mut transform) = modified_query_result;
 
         let settings = &project_asset.settings;
+
+        let int_grid_values = &project_asset
+            .layer_defs
+            .get(&self.layer_def_uid)
+            .ok_or(NewAssetEntitySystemError::BadUid)?
+            .int_grid_values;
 
         *name = Name::new(self.identifier.clone());
 
         iid.iid.clone_from(&self.iid);
 
         tiles.tiles.clone_from(&self.tiles);
+
+        let new_int_grid = IntGrid::new(&self.int_grid_csv, int_grid_values)?;
+        match (int_grid, new_int_grid.values.len()) {
+            (Some(_), 0) => {
+                entity_commands.remove::<IntGrid>();
+            }
+            (Some(mut int_grid), _) => {
+                *int_grid = new_int_grid;
+            }
+            (None, 0) => {}
+            (None, _) => {
+                entity_commands.insert(new_int_grid);
+            }
+        }
 
         transform.translation = self
             .px_total_offset

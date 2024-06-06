@@ -2,14 +2,12 @@ use bevy::prelude::*;
 use bevy::sprite::Mesh2dHandle;
 use thiserror::Error;
 
-use crate::project::ProjectAsset;
-
+use crate::layer::util::build_image_from_tiles;
+use crate::layer::util::create_tile_layer_mesh;
+use crate::layer::util::BuildImageFromTilesError;
 use crate::layer::LayerAsset;
 use crate::layer::Tiles;
-
-use super::util::build_image_from_tiles;
-use super::util::create_tile_layer_mesh;
-use super::util::BuildImageFromTilesError;
+use crate::project::ProjectAsset;
 
 #[derive(Debug, Error)]
 pub(crate) enum HandleLayerTilesError {
