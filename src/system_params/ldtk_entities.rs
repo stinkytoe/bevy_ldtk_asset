@@ -3,104 +3,79 @@ use bevy::prelude::*;
 
 use crate::entity::EntityAsset;
 
+pub type LdtkEntitiesQueryData<'a> = (Entity, &'a Handle<EntityAsset>);
+
 #[derive(SystemParam)]
 pub struct LdtkEntities<'w, 's> {
-    ldtk_entity_query: Query<'w, 's, (Entity, &'static Handle<EntityAsset>)>,
+    ldtk_entity_query: Query<'w, 's, LdtkEntitiesQueryData<'static>>,
     ldtk_entity_added_query:
-        Query<'w, 's, (Entity, &'static Handle<EntityAsset>), Added<Handle<EntityAsset>>>,
+        Query<'w, 's, LdtkEntitiesQueryData<'static>, Added<Handle<EntityAsset>>>,
     entity_assets: Res<'w, Assets<EntityAsset>>,
 }
 
 impl<'w, 's> LdtkEntities<'w, 's> {
-    pub fn iter(
-        &'w self,
-    ) -> LdtkEntitiesIterator<'w, 's, impl Iterator<Item = (Entity, &'w Handle<EntityAsset>)>> {
-        LdtkEntitiesIterator {
-            inner: self.ldtk_entity_query.iter(),
-            ldtk_entities: self,
-        }
+    pub fn iter(&'w self) -> impl Iterator<Item = LdtkEntitiesItem> {
+        self.ldtk_entity_query
+            .iter()
+            .map(|(entity, handle)| LdtkEntitiesItem {
+                entity,
+                asset: self.entity_assets.get(handle).expect("bad handle?"),
+            })
     }
 
-    pub fn iter_added(
-        &'w self,
-    ) -> LdtkEntitiesIterator<'w, 's, impl Iterator<Item = (Entity, &'w Handle<EntityAsset>)>> {
-        LdtkEntitiesIterator {
-            inner: self.ldtk_entity_added_query.iter(),
-            ldtk_entities: self,
-        }
+    pub fn iter_added(&'w self) -> impl Iterator<Item = LdtkEntitiesItem> {
+        self.ldtk_entity_added_query
+            .iter()
+            .map(|(entity, handle)| LdtkEntitiesItem {
+                entity,
+                asset: self.entity_assets.get(handle).expect("bad handle?"),
+            })
     }
 }
 
-pub struct LdtkEntitiesIterator<'w, 's, I>
-where
-    I: Iterator<Item = (Entity, &'w Handle<EntityAsset>)> + Sized,
-{
-    inner: I,
-    ldtk_entities: &'w LdtkEntities<'w, 's>,
+#[derive(Debug)]
+pub struct LdtkEntitiesItem<'w> {
+    pub entity: Entity,
+    pub asset: &'w EntityAsset,
 }
 
-impl<'w, 's, I> Iterator for LdtkEntitiesIterator<'w, 's, I>
+#[derive(Debug)]
+pub struct LdtkEntitiesWithTag<'w, I>
 where
-    I: Iterator<Item = (Entity, &'w Handle<EntityAsset>)>,
+    I: Iterator<Item = LdtkEntitiesItem<'w>>,
 {
-    type Item = (Entity, &'w Handle<EntityAsset>);
+    iter: I,
+    tag: &'w str,
+}
+
+impl<'w, I> Iterator for LdtkEntitiesWithTag<'w, I>
+where
+    I: Iterator<Item = LdtkEntitiesItem<'w>>,
+{
+    type Item = LdtkEntitiesItem<'w>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.inner.next()
+        self.iter.find(|item| {
+            item.asset
+                .tags
+                .iter()
+                .any(|inner_tag| inner_tag == self.tag)
+        })
     }
 }
 
-impl<'w, 's, I> LdtkEntitiesIterator<'w, 's, I>
-where
-    I: Iterator<Item = (Entity, &'w Handle<EntityAsset>)> + 'w,
-{
-    pub fn new(inner: I, ldtk_entities: &'s LdtkEntities) -> Self {
-        Self {
-            inner,
-            ldtk_entities,
-        }
+pub trait LdtkEntitiesEx<'w>: Iterator<Item = LdtkEntitiesItem<'w>> + Sized {
+    fn with_tag(self, tag: &'w str) -> LdtkEntitiesWithTag<'w, Self> {
+        LdtkEntitiesWithTag { iter: self, tag }
     }
 
-    #[inline]
-    pub fn with_identifier(mut self, identifier: &str) -> Option<Entity> {
-        self.inner
-            .find(|(_, handle)| {
-                self.ldtk_entities
-                    .entity_assets
-                    .get(*handle)
-                    .expect("bad handle?")
-                    .identifier
-                    == identifier
-            })
-            .map(|(entity, _)| entity)
+    fn by_identifier(mut self, identifier: &'w str) -> Option<LdtkEntitiesItem> {
+        self.find(|item| item.asset.identifier == identifier)
     }
 
-    #[inline]
-    pub fn with_iid(mut self, iid: &str) -> Option<Entity> {
-        self.inner
-            .find(|(_, handle)| {
-                self.ldtk_entities
-                    .entity_assets
-                    .get(*handle)
-                    .expect("bad handle?")
-                    .iid
-                    == iid
-            })
-            .map(|(entity, _)| entity)
-    }
-
-    #[inline]
-    pub fn has_tag(self, tag: &'w str) -> impl Iterator<Item = Entity> + 'w {
-        self.inner
-            .filter(move |(_, handle)| {
-                self.ldtk_entities
-                    .entity_assets
-                    .get(*handle)
-                    .expect("bad handle?")
-                    .tags
-                    .iter()
-                    .any(|inner_tag| inner_tag == tag)
-            })
-            .map(|(entity, _)| entity)
+    fn by_iid(mut self, iid: &'w str) -> Option<LdtkEntitiesItem> {
+        self.find(|item| item.asset.iid == iid)
     }
 }
+
+impl<'w, I: Iterator<Item = LdtkEntitiesItem<'w>>> LdtkEntitiesEx<'w> for I {}
