@@ -7,6 +7,7 @@ use bevy::reflect::Reflect;
 use crate::error::Error;
 use crate::iid::Iid;
 use crate::ldtk;
+use crate::ldtk_asset::LdtkAsset;
 
 #[derive(Debug, Reflect)]
 pub enum WorldLayout {
@@ -58,3 +59,5 @@ impl World {
         })
     }
 }
+
+impl LdtkAsset for World {}

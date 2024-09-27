@@ -11,6 +11,7 @@ pub mod error;
 pub mod field_instance;
 pub mod iid;
 pub mod layer;
+pub mod ldtk_asset;
 pub mod level;
 pub mod neighbour;
 pub mod plugin;

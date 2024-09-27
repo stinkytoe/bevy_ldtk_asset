@@ -10,6 +10,7 @@ use crate::error::Error;
 use crate::field_instance::FieldInstance;
 use crate::iid::Iid;
 use crate::ldtk;
+use crate::ldtk_asset::LdtkAsset;
 use crate::neighbour::Neighbour;
 
 #[derive(Debug, Reflect)]
@@ -109,3 +110,5 @@ impl Level {
         })
     }
 }
+
+impl LdtkAsset for Level {}

@@ -7,6 +7,7 @@ use bevy::reflect::Reflect;
 use crate::error::Error;
 use crate::iid::Iid;
 use crate::ldtk;
+use crate::ldtk_asset::LdtkAsset;
 use crate::tile_instance::TileInstance;
 
 #[derive(Debug, Reflect)]
@@ -139,3 +140,5 @@ impl Layer {
         })
     }
 }
+
+impl LdtkAsset for Layer {}
