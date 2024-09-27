@@ -1,12 +1,67 @@
 # Project Title
 
-A plugin for the [Bevy Engine](https://bevyengine.org) to allow loading of projects from the 
-[LDtk](https://ldtk.io) level editor.
+A plugin for the [Bevy Engine](https://bevyengine.org) to allow loading of projects from the [LDtk](https://ldtk.io) level editor.
 
 ## Description
 
 This plugin aims to provide an asset through Bevy's asset loader system, providing
 access to the data in an LDtk project.
+
+### Naming Collisions
+
+Unfortunately, there are many name collisions between the nomenclature used in Bevy and 
+LDtk. Especially:
+* World
+* Layer
+* Entity
+
+I will endeavor to refer to objects in Bevy/Rust as ecs objects, i.e. an ecs entity or ecs world 
+when referring to objects from the Bevy ecosystem, and LDtk objects for things either from this 
+library or LDtk itself, i.e. an LDtk entity or LDtk world.
+
+### The Assets
+An LDtk project is loaded using Bevy's asset system, and can be added as a `Handle<Project>` to 
+an ECS entity:
+
+```rust
+fn example_system(mut commands: Commands, asset_server: Res<AssetServer) {
+  commands.spawn(asset_server.load::<Project>("some_project.ldtk"));
+}
+```
+
+### Asset labeling
+An LDtk project is based on a hierarchical structure where a world (or worlds) contains levels,
+levels contain layers, and layers can either contain tiles or entities.
+
+These objects are loaded as labeled sub assets of the main project, with their identifiers acting 
+as their labels. LDtk entities will also have their Iid appended after a '@' character.
+
+For instance, an LDtk project with a layout like:
+
+```mermaid
+block-beta
+columns 1
+  OverWorld
+  Level1
+  Ground
+  Entities
+  Trees
+  Level2
+  Ground
+  Entities
+  Trees
+  Player
+  NPC1
+  Enemy1
+  Enemy2
+  Enemy3
+
+  Overworld -> Level1
+  Overworld -> Level2
+  Level1 -> Ground
+  Level1 -> Entities
+  Level1 -> Trees
+```
 
 ## Getting Started
 
@@ -21,7 +76,7 @@ from Bevy's documentation.
 You can add this plugin to your project by adding it as a crate to your Cargo project in the normal way using Cargo:
 
 ```bash
-cargo install bevy_ldtk_asset
+cargo add bevy_ldtk_asset # from within your project directory
 ```
 
 Or by adding to your `Cargo.toml` file:
@@ -40,7 +95,7 @@ or by filing an issue:
 
 ## Authors
 
-Randal Robinson
+stinkytoe
 [github](https://github.com/stinkytoe)
 [email](stinkytoe42@yahoo.com)
 
@@ -53,8 +108,10 @@ Randal Robinson
 
 ## Compatability
 
+The minor version of this project will target a specific minor version of Bevy.
+
 | bevy | bevy_ldtk_asset |
-|------| :-------------: |
+| :--: | :-------------: |
 | 0.14 | 0.5             |
 
 
