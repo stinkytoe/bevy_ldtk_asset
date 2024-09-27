@@ -5,27 +5,32 @@ A plugin for the [Bevy Engine](https://bevyengine.org) to allow loading of proje
 
 ## Description
 
-An in-depth paragraph about your project and overview of use.
+This plugin aims to provide an asset through Bevy's asset loader system, providing
+access to the data in an LDtk project.
+
+
 
 ## Getting Started
 
 ### Dependencies
 
-* Describe any prerequisites, libraries, OS version, etc., needed before installing program.
-* ex. Windows 10
+This project depends on the Bevy engine, and will therefore inherit it's dependencies. See 
+[Installing OS Dependencies](https://bevyengine.org/learn/quick-start/getting-started/setup/#installing-os-dependencies)
+from Bevy's documentation.
 
 ### Installing
 
-* How/where to download your program
-* Any modifications needed to be made to files/folders
+You can add this plugin to your project by adding it as a crate to your Cargo project in the normal way using Cargo:
 
-### Executing program
+`cargo install bevy_ldtk_asset`{:language-bash}
 
-* How to run the program
-* Step-by-step bullets
+Or by adding to your `Cargo.toml` file:
+
+```toml
+[dependencies]
+bevy_ldtk_asset = "0.5"
 ```
-code blocks for commands
-```
+
 
 ## Help
 
@@ -37,15 +42,15 @@ command to run if program contains helper info
 ## Authors
 
 Randal Robinson
-[stinkytoe](https://github.com/stinkytoe)
+[github](https://github.com/stinkytoe)
+[email](stinkytoe42@yahoo.com)
 
 ## Version History
 
-* 0.2
-    * Various bug fixes and optimizations
-    * See [commit change]() or See [release history]()
-* 0.1
-    * Initial Release
+* 0.5:
+  * Release for Bevy 0.14 (WIP!)
+* 0.4 and prior:
+  * archived...
 
 ## License
 
@@ -57,9 +62,4 @@ This project is dual-licensed under either the MIT or Apache-2.0 license:
 
 ## Acknowledgments
 
-Inspiration, code snippets, etc.
-* [awesome-readme](https://github.com/matiassingers/awesome-readme)
-* [PurpleBooth](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2)
-* [dbader](https://github.com/dbader/readme-template)
-* [zenorocha](https://gist.github.com/zenorocha/4526327)
-* [fvcproductions](https://gist.github.com/fvcproductions/1bfc2d4aecb01a834b46)
+This project would not exist without the awesome efforts of the Bevy team, and Deepknight of Deepknight Games!
