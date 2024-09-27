@@ -186,13 +186,23 @@ stinkytoe
 * 0.4 and prior:
   * archived...
 
+## Capabilities
+
+* [x] Single World and Multi World supported
+* [x] External Level Files
+* [ ] Aseprite Files
+* [ ] #18
+* [ ] Level Background Generation
+  * lala
+* [ ] Layer Background Generation
+
 ## Compatability
 
 The minor version of this project will target a specific minor version of Bevy.
 
-| bevy_ldtk_asset | bevy |
-| :--: | :-------------: |
-| 0.5 | 0.14             |
+| bevy_ldtk_asset | bevy | LDtk |
+| :--: | :-------------: | :--: |
+| 0.5.0 | 0.14             | 1.5.3 |
 
 ## License
 
