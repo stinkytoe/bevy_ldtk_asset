@@ -8,6 +8,15 @@ projects from the [LDtk](https://ldtk.io) level editor.
 This plugin aims to provide an asset through Bevy's asset loader system, providing
 access to the data in an LDtk project.
 
+---
+NOTE:
+
+Previous versions of this plugin would attempt to spawn ecs entities for the
+user. This functionality has been removed, but will be added to a separate crate
+in the future. See: [shieldtank](https://github.com/stinkytoe/shieldtank)
+
+---
+
 ### Naming Collisions
 
 Unfortunately, there are many name collisions between the nomenclature used in
@@ -22,7 +31,7 @@ ecs entity or ecs world when referring to objects from the Bevy ecosystem, and
 LDtk objects for things either from this library or LDtk itself, i.e. an LDtk
 entity or LDtk world.
 
-### The Assets
+## Assets
 
 An LDtk project is loaded using Bevy's asset system, and can be added as a
 `Handle<Project>` to an ECS entity using the asset server:
@@ -144,8 +153,7 @@ from Bevy's documentation.
 
 ### Installing
 
-You can add this plugin to your project by adding it as a crate to your Cargo
-project in the normal way using Cargo:
+You can add this plugin to your project using Cargo:
 
 ```bash
 cargo add bevy_ldtk_asset # from within your project directory
