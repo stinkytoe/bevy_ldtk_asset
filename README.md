@@ -8,8 +8,6 @@ A plugin for the [Bevy Engine](https://bevyengine.org) to allow loading of proje
 This plugin aims to provide an asset through Bevy's asset loader system, providing
 access to the data in an LDtk project.
 
-
-
 ## Getting Started
 
 ### Dependencies
@@ -22,7 +20,9 @@ from Bevy's documentation.
 
 You can add this plugin to your project by adding it as a crate to your Cargo project in the normal way using Cargo:
 
-`cargo install bevy_ldtk_asset`{:language-bash}
+```bash
+cargo install bevy_ldtk_asset
+```
 
 Or by adding to your `Cargo.toml` file:
 
@@ -31,13 +31,12 @@ Or by adding to your `Cargo.toml` file:
 bevy_ldtk_asset = "0.5"
 ```
 
-
 ## Help
 
-Any advise for common problems or issues.
-```
-command to run if program contains helper info
-```
+Please report any issues to me via my GitHub page: 
+[github](https://github.com/stinkytoe)
+or by filing an issue:
+[bevy_ldtk_asset issues](https://github.com/stinkytoe/bevy_ldtk_asset/issues)
 
 ## Authors
 
@@ -51,6 +50,13 @@ Randal Robinson
   * Release for Bevy 0.14 (WIP!)
 * 0.4 and prior:
   * archived...
+
+## Compatability
+
+| bevy | bevy_ldtk_asset |
+|------| :-------------: |
+| 0.14 | 0.5             |
+
 
 ## License
 
