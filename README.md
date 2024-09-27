@@ -47,26 +47,11 @@ For instance, an LDtk project with a layout like:
 
 ```mermaid
 flowchart LR
-  OverWorld
-  Level1
-  Ground
-  Entities
-  Trees
-  Level2
-  Ground
-  Entities
-  Trees
-  Player
-  NPC1
-  Enemy1
-  Enemy2
-  Enemy3
-
-  Overworld -> Level1
-  Overworld -> Level2
-  Level1 -> Ground
-  Level1 -> Entities
-  Level1 -> Trees
+    markdown["`This **is** _Markdown_`"]
+    newLines["`Line1
+    Line 2
+    Line 3`"]
+    markdown --> newLines
 ```
 
 ## Getting Started
