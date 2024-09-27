@@ -55,8 +55,8 @@ flowchart LR
 
   Level2
 
-  Overworld -> Level1
-  Overworld -> Level2
+  Overworld --> Level1
+  Overworld --> Level2
   
   Underworld
   
