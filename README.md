@@ -191,12 +191,8 @@ stinkytoe
 * [x] Single World and Multi World supported
 * [x] External Level Files
 * [ ] Aseprite Files
-* [ ] Level Background Generation
-  * lala
-* [ ] Layer Background Generation
-* [ ] #18
 
-* [ ] <https://github.com/stinkytoe/bevy_ldtk_asset/issues/18>
+* [ ] #18
 
 ## Compatability
 
