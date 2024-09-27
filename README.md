@@ -54,12 +54,50 @@ flowchart LR
   Trees1[Trees]
 
   Level2
+  Ground2[Ground]
+  Entities2[Entities]
+  Trees2[Trees]
 
   Overworld --> Level1
   Overworld --> Level2
+
+  Level1 --> Ground1
+  Level1 --> Entities1
+  Level1 --> Trees1
+  Entities1 --> Player
+  Entities1 --> NPC1
+  Entities1 --> NPC2
+
+  Level2 --> Ground2
+  Level2 --> Entities2
+  Level2 --> Trees2
+  Entities2 --> Player
+  Entities2 --> NPC3
+  Entities2 --> NPC4
   
   Underworld
+  Dungeon1
+  Ground3[Ground]
+  Entities3[Entities]
+  Trees3[Trees]
+
+  Dungeon2
+  Ground4[Ground]
+  Entities4[Entities]
+  Trees4[Trees]
+
+  Dungeon1 --> Ground3
+  Dungeon1 --> Entities3
+  Dungeon1 --> Trees3
+  Entities3 --> Goblin
+  Entities3 --> TrapDoor
+
   
+  Dungeon2 --> Ground4
+  Dungeon2 --> Entities4
+  Dungeon2 --> Trees4
+  Entities4 --> ShadyShopKeeper
+  Entities4 --> DubiousPotion
 ```
 
 ## Getting Started
