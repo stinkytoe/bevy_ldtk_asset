@@ -2,11 +2,10 @@ use bevy::{
     log::{self, LogPlugin},
     prelude::*,
 };
-use bevy_inspector_egui::{
-    inspector_egui_impls::InspectorPrimitive, quick::WorldInspectorPlugin,
-    DefaultInspectorConfigPlugin,
-};
-use bevy_ldtk_asset::{iid::Iid, plugin::BevyLdtkAssetPlugin, project::Project};
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
+use bevy_ldtk_asset::iid::Iid;
+use bevy_ldtk_asset::plugin::BevyLdtkAssetPlugin;
+use bevy_ldtk_asset::project::Project;
 
 fn main() {
     App::new()
