@@ -5,7 +5,10 @@ use bevy::asset::AssetLoader;
 use bevy::asset::AsyncReadExt;
 use bevy::log::debug;
 use bevy::log::trace;
+use bevy::reflect::List;
+use bevy::reflect::Map;
 use bevy::tasks::block_on;
+use bevy::utils::HashMap;
 
 use crate::entity::Entity;
 use crate::error::Error;
@@ -231,6 +234,18 @@ impl AssetLoader for ProjectLoader {
                 .map(|enum_definition| enum_definition.into())
                 .collect();
 
+            let mut children_map: IidMap<Vec<Iid>> = IidMap::default();
+            parent_map.iter().for_each(|(child, parent)| {
+                match children_map.get_mut(parent) {
+                    Some(children) => {
+                        children.push(*child);
+                    }
+                    None => {
+                        children_map.insert(*parent, vec![*child]);
+                    }
+                };
+            });
+
             debug!("Loading LDtk project completed! {:?}", load_context.path());
 
             Ok(Project {
@@ -244,6 +259,7 @@ impl AssetLoader for ProjectLoader {
                 tileset_definitions,
                 enum_definitions,
                 parent_map,
+                children_map,
             })
         })
     }

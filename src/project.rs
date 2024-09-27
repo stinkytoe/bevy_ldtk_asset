@@ -29,4 +29,5 @@ pub struct Project {
     pub enum_definitions: HashMap<i64, EnumDefinition>,
 
     pub parent_map: IidMap<Iid>,
+    pub children_map: IidMap<Vec<Iid>>,
 }
