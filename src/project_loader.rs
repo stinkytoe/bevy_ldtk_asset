@@ -4,6 +4,7 @@ use std::str::FromStr;
 use bevy::asset::AssetLoader;
 use bevy::asset::AsyncReadExt;
 use bevy::log::debug;
+use bevy::log::trace;
 use bevy::tasks::block_on;
 
 use crate::entity::Entity;
@@ -48,7 +49,7 @@ impl AssetLoader for ProjectLoader {
                 ))?
                 .to_path_buf();
 
-            debug!("Loading LDtk project: {project_directory:?}");
+            debug!("Loading LDtk project: {:?}", load_context.path());
 
             let project_iid = Iid::from_str(&ldtk_project.iid)?;
 
@@ -104,6 +105,7 @@ impl AssetLoader for ProjectLoader {
                     let world_label = world.identifier.clone();
                     let world_iid = world.iid;
                     parent_map.insert(world_iid, project_iid);
+                    trace!("World loaded: {}", world_label);
 
                     let level_vec = if ldtk_project.external_levels {
                         &ldtk_world
@@ -117,6 +119,8 @@ impl AssetLoader for ProjectLoader {
                                         "external_rel_path is None when external_levels is true!"
                                             .to_string(),
                                     ))?;
+
+                                trace!("Attempting to load external level from path: {external_rel_path}");
 
                                 let ldtk_path = Path::new(external_rel_path);
                                 let bevy_path =
@@ -139,6 +143,7 @@ impl AssetLoader for ProjectLoader {
                             let level_label = format!("{world_label}/{}", level.identifier);
                             let level_iid = level.iid;
                             parent_map.insert(level_iid, world_iid);
+                            trace!("Level loaded: {level_label}");
 
                             ldtk_level
                                 .layer_instances
@@ -152,6 +157,7 @@ impl AssetLoader for ProjectLoader {
                                     let layer_label = format!("{level_label}/{}", layer.identifier);
                                     let layer_iid = layer.iid;
                                     parent_map.insert(layer_iid, level_iid);
+                                    trace!("Layer loaded: {layer_label}");
 
                                     ldtk_layer.entity_instances.iter().try_for_each(
                                         |ldtk_entity| -> Result<(), Error> {
@@ -162,6 +168,7 @@ impl AssetLoader for ProjectLoader {
                                             );
                                             let entity_iid = entity.iid;
                                             parent_map.insert(entity_iid, layer_iid);
+                                            trace!("Entity loaded: {entity_label}");
 
                                             let entity_handle = load_context
                                                 .add_loaded_labeled_asset(
@@ -224,7 +231,7 @@ impl AssetLoader for ProjectLoader {
                 .map(|enum_definition| enum_definition.into())
                 .collect();
 
-            debug!("LDtk project: {project_directory:?} loaded!");
+            debug!("Loading LDtk project completed! {:?}", load_context.path());
 
             Ok(Project {
                 iid: project_iid,
