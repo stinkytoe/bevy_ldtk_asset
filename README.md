@@ -52,7 +52,6 @@ flowchart LR
   Ground1[Ground]
   Entities1[Entities]
   Trees1[Trees]
-
   Level2
   Ground2[Ground]
   Entities2[Entities]
@@ -71,7 +70,6 @@ flowchart LR
   Level2 --> Ground2
   Level2 --> Entities2
   Level2 --> Trees2
-  Entities2 --> Player
   Entities2 --> NPC3
   Entities2 --> NPC4
   
@@ -80,11 +78,13 @@ flowchart LR
   Ground3[Ground]
   Entities3[Entities]
   Trees3[Trees]
-
   Dungeon2
   Ground4[Ground]
   Entities4[Entities]
   Trees4[Trees]
+
+  Underworld --> Dungeon1
+  Underworld --> Dungeon2
 
   Dungeon1 --> Ground3
   Dungeon1 --> Entities3
