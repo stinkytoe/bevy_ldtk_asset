@@ -7,7 +7,7 @@ use bevy::reflect::Reflect;
 use bevy::sprite::Anchor;
 
 use crate::anchor::bevy_anchor_from_ldtk;
-use crate::color::bevy_color_from_ldtk;
+use crate::color::bevy_color_from_ldtk_string;
 use crate::error::Error;
 use crate::field_instance::FieldInstance;
 use crate::iid::Iid;
@@ -41,7 +41,7 @@ impl Entity {
                 value.grid
             )))?;
         let anchor = bevy_anchor_from_ldtk(&value.pivot)?;
-        let smart_color = bevy_color_from_ldtk(&value.smart_color)?;
+        let smart_color = bevy_color_from_ldtk_string(&value.smart_color)?;
         let tags = value.tags.clone();
         //let tile: Option<TilesetRectangle> = value.tile.map(|tile| tile.into());
         let tile = value.tile.as_ref().map(TilesetRectangle::new);

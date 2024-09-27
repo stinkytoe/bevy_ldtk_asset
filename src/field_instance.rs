@@ -4,7 +4,7 @@ use bevy::color::Color;
 use bevy::math::I64Vec2;
 use bevy::reflect::Reflect;
 
-use crate::color::bevy_color_from_ldtk;
+use crate::color::bevy_color_from_ldtk_string;
 use crate::error::Error;
 use crate::iid::Iid;
 use crate::ldtk;
@@ -140,11 +140,9 @@ impl FieldInstanceType {
                 as_bool,
                 field_instance_type
             ))),
-            "Color" => Ok(Self::Color(bevy_color_from_ldtk(field_instance_unwrap!(
-                value,
-                as_str,
-                field_instance_type
-            ))?)),
+            "Color" => Ok(Self::Color(bevy_color_from_ldtk_string(
+                field_instance_unwrap!(value, as_str, field_instance_type),
+            )?)),
             "EntityRef" => Ok(Self::EntityRef(
                 if let Some(map) =
                     field_instance_option_unwrap!(value, as_object, field_instance_type)

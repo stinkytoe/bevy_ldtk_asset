@@ -5,7 +5,7 @@ use bevy::color::Color;
 use bevy::math::{Rect, Vec2};
 use bevy::reflect::Reflect;
 
-use crate::color::bevy_color_from_ldtk;
+use crate::color::bevy_color_from_ldtk_string;
 use crate::error::Error;
 use crate::field_instance::FieldInstance;
 use crate::iid::Iid;
@@ -70,7 +70,7 @@ pub struct Level {
 
 impl Level {
     pub(crate) fn new(value: &ldtk::Level) -> Result<Self, Error> {
-        let bg_color = bevy_color_from_ldtk(&value.bg_color)?;
+        let bg_color = bevy_color_from_ldtk_string(&value.bg_color)?;
         let bg_pos: Option<LevelBackgroundPosition> = match value.bg_pos.as_ref() {
             Some(bg_pos) => Some(LevelBackgroundPosition::new(bg_pos)?),
             None => None,
