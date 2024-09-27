@@ -217,6 +217,13 @@ impl AssetLoader for ProjectLoader {
                 .map(|tileset_definition| tileset_definition.into())
                 .collect();
 
+            let enum_definitions = ldtk_project
+                .defs
+                .enums
+                .into_iter()
+                .map(|enum_definition| enum_definition.into())
+                .collect();
+
             debug!("LDtk project: {project_directory:?} loaded!");
 
             Ok(Project {
@@ -228,6 +235,7 @@ impl AssetLoader for ProjectLoader {
                 entities,
                 tileset_images,
                 tileset_definitions,
+                enum_definitions,
                 parent_map,
             })
         })

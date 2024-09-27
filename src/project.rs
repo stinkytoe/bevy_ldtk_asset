@@ -5,6 +5,7 @@ use bevy::render::texture::Image;
 use bevy::utils::HashMap;
 
 use crate::entity::Entity;
+use crate::enum_definition::EnumDefinition;
 use crate::iid::Iid;
 use crate::iid::IidMap;
 use crate::layer::Layer;
@@ -23,7 +24,9 @@ pub struct Project {
     pub entities: IidMap<Handle<Entity>>,
 
     pub tileset_images: HashMap<String, Handle<Image>>,
+
     pub tileset_definitions: HashMap<i64, TilesetDefinition>,
+    pub enum_definitions: HashMap<i64, EnumDefinition>,
 
     pub parent_map: IidMap<Iid>,
 }
