@@ -23,11 +23,12 @@ Unfortunately, there are many name collisions between the nomenclature used in
 Bevy and LDtk. Especially:
 
 * World
+* Level
 * Layer
 * Entity
 
-I will endeavor to refer to objects in Bevy/Rust as ecs objects, i.e. an
-ecs entity or ecs world when referring to objects from the Bevy ecosystem, and
+I will endeavor to refer to objects in Bevy/Rust as ECS objects, i.e. an
+ECS entity or ECS world when referring to objects from the Bevy ecosystem, and
 LDtk objects for things either from this library or LDtk itself, i.e. an LDtk
 entity or LDtk world.
 
@@ -100,7 +101,6 @@ flowchart LR
   Dungeon1 --> Trees3
   Entities3 --> Goblin
   Entities3 --> TrapDoor
-
   
   Dungeon2 --> Ground4
   Dungeon2 --> Entities4
@@ -188,19 +188,19 @@ stinkytoe
 
 ## Capabilities
 
-* [x] Single World and Multi World supported
+* [x] Single World and Multi World projects
 * [x] External Level Files
 * [ ] Aseprite Files
-
-* [ ] #18
+* [ ] Level Background Generation
+* [ ] Layer Background Generation
 
 ## Compatability
 
 The minor version of this project will target a specific minor version of Bevy.
 
-| bevy_ldtk_asset | bevy | LDtk |
-| :--: | :-------------: | :--: |
-| 0.5.0 | 0.14             | 1.5.3 |
+| bevy_ldtk_asset | bevy | LDtk  |
+| :-------------: | :--: | :---: |
+| 0.5.0           | 0.14 | 1.5.3 |
 
 ## License
 
