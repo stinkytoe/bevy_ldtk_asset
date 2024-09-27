@@ -182,9 +182,9 @@ stinkytoe
 
 The minor version of this project will target a specific minor version of Bevy.
 
-| bevy | bevy_ldtk_asset |
+| bevy_ldtk_asset | bevy |
 | :--: | :-------------: |
-| 0.14 | 0.5             |
+| 0.5 | 0.14             |
 
 ## License
 
