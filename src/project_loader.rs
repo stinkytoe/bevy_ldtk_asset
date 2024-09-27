@@ -5,10 +5,7 @@ use bevy::asset::AssetLoader;
 use bevy::asset::AsyncReadExt;
 use bevy::log::debug;
 use bevy::log::trace;
-use bevy::reflect::List;
-use bevy::reflect::Map;
 use bevy::tasks::block_on;
-use bevy::utils::HashMap;
 
 use crate::entity::Entity;
 use crate::error::Error;
@@ -155,8 +152,10 @@ impl AssetLoader for ProjectLoader {
                                     "layer_instances is None!".to_string(),
                                 ))?
                                 .iter()
-                                .try_for_each(|ldtk_layer| -> Result<(), Error> {
-                                    let layer = Layer::new(ldtk_layer)?;
+                                .rev()
+                                .enumerate()
+                                .try_for_each(|(index, ldtk_layer)| -> Result<(), Error> {
+                                    let layer = Layer::new(ldtk_layer, index)?;
                                     let layer_label = format!("{level_label}/{}", layer.identifier);
                                     let layer_iid = layer.iid;
                                     parent_map.insert(layer_iid, level_iid);

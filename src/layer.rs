@@ -94,10 +94,11 @@ pub struct Layer {
     pub layer_def_uid: i64,
     pub level_id: i64,
     pub location: Vec2,
+    pub index: usize,
 }
 
 impl Layer {
-    pub(crate) fn new(value: &ldtk::LayerInstance) -> Result<Self, Error> {
+    pub(crate) fn new(value: &ldtk::LayerInstance, index: usize) -> Result<Self, Error> {
         let grid_size = (value.c_wid, value.c_hei).into();
         let grid_cell_size = value.grid_size;
         let identifier = value.identifier.clone();
@@ -134,6 +135,7 @@ impl Layer {
             layer_def_uid,
             level_id,
             location,
+            index,
         })
     }
 }
