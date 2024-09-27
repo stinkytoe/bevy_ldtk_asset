@@ -1,18 +1,20 @@
+use bevy::color::Color;
 use bevy::reflect::Reflect;
 
+use crate::color::bevy_color_from_ldtk_int;
 use crate::ldtk;
 use crate::tileset_rectangle::TilesetRectangle;
 
 #[derive(Debug, Reflect)]
 pub struct EnumValueDefinition {
-    pub color: i64,
+    pub color: Color,
     pub id: String,
     pub tile: Option<TilesetRectangle>,
 }
 
 impl EnumValueDefinition {
     pub fn new(value: &ldtk::EnumValueDefinition) -> Self {
-        let color = value.color;
+        let color = bevy_color_from_ldtk_int(value.color);
         let id = value.id.clone();
         let tile = value.tile_rect.as_ref().map(TilesetRectangle::new);
 
