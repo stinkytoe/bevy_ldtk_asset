@@ -24,6 +24,7 @@ pub enum FieldInstanceType {
     ArrayLocalEnumSomeEnum(Vec<String>),
     ArrayMultilines(Vec<String>),
     ArrayPoint(Vec<I64Vec2>),
+    ArrayTile(Vec<TilesetRectangle>),
     Bool(bool),
     Color(Color),
     EntityRef(Option<EntityRef>),
@@ -35,6 +36,7 @@ pub enum FieldInstanceType {
     Multilines(Option<String>),
     Point(Option<I64Vec2>),
     String(Option<String>),
+    Tile(Option<TilesetRectangle>),
 }
 
 macro_rules! field_instance_unwrap {
@@ -128,11 +130,18 @@ impl FieldInstanceType {
             "Array<Point>" => Ok(Self::ArrayPoint(
                 field_instance_unwrap!(value, as_array, field_instance_type)
                     .iter()
-                    .map(|map| -> Result<_, Error> {
-                        let cx = field_instance_map_unwrap!(map, "cx", "Array<Point>", as_i64);
-                        let cy = field_instance_map_unwrap!(map, "cy", "Array<Point>", as_i64);
+                    .map(|value| -> Result<_, Error> {
+                        let cx = field_instance_map_unwrap!(value, "cx", "Array<Point>", as_i64);
+                        let cy = field_instance_map_unwrap!(value, "cy", "Array<Point>", as_i64);
                         Ok((cx, cy).into())
                     })
+                    .collect::<Result<_, _>>()?,
+            )),
+            "Array<Tile>" => Ok(Self::ArrayTile(
+                field_instance_unwrap!(value, as_array, field_instance_type)
+                    .iter()
+                    .map(|value| serde_json::from_value::<ldtk::TilesetRectangle>(value.clone()))
+                    .map(|value| value.map(|tile| TilesetRectangle::new(&tile)))
                     .collect::<Result<_, _>>()?,
             )),
             "Bool" => Ok(Self::Bool(field_instance_unwrap!(
@@ -222,6 +231,16 @@ impl FieldInstanceType {
                 field_instance_option_unwrap!(value, as_str, field_instance_type)
                     .map(|x| x.to_string()),
             )),
+            "Tile" => Ok(Self::Tile({
+                match value {
+                    Some(value) => Some(serde_json::from_value::<ldtk::TilesetRectangle>(
+                        value.clone(),
+                    )?),
+                    None => None,
+                }
+                .as_ref()
+                .map(TilesetRectangle::new)
+            })),
             _ => Err(Error::LdtkImportError(format!(
                 "Bad/Unknown Field Instance Type! given: {field_instance_type}"
             ))),
