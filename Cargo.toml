@@ -1,46 +1,43 @@
 [package]
 name = "bevy_ldtk_asset"
-version = "0.5.0"
+version = "0.6.0"
 edition = "2021"
 description = "" # — A description of the plugin
 repository = "" # — URL of the plugin source repository
 license = "" # — The plugin license
 keywords = [
-	"bevy",
+  "bevy",
 ] # — Keywords for the plugin. "bevy" at least is a good idea here
 categories = [
-	"game-development",
-	"game-engines",
+  "game-development",
+  "game-engines",
 ] # — Categories of the plugin. See the full list on crates.io.
 exclude = [
-	"assets",
-	"examples",
+  "assets",
+  "examples",
 ] # — Files to exclude from the released package. Excluding the assets folder that you may 
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[[example]]
+name = "all_features"
+path = "examples/all_features.rs"
+
+[[example]]
+name = "example"
+path = "examples/example.rs"
+
+[dev-dependencies]
+bevy-inspector-egui = "0.26"
+
 [dependencies]
-bevy = "0.13"
-# bevy = { version = "0.13", features = ["file_watcher"] }
-# bevy = { git = "https://github.com/bevyengine/bevy.git", branch = "main" }
-# bevy = { git = "https://github.com/stinkytoe/bevy.git", branch = "main" }
+bevy = "0.14"
+either = "1.13"
+path-clean = "1.0"
 serde = "1.0"
 serde_json = "1.0"
-hex = "0.4"
-futures-either = "0.1"
-path-clean = "1.0"
-image = "0.24"
 thiserror = "1.0"
 
 # [features]
 # default = ["enable_reflect"]
 # enable_reflect = []
-
-[[example]]
-name = "top_down"
-path = "examples/top_down.rs"
-
-[dev-dependencies]
-bevy = { version = "0.13", features = ["file_watcher"] }
-bevy-inspector-egui = "0.24"
-bevy-fps-counter = "0.4.0"

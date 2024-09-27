@@ -8,7 +8,7 @@ use std::collections::HashMap;
 /// users).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct LdtkJson {
+pub struct LdtkProject {
     /// This object is not actually used by LDtk. It ONLY exists to force explicit references to
     /// all types, to make sure QuickType finds them and integrate all of them. Otherwise,
     /// Quicktype will drop types that are not explicitely used.
