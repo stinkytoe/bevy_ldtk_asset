@@ -1,4 +1,4 @@
-use bevy::{color::Color, log::info};
+use bevy::color::Color;
 
 use crate::error::Error;
 
@@ -29,9 +29,9 @@ pub(crate) fn bevy_color_from_ldtk_string(color: &str) -> Result<Color, Error> {
     ))
 }
 
+// Raw color stored in lower 24 bits of value.
+// Only used in EnumValueDefinition (i think?)
 pub(crate) fn bevy_color_from_ldtk_int(color: i64) -> Color {
-    info!("Creating color from int: {color:016x}");
-
     let r = ((color & 0xFF0000) >> 16) as u8;
     let g = ((color & 0xFF00) >> 8) as u8;
     let b = (color & 0xFF) as u8;
