@@ -141,4 +141,8 @@ impl Layer {
     }
 }
 
-impl LdtkAsset for Layer {}
+impl LdtkAsset for Layer {
+    fn iid(&self) -> Iid {
+        self.iid
+    }
+}

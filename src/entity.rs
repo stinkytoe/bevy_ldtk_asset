@@ -91,4 +91,8 @@ impl Entity {
     }
 }
 
-impl LdtkAsset for Entity {}
+impl LdtkAsset for Entity {
+    fn iid(&self) -> Iid {
+        self.iid
+    }
+}

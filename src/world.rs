@@ -60,4 +60,8 @@ impl World {
     }
 }
 
-impl LdtkAsset for World {}
+impl LdtkAsset for World {
+    fn iid(&self) -> Iid {
+        self.iid
+    }
+}

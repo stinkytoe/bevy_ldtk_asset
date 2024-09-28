@@ -160,4 +160,8 @@ impl Level {
     }
 }
 
-impl LdtkAsset for Level {}
+impl LdtkAsset for Level {
+    fn iid(&self) -> Iid {
+        self.iid
+    }
+}
