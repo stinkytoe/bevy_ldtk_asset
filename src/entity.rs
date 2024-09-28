@@ -12,7 +12,7 @@ use crate::error::Error;
 use crate::field_instance::FieldInstance;
 use crate::iid::Iid;
 use crate::ldtk;
-use crate::ldtk_asset::LdtkAsset;
+use crate::ldtk_asset_trait::LdtkAsset;
 use crate::tileset_rectangle::TilesetRectangle;
 
 #[derive(Asset, Debug, Reflect)]

@@ -6,6 +6,7 @@ use crate::layer::Layer;
 use crate::level::Level;
 use crate::project::Project;
 use crate::project_loader::ProjectLoader;
+use crate::systems;
 use crate::world::World;
 
 #[derive(Debug)]
@@ -25,8 +26,18 @@ impl Plugin for BevyLdtkAssetPlugin {
             .register_asset_reflect::<Level>()
             .register_asset_reflect::<Layer>()
             .register_asset_reflect::<Entity>()
-            .register_type::<Iid>()
-            // xxxxx
-            ;
+            .register_type::<Iid>();
+
+        #[cfg(feature = "asset_events_debug")]
+        app.add_systems(
+            Update,
+            (
+                systems::project_debug_output,
+                systems::ldtk_asset_debug_output::<Entity>,
+                systems::ldtk_asset_debug_output::<Layer>,
+                systems::ldtk_asset_debug_output::<Level>,
+                systems::ldtk_asset_debug_output::<World>,
+            ),
+        );
     }
 }

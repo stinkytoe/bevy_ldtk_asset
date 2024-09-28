@@ -38,6 +38,6 @@ serde = "1.0"
 serde_json = "1.0"
 thiserror = "1.0"
 
-# [features]
-# default = ["enable_reflect"]
-# enable_reflect = []
+[features]
+default = ["asset_events_debug"]
+asset_events_debug = []
