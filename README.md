@@ -1,4 +1,4 @@
-# Project Title
+# bevy_ldtk_asset
 
 A plugin for the [Bevy Engine](https://bevyengine.org) to allow loading of
 projects from the [LDtk](https://ldtk.io) level editor.
