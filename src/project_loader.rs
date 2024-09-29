@@ -105,7 +105,6 @@ impl AssetLoader for ProjectLoader {
             let mut levels = IidMap::new();
             let mut layers = IidMap::new();
             let mut entities = IidMap::new();
-            let mut parent_map = IidMap::new();
 
             ldtk_worlds
                 .iter()
@@ -114,7 +113,6 @@ impl AssetLoader for ProjectLoader {
                     let world_label = world.identifier.clone();
                     let world_iid = world.iid;
                     let world_path = format!("{project_path}#{world_label}");
-                    parent_map.insert(world_iid, project_iid);
                     trace!("World loaded: {}", world_label);
 
                     let ldtk_levels = if ldtk_project.external_levels {
@@ -153,7 +151,6 @@ impl AssetLoader for ProjectLoader {
                             let level_label = format!("{world_label}/{}", level.identifier);
                             let level_iid = level.iid;
                             let level_path = format!("{project_path}#{level_label}");
-                            parent_map.insert(level_iid, world_iid);
                             trace!("Level loaded: {level_label}");
 
                             ldtk_level
@@ -170,7 +167,6 @@ impl AssetLoader for ProjectLoader {
                                     let layer_label = format!("{level_label}/{}", layer.identifier);
                                     let layer_iid = layer.iid;
                                     let layer_path = format!("{project_path}#{layer_label}");
-                                    parent_map.insert(layer_iid, level_iid);
                                     trace!("Layer loaded: {layer_label}");
 
                                     ldtk_layer.entity_instances.iter().try_for_each(
@@ -181,7 +177,6 @@ impl AssetLoader for ProjectLoader {
                                                 entity.identifier, ldtk_entity.iid
                                             );
                                             let entity_iid = entity.iid;
-                                            parent_map.insert(entity_iid, layer_iid);
                                             trace!("Entity loaded: {entity_label}");
 
                                             let entity_handle = load_context
@@ -245,18 +240,6 @@ impl AssetLoader for ProjectLoader {
                 .map(|enum_definition| enum_definition.into())
                 .collect();
 
-            let mut children_map: IidMap<Vec<Iid>> = IidMap::default();
-            parent_map.iter().for_each(|(child, parent)| {
-                match children_map.get_mut(parent) {
-                    Some(children) => {
-                        children.push(*child);
-                    }
-                    None => {
-                        children_map.insert(*parent, vec![*child]);
-                    }
-                };
-            });
-
             debug!("Loading LDtk project completed! {:?}", project_path);
 
             Ok(Project {
@@ -269,8 +252,6 @@ impl AssetLoader for ProjectLoader {
                 tileset_images,
                 tileset_definitions,
                 enum_definitions,
-                parent_map,
-                children_map,
             })
         })
     }

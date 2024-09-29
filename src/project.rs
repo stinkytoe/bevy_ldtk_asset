@@ -27,7 +27,4 @@ pub struct Project {
 
     pub tileset_definitions: HashMap<i64, TilesetDefinition>,
     pub enum_definitions: HashMap<i64, EnumDefinition>,
-
-    pub parent_map: IidMap<Iid>,
-    pub children_map: IidMap<Vec<Iid>>,
 }
