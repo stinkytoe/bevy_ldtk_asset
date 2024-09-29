@@ -7,6 +7,7 @@ where
     Self: Asset,
 {
     fn iid(&self) -> Iid;
+    fn identifier(&self) -> &str;
     fn parent_path(&self) -> AssetPath;
     fn children_paths(&self) -> impl Iterator<Item = AssetPath>;
 }

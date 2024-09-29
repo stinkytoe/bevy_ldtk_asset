@@ -5,7 +5,6 @@ use crate::ldtk;
 
 #[derive(Debug, Reflect)]
 pub struct TilesetRectangle {
-    // top-left corner
     pub corner: Vec2,
     pub size: Vec2,
     pub tileset_uid: i64,

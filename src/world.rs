@@ -75,6 +75,10 @@ impl LdtkAsset for World {
         self.iid
     }
 
+    fn identifier(&self) -> &str {
+        &self.identifier
+    }
+
     fn parent_path(&self) -> bevy::asset::AssetPath {
         AssetPath::from(&self.parent_path)
     }
