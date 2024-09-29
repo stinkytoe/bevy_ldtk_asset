@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use bevy::asset::Asset;
+use bevy::asset::{Asset, AssetPath};
 use bevy::color::Color;
 use bevy::math::{I64Vec2, Vec2};
 use bevy::reflect::Reflect;
@@ -29,10 +29,11 @@ pub struct Entity {
     pub field_instances: Vec<FieldInstance>,
     pub size: Vec2,
     pub location: Vec2,
+    pub parent_path: String,
 }
 
 impl Entity {
-    pub(crate) fn new(value: &ldtk::EntityInstance) -> Result<Self, Error> {
+    pub(crate) fn new(value: &ldtk::EntityInstance, parent_path: &str) -> Result<Self, Error> {
         let identifier = value.identifier.clone();
         let iid = Iid::from_str(&value.iid)?;
         let grid = (value.grid.len() == 2)
@@ -73,6 +74,7 @@ impl Entity {
                 "Unable to parse Vec2 from entity px field! given: {:?}",
                 value.grid
             )))?;
+        let parent_path = parent_path.to_string();
 
         Ok(Self {
             identifier,
@@ -87,6 +89,7 @@ impl Entity {
             field_instances,
             size,
             location,
+            parent_path,
         })
     }
 }
@@ -94,5 +97,13 @@ impl Entity {
 impl LdtkAsset for Entity {
     fn iid(&self) -> Iid {
         self.iid
+    }
+
+    fn parent_path(&self) -> bevy::asset::AssetPath {
+        AssetPath::from(&self.parent_path)
+    }
+
+    fn children_paths(&self) -> impl Iterator<Item = AssetPath> {
+        vec![].into_iter()
     }
 }

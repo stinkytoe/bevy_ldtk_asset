@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use bevy::asset::Asset;
+use bevy::asset::{Asset, AssetPath};
 use bevy::color::Color;
 use bevy::math::{Rect, Vec2};
 use bevy::reflect::Reflect;
@@ -116,10 +116,12 @@ pub struct Level {
     pub uid: i64, // TODO: do we need this?
     pub world_depth: i64,
     pub location: Vec2,
+    pub parent_path: String,
+    pub children_paths: Vec<String>,
 }
 
 impl Level {
-    pub(crate) fn new(value: &ldtk::Level) -> Result<Self, Error> {
+    pub(crate) fn new(value: &ldtk::Level, parent_path: &str) -> Result<Self, Error> {
         let bg_color = bevy_color_from_ldtk_string(&value.bg_color)?;
         let bg_pos: Option<LevelBackgroundPosition> = match value.bg_pos.as_ref() {
             Some(bg_pos) => Some(LevelBackgroundPosition::new(bg_pos)?),
@@ -142,6 +144,14 @@ impl Level {
         let uid = value.uid;
         let world_depth = value.world_depth;
         let location = (value.world_x as f32, -value.world_y as f32).into();
+        let parent_path = parent_path.to_string();
+        let children_paths = value
+            .layer_instances
+            .as_ref()
+            .ok_or(Error::LdtkImportError("".to_string()))?
+            .iter()
+            .map(|layer| format!("{parent_path}/{}/{}", value.identifier, layer.identifier))
+            .collect();
 
         Ok(Level {
             bg_color,
@@ -156,6 +166,8 @@ impl Level {
             uid,
             world_depth,
             location,
+            parent_path,
+            children_paths,
         })
     }
 }
@@ -163,5 +175,13 @@ impl Level {
 impl LdtkAsset for Level {
     fn iid(&self) -> Iid {
         self.iid
+    }
+
+    fn parent_path(&self) -> bevy::asset::AssetPath {
+        AssetPath::from(&self.parent_path)
+    }
+
+    fn children_paths(&self) -> impl Iterator<Item = bevy::asset::AssetPath> {
+        self.children_paths.iter().map(AssetPath::from)
     }
 }

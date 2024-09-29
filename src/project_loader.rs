@@ -41,15 +41,24 @@ impl AssetLoader for ProjectLoader {
                 serde_json::from_slice(&bytes)?
             };
 
-            let project_directory = load_context
-                .path()
+            let project_path = load_context.path();
+
+            let project_directory = project_path
                 .parent()
                 .ok_or(Error::LdtkImportError(
                     "Unable to get project_directory!".to_string(),
                 ))?
                 .to_path_buf();
 
-            debug!("Loading LDtk project: {:?}", load_context.path());
+            let project_path = project_path
+                .to_str()
+                .ok_or(Error::LdtkImportError(format!(
+                    "Could not convert project path to str! given: {:?}",
+                    project_path
+                )))?
+                .to_string();
+
+            debug!("Loading LDtk project: {:?}", project_path);
 
             let project_iid = Iid::from_str(&ldtk_project.iid)?;
 
@@ -101,13 +110,14 @@ impl AssetLoader for ProjectLoader {
             ldtk_worlds
                 .iter()
                 .try_for_each(|ldtk_world| -> Result<_, Error> {
-                    let world = World::new(ldtk_world)?;
+                    let world = World::new(ldtk_world, &project_path)?;
                     let world_label = world.identifier.clone();
                     let world_iid = world.iid;
+                    let world_path = format!("{project_path}#{world_label}");
                     parent_map.insert(world_iid, project_iid);
                     trace!("World loaded: {}", world_label);
 
-                    let level_vec = if ldtk_project.external_levels {
+                    let ldtk_levels = if ldtk_project.external_levels {
                         &ldtk_world
                             .levels
                             .iter()
@@ -136,12 +146,13 @@ impl AssetLoader for ProjectLoader {
                         &ldtk_world.levels
                     };
 
-                    level_vec
+                    ldtk_levels
                         .iter()
                         .try_for_each(|ldtk_level| -> Result<(), Error> {
-                            let level = Level::new(ldtk_level)?;
+                            let level = Level::new(ldtk_level, &world_path)?;
                             let level_label = format!("{world_label}/{}", level.identifier);
                             let level_iid = level.iid;
+                            let level_path = format!("{project_path}#{level_label}");
                             parent_map.insert(level_iid, world_iid);
                             trace!("Level loaded: {level_label}");
 
@@ -155,15 +166,16 @@ impl AssetLoader for ProjectLoader {
                                 .rev()
                                 .enumerate()
                                 .try_for_each(|(index, ldtk_layer)| -> Result<(), Error> {
-                                    let layer = Layer::new(ldtk_layer, index)?;
+                                    let layer = Layer::new(ldtk_layer, index, &level_path)?;
                                     let layer_label = format!("{level_label}/{}", layer.identifier);
                                     let layer_iid = layer.iid;
+                                    let layer_path = format!("{project_path}#{layer_label}");
                                     parent_map.insert(layer_iid, level_iid);
                                     trace!("Layer loaded: {layer_label}");
 
                                     ldtk_layer.entity_instances.iter().try_for_each(
                                         |ldtk_entity| -> Result<(), Error> {
-                                            let entity = Entity::new(ldtk_entity)?;
+                                            let entity = Entity::new(ldtk_entity,&layer_path)?;
                                             let entity_label = format!(
                                                 "{layer_label}/{}@{}",
                                                 entity.identifier, ldtk_entity.iid
@@ -245,7 +257,7 @@ impl AssetLoader for ProjectLoader {
                 };
             });
 
-            debug!("Loading LDtk project completed! {:?}", load_context.path());
+            debug!("Loading LDtk project completed! {:?}", project_path);
 
             Ok(Project {
                 iid: project_iid,

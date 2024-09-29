@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use bevy::asset::Asset;
+use bevy::asset::{Asset, AssetPath};
 use bevy::math::{I64Vec2, Vec2};
 use bevy::reflect::Reflect;
 
@@ -12,7 +12,7 @@ use crate::tile_instance::TileInstance;
 
 #[derive(Debug, Reflect)]
 pub struct EntitiesLayer {
-    //entities: Vec<Entity>,
+    entity_paths: Vec<String>,
 }
 
 #[derive(Debug, Reflect)]
@@ -23,7 +23,6 @@ pub struct TilesLayer {
 
 #[derive(Debug, Reflect)]
 pub enum LayerType {
-    ///// Layer type (possible values: IntGrid, Entities, Tiles or AutoLayer)
     Entities(EntitiesLayer),
     IntGrid(TilesLayer),
     Tiles(TilesLayer),
@@ -33,14 +32,15 @@ pub enum LayerType {
 impl LayerType {
     fn new(
         layer_type: &str,
-        entity_len: usize,
+        layer_path: &str,
+        entities: &[ldtk::EntityInstance],
         grid_tiles: &[ldtk::TileInstance],
         auto_layer_tiles: &[ldtk::TileInstance],
         int_grid_csv: &[i64],
     ) -> Result<Self, Error> {
         match (
             layer_type,
-            entity_len,
+            entities.len(),
             grid_tiles.len(),
             auto_layer_tiles.len(),
             int_grid_csv.len(),
@@ -49,10 +49,8 @@ impl LayerType {
                 Err(Error::LdtkImportError("Entity layer type can only have entity instance data!".to_string()))
             }
             ("Entities", _, _, _, _) => Ok(Self::Entities(EntitiesLayer {
-                //entities: entities
-                //    .into_iter()
-                //    .map(|entity| entity.try_into())
-                //    .collect::<Result<_, _>>()?,
+                entity_paths: entities.iter()
+                    .map(|entity| format!("{layer_path}/{}@{}", entity.identifier, entity.iid)).collect()
             })),
             ("Tiles", e, _, a, i) if e != 0 || a != 0 || i != 0 => Err(Error::LdtkImportError(
                 "Tiles layer type can only have grid tile data!".to_string(),
@@ -71,7 +69,7 @@ impl LayerType {
                 int_grid: int_grid_csv.to_vec(),
                 tiles: auto_layer_tiles
                     .iter()
-                    .map( TileInstance::new)
+                    .map(TileInstance::new)
                     .collect::<Result<_, _>>()?,
             })),
             (unknown, _, _, _, _) => Err(Error::LdtkImportError(format!(
@@ -96,10 +94,15 @@ pub struct Layer {
     pub level_id: i64,
     pub location: Vec2,
     pub index: usize,
+    pub parent_path: String,
 }
 
 impl Layer {
-    pub(crate) fn new(value: &ldtk::LayerInstance, index: usize) -> Result<Self, Error> {
+    pub(crate) fn new(
+        value: &ldtk::LayerInstance,
+        index: usize,
+        parent_path: &str,
+    ) -> Result<Self, Error> {
         let grid_size = (value.c_wid, value.c_hei).into();
         let grid_cell_size = value.grid_size;
         let identifier = value.identifier.clone();
@@ -113,7 +116,8 @@ impl Layer {
         let tileset_rel_path = value.tileset_rel_path.clone();
         let layer_type = LayerType::new(
             &value.layer_instance_type,
-            value.entity_instances.len(),
+            &format!("{parent_path}/{}", value.identifier),
+            &value.entity_instances,
             &value.grid_tiles,
             &value.auto_layer_tiles,
             &value.int_grid_csv,
@@ -122,6 +126,7 @@ impl Layer {
         let layer_def_uid = value.layer_def_uid;
         let level_id = value.level_id;
         let location = (value.px_offset_x as f32, -value.px_total_offset_y as f32).into();
+        let parent_path = parent_path.to_string();
 
         Ok(Layer {
             grid_size,
@@ -137,6 +142,7 @@ impl Layer {
             level_id,
             location,
             index,
+            parent_path,
         })
     }
 }
@@ -144,5 +150,22 @@ impl Layer {
 impl LdtkAsset for Layer {
     fn iid(&self) -> Iid {
         self.iid
+    }
+
+    fn parent_path(&self) -> bevy::asset::AssetPath {
+        AssetPath::from(&self.parent_path)
+    }
+
+    fn children_paths(&self) -> impl Iterator<Item = bevy::asset::AssetPath> {
+        if let LayerType::Entities(entities_layer) = &self.layer_type {
+            return entities_layer
+                .entity_paths
+                .iter()
+                .map(AssetPath::from)
+                .collect::<Vec<_>>()
+                .into_iter();
+        } else {
+            vec![].into_iter()
+        }
     }
 }

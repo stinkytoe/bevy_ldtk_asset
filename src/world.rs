@@ -1,12 +1,12 @@
 use std::str::FromStr;
 
-use bevy::asset::Asset;
+use bevy::asset::{Asset, AssetPath};
 use bevy::math::Vec2;
 use bevy::reflect::Reflect;
 
 use crate::error::Error;
 use crate::iid::Iid;
-use crate::ldtk;
+use crate::ldtk::{self};
 use crate::ldtk_asset_trait::LdtkAsset;
 
 #[derive(Debug, Reflect)]
@@ -40,10 +40,12 @@ pub struct World {
     pub identifier: String,
     pub iid: Iid,
     pub world_layout: WorldLayout,
+    pub parent_path: String,
+    pub children_paths: Vec<String>,
 }
 
 impl World {
-    pub(crate) fn new(value: &ldtk::World) -> Result<Self, Error> {
+    pub(crate) fn new(value: &ldtk::World, parent_path: &str) -> Result<Self, Error> {
         let identifier = value.identifier.clone();
         let iid = Iid::from_str(&value.iid)?;
         let world_layout = WorldLayout::new(
@@ -51,11 +53,19 @@ impl World {
             value.world_grid_width,
             value.world_grid_height,
         )?;
+        let parent_path = parent_path.to_string();
+        let children_paths = value
+            .levels
+            .iter()
+            .map(|level| format!("{parent_path}#{}/{}", value.identifier, level.identifier))
+            .collect();
 
         Ok(World {
             identifier,
             iid,
             world_layout,
+            parent_path,
+            children_paths,
         })
     }
 }
@@ -63,5 +73,13 @@ impl World {
 impl LdtkAsset for World {
     fn iid(&self) -> Iid {
         self.iid
+    }
+
+    fn parent_path(&self) -> bevy::asset::AssetPath {
+        AssetPath::from(&self.parent_path)
+    }
+
+    fn children_paths(&self) -> impl Iterator<Item = bevy::asset::AssetPath> {
+        self.children_paths.iter().map(AssetPath::from)
     }
 }
