@@ -89,6 +89,7 @@ pub type IidSet = HashSet<Iid>;
 
 mod test {
     #[test]
+    #[allow(clippy::unwrap_used)]
     fn test_from_str() {
         use super::Iid;
         use std::str::FromStr;
@@ -101,6 +102,7 @@ mod test {
     }
 
     #[test]
+    #[allow(clippy::unwrap_used)]
     fn test_to_string() {
         use super::Iid;
         use std::str::FromStr;

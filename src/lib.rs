@@ -1,4 +1,5 @@
 // #![warn(missing_docs)]
+#![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 
 mod anchor;
 mod color;
