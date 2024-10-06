@@ -11,7 +11,7 @@ access to the data in an LDtk project.
 ---
 NOTE:
 
-Previous versions of this plugin would attempt to spawn ecs entities for the
+Previous versions of this plugin would attempt to spawn ECS entities for the
 user. This functionality has been removed, but will be added to a separate crate
 in the future. See: [shieldtank](https://github.com/stinkytoe/shieldtank)
 
