@@ -26,7 +26,7 @@ pub struct Project {
     pub parent_map: IidMap<Iid>,
     pub children_map: IidMap<Vec<Iid>>,
 
-    pub tileset_images: HashMap<String, Handle<Image>>,
+    pub tilesets: HashMap<i64, Handle<Image>>,
 
     pub tileset_definitions: HashMap<i64, TilesetDefinition>,
     pub enum_definitions: HashMap<i64, EnumDefinition>,

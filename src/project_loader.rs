@@ -5,8 +5,6 @@ use bevy::asset::AssetLoader;
 use bevy::asset::AsyncReadExt;
 use bevy::log::debug;
 use bevy::log::trace;
-use bevy::reflect::List;
-use bevy::reflect::Map;
 use bevy::tasks::block_on;
 
 use crate::entity::Entity;
@@ -111,7 +109,7 @@ impl AssetLoader for ProjectLoader {
             let mut parent_map = IidMap::new();
 
             macro_rules! entity_inner {
-                ($layer_iid:expr, $layer_path: expr, $layer_label: expr, $ldtk_entity:expr ) => {{
+                ($layer_iid:expr, $layer_path: expr, $layer_label: expr, $ldtk_entity:expr) => {{
                     let entity = Entity::new($ldtk_entity, $layer_path)?;
                     let entity_label = format!(
                         "{}/{}@{}",
@@ -234,19 +232,19 @@ impl AssetLoader for ProjectLoader {
                     Ok(())
                 })?;
 
-            let tileset_images = ldtk_project
+            let tilesets = ldtk_project
                 .defs
                 .tilesets
                 .iter()
-                .filter_map(|tileset| tileset.rel_path.as_deref())
-                .map(|ldtk_path_str| (ldtk_path_str, Path::new(ldtk_path_str)))
-                .map(|(ldtk_path_str, ldtk_path)| {
-                    (
-                        ldtk_path_str.to_string(),
-                        ldtk_path_to_bevy_path(&project_directory, ldtk_path),
-                    )
+                .filter_map(|tileset| {
+                    tileset.rel_path.as_ref().map(|ldtk_path| {
+                        (
+                            tileset.uid,
+                            ldtk_path_to_bevy_path(&project_directory, ldtk_path),
+                        )
+                    })
                 })
-                .map(|(ldtk_path_str, bevy_path)| (ldtk_path_str, load_context.load(bevy_path)))
+                .map(|(uid, path)| (uid, load_context.load(path)))
                 .collect();
 
             let tileset_definitions = ldtk_project
@@ -282,7 +280,7 @@ impl AssetLoader for ProjectLoader {
                 entities,
                 parent_map,
                 children_map,
-                tileset_images,
+                tilesets,
                 tileset_definitions,
                 enum_definitions,
             })
