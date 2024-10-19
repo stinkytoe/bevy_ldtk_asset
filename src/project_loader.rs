@@ -66,7 +66,7 @@ impl AssetLoader for ProjectLoader {
 
             if json_version != "1.5.3" {
                 return Err(Error::LdtkImportError(format!(
-                    "Bad LDtk JSON version! given: {json_version}"
+                    "Bad LDtk JSON version! expected: 1.5.3 given: {json_version}"
                 )));
             }
 
