@@ -106,6 +106,80 @@ impl AssetLoader for ProjectLoader {
             let mut layers = IidMap::new();
             let mut entities = IidMap::new();
 
+            let mut parent_map = IidMap::new();
+
+            macro_rules! entity_inner {
+                ($layer_iid:expr, $layer_path: expr, $layer_label: expr, $ldtk_entity:expr ) => {{
+                    let entity = Entity::new($ldtk_entity, $layer_path)?;
+                    let entity_label = format!(
+                        "{}/{}@{}",
+                        $layer_label, entity.identifier, $ldtk_entity.iid
+                    );
+                    let entity_iid = entity.iid;
+                    parent_map.insert(entity_iid, $layer_iid);
+                    trace!("Entity loaded: {entity_label}");
+
+                    let entity_handle =
+                        load_context.add_loaded_labeled_asset(entity_label, entity.into());
+                    entities.insert(entity_iid, entity_handle);
+
+                    Ok(())
+                }};
+            }
+
+            macro_rules! layer_inner {
+                ($level_iid:expr, $level_path:expr, $level_label:expr, $index:expr, $ldtk_layer:expr) => {{
+                    let layer = Layer::new($ldtk_layer, $index, $level_path)?;
+                    let layer_label = format!("{}/{}", $level_label, layer.identifier);
+                    let layer_iid = layer.iid;
+                    let layer_path = format!("{project_path}#{layer_label}");
+                    parent_map.insert(layer_iid, $level_iid);
+                    trace!("Layer loaded: {layer_label}");
+
+                    $ldtk_layer.entity_instances.iter().try_for_each(
+                        |ldtk_entity| -> Result<(), Error> {
+                            entity_inner!(layer_iid, &layer_path, &layer_label, ldtk_entity)
+                        },
+                    )?;
+
+                    let layer_handle =
+                        load_context.add_loaded_labeled_asset(layer_label, layer.into());
+                    layers.insert(layer_iid, layer_handle);
+
+                    Ok(())
+                }};
+            }
+
+            macro_rules! level_inner {
+                ($world_iid:expr, $world_path:expr, $world_label:expr,  $ldtk_level:expr) => {{
+                    let level = Level::new($ldtk_level, $world_path)?;
+                    let level_label = format!("{}/{}", $world_label, level.identifier);
+                    let level_iid = level.iid;
+                    let level_path = format!("{project_path}#{level_label}");
+                    parent_map.insert(level_iid, $world_iid);
+                    trace!("Level loaded: {level_label}");
+
+                    $ldtk_level
+                        .layer_instances
+                        .as_ref()
+                        .ok_or(Error::LdtkImportError(
+                            "layer_instances is None!".to_string(),
+                        ))?
+                        .iter()
+                        .rev()
+                        .enumerate()
+                        .try_for_each(|(index, ldtk_layer)| -> Result<(), Error> {
+                            layer_inner!(level_iid, &level_path, &level_label, index, ldtk_layer)
+                        })?;
+
+                    let level_handle =
+                        load_context.add_loaded_labeled_asset(level_label, level.into());
+                    levels.insert(level_iid, level_handle);
+
+                    Ok(())
+                }};
+            }
+
             ldtk_worlds
                 .iter()
                 .try_for_each(|ldtk_world| -> Result<_, Error> {
@@ -113,6 +187,7 @@ impl AssetLoader for ProjectLoader {
                     let world_label = world.identifier.clone();
                     let world_iid = world.iid;
                     let world_path = format!("{project_path}#{world_label}");
+                    parent_map.insert(world_iid, project_iid);
                     trace!("World loaded: {}", world_label);
 
                     let ldtk_levels = if ldtk_project.external_levels {
@@ -147,61 +222,7 @@ impl AssetLoader for ProjectLoader {
                     ldtk_levels
                         .iter()
                         .try_for_each(|ldtk_level| -> Result<(), Error> {
-                            let level = Level::new(ldtk_level, &world_path)?;
-                            let level_label = format!("{world_label}/{}", level.identifier);
-                            let level_iid = level.iid;
-                            let level_path = format!("{project_path}#{level_label}");
-                            trace!("Level loaded: {level_label}");
-
-                            ldtk_level
-                                .layer_instances
-                                .as_ref()
-                                .ok_or(Error::LdtkImportError(
-                                    "layer_instances is None!".to_string(),
-                                ))?
-                                .iter()
-                                .rev()
-                                .enumerate()
-                                .try_for_each(|(index, ldtk_layer)| -> Result<(), Error> {
-                                    let layer = Layer::new(ldtk_layer, index, &level_path)?;
-                                    let layer_label = format!("{level_label}/{}", layer.identifier);
-                                    let layer_iid = layer.iid;
-                                    let layer_path = format!("{project_path}#{layer_label}");
-                                    trace!("Layer loaded: {layer_label}");
-
-                                    ldtk_layer.entity_instances.iter().try_for_each(
-                                        |ldtk_entity| -> Result<(), Error> {
-                                            let entity = Entity::new(ldtk_entity,&layer_path)?;
-                                            let entity_label = format!(
-                                                "{layer_label}/{}@{}",
-                                                entity.identifier, ldtk_entity.iid
-                                            );
-                                            let entity_iid = entity.iid;
-                                            trace!("Entity loaded: {entity_label}");
-
-                                            let entity_handle = load_context
-                                                .add_loaded_labeled_asset(
-                                                    entity_label,
-                                                    entity.into(),
-                                                );
-                                            entities.insert(entity_iid, entity_handle);
-
-                                            Ok(())
-                                        },
-                                    )?;
-
-                                    let layer_handle = load_context
-                                        .add_loaded_labeled_asset(layer_label, layer.into());
-                                    layers.insert(layer_iid, layer_handle);
-
-                                    Ok(())
-                                })?;
-
-                            let level_handle =
-                                load_context.add_loaded_labeled_asset(level_label, level.into());
-                            levels.insert(level_iid, level_handle);
-
-                            Ok(())
+                            level_inner!(world_iid, &world_path, &world_label, ldtk_level)
                         })?;
 
                     let world_handle =
@@ -240,6 +261,8 @@ impl AssetLoader for ProjectLoader {
                 .map(|enum_definition| enum_definition.into())
                 .collect();
 
+            let children_map = IidMap::new();
+
             debug!("Loading LDtk project completed! {:?}", project_path);
 
             Ok(Project {
@@ -249,6 +272,8 @@ impl AssetLoader for ProjectLoader {
                 levels,
                 layers,
                 entities,
+                parent_map,
+                children_map,
                 tileset_images,
                 tileset_definitions,
                 enum_definitions,
