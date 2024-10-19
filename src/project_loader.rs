@@ -5,6 +5,8 @@ use bevy::asset::AssetLoader;
 use bevy::asset::AsyncReadExt;
 use bevy::log::debug;
 use bevy::log::trace;
+use bevy::reflect::List;
+use bevy::reflect::Map;
 use bevy::tasks::block_on;
 
 use crate::entity::Entity;
@@ -261,7 +263,13 @@ impl AssetLoader for ProjectLoader {
                 .map(|enum_definition| enum_definition.into())
                 .collect();
 
-            let children_map = IidMap::new();
+            let mut children_map = IidMap::new();
+            parent_map.iter().for_each(|(&child, &parent)| {
+                children_map
+                    .entry(parent)
+                    .and_modify(|children: &mut Vec<Iid>| children.push(child))
+                    .or_insert(vec![child]);
+            });
 
             debug!("Loading LDtk project completed! {:?}", project_path);
 
