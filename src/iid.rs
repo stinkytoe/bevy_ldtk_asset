@@ -80,10 +80,7 @@ impl Debug for Iid {
     }
 }
 
-#[allow(unused)]
 pub type IidMap<T> = HashMap<Iid, T>;
-
-#[allow(unused)]
 pub type IidSet = HashSet<Iid>;
 
 mod test {

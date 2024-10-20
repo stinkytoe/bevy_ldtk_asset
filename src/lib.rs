@@ -21,6 +21,7 @@ pub mod project;
 pub mod tile_instance;
 pub mod tileset_definition;
 pub mod tileset_rectangle;
+pub mod uid;
 pub mod world;
 
 pub use error::{Error, Result};
