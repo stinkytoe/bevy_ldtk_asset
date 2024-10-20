@@ -102,7 +102,7 @@ impl FieldInstanceType {
                             "Could not parse array item with as_i64!".to_string(),
                         ))
                     })
-                    .collect::<Result<_, _>>()?,
+                    .collect::<crate::Result<_>>()?,
             )),
             "Array<LocalEnum.SomeEnum>" => Ok(Self::ArrayLocalEnumSomeEnum(
                 field_instance_unwrap!(value, as_array, field_instance_type)
@@ -115,7 +115,7 @@ impl FieldInstanceType {
                             ))?
                             .to_string())
                     })
-                    .collect::<Result<_, _>>()?,
+                    .collect::<crate::Result<_>>()?,
             )),
             "Array<Multilines>" => Ok(Self::ArrayMultilines(
                 field_instance_unwrap!(value, as_array, field_instance_type)
@@ -128,7 +128,7 @@ impl FieldInstanceType {
                             ))?
                             .to_string())
                     })
-                    .collect::<Result<_, _>>()?,
+                    .collect::<crate::Result<_>>()?,
             )),
             "Array<Point>" => Ok(Self::ArrayPoint(
                 field_instance_unwrap!(value, as_array, field_instance_type)
@@ -138,14 +138,15 @@ impl FieldInstanceType {
                         let cy = field_instance_map_unwrap!(value, "cy", "Array<Point>", as_i64);
                         Ok((cx, cy).into())
                     })
-                    .collect::<Result<_, _>>()?,
+                    .collect::<crate::Result<_>>()?,
             )),
             "Array<Tile>" => Ok(Self::ArrayTile(
                 field_instance_unwrap!(value, as_array, field_instance_type)
                     .iter()
                     .map(|value| serde_json::from_value::<ldtk::TilesetRectangle>(value.clone()))
                     .map(|value| value.map(|tile| TilesetRectangle::new(&tile)))
-                    .collect::<Result<_, _>>()?,
+                    // TODO: can this be coerced into a crate::Result?
+                    .collect::<core::result::Result<_, _>>()?,
             )),
             "Bool" => Ok(Self::Bool(field_instance_unwrap!(
                 value,

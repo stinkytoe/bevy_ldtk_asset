@@ -35,8 +35,7 @@ impl From<Iid> for u128 {
 impl FromStr for Iid {
     type Err = IidError;
 
-    // TODO: We can do better validation here,
-    // and possibly optimization
+    // TODO: We can do better validation here, and possibly optimization
     fn from_str(s: &str) -> Result<Self, IidError> {
         if s.len() != 36 {
             return Err(IidError::FormatError(s.to_owned()));
