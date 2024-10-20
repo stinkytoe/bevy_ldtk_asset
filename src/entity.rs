@@ -11,7 +11,7 @@ use crate::color::bevy_color_from_ldtk_string;
 use crate::field_instance::FieldInstance;
 use crate::iid::Iid;
 use crate::ldtk;
-use crate::ldtk_asset_trait::LdtkAsset;
+use crate::ldtk_asset_traits::{HasIdentifier, HasIid, LdtkAsset};
 use crate::tileset_rectangle::TilesetRectangle;
 
 #[derive(Asset, Debug, Reflect)]
@@ -91,20 +91,16 @@ impl Entity {
     }
 }
 
-impl LdtkAsset for Entity {
+impl LdtkAsset for Entity {}
+
+impl HasIid for Entity {
     fn iid(&self) -> Iid {
         self.iid
     }
+}
 
+impl HasIdentifier for Entity {
     fn identifier(&self) -> &str {
         &self.identifier
     }
-
-    //fn parent_path(&self) -> bevy::asset::AssetPath {
-    //    AssetPath::from(&self.parent_path)
-    //}
-    //
-    //fn children_paths(&self) -> impl Iterator<Item = AssetPath> {
-    //    vec![].into_iter()
-    //}
 }

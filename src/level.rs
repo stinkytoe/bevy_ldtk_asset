@@ -9,8 +9,9 @@ use crate::color::bevy_color_from_ldtk_string;
 use crate::field_instance::FieldInstance;
 use crate::iid::Iid;
 use crate::ldtk;
-use crate::ldtk_asset_trait::LdtkAsset;
+use crate::ldtk_asset_traits::{HasIdentifier, HasIid, LdtkAsset};
 use crate::project_loader::ProjectContext;
+use crate::uid::Uid;
 
 #[derive(Debug, Reflect)]
 pub enum NeighbourDir {
@@ -113,7 +114,7 @@ pub struct Level {
     pub identifier: String,
     pub iid: Iid,
     pub size: Vec2,
-    pub uid: i64, // TODO: do we need this?
+    pub uid: Uid, // TODO: do we need this?
     pub world_depth: i64,
     pub location: Vec2,
 }
@@ -163,20 +164,16 @@ impl Level {
     }
 }
 
-impl LdtkAsset for Level {
+impl LdtkAsset for Level {}
+
+impl HasIid for Level {
     fn iid(&self) -> Iid {
         self.iid
     }
+}
 
+impl HasIdentifier for Level {
     fn identifier(&self) -> &str {
         &self.identifier
     }
-
-    //fn parent_path(&self) -> bevy::asset::AssetPath {
-    //    AssetPath::from(&self.parent_path)
-    //}
-    //
-    //fn children_paths(&self) -> impl Iterator<Item = bevy::asset::AssetPath> {
-    //    self.children_paths.iter().map(AssetPath::from)
-    //}
 }

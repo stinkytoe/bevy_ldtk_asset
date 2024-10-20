@@ -14,7 +14,7 @@ pub mod error;
 pub mod field_instance;
 pub mod iid;
 pub mod layer;
-pub mod ldtk_asset_trait;
+pub mod ldtk_asset_traits;
 pub mod level;
 pub mod plugin;
 pub mod project;
@@ -31,7 +31,7 @@ pub mod prelude {
     pub use crate::field_instance::{EntityRef, FieldInstance, FieldInstanceType};
     pub use crate::iid::{Iid, IidError, IidMap, IidSet};
     pub use crate::layer::{EntitiesLayer, LayerType, TilesLayer};
-    pub use crate::ldtk_asset_trait::LdtkAsset;
+    pub use crate::ldtk_asset_traits::LdtkAsset;
     pub use crate::level::{LevelBackgroundPosition, Neighbour, NeighbourDir};
     pub use crate::plugin::BevyLdtkAssetPlugin;
     pub use crate::tile_instance::TileInstance;

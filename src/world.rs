@@ -9,7 +9,7 @@ use bevy::tasks::block_on;
 
 use crate::iid::{Iid, IidMap};
 use crate::ldtk;
-use crate::ldtk_asset_trait::LdtkAsset;
+use crate::ldtk_asset_traits::{HasIdentifier, HasIid, LdtkAsset};
 use crate::ldtk_path::ldtk_path_to_bevy_path;
 use crate::level::Level;
 use crate::project_loader::ProjectContext;
@@ -118,20 +118,16 @@ impl World {
     }
 }
 
-impl LdtkAsset for World {
+impl LdtkAsset for World {}
+
+impl HasIid for World {
     fn iid(&self) -> Iid {
         self.iid
     }
+}
 
+impl HasIdentifier for World {
     fn identifier(&self) -> &str {
         &self.identifier
     }
-
-    //fn parent_path(&self) -> bevy::asset::AssetPath {
-    //    AssetPath::from(&self.parent_path)
-    //}
-    //
-    //fn children_paths(&self) -> impl Iterator<Item = bevy::asset::AssetPath> {
-    //    self.children_paths.iter().map(AssetPath::from)
-    //}
 }

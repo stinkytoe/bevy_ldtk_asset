@@ -7,7 +7,7 @@ use bevy::reflect::Reflect;
 use crate::entity::Entity;
 use crate::iid::Iid;
 use crate::ldtk;
-use crate::ldtk_asset_trait::LdtkAsset;
+use crate::ldtk_asset_traits::{HasIdentifier, HasIid, LdtkAsset};
 use crate::tile_instance::TileInstance;
 
 #[derive(Debug, Reflect)]
@@ -147,29 +147,16 @@ impl Layer {
     }
 }
 
-impl LdtkAsset for Layer {
+impl LdtkAsset for Layer {}
+
+impl HasIid for Layer {
     fn iid(&self) -> Iid {
         self.iid
     }
+}
 
+impl HasIdentifier for Layer {
     fn identifier(&self) -> &str {
         &self.identifier
     }
-
-    //fn parent_path(&self) -> bevy::asset::AssetPath {
-    //    AssetPath::from(&self.parent_path)
-    //}
-    //
-    //fn children_paths(&self) -> impl Iterator<Item = bevy::asset::AssetPath> {
-    //    if let LayerType::Entities(entities_layer) = &self.layer_type {
-    //        return entities_layer
-    //            .entity_paths
-    //            .iter()
-    //            .map(AssetPath::from)
-    //            .collect::<Vec<_>>()
-    //            .into_iter();
-    //    } else {
-    //        vec![].into_iter()
-    //    }
-    //}
 }
