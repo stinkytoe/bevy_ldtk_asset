@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use bevy::asset::{Asset, Handle};
+use bevy::asset::{Asset, Handle, LoadContext};
 use bevy::math::{I64Vec2, Vec2};
 use bevy::reflect::Reflect;
 
@@ -8,6 +8,7 @@ use crate::entity::Entity;
 use crate::iid::Iid;
 use crate::ldtk;
 use crate::ldtk_asset_traits::{HasIdentifier, HasIid, LdtkAsset};
+use crate::project_loader::ProjectContext;
 use crate::tile_instance::TileInstance;
 
 #[derive(Debug, Reflect)]
@@ -32,11 +33,12 @@ pub enum LayerType {
 impl LayerType {
     fn new(
         layer_type: &str,
-        //layer_path: &str,
         entities: &[ldtk::EntityInstance],
         grid_tiles: &[ldtk::TileInstance],
         auto_layer_tiles: &[ldtk::TileInstance],
         int_grid_csv: &[i64],
+        _load_context: &mut LoadContext,
+        _project_context: &ProjectContext,
     ) -> crate::Result<Self> {
         match (
             layer_type,
@@ -101,7 +103,8 @@ impl Layer {
         value: &ldtk::LayerInstance,
         index: usize,
         //parent_path: &str,
-        entities: Vec<Entity>,
+        load_context: &mut LoadContext,
+        project_context: &ProjectContext,
     ) -> crate::Result<Self> {
         let grid_size = (value.c_wid, value.c_hei).into();
         let grid_cell_size = value.grid_size;
@@ -116,11 +119,12 @@ impl Layer {
         let tileset_rel_path = value.tileset_rel_path.clone();
         let layer_type = LayerType::new(
             &value.layer_instance_type,
-            //&format!("{parent_path}/{}", value.identifier),
             &value.entity_instances,
             &value.grid_tiles,
             &value.auto_layer_tiles,
             &value.int_grid_csv,
+            load_context,
+            project_context,
         )?;
         let iid = Iid::from_str(&value.iid)?;
         let layer_def_uid = value.layer_def_uid;

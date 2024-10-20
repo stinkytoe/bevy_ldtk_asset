@@ -8,6 +8,7 @@ use bevy::reflect::Reflect;
 use crate::color::bevy_color_from_ldtk_string;
 use crate::field_instance::FieldInstance;
 use crate::iid::Iid;
+use crate::layer::Layer;
 use crate::ldtk;
 use crate::ldtk_asset_traits::{HasIdentifier, HasIid, LdtkAsset};
 use crate::project_loader::ProjectContext;
@@ -117,6 +118,7 @@ pub struct Level {
     pub uid: Uid, // TODO: do we need this?
     pub world_depth: i64,
     pub location: Vec2,
+    pub layers: Vec<Layer>,
 }
 
 impl Level {
@@ -148,6 +150,31 @@ impl Level {
         let world_depth = value.world_depth;
         let location = (value.world_x as f32, -value.world_y as f32).into();
 
+        let layer_instances =
+            value
+                .layer_instances
+                .as_ref()
+                .ok_or(crate::Error::LdtkImportError(
+                    "layer_instances is None? \
+                    Are we opening the local layer definition instead of the external one?"
+                        .to_string(),
+                ))?;
+
+        let layers = layer_instances
+            .iter()
+            .map(|ldtk_layer_instance| {
+                //let level_iid = Iid::from_str(&ldtk_level.iid)?;
+                //let level_label = format!("{}/{}", ldtk_world.identifier, ldtk_level.identifier);
+                //let level = Level::new(ldtk_level, load_context, project_context)?.into();
+                //let handle = load_context.add_loaded_labeled_asset(level_label, level);
+                //Ok((level_iid, handle))
+                let layer_iid = Iid::from_str(&ldtk_layer_instance.iid)?;
+                //let layer_label = format!("{}/{}", )
+                //
+                todo!()
+            })
+            .collect::<crate::Result<_>>()?;
+
         Ok(Level {
             bg_color,
             bg_pos,
@@ -160,6 +187,7 @@ impl Level {
             uid,
             world_depth,
             location,
+            layers,
         })
     }
 }
