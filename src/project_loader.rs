@@ -8,6 +8,7 @@ use bevy::log::debug;
 
 use crate::iid::Iid;
 use crate::iid::IidMap;
+use crate::label::ProjectAssetPath;
 use crate::ldtk;
 use crate::project::Project;
 use crate::world::World;
@@ -57,15 +58,18 @@ impl AssetLoader for ProjectLoader {
                 )))?
                 .to_string();
 
+            let project_asset_path = ProjectAssetPath::new(&project_path);
+
             debug!("Loading LDtk project: {project_path}");
 
             let project_iid = Iid::from_str(&ldtk_project.iid)?;
 
             let json_version = ldtk_project.json_version.clone();
 
-            if json_version != "1.5.3" {
+            const SUPPORTED_VERSION: &str = "1.5.3";
+            if json_version != SUPPORTED_VERSION {
                 return Err(crate::Error::LdtkImportError(format!(
-                    "Bad LDtk JSON version! expected: 1.5.3 given: {json_version}"
+                    "Bad LDtk JSON version! expected: {SUPPORTED_VERSION} given: {json_version}"
                 )));
             }
 
@@ -100,7 +104,7 @@ impl AssetLoader for ProjectLoader {
                 ldtk_project.worlds.as_slice()
             };
 
-            let project_load_context = ProjectContext {
+            let project_context = ProjectContext {
                 project_directory: &project_directory,
                 external_levels: ldtk_project.external_levels,
             };
@@ -108,11 +112,12 @@ impl AssetLoader for ProjectLoader {
             let worlds = ldtk_worlds
                 .iter()
                 .map(|ldtk_world| {
-                    let world_iid = Iid::from_str(&ldtk_world.iid)?;
-                    let world_label = ldtk_world.identifier.clone();
-                    let world = World::new(ldtk_world, load_context, &project_load_context)?.into();
-                    let handle = load_context.add_loaded_labeled_asset(world_label, world);
-                    Ok((world_iid, handle))
+                    World::create_handle_pair(
+                        ldtk_world,
+                        &project_asset_path,
+                        load_context,
+                        &project_context,
+                    )
                 })
                 .collect::<crate::Result<IidMap<Handle<World>>>>()?;
 

@@ -8,6 +8,7 @@ use bevy::reflect::Reflect;
 use bevy::tasks::block_on;
 
 use crate::iid::{Iid, IidMap};
+use crate::label::ProjectAssetPath;
 use crate::ldtk;
 use crate::ldtk_asset_traits::{HasIdentifier, HasIid, LdtkAsset};
 use crate::ldtk_path::ldtk_path_to_bevy_path;
@@ -50,11 +51,12 @@ pub struct World {
 }
 
 impl World {
-    pub(crate) fn new(
+    pub(crate) fn create_handle_pair(
         ldtk_world: &ldtk::World,
+        project_asset_path: &ProjectAssetPath,
         load_context: &mut LoadContext,
         project_context: &ProjectContext,
-    ) -> crate::Result<Self> {
+    ) -> crate::Result<(Iid, Handle<Self>)> {
         let identifier = ldtk_world.identifier.clone();
         let iid = Iid::from_str(&ldtk_world.iid)?;
         let world_layout = WorldLayout::new(
@@ -63,6 +65,10 @@ impl World {
             ldtk_world.world_grid_height,
         )?;
 
+        let world_asset_path = project_asset_path.to_world_asset_path(&identifier);
+
+        // TODO: I think we can clean this up and remove some allocations while avoiding the
+        // temporary binding. Possibly with Either:: or similar.
         let levels_iter = if project_context.external_levels {
             &ldtk_world
                 .levels
@@ -90,31 +96,30 @@ impl World {
 
         let levels = levels_iter
             .iter()
-            .map(|ldtk_level| {
-                //let world_iid = Iid::from_str(&ldtk_world.iid)?;
-                //let world_label = ldtk_world.identifier.clone();
-                //let world = World::new(
-                //    ldtk_world,
-                //    load_context,
-                //    &project_directory,
-                //    ldtk_project.external_levels,
-                //)?
-                let level_iid = Iid::from_str(&ldtk_level.iid)?;
-                let level_label = format!("{}/{}", ldtk_world.identifier, ldtk_level.identifier);
-                let level = Level::new(ldtk_level, load_context, project_context)?.into();
-                let handle = load_context.add_loaded_labeled_asset(level_label, level);
-                Ok((level_iid, handle))
+            .enumerate()
+            .map(|(index, ldtk_level)| {
+                Level::create_handle_pair(
+                    ldtk_level,
+                    index,
+                    &world_asset_path,
+                    load_context,
+                    project_context,
+                )
             })
             .collect::<crate::Result<_>>()?;
 
-        //let levels = IidMap::default();
-
-        Ok(World {
+        let world = World {
             identifier,
             iid,
             world_layout,
             levels,
-        })
+        }
+        .into();
+
+        let handle =
+            load_context.add_loaded_labeled_asset(world_asset_path.to_asset_label(), world);
+
+        Ok((iid, handle))
     }
 }
 

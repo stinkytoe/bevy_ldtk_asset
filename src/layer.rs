@@ -5,7 +5,8 @@ use bevy::math::{I64Vec2, Vec2};
 use bevy::reflect::Reflect;
 
 use crate::entity::Entity;
-use crate::iid::Iid;
+use crate::iid::{Iid, IidMap};
+use crate::label::{LayerAssetPath, LevelAssetPath};
 use crate::ldtk;
 use crate::ldtk_asset_traits::{HasIdentifier, HasIid, LdtkAsset};
 use crate::project_loader::ProjectContext;
@@ -13,7 +14,7 @@ use crate::tile_instance::TileInstance;
 
 #[derive(Debug, Reflect)]
 pub struct EntitiesLayer {
-    entity_handles: Vec<Handle<Entity>>,
+    entity_handles: IidMap<Handle<Entity>>,
 }
 
 #[derive(Debug, Reflect)]
@@ -32,47 +33,68 @@ pub enum LayerType {
 
 impl LayerType {
     fn new(
-        layer_type: &str,
-        entities: &[ldtk::EntityInstance],
-        grid_tiles: &[ldtk::TileInstance],
-        auto_layer_tiles: &[ldtk::TileInstance],
-        int_grid_csv: &[i64],
-        _load_context: &mut LoadContext,
-        _project_context: &ProjectContext,
+        ldtk_layer_instance: &ldtk::LayerInstance,
+        layer_asset_label: &LayerAssetPath,
+        load_context: &mut LoadContext,
+        project_context: &ProjectContext,
     ) -> crate::Result<Self> {
         match (
-            layer_type,
-            entities.len(),
-            grid_tiles.len(),
-            auto_layer_tiles.len(),
-            int_grid_csv.len(),
+            ldtk_layer_instance.layer_instance_type.as_str(),
+            ldtk_layer_instance.entity_instances.len(),
+            ldtk_layer_instance.grid_tiles.len(),
+            ldtk_layer_instance.auto_layer_tiles.len(),
+            ldtk_layer_instance.int_grid_csv.len(),
         ) {
             ("Entities", _, g, a, i) if g != 0 || a != 0 || i != 0 => {
-                Err(crate::Error::LdtkImportError("Entity layer type can only have entity instance data!".to_string()))
+                Err(crate::Error::LdtkImportError(
+                    "Entity layer type can only have entity instance data!".to_string(),
+                ))
             }
             ("Entities", _, _, _, _) => Ok(Self::Entities(EntitiesLayer {
-                entity_handles: Vec::default(),
+                entity_handles: ldtk_layer_instance
+                    .entity_instances
+                    .iter()
+                    .map(|ldtk_entity_instance| {
+                        Entity::create_handle_pair(
+                            ldtk_entity_instance,
+                            layer_asset_label,
+                            load_context,
+                            project_context,
+                        )
+                    })
+                    .collect::<crate::Result<_>>()?,
             })),
-            ("Tiles", e, _, a, i) if e != 0 || a != 0 || i != 0 => Err(crate::Error::LdtkImportError(
-                "Tiles layer type can only have grid tile data!".to_string(),
-            )),
+
+            ("Tiles", e, _, a, i) if e != 0 || a != 0 || i != 0 => {
+                Err(crate::Error::LdtkImportError(
+                    "Tiles layer type can only have grid tile data!".to_string(),
+                ))
+            }
             ("Tiles", _, _, _, _) => Ok(Self::Tiles(TilesLayer {
-                int_grid: int_grid_csv.to_vec(),
-                tiles: grid_tiles
+                int_grid: ldtk_layer_instance.int_grid_csv.to_vec(),
+                tiles: ldtk_layer_instance
+                    .grid_tiles
                     .iter()
                     .map(TileInstance::new)
                     .collect::<Result<_, _>>()?,
             })),
+
             ("AutoLayer", e, g, _, _) | ("IntGrid", e, g, _, _) if e != 0 || g != 0 => {
-                Err(crate::Error::LdtkImportError("AutoLayer/IntGrid layer types can only have auto layer tile with optional int_grid data!".to_string()))
+                Err(crate::Error::LdtkImportError(
+                    "AutoLayer/IntGrid layer types \
+                        can only have auto layer tile with optional int_grid data!"
+                        .to_string(),
+                ))
             }
             ("AutoLayer", _, _, _, _) | ("IntGrid", _, _, _, _) => Ok(Self::Tiles(TilesLayer {
-                int_grid: int_grid_csv.to_vec(),
-                tiles: auto_layer_tiles
+                int_grid: ldtk_layer_instance.int_grid_csv.to_vec(),
+                tiles: ldtk_layer_instance
+                    .auto_layer_tiles
                     .iter()
                     .map(TileInstance::new)
                     .collect::<Result<_, _>>()?,
             })),
+
             (unknown, _, _, _, _) => Err(crate::Error::LdtkImportError(format!(
                 "Unknown layer type! given: {unknown}"
             ))),
@@ -99,16 +121,17 @@ pub struct Layer {
 }
 
 impl Layer {
-    pub(crate) fn new(
+    pub(crate) fn create_handle_pair(
         value: &ldtk::LayerInstance,
         index: usize,
-        //parent_path: &str,
+        level_asset_path: &LevelAssetPath,
         load_context: &mut LoadContext,
         project_context: &ProjectContext,
-    ) -> crate::Result<Self> {
+    ) -> crate::Result<(Iid, Handle<Self>)> {
         let grid_size = (value.c_wid, value.c_hei).into();
         let grid_cell_size = value.grid_size;
         let identifier = value.identifier.clone();
+        let layer_asset_path = level_asset_path.to_layer_asset_path(&identifier);
         let opacity = value.opacity;
         let total_offset = (
             value.px_total_offset_x as f32,
@@ -117,22 +140,13 @@ impl Layer {
             .into();
         let tileset_def_uid = value.tileset_def_uid;
         let tileset_rel_path = value.tileset_rel_path.clone();
-        let layer_type = LayerType::new(
-            &value.layer_instance_type,
-            &value.entity_instances,
-            &value.grid_tiles,
-            &value.auto_layer_tiles,
-            &value.int_grid_csv,
-            load_context,
-            project_context,
-        )?;
+        let layer_type = LayerType::new(value, &layer_asset_path, load_context, project_context)?;
         let iid = Iid::from_str(&value.iid)?;
         let layer_def_uid = value.layer_def_uid;
         let level_id = value.level_id;
         let location = (value.px_offset_x as f32, -value.px_total_offset_y as f32).into();
-        //let parent_path = parent_path.to_string();
 
-        Ok(Layer {
+        let layer = Layer {
             grid_size,
             grid_cell_size,
             identifier,
@@ -146,8 +160,13 @@ impl Layer {
             level_id,
             location,
             index,
-            //parent_path,
-        })
+        }
+        .into();
+
+        let handle =
+            load_context.add_loaded_labeled_asset(layer_asset_path.to_asset_label(), layer);
+
+        Ok((iid, handle))
     }
 }
 

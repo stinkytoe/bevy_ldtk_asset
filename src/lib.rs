@@ -13,6 +13,7 @@ pub mod enum_definition;
 pub mod error;
 pub mod field_instance;
 pub mod iid;
+pub mod label;
 pub mod layer;
 pub mod ldtk_asset_traits;
 pub mod level;
@@ -37,6 +38,7 @@ pub mod prelude {
     pub use crate::tile_instance::TileInstance;
     pub use crate::tileset_definition::{EnumTagValue, TileCustomMetadata, TilesetDefinition};
     pub use crate::tileset_rectangle::TilesetRectangle;
+    pub use crate::uid::{Uid, UidMap, UidSet};
 
     pub mod ldtk_asset {
         pub use crate::entity::Entity;

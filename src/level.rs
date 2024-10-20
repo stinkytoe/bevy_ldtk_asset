@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use bevy::asset::{Asset, LoadContext};
+use bevy::asset::{Asset, Handle, LoadContext};
 use bevy::color::Color;
 use bevy::math::{Rect, Vec2};
 use bevy::reflect::Reflect;
@@ -8,9 +8,11 @@ use bevy::reflect::Reflect;
 use crate::color::bevy_color_from_ldtk_string;
 use crate::field_instance::FieldInstance;
 use crate::iid::Iid;
+use crate::label::WorldAssetPath;
 use crate::layer::Layer;
 use crate::ldtk;
 use crate::ldtk_asset_traits::{HasIdentifier, HasIid, LdtkAsset};
+use crate::prelude::IidMap;
 use crate::project_loader::ProjectContext;
 use crate::uid::Uid;
 
@@ -118,15 +120,18 @@ pub struct Level {
     pub uid: Uid, // TODO: do we need this?
     pub world_depth: i64,
     pub location: Vec2,
-    pub layers: Vec<Layer>,
+    pub layers: IidMap<Handle<Layer>>,
+    pub index: usize,
 }
 
 impl Level {
-    pub(crate) fn new(
+    pub(crate) fn create_handle_pair(
         value: &ldtk::Level,
-        _load_context: &mut LoadContext,
-        _project_context: &ProjectContext,
-    ) -> crate::Result<Self> {
+        index: usize,
+        world_asset_path: &WorldAssetPath,
+        load_context: &mut LoadContext,
+        project_context: &ProjectContext,
+    ) -> crate::Result<(Iid, Handle<Self>)> {
         let bg_color = bevy_color_from_ldtk_string(&value.bg_color)?;
         let bg_pos: Option<LevelBackgroundPosition> = match value.bg_pos.as_ref() {
             Some(bg_pos) => Some(LevelBackgroundPosition::new(bg_pos)?),
@@ -150,6 +155,8 @@ impl Level {
         let world_depth = value.world_depth;
         let location = (value.world_x as f32, -value.world_y as f32).into();
 
+        let level_asset_path = world_asset_path.to_level_asset_path(&identifier);
+
         let layer_instances =
             value
                 .layer_instances
@@ -162,20 +169,20 @@ impl Level {
 
         let layers = layer_instances
             .iter()
-            .map(|ldtk_layer_instance| {
-                //let level_iid = Iid::from_str(&ldtk_level.iid)?;
-                //let level_label = format!("{}/{}", ldtk_world.identifier, ldtk_level.identifier);
-                //let level = Level::new(ldtk_level, load_context, project_context)?.into();
-                //let handle = load_context.add_loaded_labeled_asset(level_label, level);
-                //Ok((level_iid, handle))
-                let layer_iid = Iid::from_str(&ldtk_layer_instance.iid)?;
-                //let layer_label = format!("{}/{}", )
-                //
-                todo!()
+            .rev()
+            .enumerate()
+            .map(|(index, ldtk_layer_instance)| {
+                Layer::create_handle_pair(
+                    ldtk_layer_instance,
+                    index,
+                    &level_asset_path,
+                    load_context,
+                    project_context,
+                )
             })
             .collect::<crate::Result<_>>()?;
 
-        Ok(Level {
+        let level = Level {
             bg_color,
             bg_pos,
             neighbours,
@@ -188,7 +195,14 @@ impl Level {
             world_depth,
             location,
             layers,
-        })
+            index,
+        }
+        .into();
+
+        let handle =
+            load_context.add_loaded_labeled_asset(level_asset_path.to_asset_label(), level);
+
+        Ok((iid, handle))
     }
 }
 

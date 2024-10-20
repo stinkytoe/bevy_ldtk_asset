@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use bevy::asset::Asset;
+use bevy::asset::{Asset, Handle, LoadContext};
 use bevy::color::Color;
 use bevy::math::{I64Vec2, Vec2};
 use bevy::reflect::Reflect;
@@ -10,8 +10,10 @@ use crate::anchor::bevy_anchor_from_ldtk;
 use crate::color::bevy_color_from_ldtk_string;
 use crate::field_instance::FieldInstance;
 use crate::iid::Iid;
+use crate::label::LayerAssetPath;
 use crate::ldtk;
 use crate::ldtk_asset_traits::{HasIdentifier, HasIid, LdtkAsset};
+use crate::project_loader::ProjectContext;
 use crate::tileset_rectangle::TilesetRectangle;
 
 #[derive(Asset, Debug, Reflect)]
@@ -32,7 +34,12 @@ pub struct Entity {
 }
 
 impl Entity {
-    pub(crate) fn new(value: &ldtk::EntityInstance) -> crate::Result<Self> {
+    pub(crate) fn create_handle_pair(
+        value: &ldtk::EntityInstance,
+        layer_asset_path: &LayerAssetPath,
+        load_context: &mut LoadContext,
+        _project_context: &ProjectContext,
+    ) -> crate::Result<(Iid, Handle<Self>)> {
         let identifier = value.identifier.clone();
         let iid = Iid::from_str(&value.iid)?;
         let grid = (value.grid.len() == 2)
@@ -74,7 +81,9 @@ impl Entity {
                 value.grid
             )))?;
 
-        Ok(Self {
+        let entity_asset_path = layer_asset_path.to_entity_asset_path(&identifier, iid);
+
+        let entity = Self {
             identifier,
             iid,
             grid,
@@ -87,7 +96,13 @@ impl Entity {
             field_instances,
             size,
             location,
-        })
+        }
+        .into();
+
+        let handle =
+            load_context.add_loaded_labeled_asset(entity_asset_path.to_asset_label(), entity);
+
+        Ok((iid, handle))
     }
 }
 
