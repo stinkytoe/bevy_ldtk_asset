@@ -18,3 +18,5 @@ pub enum Error {
     #[error("Failure importing ldtk file! {0}")]
     LdtkImportError(String),
 }
+
+pub type Result<T> = core::result::Result<T, Error>;

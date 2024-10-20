@@ -3,20 +3,19 @@ use std::str::FromStr;
 
 use bevy::asset::AssetLoader;
 use bevy::asset::AsyncReadExt;
+use bevy::asset::Handle;
 use bevy::log::debug;
-use bevy::log::trace;
-use bevy::tasks::block_on;
 
-use crate::entity::Entity;
-use crate::error::Error;
 use crate::iid::Iid;
 use crate::iid::IidMap;
-use crate::layer::Layer;
 use crate::ldtk;
-use crate::ldtk_path::ldtk_path_to_bevy_path;
-use crate::level::Level;
 use crate::project::Project;
 use crate::world::World;
+
+pub(crate) struct ProjectContext<'a> {
+    pub(crate) project_directory: &'a Path,
+    pub(crate) external_levels: bool,
+}
 
 #[derive(Default)]
 pub(crate) struct ProjectLoader;
@@ -26,7 +25,7 @@ impl AssetLoader for ProjectLoader {
 
     type Settings = ();
 
-    type Error = Error;
+    type Error = crate::Error;
 
     fn load<'a>(
         &'a self,
@@ -45,40 +44,40 @@ impl AssetLoader for ProjectLoader {
 
             let project_directory = project_path
                 .parent()
-                .ok_or(Error::LdtkImportError(
+                .ok_or(crate::Error::LdtkImportError(
                     "Unable to get project_directory!".to_string(),
                 ))?
                 .to_path_buf();
 
             let project_path = project_path
                 .to_str()
-                .ok_or(Error::LdtkImportError(format!(
+                .ok_or(crate::Error::LdtkImportError(format!(
                     "Could not convert project path to str! given: {:?}",
                     project_path
                 )))?
                 .to_string();
 
-            debug!("Loading LDtk project: {:?}", project_path);
+            debug!("Loading LDtk project: {project_path}");
 
             let project_iid = Iid::from_str(&ldtk_project.iid)?;
 
             let json_version = ldtk_project.json_version.clone();
 
             if json_version != "1.5.3" {
-                return Err(Error::LdtkImportError(format!(
+                return Err(crate::Error::LdtkImportError(format!(
                     "Bad LDtk JSON version! expected: 1.5.3 given: {json_version}"
                 )));
             }
 
             let ldtk_worlds = if ldtk_project.worlds.is_empty() {
-                vec![ldtk::World {
+                &[ldtk::World {
                     default_level_height: ldtk_project.default_level_height.ok_or(
-                        Error::LdtkImportError(
+                        crate::Error::LdtkImportError(
                             "default_level_height is None in single world project?".to_string(),
                         ),
                     )?,
                     default_level_width: ldtk_project.default_level_width.ok_or(
-                        Error::LdtkImportError(
+                        crate::Error::LdtkImportError(
                             "default_level_width is None in single world project?".to_string(),
                         ),
                     )?,
@@ -86,203 +85,43 @@ impl AssetLoader for ProjectLoader {
                     iid: ldtk_project.iid,
                     levels: ldtk_project.levels,
                     world_grid_height: ldtk_project.world_grid_width.ok_or(
-                        Error::LdtkImportError(
+                        crate::Error::LdtkImportError(
                             "world_grid_height is None in single world project?".to_string(),
                         ),
                     )?,
                     world_grid_width: ldtk_project.world_grid_width.ok_or(
-                        Error::LdtkImportError(
+                        crate::Error::LdtkImportError(
                             "world_grid_width is None in single world project?".to_string(),
                         ),
                     )?,
                     world_layout: ldtk_project.world_layout,
                 }]
             } else {
-                ldtk_project.worlds
+                ldtk_project.worlds.as_slice()
             };
 
-            let mut worlds = IidMap::new();
-            let mut levels = IidMap::new();
-            let mut layers = IidMap::new();
-            let mut entities = IidMap::new();
+            let project_load_context = ProjectContext {
+                project_directory: &project_directory,
+                external_levels: ldtk_project.external_levels,
+            };
 
-            let mut parent_map = IidMap::new();
-
-            macro_rules! entity_inner {
-                ($layer_iid:expr, $layer_path: expr, $layer_label: expr, $ldtk_entity:expr) => {{
-                    let entity = Entity::new($ldtk_entity, $layer_path)?;
-                    let entity_label = format!(
-                        "{}/{}@{}",
-                        $layer_label, entity.identifier, $ldtk_entity.iid
-                    );
-                    let entity_iid = entity.iid;
-                    parent_map.insert(entity_iid, $layer_iid);
-                    trace!("Entity loaded: {entity_label}");
-
-                    let entity_handle =
-                        load_context.add_loaded_labeled_asset(entity_label, entity.into());
-                    entities.insert(entity_iid, entity_handle);
-
-                    Ok(())
-                }};
-            }
-
-            macro_rules! layer_inner {
-                ($level_iid:expr, $level_path:expr, $level_label:expr, $index:expr, $ldtk_layer:expr) => {{
-                    let layer = Layer::new($ldtk_layer, $index, $level_path)?;
-                    let layer_label = format!("{}/{}", $level_label, layer.identifier);
-                    let layer_iid = layer.iid;
-                    let layer_path = format!("{project_path}#{layer_label}");
-                    parent_map.insert(layer_iid, $level_iid);
-                    trace!("Layer loaded: {layer_label}");
-
-                    $ldtk_layer.entity_instances.iter().try_for_each(
-                        |ldtk_entity| -> Result<(), Error> {
-                            entity_inner!(layer_iid, &layer_path, &layer_label, ldtk_entity)
-                        },
-                    )?;
-
-                    let layer_handle =
-                        load_context.add_loaded_labeled_asset(layer_label, layer.into());
-                    layers.insert(layer_iid, layer_handle);
-
-                    Ok(())
-                }};
-            }
-
-            macro_rules! level_inner {
-                ($world_iid:expr, $world_path:expr, $world_label:expr,  $ldtk_level:expr) => {{
-                    let level = Level::new($ldtk_level, $world_path)?;
-                    let level_label = format!("{}/{}", $world_label, level.identifier);
-                    let level_iid = level.iid;
-                    let level_path = format!("{project_path}#{level_label}");
-                    parent_map.insert(level_iid, $world_iid);
-                    trace!("Level loaded: {level_label}");
-
-                    $ldtk_level
-                        .layer_instances
-                        .as_ref()
-                        .ok_or(Error::LdtkImportError(
-                            "layer_instances is None!".to_string(),
-                        ))?
-                        .iter()
-                        .rev()
-                        .enumerate()
-                        .try_for_each(|(index, ldtk_layer)| -> Result<(), Error> {
-                            layer_inner!(level_iid, &level_path, &level_label, index, ldtk_layer)
-                        })?;
-
-                    let level_handle =
-                        load_context.add_loaded_labeled_asset(level_label, level.into());
-                    levels.insert(level_iid, level_handle);
-
-                    Ok(())
-                }};
-            }
-
-            ldtk_worlds
+            let worlds = ldtk_worlds
                 .iter()
-                .try_for_each(|ldtk_world| -> Result<_, Error> {
-                    let world = World::new(ldtk_world, &project_path)?;
-                    let world_label = world.identifier.clone();
-                    let world_iid = world.iid;
-                    let world_path = format!("{project_path}#{world_label}");
-                    parent_map.insert(world_iid, project_iid);
-                    trace!("World loaded: {}", world_label);
-
-                    let ldtk_levels = if ldtk_project.external_levels {
-                        &ldtk_world
-                            .levels
-                            .iter()
-                            .map(|ldtk_level| -> Result<ldtk::Level, Error> {
-                                let external_rel_path = ldtk_level
-                                    .external_rel_path
-                                    .as_ref()
-                                    .ok_or(Error::LdtkImportError(
-                                        "external_rel_path is None when external_levels is true!"
-                                            .to_string(),
-                                    ))?;
-
-                                trace!("Attempting to load external level from path: {external_rel_path}");
-
-                                let ldtk_path = Path::new(external_rel_path);
-                                let bevy_path =
-                                    ldtk_path_to_bevy_path(&project_directory, ldtk_path);
-                                let bytes = block_on(async {
-                                    load_context.read_asset_bytes(bevy_path).await
-                                })?;
-                                let level: ldtk::Level = serde_json::from_slice(&bytes)?;
-                                Ok(level)
-                            })
-                            .collect::<Result<_, _>>()?
-                    } else {
-                        &ldtk_world.levels
-                    };
-
-                    ldtk_levels
-                        .iter()
-                        .try_for_each(|ldtk_level| -> Result<(), Error> {
-                            level_inner!(world_iid, &world_path, &world_label, ldtk_level)
-                        })?;
-
-                    let world_handle =
-                        load_context.add_loaded_labeled_asset(world_label, world.into());
-                    worlds.insert(world_iid, world_handle);
-
-                    Ok(())
-                })?;
-
-            let tilesets = ldtk_project
-                .defs
-                .tilesets
-                .iter()
-                .filter_map(|tileset| {
-                    tileset.rel_path.as_ref().map(|ldtk_path| {
-                        (
-                            tileset.uid,
-                            ldtk_path_to_bevy_path(&project_directory, ldtk_path),
-                        )
-                    })
+                .map(|ldtk_world| {
+                    let world_iid = Iid::from_str(&ldtk_world.iid)?;
+                    let world_label = ldtk_world.identifier.clone();
+                    let world = World::new(ldtk_world, load_context, &project_load_context)?.into();
+                    let handle = load_context.add_loaded_labeled_asset(world_label, world);
+                    Ok((world_iid, handle))
                 })
-                .map(|(uid, path)| (uid, load_context.load(path)))
-                .collect();
+                .collect::<crate::Result<IidMap<Handle<World>>>>()?;
 
-            let tileset_definitions = ldtk_project
-                .defs
-                .tilesets
-                .into_iter()
-                .map(|tileset_definition| tileset_definition.into())
-                .collect();
-
-            let enum_definitions = ldtk_project
-                .defs
-                .enums
-                .into_iter()
-                .map(|enum_definition| enum_definition.into())
-                .collect();
-
-            let mut children_map = IidMap::new();
-            parent_map.iter().for_each(|(&child, &parent)| {
-                children_map
-                    .entry(parent)
-                    .and_modify(|children: &mut Vec<Iid>| children.push(child))
-                    .or_insert(vec![child]);
-            });
-
-            debug!("Loading LDtk project completed! {:?}", project_path);
+            debug!("Loading LDtk project completed! {project_path}");
 
             Ok(Project {
                 iid: project_iid,
                 json_version,
                 worlds,
-                levels,
-                layers,
-                entities,
-                parent_map,
-                children_map,
-                tilesets,
-                tileset_definitions,
-                enum_definitions,
             })
         })
     }

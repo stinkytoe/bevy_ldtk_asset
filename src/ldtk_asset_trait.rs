@@ -1,4 +1,4 @@
-use bevy::asset::{Asset, AssetPath};
+use bevy::asset::Asset;
 
 use crate::iid::Iid;
 
@@ -8,6 +8,6 @@ where
 {
     fn iid(&self) -> Iid;
     fn identifier(&self) -> &str;
-    fn parent_path(&self) -> AssetPath;
-    fn children_paths(&self) -> impl Iterator<Item = AssetPath>;
+    //fn parent_path(&self) -> AssetPath;
+    //fn children_paths(&self) -> impl Iterator<Item = AssetPath>;
 }

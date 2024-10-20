@@ -23,9 +23,10 @@ pub mod tileset_definition;
 pub mod tileset_rectangle;
 pub mod world;
 
+pub use error::{Error, Result};
+
 pub mod prelude {
     pub use crate::enum_definition::{EnumDefinition, EnumValueDefinition};
-    pub use crate::error::Error;
     pub use crate::field_instance::{EntityRef, FieldInstance, FieldInstanceType};
     pub use crate::iid::{Iid, IidError, IidMap, IidSet};
     pub use crate::layer::{EntitiesLayer, LayerType, TilesLayer};

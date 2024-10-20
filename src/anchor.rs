@@ -1,11 +1,9 @@
 use bevy::math::Vec2;
 use bevy::sprite::Anchor;
 
-use crate::error::Error;
-
-pub(crate) fn bevy_anchor_from_ldtk(pivot: &[f64]) -> Result<Anchor, Error> {
+pub(crate) fn bevy_anchor_from_ldtk(pivot: &[f64]) -> crate::Result<Anchor> {
     if pivot.len() != 2 {
-        return Err(Error::LdtkImportError(format!(
+        return Err(crate::Error::LdtkImportError(format!(
             "Unable to parse pivot input to bevy Anchor! given: {:?}",
             pivot
         )));

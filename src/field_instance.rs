@@ -5,7 +5,6 @@ use bevy::math::I64Vec2;
 use bevy::reflect::Reflect;
 
 use crate::color::bevy_color_from_ldtk_string;
-use crate::error::Error;
 use crate::iid::Iid;
 use crate::ldtk;
 use crate::tileset_rectangle::TilesetRectangle;
@@ -42,12 +41,12 @@ pub enum FieldInstanceType {
 macro_rules! field_instance_unwrap {
     ($value:expr, $as_type: ident, $field_instance_type:ident) => {
         $value
-            .ok_or(Error::LdtkImportError(format!(
+            .ok_or(crate::Error::LdtkImportError(format!(
                 "Value is None when trying to parse a Field Instance of type {}!",
                 $field_instance_type
             )))?
             .$as_type()
-            .ok_or(Error::LdtkImportError(format!(
+            .ok_or(crate::Error::LdtkImportError(format!(
                 "Value could not be coerced into type {}!",
                 stringify!($variant),
             )))?
@@ -57,11 +56,15 @@ macro_rules! field_instance_unwrap {
 macro_rules! field_instance_option_unwrap {
     ($value:expr, $as_type:ident, $field_instance_type:ident) => {
         if let Some(value) = $value {
-            Some(value.$as_type().ok_or(Error::LdtkImportError(format!(
-                "Could not convert using {} for field instance of type {}!",
-                stringify!($as_type),
-                $field_instance_type
-            )))?)
+            Some(
+                value
+                    .$as_type()
+                    .ok_or(crate::Error::LdtkImportError(format!(
+                        "Could not convert using {} for field instance of type {}!",
+                        stringify!($as_type),
+                        $field_instance_type
+                    )))?,
+            )
         } else {
             None
         }
@@ -71,12 +74,12 @@ macro_rules! field_instance_option_unwrap {
 macro_rules! field_instance_map_unwrap {
     ($map:expr, $key:expr, $field_type:expr, $as_type: ident) => {
         $map.get($key)
-            .ok_or(Error::LdtkImportError(format!(
+            .ok_or(crate::Error::LdtkImportError(format!(
                 "Field {} not in object for field instance type {}",
                 $key, $field_type
             )))?
             .$as_type()
-            .ok_or(Error::LdtkImportError(format!(
+            .ok_or(crate::Error::LdtkImportError(format!(
                 "Could not parse with {} for field {} in {}!",
                 stringify!($as_type),
                 $key,
@@ -89,13 +92,13 @@ impl FieldInstanceType {
     pub(crate) fn new(
         field_instance_type: &str,
         value: Option<&serde_json::Value>,
-    ) -> Result<Self, Error> {
+    ) -> crate::Result<Self> {
         match field_instance_type {
             "Array<Int>" => Ok(Self::ArrayInt(
                 field_instance_unwrap!(value, as_array, field_instance_type)
                     .iter()
                     .map(|value| {
-                        value.as_i64().ok_or(Error::LdtkImportError(
+                        value.as_i64().ok_or(crate::Error::LdtkImportError(
                             "Could not parse array item with as_i64!".to_string(),
                         ))
                     })
@@ -104,10 +107,10 @@ impl FieldInstanceType {
             "Array<LocalEnum.SomeEnum>" => Ok(Self::ArrayLocalEnumSomeEnum(
                 field_instance_unwrap!(value, as_array, field_instance_type)
                     .iter()
-                    .map(|value| -> Result<_, Error> {
+                    .map(|value| -> crate::Result<_> {
                         Ok(value
                             .as_str()
-                            .ok_or(Error::LdtkImportError(
+                            .ok_or(crate::Error::LdtkImportError(
                                 "Could not parse array item as str!".to_string(),
                             ))?
                             .to_string())
@@ -117,10 +120,10 @@ impl FieldInstanceType {
             "Array<Multilines>" => Ok(Self::ArrayMultilines(
                 field_instance_unwrap!(value, as_array, field_instance_type)
                     .iter()
-                    .map(|value| -> Result<_, Error> {
+                    .map(|value| -> crate::Result<_> {
                         Ok(value
                             .as_str()
-                            .ok_or(Error::LdtkImportError(
+                            .ok_or(crate::Error::LdtkImportError(
                                 "Could not parse array item as str!".to_string(),
                             ))?
                             .to_string())
@@ -130,7 +133,7 @@ impl FieldInstanceType {
             "Array<Point>" => Ok(Self::ArrayPoint(
                 field_instance_unwrap!(value, as_array, field_instance_type)
                     .iter()
-                    .map(|value| -> Result<_, Error> {
+                    .map(|value| -> crate::Result<_> {
                         let cx = field_instance_map_unwrap!(value, "cx", "Array<Point>", as_i64);
                         let cy = field_instance_map_unwrap!(value, "cy", "Array<Point>", as_i64);
                         Ok((cx, cy).into())
@@ -241,7 +244,7 @@ impl FieldInstanceType {
                 .as_ref()
                 .map(TilesetRectangle::new)
             })),
-            _ => Err(Error::LdtkImportError(format!(
+            _ => Err(crate::Error::LdtkImportError(format!(
                 "Bad/Unknown Field Instance Type! given: {field_instance_type}"
             ))),
         }
@@ -257,7 +260,7 @@ pub struct FieldInstance {
 }
 
 impl FieldInstance {
-    pub(crate) fn new(value: &ldtk::FieldInstance) -> Result<Self, Error> {
+    pub(crate) fn new(value: &ldtk::FieldInstance) -> crate::Result<Self> {
         let identifier = value.identifier.clone();
         let tileset_rectangle = value.tile.as_ref().map(TilesetRectangle::new);
         let field_instance_type =

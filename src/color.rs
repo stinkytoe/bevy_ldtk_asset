@@ -1,12 +1,10 @@
 use bevy::color::Color;
 
-use crate::error::Error;
-
 // Format should be: Hex color "#rrggbb"
 // from: https://ldtk.io/json-2/#ldtk-ProjectJson;bgColor
-pub(crate) fn bevy_color_from_ldtk_string(color: &str) -> Result<Color, Error> {
+pub(crate) fn bevy_color_from_ldtk_string(color: &str) -> crate::Result<Color> {
     if color.len() != 7 {
-        return Err(Error::LdtkImportError(format!(
+        return Err(crate::Error::LdtkImportError(format!(
             "LDtk color field not seven characters! given: {color}"
         )));
     }
@@ -17,7 +15,7 @@ pub(crate) fn bevy_color_from_ldtk_string(color: &str) -> Result<Color, Error> {
     let b = &color[5..7];
 
     if hashmark != "#" {
-        return Err(Error::LdtkImportError(format!(
+        return Err(crate::Error::LdtkImportError(format!(
             "LDtk color field did not start with hash! given: {color}",
         )));
     };

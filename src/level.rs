@@ -1,16 +1,16 @@
 use std::str::FromStr;
 
-use bevy::asset::{Asset, AssetPath};
+use bevy::asset::{Asset, LoadContext};
 use bevy::color::Color;
 use bevy::math::{Rect, Vec2};
 use bevy::reflect::Reflect;
 
 use crate::color::bevy_color_from_ldtk_string;
-use crate::error::Error;
 use crate::field_instance::FieldInstance;
 use crate::iid::Iid;
 use crate::ldtk;
 use crate::ldtk_asset_trait::LdtkAsset;
+use crate::project_loader::ProjectContext;
 
 #[derive(Debug, Reflect)]
 pub enum NeighbourDir {
@@ -28,7 +28,7 @@ pub enum NeighbourDir {
 }
 
 impl NeighbourDir {
-    fn new(dir: &str) -> Result<Self, Error> {
+    fn new(dir: &str) -> crate::Result<Self> {
         match dir {
             "n" => Ok(Self::North),
             "s" => Ok(Self::South),
@@ -41,7 +41,7 @@ impl NeighbourDir {
             "ne" => Ok(Self::NorthEast),
             "sw" => Ok(Self::SouthWest),
             "se" => Ok(Self::SouthEast),
-            _ => Err(Error::LdtkImportError(format!(
+            _ => Err(crate::Error::LdtkImportError(format!(
                 "Bad direction from LDtk neighbor! given: {dir}"
             ))),
         }
@@ -55,7 +55,7 @@ pub struct Neighbour {
 }
 
 impl Neighbour {
-    pub(crate) fn new(value: &ldtk::NeighbourLevel) -> Result<Self, Error> {
+    pub(crate) fn new(value: &ldtk::NeighbourLevel) -> crate::Result<Self> {
         let dir = NeighbourDir::new(&value.dir)?;
         let level_iid = Iid::from_str(&value.level_iid)?;
 
@@ -70,7 +70,7 @@ pub struct LevelBackgroundPosition {
 }
 
 impl LevelBackgroundPosition {
-    pub(crate) fn new(value: &ldtk::LevelBackgroundPosition) -> Result<Self, Error> {
+    pub(crate) fn new(value: &ldtk::LevelBackgroundPosition) -> crate::Result<Self> {
         let crop_rect = (value.crop_rect.len() == 4)
             .then(|| {
                 let p0 = (value.crop_rect[0] as f32, value.crop_rect[1] as f32).into();
@@ -78,19 +78,19 @@ impl LevelBackgroundPosition {
                 let p1 = p0 + size;
                 Rect::from_corners(p0, p1)
             })
-            .ok_or(Error::LdtkImportError(format!(
+            .ok_or(crate::Error::LdtkImportError(format!(
                 "Bad value for crop_rect! given: {:?}",
                 value.crop_rect
             )))?;
         let scale = (value.scale.len() == 2)
             .then(|| (value.scale[0] as f32, value.scale[1] as f32).into())
-            .ok_or(Error::LdtkImportError(format!(
+            .ok_or(crate::Error::LdtkImportError(format!(
                 "Bad value for scale! given: {:?}",
                 value.crop_rect
             )))?;
         let corner = (value.top_left_px.len() == 2)
             .then(|| (value.top_left_px[0] as f32, value.top_left_px[1] as f32).into())
-            .ok_or(Error::LdtkImportError(format!(
+            .ok_or(crate::Error::LdtkImportError(format!(
                 "Bad value for corner! given: {:?}",
                 value.crop_rect
             )))?;
@@ -116,12 +116,14 @@ pub struct Level {
     pub uid: i64, // TODO: do we need this?
     pub world_depth: i64,
     pub location: Vec2,
-    pub parent_path: String,
-    pub children_paths: Vec<String>,
 }
 
 impl Level {
-    pub(crate) fn new(value: &ldtk::Level, parent_path: &str) -> Result<Self, Error> {
+    pub(crate) fn new(
+        value: &ldtk::Level,
+        _load_context: &mut LoadContext,
+        _project_context: &ProjectContext,
+    ) -> crate::Result<Self> {
         let bg_color = bevy_color_from_ldtk_string(&value.bg_color)?;
         let bg_pos: Option<LevelBackgroundPosition> = match value.bg_pos.as_ref() {
             Some(bg_pos) => Some(LevelBackgroundPosition::new(bg_pos)?),
@@ -144,14 +146,6 @@ impl Level {
         let uid = value.uid;
         let world_depth = value.world_depth;
         let location = (value.world_x as f32, -value.world_y as f32).into();
-        let parent_path = parent_path.to_string();
-        let children_paths = value
-            .layer_instances
-            .as_ref()
-            .ok_or(Error::LdtkImportError("".to_string()))?
-            .iter()
-            .map(|layer| format!("{parent_path}/{}/{}", value.identifier, layer.identifier))
-            .collect();
 
         Ok(Level {
             bg_color,
@@ -161,13 +155,10 @@ impl Level {
             field_instances,
             identifier,
             iid,
-            //layer_instances,
             size,
             uid,
             world_depth,
             location,
-            parent_path,
-            children_paths,
         })
     }
 }
@@ -181,11 +172,11 @@ impl LdtkAsset for Level {
         &self.identifier
     }
 
-    fn parent_path(&self) -> bevy::asset::AssetPath {
-        AssetPath::from(&self.parent_path)
-    }
-
-    fn children_paths(&self) -> impl Iterator<Item = bevy::asset::AssetPath> {
-        self.children_paths.iter().map(AssetPath::from)
-    }
+    //fn parent_path(&self) -> bevy::asset::AssetPath {
+    //    AssetPath::from(&self.parent_path)
+    //}
+    //
+    //fn children_paths(&self) -> impl Iterator<Item = bevy::asset::AssetPath> {
+    //    self.children_paths.iter().map(AssetPath::from)
+    //}
 }
