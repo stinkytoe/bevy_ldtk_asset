@@ -33,11 +33,11 @@ impl Plugin for BevyLdtkAssetPlugin {
             app.add_systems(
                 Update,
                 (
-                    ldtk_project_debug_output,
-                    ldtk_asset_debug_output::<Entity>,
-                    ldtk_asset_debug_output::<Layer>,
-                    ldtk_asset_debug_output::<Level>,
-                    ldtk_asset_debug_output::<World>,
+                    project_asset_events_debug_output,
+                    ldtk_asset_events_debug_output::<Entity>,
+                    ldtk_asset_events_debug_output::<Layer>,
+                    ldtk_asset_events_debug_output::<Level>,
+                    ldtk_asset_events_debug_output::<World>,
                 ),
             );
         }
