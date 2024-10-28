@@ -1,8 +1,8 @@
-use bevy::asset::Asset;
+use bevy::asset::{Asset, Handle};
 
 use crate::iid::Iid;
 
-pub trait LdtkAsset: Asset {}
+pub trait LdtkAsset: Asset + Sized {}
 
 pub trait HasIid
 where
@@ -15,8 +15,11 @@ pub trait HasIdentifier {
     fn identifier(&self) -> &str;
 }
 
-pub trait HasChildren {
-    type Child: LdtkAsset;
+pub trait HasChildren
+where
+    Self: Sized,
+{
+    type Child: LdtkAsset + Sized;
 
-    fn children(&self) -> impl Iterator<Item = &Self::Child>;
+    fn children(&self) -> impl Iterator<Item = &Handle<Self::Child>>;
 }

@@ -11,7 +11,7 @@ use crate::iid::Iid;
 use crate::label::WorldAssetPath;
 use crate::layer::Layer;
 use crate::ldtk;
-use crate::ldtk_asset_traits::{HasIdentifier, HasIid, LdtkAsset};
+use crate::ldtk_asset_traits::{HasChildren, HasIdentifier, HasIid, LdtkAsset};
 use crate::prelude::IidMap;
 use crate::project_loader::ProjectContext;
 use crate::uid::Uid;
@@ -217,5 +217,13 @@ impl HasIid for Level {
 impl HasIdentifier for Level {
     fn identifier(&self) -> &str {
         &self.identifier
+    }
+}
+
+impl HasChildren for Level {
+    type Child = Layer;
+
+    fn children(&self) -> impl Iterator<Item = &Handle<Self::Child>> {
+        self.layers.values()
     }
 }

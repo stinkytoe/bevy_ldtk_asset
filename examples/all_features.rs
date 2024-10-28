@@ -6,6 +6,8 @@ use bevy::{
     prelude::*,
 };
 
+use bevy_ldtk_asset::prelude::*;
+
 fn main() {
     App::new()
         .add_plugins((
@@ -26,9 +28,15 @@ fn main() {
         .run();
 }
 
-fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    //commands.spawn(Camera2dBundle::default());
+#[derive(Component, Debug, Reflect)]
+pub struct LdtkProject {
+    project: Handle<ldtk_asset::Project>,
+}
 
-    commands
-        .spawn(asset_server.load::<bevy_ldtk_asset::project::Project>("ldtk/all_features.ldtk"));
+fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands.spawn(Camera2d);
+
+    commands.spawn(LdtkProject {
+        project: asset_server.load::<bevy_ldtk_asset::project::Project>("ldtk/all_features.ldtk"),
+    });
 }
