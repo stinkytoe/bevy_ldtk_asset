@@ -4,6 +4,7 @@ use bevy::reflect::Reflect;
 
 use crate::iid::Iid;
 use crate::iid::IidMap;
+use crate::ldtk_asset_traits::HasChildren;
 use crate::world::World;
 
 #[derive(Asset, Debug, Reflect)]
@@ -23,4 +24,12 @@ pub struct Project {
     //
     //pub tileset_definitions: HashMap<i64, TilesetDefinition>,
     //pub enum_definitions: HashMap<i64, EnumDefinition>,
+}
+
+impl HasChildren for Project {
+    type Child = World;
+
+    fn children(&self) -> impl Iterator<Item = &Handle<Self::Child>> {
+        self.worlds.values()
+    }
 }

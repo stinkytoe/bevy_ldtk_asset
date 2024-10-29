@@ -4,7 +4,7 @@ pub(crate) mod asset_events_debug {
     use bevy::log::debug;
     use bevy::prelude::EventReader;
 
-    use crate::ldtk_asset_traits::{HasIdentifier, LdtkAsset};
+    use crate::ldtk_asset_traits::LdtkAsset;
     use crate::project::Project;
 
     pub(crate) fn project_asset_events_debug_output(
@@ -15,7 +15,7 @@ pub(crate) mod asset_events_debug {
             .for_each(|event| debug!("AssetEvent: {event:?}"));
     }
 
-    pub(crate) fn ldtk_asset_events_debug_output<A: LdtkAsset + HasIdentifier>(
+    pub(crate) fn ldtk_asset_events_debug_output<A: LdtkAsset>(
         mut events: EventReader<AssetEvent<A>>,
     ) {
         events

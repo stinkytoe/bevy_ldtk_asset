@@ -12,7 +12,7 @@ use crate::field_instance::FieldInstance;
 use crate::iid::Iid;
 use crate::label::LayerAssetPath;
 use crate::ldtk;
-use crate::ldtk_asset_traits::{HasIdentifier, HasIid, LdtkAsset};
+use crate::ldtk_asset_traits::LdtkAsset;
 use crate::project_loader::ProjectContext;
 use crate::tileset_rectangle::TilesetRectangle;
 
@@ -106,16 +106,12 @@ impl Entity {
     }
 }
 
-impl LdtkAsset for Entity {}
-
-impl HasIid for Entity {
-    fn iid(&self) -> Iid {
-        self.iid
-    }
-}
-
-impl HasIdentifier for Entity {
+impl LdtkAsset for Entity {
     fn identifier(&self) -> &str {
         &self.identifier
+    }
+
+    fn iid(&self) -> Iid {
+        self.iid
     }
 }

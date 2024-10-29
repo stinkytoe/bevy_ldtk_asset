@@ -3,12 +3,13 @@ use std::str::FromStr;
 use bevy::asset::{Asset, Handle, LoadContext};
 use bevy::math::{I64Vec2, Vec2};
 use bevy::reflect::Reflect;
+use bevy::utils::HashMap;
 
 use crate::entity::Entity;
 use crate::iid::{Iid, IidMap};
 use crate::label::{LayerAssetPath, LevelAssetPath};
 use crate::ldtk;
-use crate::ldtk_asset_traits::{HasIdentifier, HasIid, LdtkAsset};
+use crate::ldtk_asset_traits::{HasChildren, LdtkAsset};
 use crate::project_loader::ProjectContext;
 use crate::tile_instance::TileInstance;
 
@@ -117,7 +118,10 @@ pub struct Layer {
     pub level_id: i64,
     pub location: Vec2,
     pub index: usize,
-    //pub parent_path: String,
+    // TODO: hackhackhack! This is meant to always remain empty, so that we have something
+    // to generate a Values iterator with if the layer_type is such that it doesn't contain
+    // entities!
+    pub stub: IidMap<Handle<Entity>>,
 }
 
 impl Layer {
@@ -145,6 +149,7 @@ impl Layer {
         let layer_def_uid = value.layer_def_uid;
         let level_id = value.level_id;
         let location = (value.px_offset_x as f32, -value.px_total_offset_y as f32).into();
+        let stub = HashMap::default();
 
         let layer = Layer {
             grid_size,
@@ -160,6 +165,7 @@ impl Layer {
             level_id,
             location,
             index,
+            stub,
         }
         .into();
 
@@ -170,16 +176,25 @@ impl Layer {
     }
 }
 
-impl LdtkAsset for Layer {}
+impl LdtkAsset for Layer {
+    fn identifier(&self) -> &str {
+        &self.identifier
+    }
 
-impl HasIid for Layer {
     fn iid(&self) -> Iid {
         self.iid
     }
 }
 
-impl HasIdentifier for Layer {
-    fn identifier(&self) -> &str {
-        &self.identifier
+impl HasChildren for Layer {
+    type Child = Entity;
+
+    fn children(&self) -> impl Iterator<Item = &Handle<Self::Child>> {
+        match &self.layer_type {
+            LayerType::Entities(entities) => entities.entity_handles.values(),
+            LayerType::IntGrid(_) | LayerType::Tiles(_) | LayerType::AutoLayer(_) => {
+                self.stub.values()
+            }
+        }
     }
 }
