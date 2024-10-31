@@ -15,13 +15,13 @@ use crate::tile_instance::TileInstance;
 
 #[derive(Debug, Reflect)]
 pub struct EntitiesLayer {
-    entity_handles: IidMap<Handle<Entity>>,
+    pub entity_handles: IidMap<Handle<Entity>>,
 }
 
 #[derive(Debug, Reflect)]
 pub struct TilesLayer {
-    int_grid: Vec<i64>,
-    tiles: Vec<TileInstance>,
+    pub int_grid: Vec<i64>,
+    pub tiles: Vec<TileInstance>,
 }
 
 #[derive(Debug, Reflect)]
