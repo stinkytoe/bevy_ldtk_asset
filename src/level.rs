@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use bevy::asset::{Asset, Handle, LoadContext};
 use bevy::color::Color;
-use bevy::math::{Rect, Vec2};
+use bevy::math::Vec2;
 use bevy::reflect::Reflect;
 use bevy::render::texture::Image;
 
@@ -71,7 +71,8 @@ impl Neighbour {
 #[derive(Clone, Debug, Reflect)]
 pub struct LevelBackground {
     pub image: Handle<Image>,
-    pub crop_rect: Rect,
+    pub crop_corner: Vec2,
+    pub crop_size: Vec2,
     pub scale: Vec2,
     pub corner: Vec2,
 }
@@ -81,15 +82,14 @@ impl LevelBackground {
         value: &ldtk::LevelBackgroundPosition,
         image: Handle<Image>,
     ) -> crate::Result<Self> {
-        let crop_rect = (value.crop_rect.len() == 4)
+        let (crop_corner, crop_size) = (value.crop_rect.len() == 4)
             .then(|| {
-                let p0 = (value.crop_rect[0] as f32, value.crop_rect[1] as f32).into();
-                let size = Vec2::new(value.crop_rect[2] as f32, value.crop_rect[3] as f32);
-                let p1 = p0 + size;
-                Rect::from_corners(p0, p1)
+                let crop_corner = (value.crop_rect[0] as f32, value.crop_rect[1] as f32).into();
+                let crop_size = Vec2::new(value.crop_rect[2] as f32, value.crop_rect[3] as f32);
+                (crop_corner, crop_size)
             })
             .ok_or(crate::Error::LdtkImportError(format!(
-                "Bad value for crop_rect! given: {:?}",
+                "Bad value for crop! given: {:?}",
                 value.crop_rect
             )))?;
         let scale = (value.scale.len() == 2)
@@ -107,7 +107,8 @@ impl LevelBackground {
 
         Ok(Self {
             image,
-            crop_rect,
+            crop_corner,
+            crop_size,
             scale,
             corner,
         })

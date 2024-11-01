@@ -32,7 +32,7 @@ path = "examples/example.rs"
 
 [dependencies]
 #bevy = "0.14"
-bevy = { git = "https://github.com/bevyengine/bevy", tag = "v0.15.0-rc.2" }
+bevy = { git = "https://github.com/bevyengine/bevy", branch = "main" }
 path-clean = "1.0"
 serde = "1.0"
 serde_json = "1.0"
