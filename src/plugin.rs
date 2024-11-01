@@ -3,7 +3,7 @@ use bevy::prelude::*;
 use crate::entity::Entity;
 use crate::iid::Iid;
 use crate::layer::Layer;
-use crate::level::Level;
+use crate::level::{Level, LevelBackground};
 use crate::project::Project;
 use crate::project_loader::ProjectLoader;
 use crate::world::World;
@@ -25,7 +25,8 @@ impl Plugin for BevyLdtkAssetPlugin {
             .register_asset_reflect::<Level>()
             .register_asset_reflect::<Layer>()
             .register_asset_reflect::<Entity>()
-            .register_type::<Iid>();
+            .register_type::<Iid>()
+            .register_type::<LevelBackground>();
 
         #[cfg(feature = "asset_events_debug")]
         {

@@ -4,6 +4,7 @@ use bevy::asset::{Asset, Handle, LoadContext};
 use bevy::color::Color;
 use bevy::math::{Rect, Vec2};
 use bevy::reflect::Reflect;
+use bevy::render::texture::Image;
 
 use crate::color::bevy_color_from_ldtk_string;
 use crate::field_instance::FieldInstance;
@@ -12,6 +13,7 @@ use crate::label::WorldAssetPath;
 use crate::layer::Layer;
 use crate::ldtk;
 use crate::ldtk_asset_traits::{HasChildren, LdtkAsset};
+use crate::ldtk_path::ldtk_path_to_bevy_path;
 use crate::prelude::IidMap;
 use crate::project_loader::ProjectContext;
 use crate::uid::Uid;
@@ -66,15 +68,19 @@ impl Neighbour {
         Ok(Self { dir, level_iid })
     }
 }
-#[derive(Debug, Reflect)]
-pub struct LevelBackgroundPosition {
+#[derive(Clone, Debug, Reflect)]
+pub struct LevelBackground {
+    pub image: Handle<Image>,
     pub crop_rect: Rect,
     pub scale: Vec2,
     pub corner: Vec2,
 }
 
-impl LevelBackgroundPosition {
-    pub(crate) fn new(value: &ldtk::LevelBackgroundPosition) -> crate::Result<Self> {
+impl LevelBackground {
+    pub(crate) fn new(
+        value: &ldtk::LevelBackgroundPosition,
+        image: Handle<Image>,
+    ) -> crate::Result<Self> {
         let crop_rect = (value.crop_rect.len() == 4)
             .then(|| {
                 let p0 = (value.crop_rect[0] as f32, value.crop_rect[1] as f32).into();
@@ -100,6 +106,7 @@ impl LevelBackgroundPosition {
             )))?;
 
         Ok(Self {
+            image,
             crop_rect,
             scale,
             corner,
@@ -110,9 +117,8 @@ impl LevelBackgroundPosition {
 #[derive(Asset, Debug, Reflect)]
 pub struct Level {
     pub bg_color: Color,
-    pub bg_pos: Option<LevelBackgroundPosition>,
     pub neighbours: Vec<Neighbour>,
-    pub bg_rel_path: Option<String>,
+    pub background: Option<LevelBackground>,
     pub field_instances: Vec<FieldInstance>,
     pub identifier: String,
     pub iid: Iid,
@@ -133,16 +139,30 @@ impl Level {
         project_context: &ProjectContext,
     ) -> crate::Result<(Iid, Handle<Self>)> {
         let bg_color = bevy_color_from_ldtk_string(&value.bg_color)?;
-        let bg_pos: Option<LevelBackgroundPosition> = match value.bg_pos.as_ref() {
-            Some(bg_pos) => Some(LevelBackgroundPosition::new(bg_pos)?),
-            None => None,
-        };
         let neighbours = value
             .neighbours
             .iter()
             .map(Neighbour::new)
             .collect::<Result<_, _>>()?;
-        let bg_rel_path = value.bg_rel_path.clone();
+        let background = match (value.bg_pos.as_ref(), value.bg_rel_path.as_ref()) {
+            (None, None) => None,
+            (None, Some(_)) => {
+                return Err(crate::Error::LdtkImportError(
+                    "bg_pos is None while bg_rel_path is Some(_)!".to_string(),
+                ))
+            }
+            (Some(_), None) => {
+                return Err(crate::Error::LdtkImportError(
+                    "bg_pos is Some(_) while bg_rel_path is None!".to_string(),
+                ))
+            }
+            (Some(bg_pos), Some(bg_rel_path)) => {
+                let path = ldtk_path_to_bevy_path(project_context.project_directory, bg_rel_path);
+                let image = load_context.load(path);
+                let background = LevelBackground::new(bg_pos, image)?;
+                Some(background)
+            }
+        };
         let field_instances = value
             .field_instances
             .iter()
@@ -184,9 +204,8 @@ impl Level {
 
         let level = Level {
             bg_color,
-            bg_pos,
             neighbours,
-            bg_rel_path,
+            background,
             field_instances,
             identifier,
             iid,

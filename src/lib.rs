@@ -33,7 +33,7 @@ pub mod prelude {
     pub use crate::iid::{Iid, IidError, IidMap, IidSet};
     pub use crate::layer::{EntitiesLayer, LayerType, TilesLayer};
     pub use crate::ldtk_asset_traits::{HasChildren, LdtkAsset};
-    pub use crate::level::{LevelBackgroundPosition, Neighbour, NeighbourDir};
+    pub use crate::level::{LevelBackground, Neighbour, NeighbourDir};
     pub use crate::plugin::BevyLdtkAssetPlugin;
     pub use crate::tile_instance::TileInstance;
     pub use crate::tileset_definition::{EnumTagValue, TileCustomMetadata, TilesetDefinition};
