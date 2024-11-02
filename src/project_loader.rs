@@ -169,7 +169,6 @@ impl AssetLoader for ProjectLoader {
         Ok(Project {
             iid: project_iid,
             json_version,
-            tileset_definitions,
             worlds,
         })
     }

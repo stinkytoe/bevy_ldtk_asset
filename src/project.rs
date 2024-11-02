@@ -14,8 +14,6 @@ pub struct Project {
     pub iid: Iid,
     pub json_version: String,
 
-    pub tileset_definitions: UidMap<Handle<TilesetDefinition>>,
-
     pub worlds: IidMap<Handle<World>>,
 }
 
