@@ -133,6 +133,25 @@ pub enum LayerType {
 }
 
 impl LayerType {
+    pub fn get_tiles_layer(&self) -> Option<&TilesLayer> {
+        match self {
+            LayerType::Entities(_) => None,
+            LayerType::IntGrid(tiles_layer)
+            | LayerType::Tiles(tiles_layer)
+            | LayerType::AutoLayer(tiles_layer) => Some(tiles_layer),
+        }
+    }
+
+    pub fn get_entities_layer(&self) -> Option<&EntitiesLayer> {
+        if let Self::Entities(entities_layer) = self {
+            Some(entities_layer)
+        } else {
+            None
+        }
+    }
+}
+
+impl LayerType {
     fn new(
         value: &ldtk::LayerInstance,
         layer_asset_path: &LayerAssetPath,
