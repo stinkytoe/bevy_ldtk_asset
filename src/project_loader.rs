@@ -8,13 +8,21 @@ use bevy::log::debug;
 use crate::iid::Iid;
 use crate::iid::IidMap;
 use crate::label::ProjectAssetPath;
+use crate::layer_definition::LayerDefinition;
 use crate::ldtk;
 use crate::project::Project;
+use crate::tileset_definition::TilesetDefinition;
+use crate::uid::UidMap;
 use crate::world::World;
 
 pub(crate) struct ProjectContext<'a> {
     pub(crate) project_directory: &'a Path,
     pub(crate) external_levels: bool,
+}
+
+pub(crate) struct ProjectDefinitionContext<'a> {
+    pub(crate) tileset_definitions: &'a UidMap<Handle<TilesetDefinition>>,
+    pub(crate) layer_definitions: &'a UidMap<Handle<LayerDefinition>>,
 }
 
 #[derive(Default)]
@@ -110,6 +118,39 @@ impl AssetLoader for ProjectLoader {
             external_levels: ldtk_project.external_levels,
         };
 
+        let tileset_definitions = ldtk_project
+            .defs
+            .tilesets
+            .iter()
+            .map(|ldtk_tileset_definition| {
+                TilesetDefinition::create_handle_pair(
+                    ldtk_tileset_definition,
+                    &project_asset_path,
+                    load_context,
+                    &project_context,
+                )
+            })
+            .collect::<crate::Result<_>>()?;
+
+        let layer_definitions = ldtk_project
+            .defs
+            .layers
+            .iter()
+            .map(|ldtk_layer_definition| {
+                LayerDefinition::create_handle_pair(
+                    ldtk_layer_definition,
+                    &project_asset_path,
+                    load_context,
+                    &tileset_definitions,
+                )
+            })
+            .collect::<crate::Result<_>>()?;
+
+        let project_definitions_context = ProjectDefinitionContext {
+            tileset_definitions: &tileset_definitions,
+            layer_definitions: &layer_definitions,
+        };
+
         let worlds = ldtk_worlds
             .iter()
             .map(|ldtk_world| {
@@ -118,6 +159,7 @@ impl AssetLoader for ProjectLoader {
                     &project_asset_path,
                     load_context,
                     &project_context,
+                    &project_definitions_context,
                 )
             })
             .collect::<crate::Result<IidMap<Handle<World>>>>()?;
@@ -127,6 +169,7 @@ impl AssetLoader for ProjectLoader {
         Ok(Project {
             iid: project_iid,
             json_version,
+            tileset_definitions,
             worlds,
         })
     }

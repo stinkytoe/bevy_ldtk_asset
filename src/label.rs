@@ -14,11 +14,61 @@ impl ProjectAssetPath {
         }
     }
 
+    pub fn to_layer_definition_asset_path(
+        &self,
+        layer_definition_identifier: &str,
+    ) -> LayerDefinitionAssetPath {
+        LayerDefinitionAssetPath {
+            path: self.path.clone(),
+            layer_definition_identifier: layer_definition_identifier.to_string(),
+        }
+    }
+
+    pub fn to_tileset_definition_asset_path(
+        &self,
+        tileset_definition_identifier: &str,
+    ) -> TilesetDefinitionAssetPath {
+        TilesetDefinitionAssetPath {
+            path: self.path.clone(),
+            tileset_definition_identifier: tileset_definition_identifier.to_string(),
+        }
+    }
+
     pub fn to_world_asset_path(&self, world_identifier: &str) -> WorldAssetPath {
         WorldAssetPath {
             path: self.path.clone(),
             world_identifier: world_identifier.to_string(),
         }
+    }
+}
+
+#[derive(Debug, Reflect)]
+pub struct LayerDefinitionAssetPath {
+    path: String,
+    layer_definition_identifier: String,
+}
+
+impl LayerDefinitionAssetPath {
+    pub fn to_asset_label(&self) -> String {
+        format!(
+            "{}#|layer_definition:{}",
+            self.path, self.layer_definition_identifier
+        )
+    }
+}
+
+#[derive(Debug, Reflect)]
+pub struct TilesetDefinitionAssetPath {
+    path: String,
+    tileset_definition_identifier: String,
+}
+
+impl TilesetDefinitionAssetPath {
+    pub fn to_asset_label(&self) -> String {
+        format!(
+            "{}#|tileset_definition:{}",
+            self.path, self.tileset_definition_identifier
+        )
     }
 }
 

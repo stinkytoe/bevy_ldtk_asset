@@ -9,13 +9,13 @@ use bevy::render::texture::Image;
 use crate::color::bevy_color_from_ldtk_string;
 use crate::field_instance::FieldInstance;
 use crate::iid::Iid;
+use crate::iid::IidMap;
 use crate::label::WorldAssetPath;
 use crate::layer::Layer;
 use crate::ldtk;
 use crate::ldtk_asset_traits::{HasChildren, LdtkAsset};
 use crate::ldtk_path::ldtk_path_to_bevy_path;
-use crate::prelude::IidMap;
-use crate::project_loader::ProjectContext;
+use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
 use crate::uid::Uid;
 
 #[derive(Debug, Reflect)]
@@ -138,6 +138,7 @@ impl Level {
         world_asset_path: &WorldAssetPath,
         load_context: &mut LoadContext,
         project_context: &ProjectContext,
+        project_definition_context: &ProjectDefinitionContext,
     ) -> crate::Result<(Iid, Handle<Self>)> {
         let bg_color = bevy_color_from_ldtk_string(&value.bg_color)?;
         let neighbours = value
@@ -199,6 +200,7 @@ impl Level {
                     &level_asset_path,
                     load_context,
                     project_context,
+                    project_definition_context,
                 )
             })
             .collect::<crate::Result<_>>()?;

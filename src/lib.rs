@@ -15,6 +15,7 @@ pub mod field_instance;
 pub mod iid;
 pub mod label;
 pub mod layer;
+pub mod layer_definition;
 pub mod ldtk_asset_traits;
 pub mod level;
 pub mod plugin;
@@ -46,5 +47,7 @@ pub mod prelude {
         pub use crate::level::Level;
         pub use crate::project::Project;
         pub use crate::world::World;
+
+        pub use crate::tileset_definition::TilesetDefinition;
     }
 }

@@ -3,9 +3,11 @@ use bevy::prelude::*;
 use crate::entity::Entity;
 use crate::iid::Iid;
 use crate::layer::Layer;
+use crate::layer_definition::LayerDefinition;
 use crate::level::{Level, LevelBackground};
 use crate::project::Project;
 use crate::project_loader::ProjectLoader;
+use crate::tileset_definition::TilesetDefinition;
 use crate::world::World;
 
 #[derive(Debug)]
@@ -19,6 +21,8 @@ impl Plugin for BevyLdtkAssetPlugin {
             .init_asset::<Level>()
             .init_asset::<Layer>()
             .init_asset::<Entity>()
+            .init_asset::<TilesetDefinition>()
+            .init_asset::<LayerDefinition>()
             .init_asset_loader::<ProjectLoader>()
             .register_asset_reflect::<Project>()
             .register_asset_reflect::<World>()

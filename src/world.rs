@@ -13,7 +13,7 @@ use crate::ldtk;
 use crate::ldtk_asset_traits::{HasChildren, LdtkAsset};
 use crate::ldtk_path::ldtk_path_to_bevy_path;
 use crate::level::Level;
-use crate::project_loader::ProjectContext;
+use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
 
 #[derive(Debug, Reflect)]
 pub enum WorldLayout {
@@ -56,6 +56,7 @@ impl World {
         project_asset_path: &ProjectAssetPath,
         load_context: &mut LoadContext,
         project_context: &ProjectContext,
+        project_definition_context: &ProjectDefinitionContext,
     ) -> crate::Result<(Iid, Handle<Self>)> {
         let identifier = ldtk_world.identifier.clone();
         let iid = Iid::from_str(&ldtk_world.iid)?;
@@ -104,6 +105,7 @@ impl World {
                     &world_asset_path,
                     load_context,
                     project_context,
+                    project_definition_context,
                 )
             })
             .collect::<crate::Result<_>>()?;
