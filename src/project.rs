@@ -5,8 +5,6 @@ use bevy::reflect::Reflect;
 use crate::iid::Iid;
 use crate::iid::IidMap;
 use crate::ldtk_asset_traits::HasChildren;
-use crate::tileset_definition::TilesetDefinition;
-use crate::uid::UidMap;
 use crate::world::World;
 
 #[derive(Asset, Debug, Reflect)]
