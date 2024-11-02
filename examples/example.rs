@@ -49,7 +49,7 @@ fn wait_for_project(
     mut next_state: ResMut<NextState<AppState>>,
 ) {
     query.iter().for_each(|project| {
-        block_on(async { asset_server.wait_for_asset(&project.project).await }).unwrap();
+        //block_on(async { asset_server.wait_for_asset(&project.project).await }).unwrap();
 
         let _project = projects.get(project.project.id()).unwrap();
 
