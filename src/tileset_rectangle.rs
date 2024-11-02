@@ -3,7 +3,7 @@ use bevy::reflect::Reflect;
 
 use crate::ldtk;
 
-#[derive(Debug, Reflect)]
+#[derive(Clone, Debug, Reflect)]
 pub struct TilesetRectangle {
     pub corner: Vec2,
     pub size: Vec2,
