@@ -48,6 +48,7 @@ pub mod prelude {
         pub use crate::project::Project;
         pub use crate::world::World;
 
+        pub use crate::layer_definition::LayerDefinition;
         pub use crate::tileset_definition::TilesetDefinition;
     }
 }
