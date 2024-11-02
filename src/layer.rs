@@ -189,7 +189,7 @@ impl Layer {
         project_context: &ProjectContext,
         project_definition_context: &ProjectDefinitionContext,
     ) -> Result<(Iid, Handle<Self>)> {
-        let grid_size = (value.c_wid, value.c_hei).into();
+        let grid_size: I64Vec2 = (value.c_wid, value.c_hei).into();
         let grid_cell_size = value.grid_size;
         let identifier = value.identifier.clone();
         let layer_asset_path = level_asset_path.to_layer_asset_path(&identifier);
@@ -218,6 +218,15 @@ impl Layer {
         let level_id = value.level_id;
         let location = (value.px_offset_x as f32, -value.px_total_offset_y as f32).into();
         let stub = HashMap::default();
+
+        // Sanity check to guarantee that the int_grid size makes sense
+        let int_grid_len = value.int_grid_csv.len();
+        let total_grids = (grid_size.x * grid_size.y) as usize;
+        if int_grid_len != 0 && int_grid_len != total_grids {
+            return Err(Error::LdtkImportError(format!(
+                "Bad length for int_grid_csv in layer {identifier}! length:{int_grid_len}"
+            )));
+        }
 
         let layer = Layer {
             grid_size,

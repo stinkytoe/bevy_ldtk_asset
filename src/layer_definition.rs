@@ -121,19 +121,23 @@ pub struct IntGridValue {
     pub group_uid: i64,
     pub identifier: Option<String>,
     pub tile: Option<TilesetRectangle>,
+    pub value: i64,
 }
 
 impl IntGridValue {
-    pub(crate) fn new(value: &ldtk::IntGridValueDefinition) -> Result<Self> {
-        let color = bevy_color_from_ldtk_string(&value.color)?;
-        let group_uid = value.group_uid;
-        let identifier = value.identifier.clone();
-        let tile = value.tile.as_ref().map(TilesetRectangle::new);
+    pub(crate) fn new(int_grid_value: &ldtk::IntGridValueDefinition) -> Result<Self> {
+        let color = bevy_color_from_ldtk_string(&int_grid_value.color)?;
+        let group_uid = int_grid_value.group_uid;
+        let identifier = int_grid_value.identifier.clone();
+        let tile = int_grid_value.tile.as_ref().map(TilesetRectangle::new);
+        let value = int_grid_value.value;
+
         Ok(Self {
             color,
             group_uid,
             identifier,
             tile,
+            value,
         })
     }
 }
