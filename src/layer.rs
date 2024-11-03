@@ -133,6 +133,14 @@ pub enum LayerType {
 }
 
 impl LayerType {
+    pub fn is_tiles_layer(&self) -> bool {
+        !matches!(self, Self::Entities(_))
+    }
+
+    pub fn is_entities_layer(&self) -> bool {
+        matches!(self, Self::Entities(_))
+    }
+
     pub fn get_tiles_layer(&self) -> Option<&TilesLayer> {
         match self {
             LayerType::Entities(_) => None,
