@@ -2,7 +2,7 @@ use bevy::{math::Vec2, reflect::Reflect};
 
 use crate::ldtk;
 
-#[derive(Debug, Reflect)]
+#[derive(Clone, Debug, Reflect)]
 pub struct TileInstance {
     pub opacity: f32,
     pub flip_x: bool,
