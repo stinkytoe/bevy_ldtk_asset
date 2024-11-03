@@ -1,4 +1,5 @@
-use bevy::prelude::*;
+use bevy_app::{App, Plugin, Update};
+use bevy_asset::AssetApp;
 
 use crate::entity::Entity;
 use crate::iid::Iid;

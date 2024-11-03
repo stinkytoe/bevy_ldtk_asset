@@ -1,8 +1,8 @@
 #[cfg(feature = "asset_events_debug")]
 pub(crate) mod asset_events_debug {
-    use bevy::asset::AssetEvent;
-    use bevy::log::debug;
-    use bevy::prelude::EventReader;
+    use bevy_asset::AssetEvent;
+    use bevy_ecs::event::EventReader;
+    use bevy_log::debug;
 
     use crate::ldtk_asset_traits::LdtkAsset;
     use crate::project::Project;

@@ -1,9 +1,9 @@
 use std::path::Path;
 use std::str::FromStr;
 
-use bevy::asset::AssetLoader;
-use bevy::asset::Handle;
-use bevy::log::debug;
+use bevy_asset::AssetLoader;
+use bevy_asset::Handle;
+use bevy_log::debug;
 
 use crate::iid::Iid;
 use crate::iid::IidMap;
@@ -35,9 +35,9 @@ impl AssetLoader for ProjectLoader {
 
     async fn load(
         &self,
-        reader: &mut dyn bevy::asset::io::Reader,
+        reader: &mut dyn bevy_asset::io::Reader,
         _settings: &(),
-        load_context: &mut bevy::asset::LoadContext<'_>,
+        load_context: &mut bevy_asset::LoadContext<'_>,
     ) -> Result<Self::Asset, Self::Error> {
         let ldtk_project: ldtk::LdtkProject = {
             let mut bytes = Vec::new();

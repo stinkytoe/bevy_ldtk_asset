@@ -1,5 +1,5 @@
-use bevy::color::Color;
-use bevy::reflect::Reflect;
+use bevy_color::Color;
+use bevy_reflect::Reflect;
 
 use crate::color::bevy_color_from_ldtk_int;
 use crate::ldtk;

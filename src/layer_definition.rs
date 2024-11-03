@@ -1,7 +1,9 @@
-use bevy::asset::{Asset, Handle, LoadContext};
-use bevy::math::DVec2;
-use bevy::utils::HashMap;
-use bevy::{color::Color, math::Vec2, reflect::Reflect};
+use bevy_asset::{Asset, Handle, LoadContext};
+use bevy_color::Color;
+use bevy_math::DVec2;
+use bevy_math::Vec2;
+use bevy_reflect::Reflect;
+use bevy_utils::HashMap;
 
 use crate::color::bevy_color_from_ldtk_string;
 use crate::label::ProjectAssetPath;

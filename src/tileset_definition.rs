@@ -1,7 +1,7 @@
-use bevy::asset::{Asset, Handle, LoadContext};
-use bevy::math::{I64Vec2, Vec2};
-use bevy::prelude::Image;
-use bevy::reflect::Reflect;
+use bevy_asset::{Asset, Handle, LoadContext};
+use bevy_math::{I64Vec2, Vec2};
+use bevy_reflect::Reflect;
+use bevy_render::texture::Image;
 
 use crate::label::ProjectAssetPath;
 use crate::ldtk;

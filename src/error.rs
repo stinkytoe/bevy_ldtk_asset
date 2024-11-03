@@ -13,7 +13,7 @@ pub enum Error {
     IidError(#[from] crate::iid::IidError),
 
     #[error(transparent)]
-    ReadAssetBytesError(#[from] bevy::asset::ReadAssetBytesError),
+    ReadAssetBytesError(#[from] bevy_asset::ReadAssetBytesError),
 
     #[error("Failure importing ldtk file! {0}")]
     LdtkImportError(String),

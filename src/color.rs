@@ -1,4 +1,4 @@
-use bevy::color::Color;
+use bevy_color::Color;
 
 // Format should be: Hex color "#rrggbb"
 // from: https://ldtk.io/json-2/#ldtk-ProjectJson;bgColor

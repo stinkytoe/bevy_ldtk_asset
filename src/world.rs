@@ -1,11 +1,11 @@
 use std::path::Path;
 use std::str::FromStr;
 
-use bevy::asset::{Asset, Handle, LoadContext};
-use bevy::log::trace;
-use bevy::math::Vec2;
-use bevy::reflect::Reflect;
-use bevy::tasks::block_on;
+use bevy_asset::{Asset, Handle, LoadContext};
+use bevy_log::trace;
+use bevy_math::Vec2;
+use bevy_reflect::Reflect;
+use bevy_tasks::block_on;
 
 use crate::iid::{Iid, IidMap};
 use crate::label::ProjectAssetPath;

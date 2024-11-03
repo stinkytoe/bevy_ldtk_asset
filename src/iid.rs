@@ -1,11 +1,12 @@
-use bevy::reflect::Reflect;
-use bevy::utils::HashMap;
-use bevy::utils::HashSet;
 use std::fmt::Debug;
 use std::fmt::Display;
 use std::num::ParseIntError;
 use std::str::FromStr;
 use thiserror::Error;
+
+use bevy_reflect::Reflect;
+use bevy_utils::HashMap;
+use bevy_utils::HashSet;
 
 #[derive(Debug, Error)]
 pub enum IidError {

@@ -1,8 +1,8 @@
 use std::str::FromStr;
 
-use bevy::color::Color;
-use bevy::math::I64Vec2;
-use bevy::reflect::Reflect;
+use bevy_color::Color;
+use bevy_math::I64Vec2;
+use bevy_reflect::Reflect;
 
 use crate::color::bevy_color_from_ldtk_string;
 use crate::iid::Iid;

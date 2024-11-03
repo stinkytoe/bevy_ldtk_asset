@@ -1,4 +1,4 @@
-use bevy::asset::{Asset, Handle};
+use bevy_asset::{Asset, Handle};
 
 use crate::iid::Iid;
 

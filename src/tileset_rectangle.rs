@@ -1,5 +1,5 @@
-use bevy::math::Vec2;
-use bevy::reflect::Reflect;
+use bevy_math::Vec2;
+use bevy_reflect::Reflect;
 
 use crate::ldtk;
 

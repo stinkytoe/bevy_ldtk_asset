@@ -1,10 +1,10 @@
 use std::str::FromStr;
 
-use bevy::asset::{Asset, Handle, LoadContext};
-use bevy::color::Color;
-use bevy::math::Vec2;
-use bevy::reflect::Reflect;
-use bevy::render::texture::Image;
+use bevy_asset::{Asset, Handle, LoadContext};
+use bevy_color::Color;
+use bevy_math::Vec2;
+use bevy_reflect::Reflect;
+use bevy_render::texture::Image;
 
 use crate::color::bevy_color_from_ldtk_string;
 use crate::field_instance::FieldInstance;

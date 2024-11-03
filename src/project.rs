@@ -1,6 +1,6 @@
-use bevy::asset::Asset;
-use bevy::asset::Handle;
-use bevy::reflect::Reflect;
+use bevy_asset::Asset;
+use bevy_asset::Handle;
+use bevy_reflect::Reflect;
 
 use crate::iid::Iid;
 use crate::iid::IidMap;

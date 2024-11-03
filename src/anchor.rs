@@ -1,5 +1,5 @@
-use bevy::math::Vec2;
-use bevy::sprite::Anchor;
+use bevy_math::Vec2;
+use bevy_sprite::Anchor;
 
 pub(crate) fn bevy_anchor_from_ldtk(pivot: &[f64]) -> crate::Result<Anchor> {
     if pivot.len() != 2 {

@@ -19,21 +19,18 @@ exclude = [
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[[example]]
-name = "all_features"
-path = "examples/all_features.rs"
-
-[[example]]
-name = "example"
-path = "examples/example.rs"
-
-[dev-dependencies]
-#bevy-inspector-egui = "0.27"
-
 [dependencies]
-#bevy = "0.14"
-#bevy = { git = "https://github.com/bevyengine/bevy", branch = "main" }
-bevy = "=0.15.0-rc.2"
+bevy_app = "=0.15.0-rc.2"
+bevy_asset = "=0.15.0-rc.2"
+bevy_color = "=0.15.0-rc.2"
+bevy_ecs = "=0.15.0-rc.2"
+bevy_log = "=0.15.0-rc.2"
+bevy_math = "=0.15.0-rc.2"
+bevy_reflect = "=0.15.0-rc.2"
+bevy_render = "=0.15.0-rc.2"
+bevy_sprite = "=0.15.0-rc.2"
+bevy_utils = "=0.15.0-rc.2"
+bevy_tasks = "=0.15.0-rc.2"
 path-clean = "1.0"
 serde = "1.0"
 serde_json = "1.0"

@@ -1,4 +1,4 @@
-use bevy::utils::{HashMap, HashSet};
+use bevy_utils::{HashMap, HashSet};
 
 pub type Uid = i64;
 
