@@ -1,4 +1,4 @@
-use bevy_app::{App, Plugin, Update};
+use bevy_app::{App, Plugin};
 use bevy_asset::AssetApp;
 
 use crate::entity::Entity;
@@ -35,7 +35,10 @@ impl Plugin for BevyLdtkAssetPlugin {
 
         #[cfg(feature = "asset_events_debug")]
         {
+            use bevy_app::Update;
+
             use crate::systems::asset_events_debug::*;
+
             app.add_systems(
                 Update,
                 (
