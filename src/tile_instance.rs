@@ -27,13 +27,13 @@ impl TileInstance {
             }
         };
         let location = (value.px.len() == 2)
-            .then(|| (value.px[0] as f32, -value.px[1] as f32).into())
+            .then(|| (value.px[0] as f32, value.px[1] as f32).into())
             .ok_or(crate::Error::LdtkImportError(format!(
                 "Bad px vector in LDtk tile instance! given: {:?}",
                 value.px
             )))?;
         let corner = (value.src.len() == 2)
-            .then(|| (value.src[0] as f32, -value.src[1] as f32).into())
+            .then(|| (value.src[0] as f32, value.src[1] as f32).into())
             .ok_or(crate::Error::LdtkImportError(format!(
                 "Bad src vector in LDtk tile instance! given: {:?}",
                 value.px
