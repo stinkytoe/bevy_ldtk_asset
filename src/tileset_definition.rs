@@ -13,7 +13,7 @@ use crate::Result;
 #[derive(Debug, Reflect)]
 pub struct TileCustomMetadata {
     pub data: String,
-    pub tile_id: i64,
+    pub tile_id: Uid,
 }
 
 impl TileCustomMetadata {

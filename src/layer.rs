@@ -16,6 +16,7 @@ use crate::ldtk_path::ldtk_path_to_bevy_path;
 use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
 use crate::tile_instance::TileInstance;
 use crate::tileset_definition::TilesetDefinition;
+use crate::uid::Uid;
 use crate::{ldtk_import_error, Result};
 
 #[derive(Debug, Reflect)]
@@ -193,9 +194,8 @@ pub struct Layer {
     pub total_offset: Vec2,
     pub layer_type: LayerType,
     pub iid: Iid,
-    //pub layer_def_uid: i64,
     pub layer_definition: Handle<LayerDefinition>,
-    pub level_id: i64,
+    pub level_id: Uid,
     pub location: Vec2,
     pub index: usize,
     // TODO: hackhackhack! This is meant to always remain empty, so that we have something

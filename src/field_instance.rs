@@ -10,7 +10,7 @@ use crate::iid::Iid;
 use crate::ldtk_import_error;
 use crate::tileset_definition::TilesetDefinition;
 use crate::tileset_rectangle::TilesetRectangle;
-use crate::uid::UidMap;
+use crate::uid::{Uid, UidMap};
 use crate::{ldtk, Result};
 
 #[derive(Debug, Reflect)]
@@ -280,7 +280,7 @@ pub struct FieldInstance {
     pub identifier: String,
     pub tileset_rectangle: Option<TilesetRectangle>,
     pub field_instance_type: FieldInstanceType,
-    pub def_uid: i64,
+    pub def_uid: Uid,
 }
 
 impl FieldInstance {

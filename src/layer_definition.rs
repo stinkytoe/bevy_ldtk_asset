@@ -119,7 +119,7 @@ impl LayerDefinition {
 #[derive(Clone, Debug, Reflect)]
 pub struct IntGridValue {
     pub color: Color,
-    pub group_uid: i64,
+    pub group_uid: Uid,
     pub identifier: Option<String>,
     pub tile: Option<TilesetRectangle>,
     pub value: i64,
