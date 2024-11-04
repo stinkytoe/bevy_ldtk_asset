@@ -1,36 +1,58 @@
 # bevy_ldtk_asset
 
-A plugin for the [Bevy Engine](https://bevyengine.org) to allow loading of
-projects from the [LDtk](https://ldtk.io) level editor.
+A plugin for the [Bevy Engine](https://bevyengine.org) to allow loading of projects
+from the [LDtk](https://ldtk.io) level editor.
 
 ## Description
 
 This plugin aims to provide an asset through Bevy's asset loader system, providing
 access to the data in an LDtk project.
 
----
-NOTE:
+### Philosophy
 
-Previous versions of this plugin would attempt to spawn ECS entities for the
-user. This functionality has been removed, but will be added to a separate crate
-in the future. See: [shieldtank](https://github.com/stinkytoe/shieldtank)
+This crate attempts to provide the user with data that can readily be introduced
+into Bevy, but does not attempt to offer opinions on how this data should be used.
+No components, systems (except for debug output), events, resources, etc are provided.
 
----
+#### Conventions
+
+When possible, we will convert items to a Bevy compatible format.
+
+* Fields describing a color will be stored as a [bevy color](https://docs.rs/bevy/latest/bevy/color/enum.Color.html)
+* If the field describes a location in the world, we will use a [Vec2](https://docs.rs/bevy/latest/bevy/math/struct.Vec2.html)
+  * The `y` will be inverted to be compatible with Bevy's screen space convention
+  of `x` positive to the right, and `y` being positive up
+* If the field describes a location within an image, we will use a [I64Vec2](https://docs.rs/bevy/latest/bevy/math/struct.I64Vec2.html)
+* Images will be stored as a `Handle<Image>`
+* Numeric fields which aren't coerced into a Bevy type will stored in an appropriate
+  64 bit field (`u64`, `i64`, `f64`)
+* `Iid`'s are parsed into our local [Iid] type. It is considered undefined behavior
+  if these fail to be unique
+* `Uid`'s are represented by the [Uid] type, which is of type `i64`
+* LDtk pivot fields are converted to and stored as [Anchor](https://docs.rs/bevy/latest/bevy/sprite/enum.Anchor.html)
+  fields
 
 ### Naming Collisions
 
 Unfortunately, there are many name collisions between the nomenclature used in
-Bevy and LDtk. Especially:
+Bevy and LDtk. Especially (but not exclusively):
 
 * World
 * Level
 * Layer
 * Entity
 
-I will endeavor to refer to objects in Bevy/Rust as ECS objects, i.e. an
+I will endeavor to refer to objects in Bevy as ECS objects, i.e. an
 ECS entity or ECS world when referring to objects from the Bevy ecosystem, and
 LDtk objects for things either from this library or LDtk itself, i.e. an LDtk
 entity or LDtk world.
+
+Users are recommended to use the `use ... as ...` pattern in their own code when
+importing these types to help avoid any pitfalls, such as:
+
+```rust
+use bevy_ldtk_asset::project::Project as ProjectAsset;
+```
 
 ## Assets
 
@@ -38,8 +60,15 @@ An LDtk project is loaded using Bevy's asset system, and can be added as a
 `Handle<Project>` to an ECS entity using the asset server:
 
 ```rust
+#[Derive(Component)]
+struct MyComponent {
+    project_handle: Handle<bevy_ldtk_asset::project::Project>,
+}
+
 fn example_system(mut commands: Commands, asset_server: Res<AssetServer>) {
-  commands.spawn(asset_server.load::<Project>("some_project.ldtk"));
+    commands.spawn(MyComponent {
+        project_handle: asset_server.load("some_project.ldtk");
+    })
 }
 ```
 
@@ -142,6 +171,16 @@ example.ldtk#Underworld/Dungeon2/Entities/DubiousPotion@14500cf9-0bd3-440e-b7d0-
 example.ldtk#Underworld/Dungeon2/Trees
 ```
 
+### LDtk dependencies (Images, etc)
+
+An LDtk project will itself point to other assets, such as [Image] files used
+for tile maps. For these to also work in [Bevy](https://bevyengine.org), these
+assets should be in the same asset storage as the `.ldtk` file. Typically this
+will be the Rust crate's assets folder. `bevy_ldtk_asset` will attempt to
+reconcile the locations of these assets by assuming the paths in the `.ldtk`
+file are relative to the file itself, and that those paths also exist
+within the same asset storage location as the `.ldtk` file.
+
 ## Getting Started
 
 ### Dependencies
@@ -149,7 +188,7 @@ example.ldtk#Underworld/Dungeon2/Trees
 This project depends on the Bevy engine, and will therefore inherit its
 dependencies. See
 [Installing OS Dependencies](https://bevyengine.org/learn/quick-start/getting-started/setup/#installing-os-dependencies)
-from Bevy's documentation.
+from Bevy's documentation for instructions.
 
 ### Installing
 
@@ -182,7 +221,7 @@ stinkytoe
 ## Version History
 
 * 0.5:
-  * Release for Bevy 0.14 (WIP!)
+  * Release for Bevy 0.15 (WIP!)
 * 0.4 and prior:
   * archived...
 
@@ -190,26 +229,33 @@ stinkytoe
 
 * [x] Single World and Multi World projects
 * [x] External Level Files
-* [ ] Aseprite Files
-* [ ] Level Background Generation
-* [ ] Layer Background Generation
+* [ ] Aseprite Files [#20](https://github.com/stinkytoe/bevy_ldtk_asset/issues/20)
+* [ ] Table of Contents export
+* [x] Layer Definitions
+* [ ] Entity Definitions
+* [x] Tileset Definitions
+* [ ] Enum Definitions
+* [ ] Nine-Slice Borders for Entities
 
 ## Compatability
 
-The minor version of this project will target a specific minor version of Bevy.
-
 | bevy_ldtk_asset | bevy | LDtk  |
 | :-------------: | :--: | :---: |
-| 0.5.0           | 0.14 | 1.5.3 |
+| 0.5.0           | 0.15 | 1.5.3 |
 
 ## License
 
 This project is dual-licensed under either the MIT or Apache-2.0 license:
 
-* MIT License ([LICENSE-MIT](LICENSE-MIT) or [http://opensource.org/licenses/MIT](http://opensource.org/licenses/MIT))
-* Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0))
+MIT License ([LICENSE-MIT](LICENSE-MIT) or [http://opensource.org/licenses/MIT](http://opensource.org/licenses/MIT))
+
+Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0))
 
 ## Acknowledgments
 
 This project would not exist without the awesome efforts of the Bevy team, and
 Deepknight of Deepknight Games!
+
+[bevy](https://bevyengine.org)
+
+[LDtk](https://ldtk.io)
