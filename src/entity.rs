@@ -12,7 +12,7 @@ use crate::field_instance::FieldInstance;
 use crate::iid::Iid;
 use crate::label::LayerAssetPath;
 use crate::ldtk;
-use crate::project_loader::ProjectContext;
+use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
 use crate::tileset_rectangle::TilesetRectangle;
 
 #[derive(Asset, Debug, Reflect)]
@@ -38,6 +38,7 @@ impl Entity {
         layer_asset_path: &LayerAssetPath,
         load_context: &mut LoadContext,
         _project_context: &ProjectContext,
+        project_definitions_context: &ProjectDefinitionContext,
     ) -> crate::Result<(Iid, Handle<Self>)> {
         let identifier = value.identifier.clone();
         let iid = Iid::from_str(&value.iid)?;
@@ -51,7 +52,13 @@ impl Entity {
         let smart_color = bevy_color_from_ldtk_string(&value.smart_color)?;
         let tags = value.tags.clone();
         //let tile: Option<TilesetRectangle> = value.tile.map(|tile| tile.into());
-        let tile = value.tile.as_ref().map(TilesetRectangle::new);
+        let tile = value
+            .tile
+            .as_ref()
+            .map(|value| {
+                TilesetRectangle::new(value, project_definitions_context.tileset_definitions)
+            })
+            .transpose()?;
         let world_location = match (value.world_x, value.world_y) {
             (None, None) => None,
             (None, Some(y)) => {
@@ -70,7 +77,7 @@ impl Entity {
         let field_instances = value
             .field_instances
             .iter()
-            .map(FieldInstance::new)
+            .map(|value| FieldInstance::new(value, project_definitions_context.tileset_definitions))
             .collect::<Result<_, _>>()?;
         let size = (value.width as f32, value.height as f32).into();
         let location = (value.px.len() == 2)

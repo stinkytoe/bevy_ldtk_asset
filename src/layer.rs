@@ -29,6 +29,7 @@ impl EntitiesLayer {
         layer_asset_path: &LayerAssetPath,
         load_context: &mut LoadContext,
         project_context: &ProjectContext,
+        project_definitions_context: &ProjectDefinitionContext,
     ) -> Result<Self> {
         (value.int_grid_csv.is_empty()
             && value.grid_tiles.is_empty()
@@ -45,6 +46,7 @@ impl EntitiesLayer {
                         layer_asset_path,
                         load_context,
                         project_context,
+                        project_definitions_context,
                     )
                 })
                 .collect::<Result<_>>()?;
@@ -173,6 +175,7 @@ impl LayerType {
                 layer_asset_path,
                 load_context,
                 project_context,
+                project_definition_context,
             )?)),
             "Tiles" | "AutoLayer" | "IntGrid" => Ok(Self::Tiles(TilesLayer::new(
                 value,

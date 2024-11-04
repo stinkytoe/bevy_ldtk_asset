@@ -71,7 +71,7 @@ impl LayerDefinition {
         let int_grid_values = value
             .int_grid_values
             .iter()
-            .map(IntGridValue::new)
+            .map(|value| IntGridValue::new(value, tileset_definitions))
             .collect::<Result<_>>()?;
         let int_grid_values_groups = value
             .int_grid_values_groups
@@ -127,11 +127,19 @@ pub struct IntGridValue {
 }
 
 impl IntGridValue {
-    pub(crate) fn new(int_grid_value: &ldtk::IntGridValueDefinition) -> Result<Self> {
+    pub(crate) fn new(
+        int_grid_value: &ldtk::IntGridValueDefinition,
+        tileset_definitions: &UidMap<Handle<TilesetDefinition>>,
+    ) -> Result<Self> {
         let color = bevy_color_from_ldtk_string(&int_grid_value.color)?;
         let group_uid = int_grid_value.group_uid;
         let identifier = int_grid_value.identifier.clone();
-        let tile = int_grid_value.tile.as_ref().map(TilesetRectangle::new);
+        let tile = int_grid_value
+            .tile
+            .as_ref()
+            .map(|value| TilesetRectangle::new(value, tileset_definitions))
+            .transpose()?;
+
         let value = int_grid_value.value;
 
         Ok(Self {
