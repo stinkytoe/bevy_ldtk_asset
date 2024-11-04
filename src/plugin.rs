@@ -2,6 +2,7 @@ use bevy_app::{App, Plugin};
 use bevy_asset::AssetApp;
 
 use crate::entity::Entity;
+use crate::entity_definition::EntityDefinition;
 use crate::iid::Iid;
 use crate::layer::Layer;
 use crate::layer_definition::LayerDefinition;
@@ -17,19 +18,20 @@ pub struct BevyLdtkAssetPlugin;
 impl Plugin for BevyLdtkAssetPlugin {
     fn build(&self, app: &mut App) {
         app //
+            .init_asset::<Entity>()
+            .init_asset::<Layer>()
+            .init_asset::<Level>()
             .init_asset::<Project>()
             .init_asset::<World>()
-            .init_asset::<Level>()
-            .init_asset::<Layer>()
-            .init_asset::<Entity>()
-            .init_asset::<TilesetDefinition>()
+            .init_asset::<EntityDefinition>()
             .init_asset::<LayerDefinition>()
+            .init_asset::<TilesetDefinition>()
             .init_asset_loader::<ProjectLoader>()
+            .register_asset_reflect::<Entity>()
+            .register_asset_reflect::<Layer>()
+            .register_asset_reflect::<Level>()
             .register_asset_reflect::<Project>()
             .register_asset_reflect::<World>()
-            .register_asset_reflect::<Level>()
-            .register_asset_reflect::<Layer>()
-            .register_asset_reflect::<Entity>()
             .register_type::<Iid>()
             .register_type::<LevelBackground>();
 

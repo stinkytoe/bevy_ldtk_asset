@@ -9,6 +9,7 @@ mod project_loader;
 mod systems;
 
 pub mod entity;
+pub mod entity_definition;
 pub mod enum_definition;
 pub mod error;
 pub mod field_instance;

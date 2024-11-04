@@ -14,6 +14,16 @@ impl ProjectAssetPath {
         }
     }
 
+    pub fn to_entity_definition_asset_path(
+        &self,
+        entity_definition_identifier: &str,
+    ) -> EntityDefinitionAssetPath {
+        EntityDefinitionAssetPath {
+            path: self.path.clone(),
+            entity_definition_identifier: entity_definition_identifier.to_string(),
+        }
+    }
+
     pub fn to_layer_definition_asset_path(
         &self,
         layer_definition_identifier: &str,
@@ -39,6 +49,21 @@ impl ProjectAssetPath {
             path: self.path.clone(),
             world_identifier: world_identifier.to_string(),
         }
+    }
+}
+
+#[derive(Debug, Reflect)]
+pub struct EntityDefinitionAssetPath {
+    path: String,
+    entity_definition_identifier: String,
+}
+
+impl EntityDefinitionAssetPath {
+    pub fn to_asset_label(&self) -> String {
+        format!(
+            "{}#|entity_definition:{}",
+            self.path, self.entity_definition_identifier
+        )
     }
 }
 

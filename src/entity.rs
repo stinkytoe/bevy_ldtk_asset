@@ -8,6 +8,7 @@ use bevy_sprite::Anchor;
 
 use crate::anchor::bevy_anchor_from_ldtk;
 use crate::color::bevy_color_from_ldtk_string;
+use crate::entity_definition::EntityDefinition;
 use crate::field_instance::FieldInstance;
 use crate::iid::Iid;
 use crate::label::LayerAssetPath;
@@ -25,7 +26,7 @@ pub struct Entity {
     pub tags: Vec<String>,
     pub tile: Option<TilesetRectangle>,
     pub world_location: Option<Vec2>,
-    pub def_uid: i64,
+    pub entity_definition: Handle<EntityDefinition>,
     pub field_instances: Vec<FieldInstance>,
     pub size: Vec2,
     pub location: Vec2,
@@ -73,7 +74,14 @@ impl Entity {
             }
             (Some(x), Some(y)) => Some((x as f32, -y as f32).into()),
         };
-        let def_uid = value.def_uid;
+        let entity_definition = project_definitions_context
+            .entity_definitions
+            .get(&value.def_uid)
+            .ok_or(ldtk_import_error!(
+                "bad entity definition uid! given: {}",
+                value.def_uid
+            ))?
+            .clone();
         let field_instances = value
             .field_instances
             .iter()
@@ -98,7 +106,7 @@ impl Entity {
             tags,
             tile,
             world_location,
-            def_uid,
+            entity_definition,
             field_instances,
             size,
             location,
