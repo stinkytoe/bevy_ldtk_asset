@@ -39,16 +39,7 @@ impl Plugin for BevyLdtkAssetPlugin {
 
             use crate::systems::asset_events_debug::*;
 
-            app.add_systems(
-                Update,
-                (
-                    project_asset_events_debug_output,
-                    ldtk_asset_events_debug_output::<Entity>,
-                    ldtk_asset_events_debug_output::<Layer>,
-                    ldtk_asset_events_debug_output::<Level>,
-                    ldtk_asset_events_debug_output::<World>,
-                ),
-            );
+            app.add_systems(Update, (project_asset_events_debug_output,));
         }
     }
 }

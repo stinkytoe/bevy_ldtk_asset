@@ -12,7 +12,6 @@ use crate::field_instance::FieldInstance;
 use crate::iid::Iid;
 use crate::label::LayerAssetPath;
 use crate::ldtk;
-use crate::ldtk_asset_traits::LdtkAsset;
 use crate::project_loader::ProjectContext;
 use crate::tileset_rectangle::TilesetRectangle;
 
@@ -103,15 +102,5 @@ impl Entity {
             load_context.add_loaded_labeled_asset(entity_asset_path.to_asset_label(), entity);
 
         Ok((iid, handle))
-    }
-}
-
-impl LdtkAsset for Entity {
-    fn identifier(&self) -> &str {
-        &self.identifier
-    }
-
-    fn iid(&self) -> Iid {
-        self.iid
     }
 }

@@ -11,11 +11,10 @@ use crate::entity::Entity;
 use crate::iid::{Iid, IidMap};
 use crate::label::{LayerAssetPath, LevelAssetPath};
 use crate::layer_definition::LayerDefinition;
-use crate::ldtk_asset_traits::{HasChildren, LdtkAsset};
 use crate::ldtk_path::ldtk_path_to_bevy_path;
-use crate::prelude::TilesetDefinition;
 use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
 use crate::tile_instance::TileInstance;
+use crate::tileset_definition::TilesetDefinition;
 use crate::Result;
 use crate::{ldtk, Error};
 
@@ -276,28 +275,5 @@ impl Layer {
             load_context.add_loaded_labeled_asset(layer_asset_path.to_asset_label(), layer);
 
         Ok((iid, handle))
-    }
-}
-
-impl LdtkAsset for Layer {
-    fn identifier(&self) -> &str {
-        &self.identifier
-    }
-
-    fn iid(&self) -> Iid {
-        self.iid
-    }
-}
-
-impl HasChildren for Layer {
-    type Child = Entity;
-
-    fn children(&self) -> impl Iterator<Item = &Handle<Self::Child>> {
-        match &self.layer_type {
-            LayerType::Entities(entities) => entities.entity_handles.values(),
-            LayerType::IntGrid(_) | LayerType::Tiles(_) | LayerType::AutoLayer(_) => {
-                self.stub.values()
-            }
-        }
     }
 }
