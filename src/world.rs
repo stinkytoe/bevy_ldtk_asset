@@ -9,10 +9,10 @@ use bevy_tasks::block_on;
 
 use crate::iid::{Iid, IidMap};
 use crate::label::ProjectAssetPath;
-use crate::ldtk;
 use crate::ldtk_path::ldtk_path_to_bevy_path;
 use crate::level::Level;
 use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
+use crate::{ldtk, ldtk_import_error};
 
 #[derive(Debug, Reflect)]
 pub enum WorldLayout {
@@ -74,11 +74,13 @@ impl World {
                 .levels
                 .iter()
                 .map(|ldtk_level| -> crate::Result<ldtk::Level> {
-                    let external_rel_path = ldtk_level.external_rel_path.as_ref().ok_or(
-                        crate::Error::LdtkImportError(
-                            "external_rel_path is None when external_levels is true!".to_string(),
-                        ),
-                    )?;
+                    let external_rel_path =
+                        ldtk_level
+                            .external_rel_path
+                            .as_ref()
+                            .ok_or(ldtk_import_error!(
+                                "external_rel_path is None when external_levels is true!"
+                            ))?;
 
                     trace!("Attempting to load external level from path: {external_rel_path}");
 

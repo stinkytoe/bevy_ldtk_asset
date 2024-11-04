@@ -7,10 +7,11 @@ use bevy_utils::HashMap;
 
 use crate::color::bevy_color_from_ldtk_string;
 use crate::label::ProjectAssetPath;
+use crate::ldtk_import_error;
 use crate::tileset_definition::TilesetDefinition;
 use crate::tileset_rectangle::TilesetRectangle;
 use crate::uid::{Uid, UidMap};
-use crate::{ldtk, Error, Result};
+use crate::{ldtk, Result};
 
 #[derive(Debug, Reflect)]
 pub enum LayerDefinitionType {
@@ -28,9 +29,9 @@ impl LayerDefinitionType {
             "Tiles" => LayerDefinitionType::Tiles,
             "AutoLayer" => LayerDefinitionType::Autolayer,
             _ => {
-                return Err(Error::LdtkImportError(format!(
+                return Err(ldtk_import_error!(
                     "Could not build LayerDefinitionType from input! given: {ldtk_type}"
-                )))
+                ))
             }
         })
     }
@@ -86,9 +87,7 @@ impl LayerDefinition {
             .map(|tileset_def_uid| {
                 tileset_definitions
                     .get(&tileset_def_uid)
-                    .ok_or(Error::LdtkImportError(format!(
-                        "Bad uid! {tileset_def_uid}"
-                    )))
+                    .ok_or(ldtk_import_error!("Bad uid! {tileset_def_uid}"))
             })
             .transpose()?
             .cloned();

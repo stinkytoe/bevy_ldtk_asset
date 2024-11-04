@@ -10,6 +10,7 @@ use crate::iid::IidMap;
 use crate::label::ProjectAssetPath;
 use crate::layer_definition::LayerDefinition;
 use crate::ldtk;
+use crate::ldtk_import_error;
 use crate::project::Project;
 use crate::tileset_definition::TilesetDefinition;
 use crate::uid::UidMap;
@@ -49,17 +50,15 @@ impl AssetLoader for ProjectLoader {
 
         let project_directory = project_path
             .parent()
-            .ok_or(crate::Error::LdtkImportError(
-                "Unable to get project_directory!".to_string(),
-            ))?
+            .ok_or(ldtk_import_error!("Unable to get project_directory!"))?
             .to_path_buf();
 
         let project_path = project_path
             .to_str()
-            .ok_or(crate::Error::LdtkImportError(format!(
+            .ok_or(ldtk_import_error!(
                 "Could not convert project path to str! given: {:?}",
                 project_path
-            )))?
+            ))?
             .to_string();
 
         let project_asset_path = ProjectAssetPath::new(&project_path);
@@ -72,9 +71,9 @@ impl AssetLoader for ProjectLoader {
 
         const SUPPORTED_VERSION: &str = "1.5.3";
         if json_version != SUPPORTED_VERSION {
-            return Err(crate::Error::LdtkImportError(format!(
+            return Err(ldtk_import_error!(
                 "Bad LDtk JSON version! expected: {SUPPORTED_VERSION} given: {json_version}"
-            )));
+            ));
         }
 
         // If the worlds vec is empty, then this is likely a single world LDtk project. To simplify
@@ -85,28 +84,20 @@ impl AssetLoader for ProjectLoader {
         let ldtk_worlds = if ldtk_project.worlds.is_empty() {
             &[ldtk::World {
                 default_level_height: ldtk_project.default_level_height.ok_or(
-                    crate::Error::LdtkImportError(
-                        "default_level_height is None in single world project?".to_string(),
-                    ),
+                    ldtk_import_error!("default_level_height is None in single world project?"),
                 )?,
-                default_level_width: ldtk_project.default_level_width.ok_or(
-                    crate::Error::LdtkImportError(
-                        "default_level_width is None in single world project?".to_string(),
-                    ),
-                )?,
+                default_level_width: ldtk_project.default_level_width.ok_or(ldtk_import_error!(
+                    "default_level_width is None in single world project?"
+                ))?,
                 identifier: "World".to_string(),
                 iid: ldtk_project.iid,
                 levels: ldtk_project.levels,
-                world_grid_height: ldtk_project.world_grid_width.ok_or(
-                    crate::Error::LdtkImportError(
-                        "world_grid_height is None in single world project?".to_string(),
-                    ),
-                )?,
-                world_grid_width: ldtk_project.world_grid_width.ok_or(
-                    crate::Error::LdtkImportError(
-                        "world_grid_width is None in single world project?".to_string(),
-                    ),
-                )?,
+                world_grid_height: ldtk_project.world_grid_width.ok_or(ldtk_import_error!(
+                    "world_grid_height is None in single world project?"
+                ))?,
+                world_grid_width: ldtk_project.world_grid_width.ok_or(ldtk_import_error!(
+                    "world_grid_width is None in single world project?"
+                ))?,
                 world_layout: ldtk_project.world_layout,
             }]
         } else {

@@ -11,9 +11,9 @@ use crate::color::bevy_color_from_ldtk_string;
 use crate::field_instance::FieldInstance;
 use crate::iid::Iid;
 use crate::label::LayerAssetPath;
-use crate::ldtk;
 use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
 use crate::tileset_rectangle::TilesetRectangle;
+use crate::{ldtk, ldtk_import_error};
 
 #[derive(Asset, Debug, Reflect)]
 pub struct Entity {
@@ -44,10 +44,10 @@ impl Entity {
         let iid = Iid::from_str(&value.iid)?;
         let grid = (value.grid.len() == 2)
             .then(|| (value.grid[0], value.grid[1]).into())
-            .ok_or(crate::Error::LdtkImportError(format!(
+            .ok_or(ldtk_import_error!(
                 "Bad value for grid! given: {:?}",
                 value.grid
-            )))?;
+            ))?;
         let anchor = bevy_anchor_from_ldtk(&value.pivot)?;
         let smart_color = bevy_color_from_ldtk_string(&value.smart_color)?;
         let tags = value.tags.clone();
@@ -62,14 +62,14 @@ impl Entity {
         let world_location = match (value.world_x, value.world_y) {
             (None, None) => None,
             (None, Some(y)) => {
-                return Err(crate::Error::LdtkImportError(format!(
+                return Err(ldtk_import_error!(
                     "When constructing an entity, world_x was None but world_y was Some({y})!",
-                )))
+                ))
             }
             (Some(x), None) => {
-                return Err(crate::Error::LdtkImportError(format!(
+                return Err(ldtk_import_error!(
                     "When constructing an entity, world_x was Some({x}) but world_y was None!",
-                )))
+                ))
             }
             (Some(x), Some(y)) => Some((x as f32, -y as f32).into()),
         };
@@ -82,10 +82,10 @@ impl Entity {
         let size = (value.width as f32, value.height as f32).into();
         let location = (value.px.len() == 2)
             .then(|| (value.px[0] as f32, -value.px[1] as f32).into())
-            .ok_or(crate::Error::LdtkImportError(format!(
+            .ok_or(ldtk_import_error!(
                 "Unable to parse Vec2 from entity px field! given: {:?}",
                 value.grid
-            )))?;
+            ))?;
 
         let entity_asset_path = layer_asset_path.to_entity_asset_path(&identifier, iid);
 

@@ -13,6 +13,7 @@ use crate::iid::IidMap;
 use crate::label::WorldAssetPath;
 use crate::layer::Layer;
 use crate::ldtk;
+use crate::ldtk_import_error;
 use crate::ldtk_path::ldtk_path_to_bevy_path;
 use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
 use crate::uid::Uid;
@@ -46,9 +47,9 @@ impl NeighbourDir {
             "ne" => Ok(Self::NorthEast),
             "sw" => Ok(Self::SouthWest),
             "se" => Ok(Self::SouthEast),
-            _ => Err(crate::Error::LdtkImportError(format!(
+            _ => Err(ldtk_import_error!(
                 "Bad direction from LDtk neighbor! given: {dir}"
-            ))),
+            )),
         }
     }
 }
@@ -87,22 +88,22 @@ impl LevelBackground {
                 let crop_size = Vec2::new(value.crop_rect[2] as f32, value.crop_rect[3] as f32);
                 (crop_corner, crop_size)
             })
-            .ok_or(crate::Error::LdtkImportError(format!(
+            .ok_or(ldtk_import_error!(
                 "Bad value for crop! given: {:?}",
                 value.crop_rect
-            )))?;
+            ))?;
         let scale = (value.scale.len() == 2)
             .then(|| (value.scale[0] as f32, value.scale[1] as f32).into())
-            .ok_or(crate::Error::LdtkImportError(format!(
+            .ok_or(ldtk_import_error!(
                 "Bad value for scale! given: {:?}",
                 value.crop_rect
-            )))?;
+            ))?;
         let corner = (value.top_left_px.len() == 2)
             .then(|| (value.top_left_px[0] as f32, value.top_left_px[1] as f32).into())
-            .ok_or(crate::Error::LdtkImportError(format!(
+            .ok_or(ldtk_import_error!(
                 "Bad value for corner! given: {:?}",
                 value.crop_rect
-            )))?;
+            ))?;
 
         Ok(Self {
             image,
@@ -148,13 +149,13 @@ impl Level {
         let background = match (value.bg_pos.as_ref(), value.bg_rel_path.as_ref()) {
             (None, None) => None,
             (None, Some(_)) => {
-                return Err(crate::Error::LdtkImportError(
-                    "bg_pos is None while bg_rel_path is Some(_)!".to_string(),
+                return Err(ldtk_import_error!(
+                    "bg_pos is None while bg_rel_path is Some(_)!"
                 ))
             }
             (Some(_), None) => {
-                return Err(crate::Error::LdtkImportError(
-                    "bg_pos is Some(_) while bg_rel_path is None!".to_string(),
+                return Err(ldtk_import_error!(
+                    "bg_pos is Some(_) while bg_rel_path is None!"
                 ))
             }
             (Some(bg_pos), Some(bg_rel_path)) => {
@@ -178,15 +179,10 @@ impl Level {
 
         let level_asset_path = world_asset_path.to_level_asset_path(&identifier);
 
-        let layer_instances =
-            value
-                .layer_instances
-                .as_ref()
-                .ok_or(crate::Error::LdtkImportError(
-                    "layer_instances is None? \
+        let layer_instances = value.layer_instances.as_ref().ok_or(ldtk_import_error!(
+            "layer_instances is None? \
                     Are we opening the local layer definition instead of the external one?"
-                        .to_string(),
-                ))?;
+        ))?;
 
         let layers = layer_instances
             .iter()

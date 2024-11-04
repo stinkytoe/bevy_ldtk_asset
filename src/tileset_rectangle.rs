@@ -2,10 +2,10 @@ use bevy_asset::Handle;
 use bevy_math::Vec2;
 use bevy_reflect::Reflect;
 
-use crate::ldtk;
 use crate::tileset_definition::TilesetDefinition;
 use crate::uid::UidMap;
-use crate::{Error, Result};
+use crate::Result;
+use crate::{ldtk, ldtk_import_error};
 
 #[derive(Clone, Debug, Reflect)]
 pub struct TilesetRectangle {
@@ -23,10 +23,10 @@ impl TilesetRectangle {
         let size = (value.w as f32, value.h as f32).into();
         let tileset_definition = tileset_definitions
             .get(&value.tileset_uid)
-            .ok_or(Error::LdtkImportError(format!(
+            .ok_or(ldtk_import_error!(
                 "Bad tileset definition uid! given: {}",
                 value.tileset_uid
-            )))?
+            ))?
             .clone();
 
         Ok(Self {

@@ -7,10 +7,11 @@ use bevy_reflect::Reflect;
 
 use crate::color::bevy_color_from_ldtk_string;
 use crate::iid::Iid;
+use crate::ldtk_import_error;
 use crate::tileset_definition::TilesetDefinition;
 use crate::tileset_rectangle::TilesetRectangle;
 use crate::uid::UidMap;
-use crate::{ldtk, Error, Result};
+use crate::{ldtk, Result};
 
 #[derive(Debug, Reflect)]
 pub struct EntityRef {
@@ -44,17 +45,18 @@ pub enum FieldInstanceType {
 macro_rules! field_instance_map_get {
     ($map:expr, $key:expr, $field_type:expr, $as_type: ident) => {
         $map.get($key)
-            .ok_or(crate::Error::LdtkImportError(format!(
+            .ok_or(ldtk_import_error!(
                 "Field {} not in object for field instance type {}",
-                $key, $field_type
-            )))?
+                $key,
+                $field_type
+            ))?
             .$as_type()
-            .ok_or(crate::Error::LdtkImportError(format!(
+            .ok_or(ldtk_import_error!(
                 "Could not parse with {} for field {} in {}!",
                 stringify!($as_type),
                 $key,
-                $field_type
-            )))?
+                $field_type,
+            ))?
     };
 }
 
@@ -77,10 +79,10 @@ impl FieldInstanceType {
                             .collect::<Result<Vec<_>>>()
                     })
                     .transpose()?
-                    .ok_or(Error::LdtkImportError(format!(
+                    .ok_or(ldtk_import_error!(
                         "Could not construct Vec<i64> from ldtk input! given: {:?}",
                         value
-                    )))?,
+                    ))?,
             )),
             "Array<LocalEnum.SomeEnum>" => Ok(Self::ArrayLocalEnumSomeEnum(
                 value
@@ -95,10 +97,10 @@ impl FieldInstanceType {
                             .collect::<Result<Vec<_>>>()
                     })
                     .transpose()?
-                    .ok_or(Error::LdtkImportError(format!(
+                    .ok_or(ldtk_import_error!(
                         "Could not construct Vec<String> from ldtk input! given: {:?}",
                         value
-                    )))?,
+                    ))?,
             )),
             "Array<Multilines>" => Ok(Self::ArrayMultilines(
                 value
@@ -113,10 +115,10 @@ impl FieldInstanceType {
                             .collect::<Result<Vec<_>>>()
                     })
                     .transpose()?
-                    .ok_or(Error::LdtkImportError(format!(
+                    .ok_or(ldtk_import_error!(
                         "Could not construct Vec<String> from ldtk input! given: {:?}",
                         value
-                    )))?,
+                    ))?,
             )),
             "Array<Point>" => Ok(Self::ArrayPoint(
                 value
@@ -132,10 +134,10 @@ impl FieldInstanceType {
                             .collect::<Result<Vec<_>>>()
                     })
                     .transpose()?
-                    .ok_or(Error::LdtkImportError(format!(
+                    .ok_or(ldtk_import_error!(
                         "Could not construct Vec<I64Vec2> from ldtk input! given: {:?}",
                         value
-                    )))?,
+                    ))?,
             )),
             "Array<Tile>" => Ok(Self::ArrayTile(
                 value
@@ -153,29 +155,29 @@ impl FieldInstanceType {
                             .collect::<Result<Vec<_>>>()
                     })
                     .transpose()?
-                    .ok_or(Error::LdtkImportError(format!(
+                    .ok_or(ldtk_import_error!(
                         "Could not construct Vec<TilesetRectangle> from ldtk input! given: {:?}",
                         value
-                    )))?,
+                    ))?,
             )),
             "Bool" => Ok(Self::Bool(
                 value
                     .map(|value| serde_json::from_value::<bool>(value.clone()))
                     .transpose()?
-                    .ok_or(Error::LdtkImportError(format!(
+                    .ok_or(ldtk_import_error!(
                         "Could not construct bevy color from ldtk input! given: {:?}",
                         value
-                    )))?,
+                    ))?,
             )),
             "Color" => Ok(Self::Color(
                 value
                     .and_then(|value| value.as_str())
                     .map(bevy_color_from_ldtk_string)
                     .transpose()?
-                    .ok_or(Error::LdtkImportError(format!(
+                    .ok_or(ldtk_import_error!(
                         "Could not construct bevy color from ldtk input! given: {:?}",
                         value
-                    )))?,
+                    ))?,
             )),
             "EntityRef" => Ok(Self::EntityRef(
                 value
@@ -266,9 +268,9 @@ impl FieldInstanceType {
                     .map(|value| TilesetRectangle::new(&value, tileset_definitions))
                     .transpose()?,
             )),
-            _ => Err(crate::Error::LdtkImportError(format!(
+            _ => Err(ldtk_import_error!(
                 "Bad/Unknown Field Instance Type! given: {field_instance_type}"
-            ))),
+            )),
         }
     }
 }

@@ -11,12 +11,12 @@ use crate::entity::Entity;
 use crate::iid::{Iid, IidMap};
 use crate::label::{LayerAssetPath, LevelAssetPath};
 use crate::layer_definition::LayerDefinition;
+use crate::ldtk;
 use crate::ldtk_path::ldtk_path_to_bevy_path;
 use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
 use crate::tile_instance::TileInstance;
 use crate::tileset_definition::TilesetDefinition;
-use crate::Result;
-use crate::{ldtk, Error};
+use crate::{ldtk_import_error, Result};
 
 #[derive(Debug, Reflect)]
 pub struct EntitiesLayer {
@@ -53,9 +53,7 @@ impl EntitiesLayer {
             Ok(Self { entity_handles })
         })
         .transpose()?
-        .ok_or(Error::LdtkImportError(
-            "Entities layer with Tile data!".to_string(),
-        ))
+        .ok_or(ldtk_import_error!("Entities layer with Tile data!"))
     }
 }
 
@@ -120,9 +118,7 @@ impl TilesLayer {
                 })
             })
             .transpose()?
-            .ok_or(Error::LdtkImportError(
-                "Entities layer with Tile data!".to_string(),
-            ))
+            .ok_or(ldtk_import_error!("Entities layer with Tile data!"))
     }
 }
 
@@ -183,9 +179,7 @@ impl LayerType {
                 project_context,
                 project_definition_context,
             )?)),
-            unknown => Err(crate::Error::LdtkImportError(format!(
-                "Unknown layer type! given: {unknown}"
-            ))),
+            unknown => Err(ldtk_import_error!("Unknown layer type! given: {unknown}")),
         }
     }
 }
@@ -240,10 +234,10 @@ impl Layer {
         let layer_definition = project_definition_context
             .layer_definitions
             .get(&value.layer_def_uid)
-            .ok_or(Error::LdtkImportError(format!(
+            .ok_or(ldtk_import_error!(
                 "Bad layer definition uid! given: {}",
                 value.layer_def_uid
-            )))?
+            ))?
             .clone();
         let level_id = value.level_id;
         let location = (value.px_offset_x as f32, -value.px_total_offset_y as f32).into();
@@ -253,9 +247,9 @@ impl Layer {
         let int_grid_len = value.int_grid_csv.len();
         let total_grids = (grid_size.x * grid_size.y) as usize;
         if int_grid_len != 0 && int_grid_len != total_grids {
-            return Err(Error::LdtkImportError(format!(
+            return Err(ldtk_import_error!(
                 "Bad length for int_grid_csv in layer {identifier}! length:{int_grid_len}"
-            )));
+            ));
         }
 
         let layer = Layer {

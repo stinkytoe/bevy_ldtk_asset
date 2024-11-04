@@ -19,4 +19,11 @@ pub enum Error {
     LdtkImportError(String),
 }
 
+#[macro_export]
+macro_rules! ldtk_import_error {
+    ($($args:tt)*) => {
+        $crate::error::Error::LdtkImportError(format!($($args)*))
+    };
+}
+
 pub type Result<T> = core::result::Result<T, Error>;
