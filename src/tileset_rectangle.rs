@@ -1,5 +1,5 @@
 use bevy_asset::Handle;
-use bevy_math::Vec2;
+use bevy_math::{Rect, Vec2};
 use bevy_reflect::Reflect;
 
 use crate::tileset_definition::TilesetDefinition;
@@ -9,8 +9,8 @@ use crate::{ldtk, ldtk_import_error};
 
 #[derive(Clone, Debug, Reflect)]
 pub struct TilesetRectangle {
-    pub corner: Vec2,
     pub size: Vec2,
+    pub region: Rect,
     pub tileset_definition: Handle<TilesetDefinition>,
 }
 
@@ -19,8 +19,9 @@ impl TilesetRectangle {
         value: &ldtk::TilesetRectangle,
         tileset_definitions: &UidMap<Handle<TilesetDefinition>>,
     ) -> Result<Self> {
-        let corner = (value.x as f32, value.y as f32).into();
-        let size = (value.w as f32, value.h as f32).into();
+        let corner = Vec2::new(value.x as f32, value.y as f32);
+        let size = Vec2::new(value.w as f32, value.h as f32);
+        let region = Rect::from_corners(corner, corner + size);
         let tileset_definition = tileset_definitions
             .get(&value.tileset_uid)
             .ok_or(ldtk_import_error!(
@@ -30,8 +31,8 @@ impl TilesetRectangle {
             .clone();
 
         Ok(Self {
-            corner,
             size,
+            region,
             tileset_definition,
         })
     }

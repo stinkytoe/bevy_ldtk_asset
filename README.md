@@ -14,7 +14,7 @@ This crate attempts to provide the user with data that can readily be introduced
 into Bevy, but does not attempt to offer opinions on how this data should be used.
 No components, systems (except for debug output), events, resources, etc are provided.
 
-#### Conventions
+### Conventions
 
 When possible, we will convert items to a Bevy compatible format.
 
@@ -232,10 +232,10 @@ stinkytoe
 * [ ] Aseprite Files [#20](https://github.com/stinkytoe/bevy_ldtk_asset/issues/20)
 * [ ] Table of Contents export
 * [x] Layer Definitions
-* [ ] Entity Definitions
+* [x] Entity Definitions
 * [x] Tileset Definitions
 * [ ] Enum Definitions
-* [ ] Nine-Slice Borders for Entities
+* [ ] Nine-Slice Borders for Entities [#21](https://github.com/stinkytoe/bevy_ldtk_asset/issues/21)
 
 ## Compatability
 
