@@ -12,6 +12,7 @@ use crate::iid::{Iid, IidMap};
 use crate::label::{LayerAssetPath, LevelAssetPath};
 use crate::layer_definition::LayerDefinition;
 use crate::ldtk;
+use crate::ldtk_asset_trait::LdtkAsset;
 use crate::ldtk_path::ldtk_path_to_bevy_path;
 use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
 use crate::tile_instance::TileInstance;
@@ -272,5 +273,15 @@ impl Layer {
             load_context.add_loaded_labeled_asset(layer_asset_path.to_asset_label(), layer);
 
         Ok((iid, handle))
+    }
+}
+
+impl LdtkAsset for Layer {
+    fn identifier(&self) -> &str {
+        &self.identifier
+    }
+
+    fn iid(&self) -> Iid {
+        self.iid
     }
 }

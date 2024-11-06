@@ -9,6 +9,7 @@ use bevy_tasks::block_on;
 
 use crate::iid::{Iid, IidMap};
 use crate::label::ProjectAssetPath;
+use crate::ldtk_asset_trait::LdtkAsset;
 use crate::ldtk_path::ldtk_path_to_bevy_path;
 use crate::level::Level;
 use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
@@ -123,5 +124,15 @@ impl World {
             load_context.add_loaded_labeled_asset(world_asset_path.to_asset_label(), world);
 
         Ok((iid, handle))
+    }
+}
+
+impl LdtkAsset for World {
+    fn identifier(&self) -> &str {
+        &self.identifier
+    }
+
+    fn iid(&self) -> Iid {
+        self.iid
     }
 }

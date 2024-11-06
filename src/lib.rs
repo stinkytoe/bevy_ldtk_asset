@@ -17,6 +17,7 @@ pub mod iid;
 pub mod label;
 pub mod layer;
 pub mod layer_definition;
+pub mod ldtk_asset_trait;
 pub mod level;
 pub mod plugin;
 pub mod project;
