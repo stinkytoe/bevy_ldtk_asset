@@ -4,6 +4,8 @@ use std::str::FromStr;
 use bevy_asset::AssetLoader;
 use bevy_asset::Handle;
 use bevy_log::debug;
+use serde::Deserialize;
+use serde::Serialize;
 
 use crate::entity_definition::EntityDefinition;
 use crate::iid::Iid;
@@ -17,8 +19,24 @@ use crate::tileset_definition::TilesetDefinition;
 use crate::uid::UidMap;
 use crate::world::World;
 
+#[derive(Serialize, Deserialize)]
+pub struct ProjectSettings {
+    pub level_separation: f32,
+    pub layer_separation: f32,
+}
+
+impl Default for ProjectSettings {
+    fn default() -> Self {
+        Self {
+            level_separation: 1.0,
+            layer_separation: 0.1,
+        }
+    }
+}
+
 pub(crate) struct ProjectContext<'a> {
     pub(crate) project_directory: &'a Path,
+    pub(crate) project_settings: &'a ProjectSettings,
     pub(crate) external_levels: bool,
 }
 
@@ -33,13 +51,13 @@ pub(crate) struct ProjectLoader;
 
 impl AssetLoader for ProjectLoader {
     type Asset = Project;
-    type Settings = ();
+    type Settings = ProjectSettings;
     type Error = crate::Error;
 
     async fn load(
         &self,
         reader: &mut dyn bevy_asset::io::Reader,
-        _settings: &(),
+        project_settings: &ProjectSettings,
         load_context: &mut bevy_asset::LoadContext<'_>,
     ) -> Result<Self::Asset, Self::Error> {
         let ldtk_project: ldtk::LdtkProject = {
@@ -108,6 +126,7 @@ impl AssetLoader for ProjectLoader {
 
         let project_context = ProjectContext {
             project_directory: &project_directory,
+            project_settings,
             external_levels: ldtk_project.external_levels,
         };
 
@@ -177,6 +196,7 @@ impl AssetLoader for ProjectLoader {
         Ok(Project {
             iid: project_iid,
             json_version,
+            path: project_path,
             worlds,
         })
     }

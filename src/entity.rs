@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_color::Color;
-use bevy_math::{I64Vec2, Vec2};
+use bevy_math::{I64Vec2, Vec2, Vec3};
 use bevy_reflect::Reflect;
 use bevy_sprite::Anchor;
 
@@ -122,11 +122,15 @@ impl Entity {
 }
 
 impl LdtkAsset for Entity {
-    fn identifier(&self) -> &str {
+    fn get_identifier(&self) -> &str {
         &self.identifier
     }
 
-    fn iid(&self) -> Iid {
+    fn get_iid(&self) -> Iid {
         self.iid
+    }
+
+    fn get_translation(&self) -> Vec3 {
+        self.location.extend(0.0)
     }
 }

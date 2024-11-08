@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_log::error;
-use bevy_math::{I64Vec2, Vec2};
+use bevy_math::{I64Vec2, Vec2, Vec3};
 use bevy_reflect::Reflect;
 use bevy_render::texture::Image;
 use bevy_utils::HashMap;
@@ -197,7 +197,7 @@ pub struct Layer {
     pub iid: Iid,
     pub layer_definition: Handle<LayerDefinition>,
     pub level_id: Uid,
-    pub location: Vec2,
+    pub location: Vec3,
     pub index: usize,
     // TODO: hackhackhack! This is meant to always remain empty, so that we have something
     // to generate a Values iterator with if the layer_type is such that it doesn't contain
@@ -241,7 +241,13 @@ impl Layer {
             ))?
             .clone();
         let level_id = value.level_id;
-        let location = (value.px_offset_x as f32, -value.px_total_offset_y as f32).into();
+        let z_offset = project_context.project_settings.layer_separation * (index + 1) as f32;
+        let location = (
+            value.px_offset_x as f32,
+            -value.px_total_offset_y as f32,
+            z_offset,
+        )
+            .into();
         let stub = HashMap::default();
 
         // Sanity check to guarantee that the int_grid size makes sense
@@ -277,11 +283,15 @@ impl Layer {
 }
 
 impl LdtkAsset for Layer {
-    fn identifier(&self) -> &str {
+    fn get_identifier(&self) -> &str {
         &self.identifier
     }
 
-    fn iid(&self) -> Iid {
+    fn get_iid(&self) -> Iid {
         self.iid
+    }
+
+    fn get_translation(&self) -> Vec3 {
+        self.location
     }
 }

@@ -3,7 +3,7 @@ use std::str::FromStr;
 
 use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_log::trace;
-use bevy_math::Vec2;
+use bevy_math::{Vec2, Vec3};
 use bevy_reflect::Reflect;
 use bevy_tasks::block_on;
 
@@ -128,11 +128,15 @@ impl World {
 }
 
 impl LdtkAsset for World {
-    fn identifier(&self) -> &str {
+    fn get_identifier(&self) -> &str {
         &self.identifier
     }
 
-    fn iid(&self) -> Iid {
+    fn get_iid(&self) -> Iid {
         self.iid
+    }
+
+    fn get_translation(&self) -> Vec3 {
+        Vec3::ZERO
     }
 }
