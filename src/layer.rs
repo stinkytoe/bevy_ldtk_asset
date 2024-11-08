@@ -199,10 +199,6 @@ pub struct Layer {
     pub level_id: Uid,
     pub location: Vec3,
     pub index: usize,
-    // TODO: hackhackhack! This is meant to always remain empty, so that we have something
-    // to generate a Values iterator with if the layer_type is such that it doesn't contain
-    // entities!
-    pub stub: IidMap<Handle<Entity>>,
 }
 
 impl Layer {
@@ -248,7 +244,6 @@ impl Layer {
             z_offset,
         )
             .into();
-        let stub = HashMap::default();
 
         // Sanity check to guarantee that the int_grid size makes sense
         let int_grid_len = value.int_grid_csv.len();
@@ -271,7 +266,6 @@ impl Layer {
             level_id,
             location,
             index,
-            stub,
         }
         .into();
 
