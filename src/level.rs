@@ -15,6 +15,7 @@ use crate::label::WorldAssetPath;
 use crate::layer::Layer;
 use crate::ldtk;
 use crate::ldtk_asset_trait::LdtkAsset;
+use crate::ldtk_asset_trait::LdtkAssetWithChildren;
 use crate::ldtk_import_error;
 use crate::ldtk_path::ldtk_path_to_bevy_path;
 use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
@@ -238,5 +239,11 @@ impl LdtkAsset for Level {
 
     fn get_translation(&self) -> Vec3 {
         self.location
+    }
+}
+
+impl LdtkAssetWithChildren<Layer> for Level {
+    fn get_children(&self) -> impl Iterator<Item = &Handle<Layer>> {
+        self.layers.values()
     }
 }

@@ -6,6 +6,7 @@ use bevy_reflect::Reflect;
 use crate::iid::Iid;
 use crate::iid::IidMap;
 use crate::ldtk_asset_trait::LdtkAsset;
+use crate::ldtk_asset_trait::LdtkAssetWithChildren;
 use crate::world::World;
 
 #[derive(Asset, Debug, Reflect)]
@@ -28,5 +29,11 @@ impl LdtkAsset for Project {
 
     fn get_translation(&self) -> Vec3 {
         Vec3::ZERO
+    }
+}
+
+impl LdtkAssetWithChildren<World> for Project {
+    fn get_children(&self) -> impl Iterator<Item = &Handle<World>> {
+        self.worlds.values()
     }
 }

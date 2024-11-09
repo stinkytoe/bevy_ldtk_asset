@@ -9,7 +9,7 @@ use bevy_tasks::block_on;
 
 use crate::iid::{Iid, IidMap};
 use crate::label::ProjectAssetPath;
-use crate::ldtk_asset_trait::LdtkAsset;
+use crate::ldtk_asset_trait::{LdtkAsset, LdtkAssetWithChildren};
 use crate::ldtk_path::ldtk_path_to_bevy_path;
 use crate::level::Level;
 use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
@@ -138,5 +138,11 @@ impl LdtkAsset for World {
 
     fn get_translation(&self) -> Vec3 {
         Vec3::ZERO
+    }
+}
+
+impl LdtkAssetWithChildren<Level> for World {
+    fn get_children(&self) -> impl Iterator<Item = &Handle<Level>> {
+        self.levels.values()
     }
 }

@@ -5,14 +5,13 @@ use bevy_log::error;
 use bevy_math::{I64Vec2, Vec2, Vec3};
 use bevy_reflect::Reflect;
 use bevy_render::texture::Image;
-use bevy_utils::HashMap;
 
 use crate::entity::Entity;
 use crate::iid::{Iid, IidMap};
 use crate::label::{LayerAssetPath, LevelAssetPath};
 use crate::layer_definition::LayerDefinition;
 use crate::ldtk;
-use crate::ldtk_asset_trait::LdtkAsset;
+use crate::ldtk_asset_trait::{LdtkAsset, LdtkAssetWithChildren};
 use crate::ldtk_path::ldtk_path_to_bevy_path;
 use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
 use crate::tile_instance::TileInstance;
@@ -287,5 +286,18 @@ impl LdtkAsset for Layer {
 
     fn get_translation(&self) -> Vec3 {
         self.location
+    }
+}
+
+impl LdtkAssetWithChildren<Entity> for Layer {
+    fn get_children(&self) -> impl Iterator<Item = &Handle<Entity>> {
+        match &self.layer_type {
+            LayerType::Entities(entities_layer) => {
+                either::Left(entities_layer.entity_handles.values())
+            }
+            LayerType::IntGrid(_) | LayerType::Tiles(_) | LayerType::AutoLayer(_) => {
+                either::Right([].iter())
+            }
+        }
     }
 }
