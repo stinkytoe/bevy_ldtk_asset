@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_color::Color;
-use bevy_math::{I64Vec2, Vec2, Vec3};
+use bevy_math::{I64Vec2, Vec2};
 use bevy_reflect::Reflect;
 use bevy_sprite::Anchor;
 
@@ -31,7 +31,6 @@ pub struct Entity {
     pub field_instances: Vec<FieldInstance>,
     pub size: Vec2,
     pub location: Vec2,
-    //pub parent_path: String,
 }
 
 impl Entity {
@@ -128,9 +127,5 @@ impl LdtkAsset for Entity {
 
     fn get_iid(&self) -> Iid {
         self.iid
-    }
-
-    fn get_translation(&self) -> Vec3 {
-        self.location.extend(0.0)
     }
 }

@@ -1,6 +1,5 @@
 use bevy_asset::Asset;
 use bevy_asset::Handle;
-use bevy_math::Vec3;
 use bevy_reflect::Reflect;
 
 use crate::iid::Iid;
@@ -25,10 +24,6 @@ impl LdtkAsset for Project {
 
     fn get_iid(&self) -> Iid {
         self.iid
-    }
-
-    fn get_translation(&self) -> Vec3 {
-        Vec3::ZERO
     }
 }
 

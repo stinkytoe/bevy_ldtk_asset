@@ -3,7 +3,6 @@ use std::str::FromStr;
 use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_color::Color;
 use bevy_math::Vec2;
-use bevy_math::Vec3;
 use bevy_reflect::Reflect;
 use bevy_render::texture::Image;
 
@@ -129,7 +128,7 @@ pub struct Level {
     pub size: Vec2,
     pub uid: Uid, // TODO: do we need this?
     pub world_depth: i64,
-    pub location: Vec3,
+    pub location: Vec2,
     pub layers: IidMap<Handle<Layer>>,
     pub index: usize,
 }
@@ -178,9 +177,7 @@ impl Level {
         let size = (value.px_wid as f32, value.px_hei as f32).into();
         let uid = value.uid;
         let world_depth = value.world_depth;
-        let z_offset =
-            project_context.project_settings.level_separation * (value.world_depth as f32);
-        let location = (value.world_x as f32, -value.world_y as f32, z_offset).into();
+        let location = (value.world_x as f32, -value.world_y as f32).into();
 
         let level_asset_path = world_asset_path.to_level_asset_path(&identifier);
 
@@ -235,10 +232,6 @@ impl LdtkAsset for Level {
 
     fn get_iid(&self) -> Iid {
         self.iid
-    }
-
-    fn get_translation(&self) -> Vec3 {
-        self.location
     }
 }
 

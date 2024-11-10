@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_log::error;
-use bevy_math::{I64Vec2, Vec2, Vec3};
+use bevy_math::{I64Vec2, Vec2};
 use bevy_reflect::Reflect;
 use bevy_render::texture::Image;
 
@@ -196,7 +196,7 @@ pub struct Layer {
     pub iid: Iid,
     pub layer_definition: Handle<LayerDefinition>,
     pub level_id: Uid,
-    pub location: Vec3,
+    pub location: Vec2,
     pub index: usize,
 }
 
@@ -236,11 +236,9 @@ impl Layer {
             ))?
             .clone();
         let level_id = value.level_id;
-        let z_offset = project_context.project_settings.layer_separation * (index + 1) as f32;
         let location = (
             value.px_total_offset_x as f32,
             -value.px_total_offset_y as f32,
-            z_offset,
         )
             .into();
 
@@ -282,10 +280,6 @@ impl LdtkAsset for Layer {
 
     fn get_iid(&self) -> Iid {
         self.iid
-    }
-
-    fn get_translation(&self) -> Vec3 {
-        self.location
     }
 }
 
