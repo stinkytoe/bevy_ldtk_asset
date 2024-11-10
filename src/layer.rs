@@ -238,7 +238,7 @@ impl Layer {
         let level_id = value.level_id;
         let z_offset = project_context.project_settings.layer_separation * (index + 1) as f32;
         let location = (
-            value.px_offset_x as f32,
+            value.px_total_offset_x as f32,
             -value.px_total_offset_y as f32,
             z_offset,
         )
