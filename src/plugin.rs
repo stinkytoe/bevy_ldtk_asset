@@ -3,6 +3,7 @@ use bevy_asset::AssetApp;
 
 use crate::entity::Entity;
 use crate::entity_definition::EntityDefinition;
+use crate::enum_definition::EnumDefinition;
 use crate::iid::Iid;
 use crate::layer::Layer;
 use crate::layer_definition::LayerDefinition;
@@ -26,6 +27,7 @@ impl Plugin for BevyLdtkAssetPlugin {
             .init_asset::<EntityDefinition>()
             .init_asset::<LayerDefinition>()
             .init_asset::<TilesetDefinition>()
+            .init_asset::<EnumDefinition>()
             .init_asset_loader::<ProjectLoader>()
             .register_asset_reflect::<Entity>()
             .register_asset_reflect::<Layer>()

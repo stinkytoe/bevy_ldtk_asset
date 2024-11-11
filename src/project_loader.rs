@@ -7,6 +7,7 @@ use bevy_log::debug;
 
 use crate::asset_labels::ProjectAssetPath;
 use crate::entity_definition::EntityDefinition;
+use crate::enum_definition::EnumDefinition;
 use crate::iid::Iid;
 use crate::iid::IidMap;
 use crate::layer_definition::LayerDefinition;
@@ -26,6 +27,7 @@ pub(crate) struct ProjectDefinitionContext<'a> {
     pub(crate) tileset_definitions: &'a UidMap<Handle<TilesetDefinition>>,
     pub(crate) layer_definitions: &'a UidMap<Handle<LayerDefinition>>,
     pub(crate) entity_definitions: &'a UidMap<Handle<EntityDefinition>>,
+    pub(crate) enum_definitions: &'a UidMap<Handle<EnumDefinition>>,
 }
 
 #[derive(Default)]
@@ -153,10 +155,26 @@ impl AssetLoader for ProjectLoader {
             })
             .collect::<crate::Result<_>>()?;
 
+        let enum_definitions = ldtk_project
+            .defs
+            .enums
+            .iter()
+            .map(|ldtk_enum_definition| {
+                EnumDefinition::create_handle_pair(
+                    ldtk_enum_definition,
+                    &project_asset_path,
+                    load_context,
+                    &project_context,
+                    &tileset_definitions,
+                )
+            })
+            .collect::<crate::Result<_>>()?;
+
         let project_definitions_context = ProjectDefinitionContext {
             tileset_definitions: &tileset_definitions,
             layer_definitions: &layer_definitions,
             entity_definitions: &entity_definitions,
+            enum_definitions: &enum_definitions,
         };
 
         let worlds = ldtk_worlds
