@@ -170,7 +170,13 @@ impl Level {
         let field_instances = value
             .field_instances
             .iter()
-            .map(|value| FieldInstance::new(value, project_definition_context.tileset_definitions))
+            .map(|value| {
+                FieldInstance::new(
+                    value,
+                    project_definition_context.tileset_definitions,
+                    project_definition_context.enum_definitions,
+                )
+            })
             .collect::<Result<_, _>>()?;
         let identifier = value.identifier.clone();
         let iid = Iid::from_str(&value.iid)?;

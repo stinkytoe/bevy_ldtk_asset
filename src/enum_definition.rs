@@ -38,11 +38,15 @@ impl EnumValueDefinition {
     }
 }
 
+/// Enum definitions are a little different in the way they are indexed. They do have internal
+/// Uids, however, a field instance of type Enum or Array<Enum> doesn't expose this directly. The
+/// data is in the JSON, but it's not exposed via the schema. So, we index these by their
+/// identifier as opposed to their Uid. Any definition *could* be indexed the same way, but I chose
+/// to use the uid when available via the schema.
 #[derive(Asset, Debug, Reflect)]
 pub struct EnumDefinition {
     pub identifier: String,
     pub external_rel_path: Option<PathBuf>,
-    //pub icon_tileset_uid: Option<i64>,
     icon_tileset_definition: Option<Handle<TilesetDefinition>>,
     pub tags: Vec<String>,
     pub values: Vec<EnumValueDefinition>,
@@ -55,8 +59,7 @@ impl EnumDefinition {
         load_context: &mut LoadContext,
         project_context: &ProjectContext,
         tileset_definitions: &UidMap<Handle<TilesetDefinition>>,
-    ) -> Result<(i64, Handle<Self>)> {
-        let uid = value.uid;
+    ) -> Result<(String, Handle<Self>)> {
         let identifier = value.identifier.clone();
         let external_rel_path = value
             .external_rel_path
@@ -82,7 +85,7 @@ impl EnumDefinition {
         let path = project_asset_path.to_enum_definition_asset_path(&identifier)?;
 
         let asset = Self {
-            identifier,
+            identifier: identifier.clone(),
             external_rel_path,
             icon_tileset_definition,
             tags,
@@ -92,6 +95,6 @@ impl EnumDefinition {
 
         let handle = load_context.add_loaded_labeled_asset(path.to_asset_label(), asset);
 
-        Ok((uid, handle))
+        Ok((identifier, handle))
     }
 }

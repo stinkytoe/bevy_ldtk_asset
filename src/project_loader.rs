@@ -4,6 +4,7 @@ use std::str::FromStr;
 use bevy_asset::AssetLoader;
 use bevy_asset::Handle;
 use bevy_log::debug;
+use bevy_utils::HashMap;
 
 use crate::asset_labels::ProjectAssetPath;
 use crate::entity_definition::EntityDefinition;
@@ -27,7 +28,7 @@ pub(crate) struct ProjectDefinitionContext<'a> {
     pub(crate) tileset_definitions: &'a UidMap<Handle<TilesetDefinition>>,
     pub(crate) layer_definitions: &'a UidMap<Handle<LayerDefinition>>,
     pub(crate) entity_definitions: &'a UidMap<Handle<EntityDefinition>>,
-    pub(crate) enum_definitions: &'a UidMap<Handle<EnumDefinition>>,
+    pub(crate) enum_definitions: &'a HashMap<String, Handle<EnumDefinition>>,
 }
 
 #[derive(Default)]

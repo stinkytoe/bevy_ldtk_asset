@@ -85,7 +85,13 @@ impl Entity {
         let field_instances = value
             .field_instances
             .iter()
-            .map(|value| FieldInstance::new(value, project_definitions_context.tileset_definitions))
+            .map(|value| {
+                FieldInstance::new(
+                    value,
+                    project_definitions_context.tileset_definitions,
+                    project_definitions_context.enum_definitions,
+                )
+            })
             .collect::<Result<_, _>>()?;
         let size = (value.width as f32, value.height as f32).into();
         let location = (value.px.len() == 2)

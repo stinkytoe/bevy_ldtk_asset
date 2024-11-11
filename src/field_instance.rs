@@ -4,8 +4,10 @@ use bevy_asset::Handle;
 use bevy_color::Color;
 use bevy_math::I64Vec2;
 use bevy_reflect::Reflect;
+use bevy_utils::HashMap;
 
 use crate::color::bevy_color_from_ldtk_string;
+use crate::enum_definition::EnumDefinition;
 use crate::iid::Iid;
 use crate::ldtk_import_error;
 use crate::tileset_definition::TilesetDefinition;
@@ -22,20 +24,25 @@ pub struct EntityRef {
 }
 
 #[derive(Debug, Reflect)]
+pub struct EnumValue {
+    value: String,
+    enum_definition: Handle<EnumDefinition>,
+}
+
+#[derive(Debug, Reflect)]
 pub enum FieldInstanceType {
     ArrayInt(Vec<i64>),
-    ArrayLocalEnumSomeEnum(Vec<String>),
+    ArrayEnum(Vec<EnumValue>),
     ArrayMultilines(Vec<String>),
     ArrayPoint(Vec<I64Vec2>),
     ArrayTile(Vec<TilesetRectangle>),
     Bool(bool),
     Color(Color),
     EntityRef(Option<EntityRef>),
-    ExternEnumAnExternEnum(Option<String>),
+    Enum(Option<EnumValue>),
     FilePath(Option<String>),
     Float(Option<f64>),
     Int(Option<i64>),
-    LocalEnumSomeEnum(Option<String>),
     Multilines(Option<String>),
     Point(Option<I64Vec2>),
     String(Option<String>),
@@ -65,6 +72,7 @@ impl FieldInstanceType {
         field_instance_type: &str,
         value: Option<&serde_json::Value>,
         tileset_definitions: &UidMap<Handle<TilesetDefinition>>,
+        enum_definitions: &HashMap<String, Handle<EnumDefinition>>,
     ) -> crate::Result<Self> {
         match field_instance_type {
             "Array<Int>" => Ok(Self::ArrayInt(
@@ -81,24 +89,6 @@ impl FieldInstanceType {
                     .transpose()?
                     .ok_or(ldtk_import_error!(
                         "Could not construct Vec<i64> from ldtk input! given: {:?}",
-                        value
-                    ))?,
-            )),
-            "Array<LocalEnum.SomeEnum>" => Ok(Self::ArrayLocalEnumSomeEnum(
-                value
-                    .and_then(|value| value.as_array())
-                    .map(|value| {
-                        value
-                            .iter()
-                            .map(|value| {
-                                serde_json::from_value::<String>(value.clone())
-                                    .map_err(|e| e.into())
-                            })
-                            .collect::<Result<Vec<_>>>()
-                    })
-                    .transpose()?
-                    .ok_or(ldtk_import_error!(
-                        "Could not construct Vec<String> from ldtk input! given: {:?}",
                         value
                     ))?,
             )),
@@ -215,11 +205,6 @@ impl FieldInstanceType {
                     })
                     .transpose()?,
             )),
-            "ExternEnum.AnExternEnum" => Ok(Self::ExternEnumAnExternEnum(
-                value
-                    .map(|value| serde_json::from_value::<String>(value.clone()))
-                    .transpose()?,
-            )),
             "FilePath" => Ok(Self::FilePath(
                 value
                     .map(|value| serde_json::from_value::<String>(value.clone()))
@@ -233,11 +218,6 @@ impl FieldInstanceType {
             "Int" => Ok(Self::Int(
                 value
                     .map(|value| serde_json::from_value::<i64>(value.clone()))
-                    .transpose()?,
-            )),
-            "LocalEnum.SomeEnum" => Ok(Self::LocalEnumSomeEnum(
-                value
-                    .map(|value| serde_json::from_value::<String>(value.clone()))
                     .transpose()?,
             )),
             "Point" => Ok(Self::Point(
@@ -268,9 +248,155 @@ impl FieldInstanceType {
                     .map(|value| TilesetRectangle::new(&value, tileset_definitions))
                     .transpose()?,
             )),
-            _ => Err(ldtk_import_error!(
-                "Bad/Unknown Field Instance Type! given: {field_instance_type}"
-            )),
+            _ =>
+            // try to parse as an enum
+            {
+                //Err(ldtk_import_error!(
+                //    "Bad/Unknown Field Instance Type! given: {field_instance_type}"
+                //))
+                Self::parse_non_obvious_field_instance_type(
+                    field_instance_type,
+                    value,
+                    enum_definitions,
+                )
+            }
+        }
+    }
+
+    fn parse_non_obvious_field_instance_type(
+        field_instance_type: &str,
+        value: Option<&serde_json::Value>,
+        enum_definitions: &HashMap<String, Handle<EnumDefinition>>,
+    ) -> crate::Result<Self> {
+        // If we make it here, we should have one of four things:
+        // * "LocalEnum.{Enum Group Name}"
+        // * "ExternEnum.{Enum Group Name}"
+        // * "Array<LocalEnum.{Enum Group Name}>"
+        // * "Array<ExternEnum.{Enum Group Name}>"
+        //
+        // There is no difference between LocalEnum and ExternEnum, except the externalRelPath
+        // field.
+        //
+        // The LocalEnum.{Enum Group Name} and ExternEnum.{Enum Group Name} will store a string in
+        // their value field.
+        //
+        // The Array<...> variant stores an array of strings in its value field.
+
+        let mut around_the_dot = field_instance_type.split('.');
+
+        let (Some(lhs), Some(rhs), None) = (
+            around_the_dot.next(),
+            around_the_dot.next(),
+            around_the_dot.next(),
+        ) else {
+            return Err(ldtk_import_error!(
+                "Bad field instance type! {field_instance_type}"
+            ));
+        };
+
+        let (enum_name, is_array) = if lhs.contains('<') {
+            let mut around_the_carat = lhs.split('<');
+            let (Some(array_lhs), Some(array_rhs), None) = (
+                around_the_carat.next(),
+                around_the_carat.next(),
+                around_the_carat.next(),
+            ) else {
+                return Err(ldtk_import_error!(
+                    "Bad field instance type! {field_instance_type}"
+                ));
+            };
+
+            if array_lhs != "Array" {
+                return Err(ldtk_import_error!(
+                    "Bad field instance type! {field_instance_type}"
+                ));
+            }
+
+            if !(array_rhs == "LocalEnum" || array_rhs == "ExternEnum") {
+                return Err(ldtk_import_error!(
+                    "Bad field instance type! {field_instance_type}"
+                ));
+            }
+
+            // maybe redundant?
+            if rhs.len() < 2 {
+                return Err(ldtk_import_error!(
+                    "Bad field instance type! {field_instance_type}"
+                ));
+            }
+
+            if !rhs.ends_with('>') {
+                return Err(ldtk_import_error!(
+                    "Bad field instance type! {field_instance_type}"
+                ));
+            }
+
+            (&rhs[..rhs.len() - 1], true)
+        } else {
+            if !(lhs == "LocalEnum" || lhs == "ExternEnum") {
+                return Err(ldtk_import_error!(
+                    "Bad field instance type! {field_instance_type}"
+                ));
+            }
+
+            (rhs, false)
+        };
+
+        if is_array {
+            let array_enum = value
+                .and_then(|value| value.as_array())
+                .map(|value| {
+                    value
+                        .iter()
+                        .map(|value| {
+                            serde_json::from_value::<String>(value.clone()).map_err(|e| e.into())
+                        })
+                        .collect::<Result<Vec<_>>>()
+                })
+                .transpose()?
+                .map(|value| -> Result<Vec<EnumValue>> {
+                    value
+                        .into_iter()
+                        .map(|value| -> Result<EnumValue> {
+                            let enum_definition = enum_definitions
+                                .get(enum_name)
+                                .ok_or(ldtk_import_error!("bad enum identifier! {}", enum_name))?
+                                .clone();
+
+                            Ok(EnumValue {
+                                value,
+                                enum_definition,
+                            })
+                        })
+                        .collect::<Result<Vec<_>>>()
+                })
+                .transpose()?
+                .ok_or(ldtk_import_error!(
+                    "Could not construct Vec<String> from ldtk input! given: {:?}",
+                    value
+                ))?;
+
+            Ok(Self::ArrayEnum(array_enum))
+        } else {
+            let enum_value: Option<EnumValue> = value
+                .map(|value| -> Result<String> {
+                    serde_json::from_value::<String>(value.clone()).map_err(|e| e.into())
+                })
+                .transpose()?
+                .map(|value| -> Result<EnumValue> {
+                    let enum_definition = enum_definitions
+                        .get(enum_name)
+                        .ok_or(ldtk_import_error!("bad enum identifier! {}", enum_name))?
+                        .clone();
+
+                    Ok(EnumValue {
+                        value,
+                        enum_definition,
+                    })
+                })
+                .transpose()?;
+
+            Ok(Self::Enum(enum_value))
         }
     }
 }
@@ -287,6 +413,7 @@ impl FieldInstance {
     pub(crate) fn new(
         value: &ldtk::FieldInstance,
         tileset_definitions: &UidMap<Handle<TilesetDefinition>>,
+        enum_definitions: &HashMap<String, Handle<EnumDefinition>>,
     ) -> crate::Result<Self> {
         let identifier = value.identifier.clone();
         let tileset_rectangle = value
@@ -298,6 +425,7 @@ impl FieldInstance {
             &value.field_instance_type,
             value.value.as_ref(),
             tileset_definitions,
+            enum_definitions,
         )?;
         let def_uid = value.def_uid;
 
