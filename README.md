@@ -142,34 +142,36 @@ Would result in the following assets and sub-assets being generated:
 
 ```text
 example.ldtk
-example.ldtk#Overworld
-example.ldtk#Overworld/Level1
-example.ldtk#Overworld/Level1/Ground
-example.ldtk#Overworld/Level1/Entities
-example.ldtk#Overworld/Level1/Entities/Player@e594faf8-fe91-4a25-8082-95ff47040f43
-example.ldtk#Overworld/Level1/Entities/NPC1@d4465592-92ba-4fd7-80c2-7a315d4368be
-example.ldtk#Overworld/Level1/Entities/NPC2@355ad2ee-fbbb-4d30-b5b9-4711ea699121
-example.ldtk#Overworld/Level1/Trees
-example.ldtk#Overworld/Level2
-example.ldtk#Overworld/Level2/Ground
-example.ldtk#Overworld/Level2/Entities
-example.ldtk#Overworld/Level2/Entities/NPC3@8ff0db7d-2969-459a-8f54-467f67aa669f
-example.ldtk#Overworld/Level2/Entities/NPC4@492dceab-8884-4188-90aa-61662444f501
-example.ldtk#Overworld/Level2/Trees
-example.ldtk#Underworld
-example.ldtk#Underworld/Dungeon1
-example.ldtk#Underworld/Dungeon1/Ground
-example.ldtk#Underworld/Dungeon1/Entities
-example.ldtk#Underworld/Dungeon1/Entities/Goblin@c528ae1d-4625-4999-a184-d061253d0595
-example.ldtk#Underworld/Dungeon1/Entities/TrapDoor@2a91e6b2-d63b-4d90-9e5a-f860eea82afd
-example.ldtk#Underworld/Dungeon1/Trees
-example.ldtk#Underworld/Dungeon2
-example.ldtk#Underworld/Dungeon2/Ground
-example.ldtk#Underworld/Dungeon2/Entities
-example.ldtk#Underworld/Dungeon2/Entities/ShadyShopKeeper@55ae7dac-3158-41d1-a8c0-8b586ad19f4c
-example.ldtk#Underworld/Dungeon2/Entities/DubiousPotion@14500cf9-0bd3-440e-b7d0-085a64e79493
-example.ldtk#Underworld/Dungeon2/Trees
+example.ldtk#worlds:Overworld
+example.ldtk#worlds:Overworld/Level1
+example.ldtk#worlds:Overworld/Level1/Ground
+example.ldtk#worlds:Overworld/Level1/Entities
+example.ldtk#worlds:Overworld/Level1/Entities/Player@e594faf8-fe91-4a25-8082-95ff47040f43
+example.ldtk#worlds:Overworld/Level1/Entities/NPC1@d4465592-92ba-4fd7-80c2-7a315d4368be
+example.ldtk#worlds:Overworld/Level1/Entities/NPC2@355ad2ee-fbbb-4d30-b5b9-4711ea699121
+example.ldtk#worlds:Overworld/Level1/Trees
+example.ldtk#worlds:Overworld/Level2
+example.ldtk#worlds:Overworld/Level2/Ground
+example.ldtk#worlds:Overworld/Level2/Entities
+example.ldtk#worlds:Overworld/Level2/Entities/NPC3@8ff0db7d-2969-459a-8f54-467f67aa669f
+example.ldtk#worlds:Overworld/Level2/Entities/NPC4@492dceab-8884-4188-90aa-61662444f501
+example.ldtk#worlds:Overworld/Level2/Trees
+example.ldtk#worlds:Underworld
+example.ldtk#worlds:Underworld/Dungeon1
+example.ldtk#worlds:Underworld/Dungeon1/Ground
+example.ldtk#worlds:Underworld/Dungeon1/Entities
+example.ldtk#worlds:Underworld/Dungeon1/Entities/Goblin@c528ae1d-4625-4999-a184-d061253d0595
+example.ldtk#worlds:Underworld/Dungeon1/Entities/TrapDoor@2a91e6b2-d63b-4d90-9e5a-f860eea82afd
+example.ldtk#worlds:Underworld/Dungeon1/Trees
+example.ldtk#worlds:Underworld/Dungeon2
+example.ldtk#worlds:Underworld/Dungeon2/Ground
+example.ldtk#worlds:Underworld/Dungeon2/Entities
+example.ldtk#worlds:Underworld/Dungeon2/Entities/ShadyShopKeeper@55ae7dac-3158-41d1-a8c0-8b586ad19f4c
+example.ldtk#worlds:Underworld/Dungeon2/Entities/DubiousPotion@14500cf9-0bd3-440e-b7d0-085a64e79493
+example.ldtk#worlds:Underworld/Dungeon2/Trees
 ```
+
+See [asset_labels] for a full description.
 
 ### LDtk dependencies (Images, etc)
 
