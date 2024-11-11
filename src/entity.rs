@@ -1,3 +1,8 @@
+//! The LDtk entity, represented as a Bevy asset.
+//!
+//! This is an import of an LDtk
+//! [EntityInstance](https://ldtk.io/json/#ldtk-EntityInstanceJson)
+
 use std::str::FromStr;
 
 use bevy_asset::{Asset, Handle, LoadContext};
@@ -17,19 +22,58 @@ use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
 use crate::tileset_rectangle::TilesetRectangle;
 use crate::{ldtk, ldtk_import_error};
 
+/// An asset representing an [LDtk Entity Instance](https://ldtk.io/json/#ldtk-EntityInstanceJson)
+///
+/// See [crate::asset_labels] for a description of the label format.
 #[derive(Asset, Debug, Reflect)]
 pub struct Entity {
+    /// The identifier for this specific entity.
+    ///
+    /// Unlike other identifiers, there is no guarantee that this is unique.
     pub identifier: String,
+    /// The Iid. This will likely always be unique, even across projects.
     pub iid: Iid,
+    /// The grid location of the entity in the containing layer
     pub grid: I64Vec2,
+    /// The anchor point of the entity.
+    ///
+    /// This represents where the 'center' of the entity is. Both the spatial location and the
+    /// graphical representation of the entity use this anchor.
     pub anchor: Anchor,
+    /// A color representing the entity, calculated by LDtk. Not normally used for visualization.
     pub smart_color: Color,
+    /// A list of tags assigned to this specific entity.
+    ///
+    /// These are assigned in the entity definition, but copied to the instance for convenience.
+    /// This allows the user to designate properties and intents about this entity to the game,
+    /// such as: is it a player/npc/enemy etc.
     pub tags: Vec<String>,
+    /// An optional [TilesetRectangle].
+    ///
+    /// This is used by the editor as the default visualization, but could be used by a game as the
+    /// visualization as well.
     pub tile: Option<TilesetRectangle>,
+    /// The entity's location in world space, as defined in the LDtk project.
+    ///
+    /// This is converted from LDtk's coordinate space to Bevy's pixel coordinate space by negating
+    /// the y value.
     pub world_location: Option<Vec2>,
+    /// A handle pointing to the [EntityDefinition] asset.
     pub entity_definition: Handle<EntityDefinition>,
+    /// A vec of [FieldInstance] entries.
+    ///
+    /// These can be defined either in the LDtk [EntityDefinition](https://ldtk.io/json/#ldtk-EntityDefJson),
+    /// or the [EntityInstance](https://ldtk.io/json/#ldtk-EntityInstanceJson) itself.
     pub field_instances: Vec<FieldInstance>,
+    /// The size of the entity object.
+    ///
+    /// Note: this does not nesessarily correlate with the size of the entity's visualization, if
+    /// it defines one.
     pub size: Vec2,
+    /// The entity's location in the space defined by its containing [Layer].
+    ///
+    /// This is converted from LDtk's coordinate space to Bevy's pixel coordinate space by negating
+    /// the y value.
     pub location: Vec2,
 }
 

@@ -27,6 +27,7 @@
 //!
 //! [EnumDefinition]s are labeled as: `enum_definitions:Identifier`.
 
+#![allow(missing_docs)]
 use bevy_reflect::Reflect;
 
 use crate::iid::Iid;
