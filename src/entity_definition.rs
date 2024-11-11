@@ -61,15 +61,6 @@ impl EntityDefinition {
         let color = bevy_color_from_ldtk_string(&value.color)?;
         let size = (value.width as f32, value.height as f32).into();
         let anchor = bevy_anchor_from_ldtk(&[value.pivot_x, value.pivot_y])?;
-        //let tile_id = value.tile_id;
-        //let tile = value.tile_rect.as_ref().map(|value| {
-        //    TilesetRectangle::new(
-        //        value,
-        //        tileset_definitions
-        //            .get(&tile_id)
-        //            .ok_or(ldtk_import_error!("bad tile id! {}", tile_id))?,
-        //    )?
-        //});
         let tile = value
             .tile_rect
             .as_ref()
