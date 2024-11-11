@@ -1,3 +1,32 @@
+//! Asset labels for the sub-asset types.
+//!
+//! Each world is stored in its own sub asset of type [World], and labeled with the prefix of
+//! `worlds:WorldIdentifier`.
+//!
+//! Levels are of type [Level], and labeled with their respective world with the label
+//! `worlds:WorldIdentifier/LevelIdentifier`.
+//!
+//! Layers are of type [Layer], and labeled with their respective level and world as
+//! `worlds:WorldIdentifier/LevelIdentifier/LayerIdentifier`. Layer names are not unique globally,
+//! but are unique when paired with their containing level.
+//!
+//! Entities are of type [Entity]. They differ from the other types in that their identifiers are
+//! not unique. A user can make multiple copies of any given entity, barring restrictions in LDtk
+//! itself. (see [Entities](https://ldtk.io/json/#ldtk-EntityInstanceJson) section of the LDtk
+//! documentation). To maintain uniqueness, entities in this library will label themselves with a
+//! concatenation of the identifier and the string representation of their [Iid] like so:
+//! `Entity@deadbeef-1234-fee1-5678-ba5eba118ba7`. This will be appended to the layer instance they
+//! belong to in the editor:
+//! `worlds:WorldIdentifier/LevelIdentifier/LayerIdentifier/Entity@deadbeef-1234-fee1-5678-ba5eba118ba7`.
+//!
+//! [TilesetDefinition]s are labeled as: `tileset_definitions:Identifier`.
+//!
+//! [EntityDefinition]s are labeled as: `entity_definitions:Identifier`.
+//!
+//! [LayerDefinition]s are labeled as: `layer_definitions:Identifier`.
+//!
+//! [EnumDefinition]s are labeled as: `enum_definitions:Identifier`.
+
 use bevy_reflect::Reflect;
 
 use crate::iid::Iid;
@@ -18,10 +47,6 @@ impl ProjectAssetPath {
                 "Could not construct asset path from {:?}!",
                 path
             ))
-    }
-
-    pub fn to_asset_path(&self) -> String {
-        self.path.clone()
     }
 
     pub fn to_entity_definition_asset_path(
@@ -274,8 +299,6 @@ mod test {
     fn test() {
         let path = "path/to/test.ldtk".to_string();
         let project_asset_path = ProjectAssetPath::new(&path).unwrap();
-
-        assert_eq!(project_asset_path.to_asset_path(), path);
 
         let world_identifier = "Lalaland_123".to_string();
 
