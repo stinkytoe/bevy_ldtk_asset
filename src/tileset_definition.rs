@@ -3,7 +3,7 @@ use bevy_math::{I64Vec2, Vec2};
 use bevy_reflect::Reflect;
 use bevy_render::texture::Image;
 
-use crate::label::ProjectAssetPath;
+use crate::asset_labels::ProjectAssetPath;
 use crate::ldtk;
 use crate::ldtk_path::ldtk_path_to_bevy_path;
 use crate::project_loader::ProjectContext;
@@ -65,7 +65,7 @@ impl TilesetDefinition {
         let uid = value.uid;
 
         let tileset_definition_asset_path =
-            project_asset_path.to_tileset_definition_asset_path(&identifier);
+            project_asset_path.to_tileset_definition_asset_path(&identifier)?;
 
         let cell_size = (value.c_wid, value.c_hei).into();
         let custom_data = value

@@ -8,13 +8,13 @@ mod ldtk_path;
 mod project_loader;
 mod systems;
 
+pub mod asset_labels;
 pub mod entity;
 pub mod entity_definition;
 pub mod enum_definition;
 pub mod error;
 pub mod field_instance;
 pub mod iid;
-pub mod label;
 pub mod layer;
 pub mod layer_definition;
 pub mod ldtk_asset_trait;

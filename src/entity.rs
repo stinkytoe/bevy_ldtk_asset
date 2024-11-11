@@ -7,11 +7,11 @@ use bevy_reflect::Reflect;
 use bevy_sprite::Anchor;
 
 use crate::anchor::bevy_anchor_from_ldtk;
+use crate::asset_labels::LayerAssetPath;
 use crate::color::bevy_color_from_ldtk_string;
 use crate::entity_definition::EntityDefinition;
 use crate::field_instance::FieldInstance;
 use crate::iid::Iid;
-use crate::label::LayerAssetPath;
 use crate::ldtk_asset_trait::LdtkAsset;
 use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
 use crate::tileset_rectangle::TilesetRectangle;
@@ -95,7 +95,7 @@ impl Entity {
                 value.grid
             ))?;
 
-        let entity_asset_path = layer_asset_path.to_entity_asset_path(&identifier, iid);
+        let entity_asset_path = layer_asset_path.to_entity_asset_path(&identifier, iid)?;
 
         let entity = Self {
             identifier,

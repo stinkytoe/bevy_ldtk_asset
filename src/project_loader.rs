@@ -5,10 +5,10 @@ use bevy_asset::AssetLoader;
 use bevy_asset::Handle;
 use bevy_log::debug;
 
+use crate::asset_labels::ProjectAssetPath;
 use crate::entity_definition::EntityDefinition;
 use crate::iid::Iid;
 use crate::iid::IidMap;
-use crate::label::ProjectAssetPath;
 use crate::layer_definition::LayerDefinition;
 use crate::ldtk;
 use crate::ldtk_import_error;
@@ -63,7 +63,7 @@ impl AssetLoader for ProjectLoader {
             ))?
             .to_string();
 
-        let project_asset_path = ProjectAssetPath::new(&project_path);
+        let project_asset_path = ProjectAssetPath::new(&project_path)?;
 
         debug!("Loading LDtk project: {project_path}");
 

@@ -5,8 +5,8 @@ use bevy_math::Vec2;
 use bevy_reflect::Reflect;
 use bevy_utils::HashMap;
 
+use crate::asset_labels::ProjectAssetPath;
 use crate::color::bevy_color_from_ldtk_string;
-use crate::label::ProjectAssetPath;
 use crate::ldtk_import_error;
 use crate::tileset_definition::TilesetDefinition;
 use crate::tileset_rectangle::TilesetRectangle;
@@ -63,7 +63,7 @@ impl LayerDefinition {
         let uid = value.uid;
 
         let layer_definition_asset_path =
-            project_asset_path.to_layer_definition_asset_path(&identifier);
+            project_asset_path.to_layer_definition_asset_path(&identifier)?;
 
         let layer_definition_type = LayerDefinitionType::new(&value.layer_definition_type)?;
         let auto_source_layer_def_uid = value.auto_source_layer_def_uid;

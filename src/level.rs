@@ -6,11 +6,11 @@ use bevy_math::Vec2;
 use bevy_reflect::Reflect;
 use bevy_render::texture::Image;
 
+use crate::asset_labels::WorldAssetPath;
 use crate::color::bevy_color_from_ldtk_string;
 use crate::field_instance::FieldInstance;
 use crate::iid::Iid;
 use crate::iid::IidMap;
-use crate::label::WorldAssetPath;
 use crate::layer::Layer;
 use crate::ldtk;
 use crate::ldtk_asset_trait::LdtkAsset;
@@ -179,7 +179,7 @@ impl Level {
         let world_depth = value.world_depth;
         let location = (value.world_x as f32, -value.world_y as f32).into();
 
-        let level_asset_path = world_asset_path.to_level_asset_path(&identifier);
+        let level_asset_path = world_asset_path.to_level_asset_path(&identifier)?;
 
         let layer_instances = value.layer_instances.as_ref().ok_or(ldtk_import_error!(
             "layer_instances is None? \

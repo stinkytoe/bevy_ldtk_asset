@@ -6,9 +6,9 @@ use bevy_math::{I64Vec2, Vec2};
 use bevy_reflect::Reflect;
 use bevy_render::texture::Image;
 
+use crate::asset_labels::{LayerAssetPath, LevelAssetPath};
 use crate::entity::Entity;
 use crate::iid::{Iid, IidMap};
-use crate::label::{LayerAssetPath, LevelAssetPath};
 use crate::layer_definition::LayerDefinition;
 use crate::ldtk;
 use crate::ldtk_asset_trait::{LdtkAsset, LdtkAssetWithChildren};
@@ -212,7 +212,7 @@ impl Layer {
         let grid_size: I64Vec2 = (value.c_wid, value.c_hei).into();
         let grid_cell_size = value.grid_size;
         let identifier = value.identifier.clone();
-        let layer_asset_path = level_asset_path.to_layer_asset_path(&identifier);
+        let layer_asset_path = level_asset_path.to_layer_asset_path(&identifier)?;
         let opacity = value.opacity;
         let total_offset = (
             value.px_total_offset_x as f32,

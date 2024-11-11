@@ -7,8 +7,8 @@ use bevy_math::Vec2;
 use bevy_reflect::Reflect;
 use bevy_tasks::block_on;
 
+use crate::asset_labels::ProjectAssetPath;
 use crate::iid::{Iid, IidMap};
-use crate::label::ProjectAssetPath;
 use crate::ldtk_asset_trait::{LdtkAsset, LdtkAssetWithChildren};
 use crate::ldtk_path::ldtk_path_to_bevy_path;
 use crate::level::Level;
@@ -66,7 +66,7 @@ impl World {
             ldtk_world.world_grid_height,
         )?;
 
-        let world_asset_path = project_asset_path.to_world_asset_path(&identifier);
+        let world_asset_path = project_asset_path.to_world_asset_path(&identifier)?;
 
         // TODO: I think we can clean this up and remove some allocations while avoiding the
         // temporary binding. Possibly with Either:: or similar.

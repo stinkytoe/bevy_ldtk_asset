@@ -5,8 +5,8 @@ use bevy_reflect::Reflect;
 use bevy_sprite::Anchor;
 
 use crate::anchor::bevy_anchor_from_ldtk;
+use crate::asset_labels::ProjectAssetPath;
 use crate::color::bevy_color_from_ldtk_string;
-use crate::label::ProjectAssetPath;
 use crate::tileset_definition::TilesetDefinition;
 use crate::tileset_rectangle::TilesetRectangle;
 use crate::uid::{Uid, UidMap};
@@ -82,7 +82,7 @@ impl EntityDefinition {
             .transpose()?;
         let render_mode = value.tile_render_mode.clone().into();
 
-        let path = project_asset_path.to_entity_definition_asset_path(&identifier);
+        let path = project_asset_path.to_entity_definition_asset_path(&identifier)?;
 
         let asset = Self {
             identifier,
