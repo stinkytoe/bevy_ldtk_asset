@@ -5,6 +5,7 @@ use bevy_color::Color;
 use bevy_math::Vec2;
 use bevy_reflect::Reflect;
 use bevy_render::texture::Image;
+use bevy_utils::HashMap;
 
 use crate::asset_labels::WorldAssetPath;
 use crate::color::bevy_color_from_ldtk_string;
@@ -19,6 +20,7 @@ use crate::ldtk_import_error;
 use crate::ldtk_path::ldtk_path_to_bevy_path;
 use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
 use crate::uid::Uid;
+use crate::Result;
 
 #[derive(Debug, Reflect)]
 pub enum NeighbourDir {
@@ -122,7 +124,7 @@ pub struct Level {
     pub bg_color: Color,
     pub neighbours: Vec<Neighbour>,
     pub background: Option<LevelBackground>,
-    pub field_instances: Vec<FieldInstance>,
+    pub field_instances: HashMap<String, FieldInstance>,
     pub identifier: String,
     pub iid: Iid,
     pub size: Vec2,
@@ -147,7 +149,7 @@ impl Level {
             .neighbours
             .iter()
             .map(Neighbour::new)
-            .collect::<Result<_, _>>()?;
+            .collect::<Result<_>>()?;
         let background = match (value.bg_pos.as_ref(), value.bg_rel_path.as_ref()) {
             (None, None) => None,
             (None, Some(_)) => {
@@ -170,14 +172,17 @@ impl Level {
         let field_instances = value
             .field_instances
             .iter()
-            .map(|value| {
-                FieldInstance::new(
-                    value,
-                    project_definition_context.tileset_definitions,
-                    project_definition_context.enum_definitions,
-                )
+            .map(|value| -> Result<(String, FieldInstance)> {
+                Ok((
+                    value.identifier.clone(),
+                    FieldInstance::new(
+                        value,
+                        project_definition_context.tileset_definitions,
+                        project_definition_context.enum_definitions,
+                    )?,
+                ))
             })
-            .collect::<Result<_, _>>()?;
+            .collect::<Result<_>>()?;
         let identifier = value.identifier.clone();
         let iid = Iid::from_str(&value.iid)?;
         let size = (value.px_wid as f32, value.px_hei as f32).into();

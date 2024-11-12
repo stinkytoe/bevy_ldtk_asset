@@ -403,7 +403,6 @@ impl FieldInstanceType {
 
 #[derive(Debug, Reflect)]
 pub struct FieldInstance {
-    pub identifier: String,
     pub tileset_rectangle: Option<TilesetRectangle>,
     pub field_instance_type: FieldInstanceType,
     pub def_uid: Uid,
@@ -415,7 +414,6 @@ impl FieldInstance {
         tileset_definitions: &UidMap<Handle<TilesetDefinition>>,
         enum_definitions: &HashMap<String, Handle<EnumDefinition>>,
     ) -> crate::Result<Self> {
-        let identifier = value.identifier.clone();
         let tileset_rectangle = value
             .tile
             .as_ref()
@@ -430,7 +428,6 @@ impl FieldInstance {
         let def_uid = value.def_uid;
 
         Ok(Self {
-            identifier,
             tileset_rectangle,
             field_instance_type,
             def_uid,

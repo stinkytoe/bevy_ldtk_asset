@@ -10,6 +10,7 @@ use bevy_color::Color;
 use bevy_math::{I64Vec2, Vec2};
 use bevy_reflect::Reflect;
 use bevy_sprite::Anchor;
+use bevy_utils::HashMap;
 
 use crate::anchor::bevy_anchor_from_ldtk;
 use crate::asset_labels::LayerAssetPath;
@@ -20,6 +21,7 @@ use crate::iid::Iid;
 use crate::ldtk_asset_trait::LdtkAsset;
 use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
 use crate::tileset_rectangle::TilesetRectangle;
+use crate::Result;
 use crate::{ldtk, ldtk_import_error};
 
 /// An asset representing an [LDtk Entity Instance](https://ldtk.io/json/#ldtk-EntityInstanceJson)
@@ -60,11 +62,11 @@ pub struct Entity {
     pub world_location: Option<Vec2>,
     /// A handle pointing to the [EntityDefinition] asset.
     pub entity_definition: Handle<EntityDefinition>,
-    /// A vec of [FieldInstance] entries.
+    /// A hash map of [FieldInstance] entries, indexed by their identifier.
     ///
     /// These can be defined either in the LDtk [EntityDefinition](https://ldtk.io/json/#ldtk-EntityDefJson),
     /// or the [EntityInstance](https://ldtk.io/json/#ldtk-EntityInstanceJson) itself.
-    pub field_instances: Vec<FieldInstance>,
+    pub field_instances: HashMap<String, FieldInstance>,
     /// The size of the entity object.
     ///
     /// Note: this does not nesessarily correlate with the size of the entity's visualization, if
@@ -84,7 +86,7 @@ impl Entity {
         load_context: &mut LoadContext,
         _project_context: &ProjectContext,
         project_definitions_context: &ProjectDefinitionContext,
-    ) -> crate::Result<(Iid, Handle<Self>)> {
+    ) -> Result<(Iid, Handle<Self>)> {
         let identifier = value.identifier.clone();
         let iid = Iid::from_str(&value.iid)?;
         let grid = (value.grid.len() == 2)
@@ -129,14 +131,17 @@ impl Entity {
         let field_instances = value
             .field_instances
             .iter()
-            .map(|value| {
-                FieldInstance::new(
-                    value,
-                    project_definitions_context.tileset_definitions,
-                    project_definitions_context.enum_definitions,
-                )
+            .map(|value| -> Result<(String, FieldInstance)> {
+                Ok((
+                    value.identifier.clone(),
+                    FieldInstance::new(
+                        value,
+                        project_definitions_context.tileset_definitions,
+                        project_definitions_context.enum_definitions,
+                    )?,
+                ))
             })
-            .collect::<Result<_, _>>()?;
+            .collect::<Result<_>>()?;
         let size = (value.width as f32, value.height as f32).into();
         let location = (value.px.len() == 2)
             .then(|| (value.px[0] as f32, -value.px[1] as f32).into())

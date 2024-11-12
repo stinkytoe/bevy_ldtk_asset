@@ -1,6 +1,6 @@
 //! A [Bevy](https://bevyengine.org) plugin for loading [LDtk](https://ldtk.io) project files!
 
-#![warn(missing_docs)]
+//#![warn(missing_docs)]
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 
 mod anchor;
