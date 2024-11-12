@@ -207,6 +207,8 @@ impl FieldInstanceType {
                     .transpose()?,
             )),
             "FilePath" => Ok(Self::FilePath(
+                // TODO: Should we refactor this to a Bevy asset path with
+                // ldtk_path_to_bevy_path?
                 value
                     .map(|value| serde_json::from_value::<String>(value.clone()))
                     .transpose()?,
