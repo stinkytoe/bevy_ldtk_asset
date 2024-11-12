@@ -16,6 +16,7 @@ use crate::layer::Layer;
 use crate::ldtk;
 use crate::ldtk_asset_trait::LdtkAsset;
 use crate::ldtk_asset_trait::LdtkAssetWithChildren;
+use crate::ldtk_asset_trait::LdtkAssetWithFieldInstances;
 use crate::ldtk_import_error;
 use crate::ldtk_path::ldtk_path_to_bevy_path;
 use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
@@ -249,5 +250,11 @@ impl LdtkAsset for Level {
 impl LdtkAssetWithChildren<Layer> for Level {
     fn get_children(&self) -> impl Iterator<Item = &Handle<Layer>> {
         self.layers.values()
+    }
+}
+
+impl LdtkAssetWithFieldInstances for Level {
+    fn get_field_instance(&self, identifier: &str) -> Option<&FieldInstance> {
+        self.field_instances.get(identifier)
     }
 }
