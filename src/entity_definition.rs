@@ -12,6 +12,10 @@ use crate::tileset_rectangle::TilesetRectangle;
 use crate::uid::{Uid, UidMap};
 use crate::{ldtk, Result};
 
+/// Hint from LDtk on how this entity's sprite should be rendered.
+///
+/// See [LDtk documentation on tileRenderMode](https://ldtk.io/json/#ldtk-EntityDefJson;tileRenderMode)
+#[allow(missing_docs)]
 #[derive(Debug, Reflect)]
 pub enum TileRenderMode {
     Cover,
@@ -37,15 +41,31 @@ impl From<ldtk::TileRenderMode> for TileRenderMode {
     }
 }
 
+/// The definition for creating a new entity.
+///
+/// TODO: add nine_slice_borders field! [#21](https://github.com/stinkytoe/bevy_ldtk_asset/issues/21)
+/// TODO: how are we going to handle aseprite targets? [#20](https://github.com/stinkytoe/bevy_ldtk_asset/issues/20)
 #[derive(Asset, Debug, Reflect)]
 pub struct EntityDefinition {
+    /// The identifier for this definition.
+    ///
+    /// Unlike [crate::entity::Entity] instances, the identifier for the definition is unique.
     pub identifier: String,
+    /// Base color for the entity.
     pub color: Color,
+    /// Size of the region for this entity.
+    ///
+    /// Not necessarily the size of the visualization.
     pub size: Vec2,
-    // TODO: add nine_slice_borders field!
+    /// The relative `center` of the entity.
     pub anchor: Anchor,
+    /// Optional [TilesetRectangle], representing a potential visualization of the entity.
     pub tile: Option<TilesetRectangle>,
+    /// Optional [TilesetRectangle] for use in LDtk's GUI.
+    ///
+    /// Potentially an icon or portrait representation?
     pub ui_tile: Option<TilesetRectangle>,
+    /// The render mode for an [crate::entity::Entity] instance's visualization.
     pub render_mode: TileRenderMode,
 }
 
