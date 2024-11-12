@@ -39,7 +39,7 @@ pub enum NeighbourDir {
 }
 
 impl NeighbourDir {
-    fn new(dir: &str) -> crate::Result<Self> {
+    fn new(dir: &str) -> Result<Self> {
         match dir {
             "n" => Ok(Self::North),
             "s" => Ok(Self::South),
@@ -66,7 +66,7 @@ pub struct Neighbour {
 }
 
 impl Neighbour {
-    pub(crate) fn new(value: &ldtk::NeighbourLevel) -> crate::Result<Self> {
+    pub(crate) fn new(value: &ldtk::NeighbourLevel) -> Result<Self> {
         let dir = NeighbourDir::new(&value.dir)?;
         let level_iid = Iid::from_str(&value.level_iid)?;
 
@@ -83,10 +83,7 @@ pub struct LevelBackground {
 }
 
 impl LevelBackground {
-    pub(crate) fn new(
-        value: &ldtk::LevelBackgroundPosition,
-        image: Handle<Image>,
-    ) -> crate::Result<Self> {
+    pub(crate) fn new(value: &ldtk::LevelBackgroundPosition, image: Handle<Image>) -> Result<Self> {
         let (crop_corner, crop_size) = (value.crop_rect.len() == 4)
             .then(|| {
                 let crop_corner = (value.crop_rect[0] as f32, value.crop_rect[1] as f32).into();
@@ -144,7 +141,7 @@ impl Level {
         load_context: &mut LoadContext,
         project_context: &ProjectContext,
         project_definition_context: &ProjectDefinitionContext,
-    ) -> crate::Result<(Iid, Handle<Self>)> {
+    ) -> Result<(Iid, Handle<Self>)> {
         let bg_color = bevy_color_from_ldtk_string(&value.bg_color)?;
         let neighbours = value
             .neighbours
@@ -212,7 +209,7 @@ impl Level {
                     project_definition_context,
                 )
             })
-            .collect::<crate::Result<_>>()?;
+            .collect::<Result<_>>()?;
 
         let level = Level {
             bg_color,

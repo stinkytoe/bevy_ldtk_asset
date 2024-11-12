@@ -2,10 +2,10 @@ use bevy_asset::Handle;
 use bevy_math::{Rect, Vec2};
 use bevy_reflect::Reflect;
 
+use crate::ldtk;
 use crate::tileset_definition::TilesetDefinition;
 use crate::uid::UidMap;
-use crate::Result;
-use crate::{ldtk, ldtk_import_error};
+use crate::{ldtk_import_error, Result};
 
 #[derive(Clone, Debug, Reflect)]
 pub struct TilesetRectangle {

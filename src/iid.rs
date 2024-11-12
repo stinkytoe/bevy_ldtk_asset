@@ -12,6 +12,7 @@ use bevy_utils::HashSet;
 pub enum IidError {
     #[error(transparent)]
     ParseIntError(#[from] ParseIntError),
+
     #[error("Format error on input: {0}")]
     FormatError(String),
 }

@@ -6,13 +6,14 @@ use bevy_reflect::Reflect;
 
 use crate::asset_labels::ProjectAssetPath;
 use crate::color::bevy_color_from_ldtk_int;
+use crate::ldtk;
+use crate::ldtk_import_error;
 use crate::ldtk_path::ldtk_path_to_bevy_path;
 use crate::project_loader::ProjectContext;
 use crate::tileset_definition::TilesetDefinition;
 use crate::tileset_rectangle::TilesetRectangle;
 use crate::uid::UidMap;
 use crate::Result;
-use crate::{ldtk, ldtk_import_error};
 
 #[derive(Debug, Reflect)]
 pub struct EnumValueDefinition {

@@ -9,11 +9,12 @@ use bevy_tasks::block_on;
 
 use crate::asset_labels::ProjectAssetPath;
 use crate::iid::{Iid, IidMap};
+use crate::ldtk;
 use crate::ldtk_asset_trait::{LdtkAsset, LdtkAssetWithChildren};
 use crate::ldtk_path::ldtk_path_to_bevy_path;
 use crate::level::Level;
 use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
-use crate::{ldtk, ldtk_import_error};
+use crate::{ldtk_import_error, Result};
 
 #[derive(Debug, Reflect)]
 pub enum WorldLayout {
@@ -28,7 +29,7 @@ impl WorldLayout {
         layout: &Option<ldtk::WorldLayout>,
         world_grid_width: i64,
         world_grid_height: i64,
-    ) -> crate::Result<Self> {
+    ) -> Result<Self> {
         match layout {
             Some(ldtk::WorldLayout::GridVania) => Ok(Self::GridVania(
                 (world_grid_width as f32, world_grid_height as f32).into(),
@@ -57,7 +58,7 @@ impl World {
         load_context: &mut LoadContext,
         project_context: &ProjectContext,
         project_definition_context: &ProjectDefinitionContext,
-    ) -> crate::Result<(Iid, Handle<Self>)> {
+    ) -> Result<(Iid, Handle<Self>)> {
         let identifier = ldtk_world.identifier.clone();
         let iid = Iid::from_str(&ldtk_world.iid)?;
         let world_layout = WorldLayout::new(
@@ -74,7 +75,7 @@ impl World {
             &ldtk_world
                 .levels
                 .iter()
-                .map(|ldtk_level| -> crate::Result<ldtk::Level> {
+                .map(|ldtk_level| -> Result<ldtk::Level> {
                     let external_rel_path =
                         ldtk_level
                             .external_rel_path
@@ -92,7 +93,7 @@ impl World {
                     let level: ldtk::Level = serde_json::from_slice(&bytes)?;
                     Ok(level)
                 })
-                .collect::<crate::Result<_>>()?
+                .collect::<Result<_>>()?
         } else {
             &ldtk_world.levels
         };
@@ -110,7 +111,7 @@ impl World {
                     project_definition_context,
                 )
             })
-            .collect::<crate::Result<_>>()?;
+            .collect::<Result<_>>()?;
 
         let world = World {
             identifier,

@@ -7,11 +7,12 @@ use bevy_utils::HashMap;
 
 use crate::asset_labels::ProjectAssetPath;
 use crate::color::bevy_color_from_ldtk_string;
+use crate::ldtk;
 use crate::ldtk_import_error;
 use crate::tileset_definition::TilesetDefinition;
 use crate::tileset_rectangle::TilesetRectangle;
 use crate::uid::{Uid, UidMap};
-use crate::{ldtk, Result};
+use crate::Result;
 
 #[derive(Debug, Reflect)]
 pub enum LayerDefinitionType {

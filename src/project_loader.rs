@@ -18,6 +18,7 @@ use crate::project::Project;
 use crate::tileset_definition::TilesetDefinition;
 use crate::uid::UidMap;
 use crate::world::World;
+use crate::Result;
 
 pub(crate) struct ProjectContext<'a> {
     pub(crate) project_directory: &'a Path,
@@ -44,7 +45,7 @@ impl AssetLoader for ProjectLoader {
         reader: &mut dyn bevy_asset::io::Reader,
         _settings: &Self::Settings,
         load_context: &mut bevy_asset::LoadContext<'_>,
-    ) -> Result<Self::Asset, Self::Error> {
+    ) -> Result<Self::Asset> {
         let ldtk_project: ldtk::LdtkProject = {
             let mut bytes = Vec::new();
             reader.read_to_end(&mut bytes).await?;
@@ -126,7 +127,7 @@ impl AssetLoader for ProjectLoader {
                     &project_context,
                 )
             })
-            .collect::<crate::Result<_>>()?;
+            .collect::<Result<_>>()?;
 
         let layer_definitions = ldtk_project
             .defs
@@ -140,7 +141,7 @@ impl AssetLoader for ProjectLoader {
                     &tileset_definitions,
                 )
             })
-            .collect::<crate::Result<_>>()?;
+            .collect::<Result<_>>()?;
 
         let entity_definitions = ldtk_project
             .defs
@@ -154,7 +155,7 @@ impl AssetLoader for ProjectLoader {
                     &tileset_definitions,
                 )
             })
-            .collect::<crate::Result<_>>()?;
+            .collect::<Result<_>>()?;
 
         let enum_definitions = ldtk_project
             .defs
@@ -169,7 +170,7 @@ impl AssetLoader for ProjectLoader {
                     &tileset_definitions,
                 )
             })
-            .collect::<crate::Result<_>>()?;
+            .collect::<Result<_>>()?;
 
         let project_definitions_context = ProjectDefinitionContext {
             tileset_definitions: &tileset_definitions,
@@ -189,7 +190,7 @@ impl AssetLoader for ProjectLoader {
                     &project_definitions_context,
                 )
             })
-            .collect::<crate::Result<IidMap<Handle<World>>>>()?;
+            .collect::<Result<IidMap<Handle<World>>>>()?;
 
         debug!("Loading LDtk project completed! {project_path}");
 

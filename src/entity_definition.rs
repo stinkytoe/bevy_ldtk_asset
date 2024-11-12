@@ -7,10 +7,11 @@ use bevy_sprite::Anchor;
 use crate::anchor::bevy_anchor_from_ldtk;
 use crate::asset_labels::ProjectAssetPath;
 use crate::color::bevy_color_from_ldtk_string;
+use crate::ldtk;
 use crate::tileset_definition::TilesetDefinition;
 use crate::tileset_rectangle::TilesetRectangle;
 use crate::uid::{Uid, UidMap};
-use crate::{ldtk, Result};
+use crate::Result;
 
 /// Hint from LDtk on how this entity's sprite should be rendered.
 ///

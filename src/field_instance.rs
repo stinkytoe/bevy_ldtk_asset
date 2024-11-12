@@ -9,11 +9,12 @@ use bevy_utils::HashMap;
 use crate::color::bevy_color_from_ldtk_string;
 use crate::enum_definition::EnumDefinition;
 use crate::iid::Iid;
+use crate::ldtk;
 use crate::ldtk_import_error;
 use crate::tileset_definition::TilesetDefinition;
 use crate::tileset_rectangle::TilesetRectangle;
 use crate::uid::{Uid, UidMap};
-use crate::{ldtk, Result};
+use crate::Result;
 
 #[derive(Debug, Reflect)]
 pub struct EntityRef {
@@ -73,7 +74,7 @@ impl FieldInstanceType {
         value: Option<&serde_json::Value>,
         tileset_definitions: &UidMap<Handle<TilesetDefinition>>,
         enum_definitions: &HashMap<String, Handle<EnumDefinition>>,
-    ) -> crate::Result<Self> {
+    ) -> Result<Self> {
         match field_instance_type {
             "Array<Int>" => Ok(Self::ArrayInt(
                 value
@@ -267,7 +268,7 @@ impl FieldInstanceType {
         field_instance_type: &str,
         value: Option<&serde_json::Value>,
         enum_definitions: &HashMap<String, Handle<EnumDefinition>>,
-    ) -> crate::Result<Self> {
+    ) -> Result<Self> {
         // If we make it here, we should have one of four things:
         // * "LocalEnum.{Enum Group Name}"
         // * "ExternEnum.{Enum Group Name}"
@@ -413,7 +414,7 @@ impl FieldInstance {
         value: &ldtk::FieldInstance,
         tileset_definitions: &UidMap<Handle<TilesetDefinition>>,
         enum_definitions: &HashMap<String, Handle<EnumDefinition>>,
-    ) -> crate::Result<Self> {
+    ) -> Result<Self> {
         let tileset_rectangle = value
             .tile
             .as_ref()
