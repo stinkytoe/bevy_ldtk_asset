@@ -30,7 +30,7 @@ use crate::{ldtk_import_error, Result};
 #[derive(Debug, Reflect)]
 pub struct EntitiesLayer {
     /// Handles pointing to the [Entity] instances which belong to this layer.
-    pub entity_handles: IidMap<Handle<Entity>>,
+    pub entities: IidMap<Handle<Entity>>,
 }
 
 impl EntitiesLayer {
@@ -60,7 +60,9 @@ impl EntitiesLayer {
                     )
                 })
                 .collect::<Result<_>>()?;
-            Ok(Self { entity_handles })
+            Ok(Self {
+                entities: entity_handles,
+            })
         })
         .transpose()?
         .ok_or(ldtk_import_error!("Entities layer with Tile data!"))
@@ -364,9 +366,7 @@ impl LdtkAsset for Layer {
 impl LdtkAssetWithChildren<Entity> for Layer {
     fn get_children(&self) -> impl Iterator<Item = &Handle<Entity>> {
         match &self.layer_type {
-            LayerType::Entities(entities_layer) => {
-                either::Left(entities_layer.entity_handles.values())
-            }
+            LayerType::Entities(entities_layer) => either::Left(entities_layer.entities.values()),
             LayerType::IntGrid(_) | LayerType::Tiles(_) | LayerType::AutoLayer(_) => {
                 either::Right([].iter())
             }
