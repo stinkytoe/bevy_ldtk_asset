@@ -99,3 +99,9 @@ impl EnumDefinition {
         Ok((identifier, handle))
     }
 }
+
+impl EnumDefinition {
+    pub fn has_tag(&self, tag: &str) -> bool {
+        self.tags.iter().any(|inner_tag| inner_tag == tag)
+    }
+}

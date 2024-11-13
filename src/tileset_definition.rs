@@ -106,3 +106,9 @@ impl TilesetDefinition {
         Ok((uid, handle))
     }
 }
+
+impl TilesetDefinition {
+    pub fn has_tag(&self, tag: &str) -> bool {
+        self.tags.iter().any(|inner_tag| inner_tag == tag)
+    }
+}
