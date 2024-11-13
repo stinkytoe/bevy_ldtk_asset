@@ -303,25 +303,6 @@ impl FieldInstanceType {
                 value,
                 enum_definition,
             }))
-            //let enum_value: Option<EnumValue> = value
-            //    .map(|value| -> Result<String> {
-            //        serde_json::from_value::<String>(value.clone()).map_err(|e| e.into())
-            //    })
-            //    .transpose()?
-            //    .map(|value| -> Result<EnumValue> {
-            //        let enum_definition = enum_definitions
-            //            .get(enum_name)
-            //            .ok_or(ldtk_import_error!("bad enum identifier! {}", enum_name))?
-            //            .clone();
-            //
-            //        Ok(EnumValue {
-            //            value,
-            //            enum_definition,
-            //        })
-            //    })
-            //    .transpose()?;
-            //
-            //Ok(Self::Enum(enum_value))
         }
     }
 }
@@ -358,4 +339,119 @@ impl FieldInstance {
             def_uid,
         })
     }
+}
+
+macro_rules! is_type {
+    ($self:expr, $field_instance_type:path) => {
+        matches!($self.field_instance_type, $field_instance_type(_))
+    };
+}
+
+impl FieldInstance {
+    pub fn is_array_int(&self) -> bool {
+        is_type!(self, FieldInstanceType::ArrayInt)
+    }
+
+    pub fn is_array_enum(&self) -> bool {
+        is_type!(self, FieldInstanceType::ArrayEnum)
+    }
+
+    pub fn is_array_multilines(&self) -> bool {
+        is_type!(self, FieldInstanceType::ArrayMultilines)
+    }
+
+    pub fn is_array_point(&self) -> bool {
+        is_type!(self, FieldInstanceType::ArrayPoint)
+    }
+
+    pub fn is_array_tile(&self) -> bool {
+        is_type!(self, FieldInstanceType::ArrayTile)
+    }
+
+    pub fn is_bool(&self) -> bool {
+        is_type!(self, FieldInstanceType::Bool)
+    }
+
+    pub fn is_color(&self) -> bool {
+        is_type!(self, FieldInstanceType::Color)
+    }
+
+    pub fn is_entity_ref(&self) -> bool {
+        is_type!(self, FieldInstanceType::EntityRef)
+    }
+
+    pub fn is_enum(&self) -> bool {
+        is_type!(self, FieldInstanceType::Enum)
+    }
+
+    pub fn is_file_path(&self) -> bool {
+        is_type!(self, FieldInstanceType::FilePath)
+    }
+
+    pub fn is_float(&self) -> bool {
+        is_type!(self, FieldInstanceType::Float)
+    }
+
+    pub fn is_int(&self) -> bool {
+        is_type!(self, FieldInstanceType::Int)
+    }
+
+    pub fn is_multilines(&self) -> bool {
+        is_type!(self, FieldInstanceType::Multilines)
+    }
+
+    pub fn is_point(&self) -> bool {
+        is_type!(self, FieldInstanceType::Point)
+    }
+
+    pub fn is_string(&self) -> bool {
+        is_type!(self, FieldInstanceType::String)
+    }
+
+    pub fn is_tile(&self) -> bool {
+        is_type!(self, FieldInstanceType::Tile)
+    }
+}
+
+macro_rules! get_by_type {
+    ( $fn_name:ident, $layer_instance_type:path, $ret:path) => {
+        pub fn $fn_name(&self) -> Option<&$ret> {
+            if let $layer_instance_type(inner) = &self.field_instance_type {
+                Some(inner)
+            } else {
+                None
+            }
+        }
+    };
+}
+
+impl FieldInstance {
+    get_by_type!(get_array_int, FieldInstanceType::ArrayInt, Vec<i64>);
+    get_by_type!(get_array_enum, FieldInstanceType::ArrayEnum, Vec<EnumValue>);
+    get_by_type!(
+        get_array_multilines,
+        FieldInstanceType::ArrayMultilines,
+        Vec<String>
+    );
+    get_by_type!(get_array_point, FieldInstanceType::ArrayPoint, Vec<I64Vec2>);
+    get_by_type!(
+        get_array_tile,
+        FieldInstanceType::ArrayTile,
+        Vec<TilesetRectangle>
+    );
+    get_by_type!(get_bool, FieldInstanceType::Bool, bool);
+    get_by_type!(get_color, FieldInstanceType::Color, Color);
+    get_by_type!(
+        get_array_entity_ref,
+        FieldInstanceType::EntityRef,
+        EntityRef
+    );
+    get_by_type!(get_enum, FieldInstanceType::Enum, EnumValue);
+    get_by_type!(get_file_path, FieldInstanceType::FilePath, String);
+    get_by_type!(get_float, FieldInstanceType::Float, f64);
+    get_by_type!(get_int, FieldInstanceType::Int, i64);
+    get_by_type!(get_multilines, FieldInstanceType::Multilines, String);
+    get_by_type!(get_point, FieldInstanceType::Point, I64Vec2);
+    get_by_type!(get_string, FieldInstanceType::String, String);
+    get_by_type!(get_tile, FieldInstanceType::Tile, TilesetRectangle);
 }
