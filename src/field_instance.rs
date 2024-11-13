@@ -39,15 +39,15 @@ pub enum FieldInstanceType {
     ArrayTile(Vec<TilesetRectangle>),
     Bool(bool),
     Color(Color),
-    EntityRef(Option<EntityRef>),
-    Enum(Option<EnumValue>),
-    FilePath(Option<String>),
-    Float(Option<f64>),
-    Int(Option<i64>),
-    Multilines(Option<String>),
-    Point(Option<I64Vec2>),
-    String(Option<String>),
-    Tile(Option<TilesetRectangle>),
+    EntityRef(EntityRef),
+    Enum(EnumValue),
+    FilePath(String),
+    Float(f64),
+    Int(i64),
+    Multilines(String),
+    Point(I64Vec2),
+    String(String),
+    Tile(TilesetRectangle),
 }
 
 macro_rules! field_instance_map_get {
@@ -75,188 +75,113 @@ impl FieldInstanceType {
         tileset_definitions: &UidMap<Handle<TilesetDefinition>>,
         enum_definitions: &HashMap<String, Handle<EnumDefinition>>,
     ) -> Result<Self> {
+        let value = value.ok_or(ldtk_import_error!("Field instance value is None!"))?;
         match field_instance_type {
             "Array<Int>" => Ok(Self::ArrayInt(
                 value
-                    .and_then(|value| value.as_array())
-                    .map(|value| {
-                        value
-                            .iter()
-                            .map(|value| {
-                                serde_json::from_value::<i64>(value.clone()).map_err(|e| e.into())
-                            })
-                            .collect::<Result<Vec<_>>>()
-                    })
-                    .transpose()?
+                    .as_array()
                     .ok_or(ldtk_import_error!(
-                        "Could not construct Vec<i64> from ldtk input! given: {:?}",
+                        "Field Instance with type Array<Int>, value not an array! {:?}",
                         value
-                    ))?,
+                    ))?
+                    .iter()
+                    .map(|value| serde_json::from_value::<i64>(value.clone()).map_err(|e| e.into()))
+                    .collect::<Result<Vec<_>>>()?,
             )),
             "Array<Multilines>" => Ok(Self::ArrayMultilines(
                 value
-                    .and_then(|value| value.as_array())
-                    .map(|value| {
-                        value
-                            .iter()
-                            .map(|value| {
-                                serde_json::from_value::<String>(value.clone())
-                                    .map_err(|e| e.into())
-                            })
-                            .collect::<Result<Vec<_>>>()
-                    })
-                    .transpose()?
+                    .as_array()
                     .ok_or(ldtk_import_error!(
-                        "Could not construct Vec<String> from ldtk input! given: {:?}",
+                        "Field Instance with type Array<Multilines>, value not an array! {:?}",
                         value
-                    ))?,
+                    ))?
+                    .iter()
+                    .map(|value| {
+                        serde_json::from_value::<String>(value.clone()).map_err(|e| e.into())
+                    })
+                    .collect::<Result<Vec<_>>>()?,
             )),
             "Array<Point>" => Ok(Self::ArrayPoint(
                 value
-                    .and_then(|value| value.as_array())
-                    .map(|value| {
-                        value
-                            .iter()
-                            .map(|value| {
-                                let cx = field_instance_map_get!(value, "cx", "Point", as_i64);
-                                let cy = field_instance_map_get!(value, "cy", "Point", as_i64);
-                                Ok((cx, cy).into())
-                            })
-                            .collect::<Result<Vec<_>>>()
-                    })
-                    .transpose()?
+                    .as_array()
                     .ok_or(ldtk_import_error!(
-                        "Could not construct Vec<I64Vec2> from ldtk input! given: {:?}",
+                        "Field Instance with type Array<Point>, value not an array! {:?}",
                         value
-                    ))?,
+                    ))?
+                    .iter()
+                    .map(|value| {
+                        let cx = field_instance_map_get!(value, "cx", "Point", as_i64);
+                        let cy = field_instance_map_get!(value, "cy", "Point", as_i64);
+                        Ok((cx, cy).into())
+                    })
+                    .collect::<Result<Vec<_>>>()?,
             )),
             "Array<Tile>" => Ok(Self::ArrayTile(
                 value
-                    .and_then(|value| value.as_array())
+                    .as_array()
+                    .ok_or(ldtk_import_error!(
+                        "Field Instance with type Array<Tile>, value not an array! {:?}",
+                        value
+                    ))?
+                    .iter()
                     .map(|value| {
-                        value
-                            .iter()
-                            .map(|value| {
-                                let value = serde_json::from_value::<ldtk::TilesetRectangle>(
-                                    value.clone(),
-                                )?;
+                        let value =
+                            serde_json::from_value::<ldtk::TilesetRectangle>(value.clone())?;
+                        TilesetRectangle::new(&value, tileset_definitions)
+                    })
+                    .collect::<Result<Vec<_>>>()?,
+            )),
+            "Bool" => Ok(Self::Bool(serde_json::from_value::<bool>(value.clone())?)),
+            "Color" => Ok(Self::Color({
+                let value = serde_json::from_value::<String>(value.clone())?;
+                bevy_color_from_ldtk_string(&value)?
+            })),
+            "EntityRef" => Ok(Self::EntityRef({
+                let entity_iid = field_instance_map_get!(value, "entityIid", "EntityRef", as_str);
+                let entity_iid = Iid::from_str(entity_iid)?;
 
-                                TilesetRectangle::new(&value, tileset_definitions)
-                            })
-                            .collect::<Result<Vec<_>>>()
-                    })
-                    .transpose()?
-                    .ok_or(ldtk_import_error!(
-                        "Could not construct Vec<TilesetRectangle> from ldtk input! given: {:?}",
-                        value
-                    ))?,
-            )),
-            "Bool" => Ok(Self::Bool(
-                value
-                    .map(|value| serde_json::from_value::<bool>(value.clone()))
-                    .transpose()?
-                    .ok_or(ldtk_import_error!(
-                        "Could not construct bevy color from ldtk input! given: {:?}",
-                        value
-                    ))?,
-            )),
-            "Color" => Ok(Self::Color(
-                value
-                    .and_then(|value| value.as_str())
-                    .map(bevy_color_from_ldtk_string)
-                    .transpose()?
-                    .ok_or(ldtk_import_error!(
-                        "Could not construct bevy color from ldtk input! given: {:?}",
-                        value
-                    ))?,
-            )),
-            "EntityRef" => Ok(Self::EntityRef(
-                value
-                    .map(|value| -> Result<EntityRef> {
-                        let entity_iid = Iid::from_str(field_instance_map_get!(
-                            value,
-                            "entityIid",
-                            "EntityRef",
-                            as_str
-                        ))?;
-                        let layer_iid = Iid::from_str(field_instance_map_get!(
-                            value,
-                            "layerIid",
-                            "EntityRef",
-                            as_str
-                        ))?;
-                        let level_iid = Iid::from_str(field_instance_map_get!(
-                            value,
-                            "levelIid",
-                            "EntityRef",
-                            as_str
-                        ))?;
-                        let world_iid = Iid::from_str(field_instance_map_get!(
-                            value,
-                            "worldIid",
-                            "EntityRef",
-                            as_str
-                        ))?;
-                        Ok(EntityRef {
-                            entity_iid,
-                            layer_iid,
-                            level_iid,
-                            world_iid,
-                        })
-                    })
-                    .transpose()?,
-            )),
-            "FilePath" => Ok(Self::FilePath(
-                // TODO: Should we refactor this to a Bevy asset path with
-                // ldtk_path_to_bevy_path?
-                value
-                    .map(|value| serde_json::from_value::<String>(value.clone()))
-                    .transpose()?,
-            )),
-            "Float" => Ok(Self::Float(
-                value
-                    .map(|value| serde_json::from_value::<f64>(value.clone()))
-                    .transpose()?,
-            )),
-            "Int" => Ok(Self::Int(
-                value
-                    .map(|value| serde_json::from_value::<i64>(value.clone()))
-                    .transpose()?,
-            )),
+                let layer_iid = field_instance_map_get!(value, "layerIid", "EntityRef", as_str);
+                let layer_iid = Iid::from_str(layer_iid)?;
+
+                let level_iid = field_instance_map_get!(value, "levelIid", "EntityRef", as_str);
+                let level_iid = Iid::from_str(level_iid)?;
+
+                let world_iid = field_instance_map_get!(value, "worldIid", "EntityRef", as_str);
+                let world_iid = Iid::from_str(world_iid)?;
+
+                EntityRef {
+                    entity_iid,
+                    layer_iid,
+                    level_iid,
+                    world_iid,
+                }
+            })),
+            // TODO: Should we refactor this to a Bevy asset path with
+            // ldtk_path_to_bevy_path?
+            "FilePath" => Ok(Self::FilePath(serde_json::from_value::<String>(
+                value.clone(),
+            )?)),
+            "Float" => Ok(Self::Float(serde_json::from_value::<f64>(value.clone())?)),
+            "Int" => Ok(Self::Int(serde_json::from_value::<i64>(value.clone())?)),
             "Point" => Ok(Self::Point(
-                value
-                    .map(|value| -> Result<(i64, i64)> {
-                        Ok((
-                            field_instance_map_get!(value, "cx", "Point", as_i64),
-                            field_instance_map_get!(value, "cy", "Point", as_i64),
-                        ))
-                    })
-                    .transpose()?
-                    .map(|pair| pair.into()),
+                (
+                    field_instance_map_get!(value, "cx", "Point", as_i64),
+                    field_instance_map_get!(value, "cy", "Point", as_i64),
+                )
+                    .into(),
             )),
-            "Multilines" => Ok(Self::Multilines(
-                value
-                    .map(|value| serde_json::from_value::<String>(value.clone()))
-                    .transpose()?,
-            )),
-            "String" => Ok(Self::String(
-                value
-                    .map(|value| serde_json::from_value::<String>(value.clone()))
-                    .transpose()?,
-            )),
-            "Tile" => Ok(Self::Tile(
-                value
-                    .map(|value| serde_json::from_value::<ldtk::TilesetRectangle>(value.clone()))
-                    .transpose()?
-                    .map(|value| TilesetRectangle::new(&value, tileset_definitions))
-                    .transpose()?,
-            )),
-            _ =>
-            // try to parse as an enum
-            {
-                //Err(ldtk_import_error!(
-                //    "Bad/Unknown Field Instance Type! given: {field_instance_type}"
-                //))
+            "Multilines" => Ok(Self::Multilines(serde_json::from_value::<String>(
+                value.clone(),
+            )?)),
+            "String" => Ok(Self::String(serde_json::from_value::<String>(
+                value.clone(),
+            )?)),
+            "Tile" => Ok(Self::Tile({
+                let value = serde_json::from_value::<ldtk::TilesetRectangle>(value.clone())?;
+                TilesetRectangle::new(&value, tileset_definitions)?
+            })),
+            _ => {
+                // try to parse as an enum
                 Self::parse_non_obvious_field_instance_type(
                     field_instance_type,
                     value,
@@ -268,7 +193,7 @@ impl FieldInstanceType {
 
     fn parse_non_obvious_field_instance_type(
         field_instance_type: &str,
-        value: Option<&serde_json::Value>,
+        value: &serde_json::Value,
         enum_definitions: &HashMap<String, Handle<EnumDefinition>>,
     ) -> Result<Self> {
         // If we make it here, we should have one of four things:
@@ -347,46 +272,13 @@ impl FieldInstanceType {
 
         if is_array {
             let array_enum = value
-                .and_then(|value| value.as_array())
-                .map(|value| {
-                    value
-                        .iter()
-                        .map(|value| {
-                            serde_json::from_value::<String>(value.clone()).map_err(|e| e.into())
-                        })
-                        .collect::<Result<Vec<_>>>()
-                })
-                .transpose()?
-                .map(|value| -> Result<Vec<EnumValue>> {
-                    value
-                        .into_iter()
-                        .map(|value| -> Result<EnumValue> {
-                            let enum_definition = enum_definitions
-                                .get(enum_name)
-                                .ok_or(ldtk_import_error!("bad enum identifier! {}", enum_name))?
-                                .clone();
-
-                            Ok(EnumValue {
-                                value,
-                                enum_definition,
-                            })
-                        })
-                        .collect::<Result<Vec<_>>>()
-                })
-                .transpose()?
+                .as_array()
                 .ok_or(ldtk_import_error!(
-                    "Could not construct Vec<String> from ldtk input! given: {:?}",
-                    value
-                ))?;
-
-            Ok(Self::ArrayEnum(array_enum))
-        } else {
-            let enum_value: Option<EnumValue> = value
-                .map(|value| -> Result<String> {
-                    serde_json::from_value::<String>(value.clone()).map_err(|e| e.into())
-                })
-                .transpose()?
-                .map(|value| -> Result<EnumValue> {
+                    "Field Instance with type Array<*Enum.*>, value not an array!"
+                ))?
+                .iter()
+                .map(|value| {
+                    let value = serde_json::from_value::<String>(value.clone())?;
                     let enum_definition = enum_definitions
                         .get(enum_name)
                         .ok_or(ldtk_import_error!("bad enum identifier! {}", enum_name))?
@@ -397,9 +289,39 @@ impl FieldInstanceType {
                         enum_definition,
                     })
                 })
-                .transpose()?;
+                .collect::<Result<Vec<_>>>()?;
 
-            Ok(Self::Enum(enum_value))
+            Ok(Self::ArrayEnum(array_enum))
+        } else {
+            let value = serde_json::from_value::<String>(value.clone())?;
+            let enum_definition = enum_definitions
+                .get(enum_name)
+                .ok_or(ldtk_import_error!("bad enum identifier! {}", enum_name))?
+                .clone();
+
+            Ok(Self::Enum(EnumValue {
+                value,
+                enum_definition,
+            }))
+            //let enum_value: Option<EnumValue> = value
+            //    .map(|value| -> Result<String> {
+            //        serde_json::from_value::<String>(value.clone()).map_err(|e| e.into())
+            //    })
+            //    .transpose()?
+            //    .map(|value| -> Result<EnumValue> {
+            //        let enum_definition = enum_definitions
+            //            .get(enum_name)
+            //            .ok_or(ldtk_import_error!("bad enum identifier! {}", enum_name))?
+            //            .clone();
+            //
+            //        Ok(EnumValue {
+            //            value,
+            //            enum_definition,
+            //        })
+            //    })
+            //    .transpose()?;
+            //
+            //Ok(Self::Enum(enum_value))
         }
     }
 }

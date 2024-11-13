@@ -2,6 +2,7 @@ use std::str::FromStr;
 
 use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_color::Color;
+use bevy_log::error;
 use bevy_math::Vec2;
 use bevy_reflect::Reflect;
 use bevy_render::texture::Image;
@@ -170,6 +171,13 @@ impl Level {
         let field_instances = value
             .field_instances
             .iter()
+            .filter(|value| {
+                let ret = value.value.is_some();
+                if !ret {
+                    error!("Skipping field instance {value:?} because inner value is None!");
+                }
+                ret
+            })
             .map(|value| -> Result<(String, FieldInstance)> {
                 Ok((
                     value.identifier.clone(),
