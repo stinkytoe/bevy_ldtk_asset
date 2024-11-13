@@ -181,6 +181,10 @@ impl Entity {
 
         Ok((iid, handle))
     }
+
+    pub fn has_tag(&self, tag: &str) -> bool {
+        self.tags.iter().any(|inner_tag| inner_tag == tag)
+    }
 }
 
 impl LdtkAsset for Entity {
