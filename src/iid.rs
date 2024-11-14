@@ -14,8 +14,15 @@ pub enum IidError {
     FormatError(String),
 }
 
-pub use uuid::uuid as iid;
 pub use uuid::Uuid as Iid;
+
+#[macro_export]
+macro_rules! iid {
+    ($iid:expr) => {
+        uuid!(iid)
+    };
+}
+pub use iid;
 
 pub type IidMap<T> = HashMap<Iid, T>;
 pub type IidSet = HashSet<Iid>;
