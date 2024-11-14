@@ -10,7 +10,7 @@ pub enum Error {
     ParseIntError(#[from] std::num::ParseIntError),
 
     #[error(transparent)]
-    IidError(#[from] crate::iid::IidError),
+    UuidError(#[from] uuid::Error),
 
     #[error(transparent)]
     ReadAssetBytesError(#[from] bevy_asset::ReadAssetBytesError),
