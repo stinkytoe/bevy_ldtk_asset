@@ -246,7 +246,7 @@ impl LayerType {
 
 /// An asset representing an [LDtk Layer Instance](https://ldtk.io/json/#ldtk-LayerInstanceJson).
 ///
-/// See [asset_labels] for a description of the label format.
+/// See [crate::asset_labels] for a description of the label format.
 #[derive(Asset, Debug, Reflect)]
 pub struct Layer {
     /// The size of the logical grid, in two dimensions.
@@ -275,7 +275,7 @@ pub struct Layer {
     pub layer_definition: Handle<LayerDefinition>,
     /// The [Uid] of the containing level.
     pub level_id: Uid,
-    /// Location of this layer in relation to its containing [Level].
+    /// Location of this layer in relation to its containing [crate::level::Level].
     ///
     /// Derived from [pdTotalOffsetX](https://ldtk.io/json/#ldtk-LayerInstanceJson;__pxTotalOffsetX)
     /// and [pdTotalOffsetY](https://ldtk.io/json/#ldtk-LayerInstanceJson;__pxTotalOffsetY), and is

@@ -73,7 +73,7 @@ pub struct Entity {
     /// Note: this does not nesessarily correlate with the size of the entity's visualization, if
     /// it defines one.
     pub size: Vec2,
-    /// The entity's location in the space defined by its containing [Layer].
+    /// The entity's location in the space defined by its containing [crate::layer::Layer].
     ///
     /// This is converted from LDtk's coordinate space to Bevy's pixel coordinate space by negating
     /// the y value.

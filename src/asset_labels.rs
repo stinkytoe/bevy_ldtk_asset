@@ -1,16 +1,16 @@
 //! Asset labels for the sub-asset types.
 //!
-//! Each world is stored in its own sub asset of type [World], and labeled with the prefix of
+//! Each world is stored in its own sub asset of type [crate::world::World], and labeled with the prefix of
 //! `worlds:WorldIdentifier`.
 //!
-//! Levels are of type [Level], and labeled with their respective world with the label
+//! Levels are of type [crate::level::Level], and labeled with their respective world with the label
 //! `worlds:WorldIdentifier/LevelIdentifier`.
 //!
-//! Layers are of type [Layer], and labeled with their respective level and world as
+//! Layers are of type [crate::layer::Layer], and labeled with their respective level and world as
 //! `worlds:WorldIdentifier/LevelIdentifier/LayerIdentifier`. Layer names are not unique globally,
 //! but are unique when paired with their containing level.
 //!
-//! Entities are of type [Entity]. They differ from the other types in that their identifiers are
+//! Entities are of type [crate::entity::Entity]. They differ from the other types in that their identifiers are
 //! not unique. A user can make multiple copies of any given entity, barring restrictions in LDtk
 //! itself. (see [Entities](https://ldtk.io/json/#ldtk-EntityInstanceJson) section of the LDtk
 //! documentation). To maintain uniqueness, entities in this library will label themselves with a
@@ -19,13 +19,13 @@
 //! belong to in the editor:
 //! `worlds:WorldIdentifier/LevelIdentifier/LayerIdentifier/Entity@deadbeef-1234-fee1-5678-ba5eba118ba7`.
 //!
-//! [TilesetDefinition]s are labeled as: `tileset_definitions:Identifier`.
+//! [crate::tileset_definition::TilesetDefinition]s are labeled as: `tileset_definitions:Identifier`.
 //!
-//! [EntityDefinition]s are labeled as: `entity_definitions:Identifier`.
+//! [crate::entity_definition::EntityDefinition]s are labeled as: `entity_definitions:Identifier`.
 //!
-//! [LayerDefinition]s are labeled as: `layer_definitions:Identifier`.
+//! [crate::layer_definition::LayerDefinition]s are labeled as: `layer_definitions:Identifier`.
 //!
-//! [EnumDefinition]s are labeled as: `enum_definitions:Identifier`.
+//! [crate::enum_definition::EnumDefinition]s are labeled as: `enum_definitions:Identifier`.
 
 #![allow(missing_docs)]
 use bevy_reflect::Reflect;

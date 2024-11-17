@@ -1,3 +1,12 @@
+//! The LDtk definition for a layer.
+//!
+//! This is used by LDtk for creating new layer instances.
+//!
+//! This is an import of an LDtk
+//! [LayerDefinition](https://ldtk.io/json/#ldtk-LayerDefJson)
+
+#![allow(missing_docs)]
+
 use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_color::Color;
 use bevy_math::DVec2;
