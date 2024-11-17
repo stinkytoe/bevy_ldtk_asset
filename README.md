@@ -32,28 +32,6 @@ When possible, we will convert items to a Bevy compatible format.
 * LDtk pivot fields are converted to and stored as [Anchor](https://docs.rs/bevy/latest/bevy/sprite/enum.Anchor.html)
   fields
 
-### Naming Collisions
-
-Unfortunately, there are many name collisions between the nomenclature used in
-Bevy and LDtk. Especially (but not exclusively):
-
-* World
-* Level
-* Layer
-* Entity
-
-I will endeavor to refer to objects in Bevy as ECS objects, i.e. an
-ECS entity or ECS world when referring to objects from the Bevy ecosystem, and
-LDtk objects for things either from this library or LDtk itself, i.e. an LDtk
-entity or LDtk world.
-
-Users are recommended to use the `use ... as ...` pattern in their own code when
-importing these types to help avoid any pitfalls, such as:
-
-```rust
-use bevy_ldtk_asset::project::Project as ProjectAsset;
-```
-
 ## Assets
 
 An LDtk project is loaded using Bevy's asset system, and can be added as a
@@ -195,6 +173,37 @@ Unfortunately there is metadata in the main project which is needed to properly
 describe a level, and all of it's sub assets. So, loading the entire project is
 the only option.
 
+### Multi Worlds Projects
+
+Originally LDtk only supported a single 'World' per project file. In these
+projects, the world does not have an identifier or its own Iid. Recently they
+have added an option for multi world projects.
+
+For single world projects, we add the identifier of "World", and clone the Iid
+of the project in order to build our World asset.
+
+### Naming Collisions
+
+Unfortunately, there are many name collisions between the nomenclature used in
+Bevy and LDtk. Especially (but not exclusively):
+
+* World
+* Level
+* Layer
+* Entity
+
+I will endeavor to refer to objects in Bevy as ECS objects, i.e. an
+ECS entity or ECS world when referring to objects from the Bevy ecosystem, and
+LDtk objects for things either from this library or LDtk itself, i.e. an LDtk
+entity or LDtk world.
+
+Users are recommended to use the `use ... as ...` pattern in their own code when
+importing these types to help avoid any pitfalls, such as:
+
+```rust
+use bevy_ldtk_asset::project::Project as ProjectAsset;
+```
+
 ## Getting Started
 
 ### Dependencies
@@ -248,7 +257,7 @@ stinkytoe
 * [x] Layer Definitions
 * [x] Entity Definitions
 * [x] Tileset Definitions
-* [ ] Enum Definitions
+* [x] Enum Definitions
 * [ ] Nine-Slice Borders for Entities [#21](https://github.com/stinkytoe/bevy_ldtk_asset/issues/21)
 
 ## Compatability
