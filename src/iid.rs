@@ -1,18 +1,18 @@
-use std::fmt::Debug;
-use std::num::ParseIntError;
-use thiserror::Error;
+//! Interface for handling Iid fields in LDtk
+//!
+//! This is a thin wrapper over the [uuid](https://crates.io/crates/uuid) crate, with
+//! [Iid] being a re-export of [uuid::Uuid], and the [iid]! macro being a re-export of of
+//! [uuid::Uuid].
+//!
+//! I chose to wrap these values for tow reasons:
+//! * To match the nomenclature of LDtk
+//! * I had originally written my own implementation, but switched to the superior [uuid] crate
+//!   after I realized it offered better features while remaining compatable with LDtk.
+
+#![allow(missing_docs)]
 
 use bevy_utils::HashMap;
 use bevy_utils::HashSet;
-
-#[derive(Debug, Error)]
-pub enum IidError {
-    #[error(transparent)]
-    ParseIntError(#[from] ParseIntError),
-
-    #[error("Format error on input: {0}")]
-    FormatError(String),
-}
 
 pub use uuid::Uuid as Iid;
 

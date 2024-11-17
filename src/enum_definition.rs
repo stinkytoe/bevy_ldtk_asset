@@ -1,3 +1,9 @@
+//! The definition for LDtk enum values.
+//!
+//! Used by entities to provide special values, such as items or enemy types.
+//!
+//! See [Enumerations](https://ldtk.io/docs/general/editor-components/enumerations-enums/)
+//! in the LDtk documentation for a description.
 use std::path::PathBuf;
 
 use bevy_asset::{Asset, Handle, LoadContext};
@@ -15,6 +21,8 @@ use crate::tileset_rectangle::TilesetRectangle;
 use crate::uid::UidMap;
 use crate::Result;
 
+/// Data associated with a specific enum.
+#[allow(missing_docs)]
 #[derive(Debug, Reflect)]
 pub struct EnumValueDefinition {
     pub color: Color,
@@ -23,7 +31,7 @@ pub struct EnumValueDefinition {
 }
 
 impl EnumValueDefinition {
-    pub fn new(
+    pub(crate) fn new(
         value: &ldtk::EnumValueDefinition,
         tileset_definitions: &UidMap<Handle<TilesetDefinition>>,
     ) -> Result<Self> {
@@ -39,13 +47,15 @@ impl EnumValueDefinition {
     }
 }
 
-/// Enum definitions are a little different in the way they are indexed. They do have internal
-/// Uids, however, a field instance of type Enum or Array<Enum> doesn't expose this directly. The
-/// data is in the JSON, but it's not exposed via the schema. So, we index these by their
-/// identifier as opposed to their Uid. Any definition *could* be indexed the same way, but I chose
-/// to use the uid when available via the schema.
+/// An enum definition groups a vector of [EnumValueDefinition]s into a logical group.
+#[allow(missing_docs)]
 #[derive(Asset, Debug, Reflect)]
 pub struct EnumDefinition {
+    // Enum definitions are a little different in the way they are indexed. They do have internal
+    // Uids, however, a field instance of type Enum or Array<Enum> doesn't expose this directly. The
+    // data is in the JSON, but it's not exposed via the schema. So, we index these by their
+    // identifier as opposed to their Uid. Any definition *could* be indexed the same way, but I chose
+    // to use the uid when available via the schema.
     pub identifier: String,
     pub external_rel_path: Option<PathBuf>,
     icon_tileset_definition: Option<Handle<TilesetDefinition>>,
@@ -101,6 +111,8 @@ impl EnumDefinition {
 }
 
 impl EnumDefinition {
+    /// Returns true iff this enum definition has the given tag in its tags field. This is filled
+    /// out in the editor, by the level designer.
     pub fn has_tag(&self, tag: &str) -> bool {
         self.tags.iter().any(|inner_tag| inner_tag == tag)
     }

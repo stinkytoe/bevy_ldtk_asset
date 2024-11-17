@@ -1,3 +1,12 @@
+//! A field instance is a field value attached to certain assets.
+//!
+//! A vector of field instances can be attached to any of:
+//! * [crate::entity::Entity]
+//! * [crate::entity_definition::EntityDefinition]
+//! * [crate::level::Level]
+//!
+//! See [FieldInstance](https://ldtk.io/json/#ldtk-FieldInstanceJson) for a full description.
+
 use std::str::FromStr;
 
 use bevy_asset::Handle;
@@ -16,6 +25,8 @@ use crate::tileset_rectangle::TilesetRectangle;
 use crate::uid::{Uid, UidMap};
 use crate::Result;
 
+/// The internal value of a field instance of type [FieldInstanceType::EntityRef]
+#[allow(missing_docs)]
 #[derive(Debug, Reflect)]
 pub struct EntityRef {
     pub entity_iid: Iid,
@@ -24,12 +35,14 @@ pub struct EntityRef {
     pub world_iid: Iid,
 }
 
+#[allow(missing_docs)]
 #[derive(Debug, Reflect)]
 pub struct EnumValue {
     value: String,
     enum_definition: Handle<EnumDefinition>,
 }
 
+#[allow(missing_docs)]
 #[derive(Debug, Reflect)]
 pub enum FieldInstanceType {
     ArrayInt(Vec<i64>),
@@ -307,6 +320,12 @@ impl FieldInstanceType {
     }
 }
 
+/// An individual field instance type.
+///
+/// Typically, this will be stored in a vec in either an
+/// [crate::entity::Entity] or a [crate::level::Level], and be associated with that particular
+/// asset.
+#[allow(missing_docs)]
 #[derive(Debug, Reflect)]
 pub struct FieldInstance {
     pub tileset_rectangle: Option<TilesetRectangle>,
@@ -347,6 +366,7 @@ macro_rules! is_type {
     };
 }
 
+#[allow(missing_docs)]
 impl FieldInstance {
     pub fn is_array_int(&self) -> bool {
         is_type!(self, FieldInstanceType::ArrayInt)
@@ -425,27 +445,17 @@ macro_rules! get_by_type {
     };
 }
 
+#[rustfmt::skip::macros(get_by_type)]
+#[allow(missing_docs)]
 impl FieldInstance {
     get_by_type!(get_array_int, FieldInstanceType::ArrayInt, Vec<i64>);
     get_by_type!(get_array_enum, FieldInstanceType::ArrayEnum, Vec<EnumValue>);
-    get_by_type!(
-        get_array_multilines,
-        FieldInstanceType::ArrayMultilines,
-        Vec<String>
-    );
+    get_by_type!(get_array_multilines, FieldInstanceType::ArrayMultilines, Vec<String>);
     get_by_type!(get_array_point, FieldInstanceType::ArrayPoint, Vec<I64Vec2>);
-    get_by_type!(
-        get_array_tile,
-        FieldInstanceType::ArrayTile,
-        Vec<TilesetRectangle>
-    );
+    get_by_type!(get_array_tile, FieldInstanceType::ArrayTile, Vec<TilesetRectangle>);
     get_by_type!(get_bool, FieldInstanceType::Bool, bool);
     get_by_type!(get_color, FieldInstanceType::Color, Color);
-    get_by_type!(
-        get_array_entity_ref,
-        FieldInstanceType::EntityRef,
-        EntityRef
-    );
+    get_by_type!(get_array_entity_ref,FieldInstanceType::EntityRef, EntityRef);
     get_by_type!(get_enum, FieldInstanceType::Enum, EnumValue);
     get_by_type!(get_file_path, FieldInstanceType::FilePath, String);
     get_by_type!(get_float, FieldInstanceType::Float, f64);

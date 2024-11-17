@@ -182,6 +182,8 @@ impl Entity {
         Ok((iid, handle))
     }
 
+    /// Returns true iff this entity instance has the given tag in its tags field. This is filled
+    /// out in the editor, by the level designer.
     pub fn has_tag(&self, tag: &str) -> bool {
         self.tags.iter().any(|inner_tag| inner_tag == tag)
     }
