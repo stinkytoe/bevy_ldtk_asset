@@ -1,23 +1,21 @@
 [package]
 name = "bevy_ldtk_asset"
 version = "0.5.0"
+authors = ["Randal Robinson <stinkytoe42@yahoo.com>"]
 edition = "2021"
-description = "" # — A description of the plugin
-repository = "" # — URL of the plugin source repository
-license = "" # — The plugin license
-keywords = [
-  "bevy",
-] # — Keywords for the plugin. "bevy" at least is a good idea here
+description = "A Bevy plugin to support LDtk files as assets!"
+repository = "github.com/stinkytoe/bevy_ldtk_asset"
+license = "MIT OR Apache-2.0"
+keywords = ["bevy"]
 categories = [
   "game-development",
   "game-engines",
-] # — Categories of the plugin. See the full list on crates.io.
-exclude = [
-  "assets",
-  "examples",
-] # — Files to exclude from the released package. Excluding the assets folder that you may 
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+  "games",
+  "graphics",
+  "rendering::data-formats",
+]
+exclude = ["assets", "examples"]
+readme = "README.md"
 
 [dependencies]
 bevy_app = "=0.15.0-rc.3"
