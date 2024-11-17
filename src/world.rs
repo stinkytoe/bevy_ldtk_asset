@@ -16,11 +16,23 @@ use crate::level::Level;
 use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
 use crate::{ldtk_import_error, Result};
 
+/// The layout of the world's levels.
+///
+/// See [world layout](https://ldtk.io/docs/general/world/#layouts) in the
+/// LDtk documentation for a description.
 #[derive(Debug, Reflect)]
 pub enum WorldLayout {
+    /// Can be placed anywhere.
     Free,
+    /// Worlds are freely placed, but constrained to a grid.
     GridVania(Vec2),
+    /// Levels are layed out in order horizontally.
+    ///
+    /// The levels [crate::level::Level::index] field will be used to determine
+    /// the order. The exact layout (spacing, alignment, etc) is not defined in
+    /// this plugin and is left up to the user.
     LinearHorizontal,
+    /// Same as [WorldLayout::LinearHorizontal], but aligned vertically.
     LinearVertical,
 }
 
@@ -43,6 +55,8 @@ impl WorldLayout {
     }
 }
 
+/// A single world instance.
+#[allow(missing_docs)]
 #[derive(Asset, Debug, Reflect)]
 pub struct World {
     pub identifier: String,

@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 use bevy_asset::{Asset, Handle};
 
 use crate::field_instance::FieldInstance;

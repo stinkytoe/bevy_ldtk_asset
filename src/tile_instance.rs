@@ -4,6 +4,8 @@ use bevy_reflect::Reflect;
 use crate::ldtk;
 use crate::{ldtk_import_error, Result};
 
+/// An individual tile in a [crate::layer::TilesLayer] instance.
+#[allow(missing_docs)]
 #[derive(Clone, Debug, Reflect)]
 pub struct TileInstance {
     pub opacity: f32,

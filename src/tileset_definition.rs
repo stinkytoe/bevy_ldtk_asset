@@ -1,3 +1,5 @@
+#![allow(missing_docs)]
+
 use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_math::{I64Vec2, Vec2};
 use bevy_reflect::Reflect;
@@ -40,6 +42,9 @@ impl EnumTagValue {
     }
 }
 
+/// A tileset definition for use in visualizations.
+///
+/// See [TilesetDefinition](https://ldtk.io/json/#ldtk-TilesetDefJson)
 #[derive(Asset, Debug, Reflect)]
 pub struct TilesetDefinition {
     pub cell_size: I64Vec2,
@@ -108,6 +113,8 @@ impl TilesetDefinition {
 }
 
 impl TilesetDefinition {
+    /// Returns true iff this entity instance has the given tag in its tags field. This is filled
+    /// out in the editor, by the level designer.
     pub fn has_tag(&self, tag: &str) -> bool {
         self.tags.iter().any(|inner_tag| inner_tag == tag)
     }

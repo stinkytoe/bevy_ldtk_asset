@@ -13,6 +13,12 @@ use crate::project_loader::ProjectLoader;
 use crate::tileset_definition::TilesetDefinition;
 use crate::world::World;
 
+/// The top level Bevy plugin!
+///
+/// Use this to enable the features of this plugin within your Bevy app!
+///
+/// See [Plugins](https://bevyengine.org/learn/quick-start/getting-started/plugins/)
+/// from The Bevy Book for details.
 #[derive(Debug)]
 pub struct BevyLdtkAssetPlugin;
 

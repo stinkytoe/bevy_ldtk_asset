@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 use bevy_asset::Handle;
 use bevy_math::{Rect, Vec2};
 use bevy_reflect::Reflect;
@@ -7,6 +8,8 @@ use crate::tileset_definition::TilesetDefinition;
 use crate::uid::UidMap;
 use crate::{ldtk_import_error, Result};
 
+/// The visualization for an [crate::entity::Entity] asset.
+/// This can also be stored in [crate::field_instance::FieldInstance]s for reference
 #[derive(Clone, Debug, Reflect)]
 pub struct TilesetRectangle {
     pub size: Vec2,
