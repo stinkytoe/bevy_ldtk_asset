@@ -183,6 +183,18 @@ reconcile the locations of these assets by assuming the paths in the `.ldtk`
 file are relative to the file itself, and that those paths also exist
 within the same asset storage location as the `.ldtk` file.
 
+### External Levels
+
+LDtk enabled the option to save levels into separate files, with extension `.ldtkl`.
+
+This is fully supported by this plugin, however they cannot be loaded directly. The
+entire project file must be loaded, though a user can simply refer to the level's
+asset path directly. See [Asset Labeling](#asset-labeling).
+
+Unfortunately there is metadata in the main project which is needed to properly
+describe a level, and all of it's sub assets. So, loading the entire project is
+the only option.
+
 ## Getting Started
 
 ### Dependencies
