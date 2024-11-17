@@ -1,5 +1,6 @@
 # bevy_ldtk_asset
 
+[![License](https://img.shields.io/badge/license-MIT%2FApache-blue.svg)](https://github.com/stinkytoe/bevy_ldtk_asset/tree/main#license)
 A plugin for the [Bevy Engine](https://bevyengine.org) to allow loading of projects
 from the [LDtk](https://ldtk.io) level editor.
 
