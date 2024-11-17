@@ -1,3 +1,8 @@
+//! The LDtk level, represented as a Bevy asset.
+//!
+//! This is an import of an LDtk
+//! [LevelInstance](https://ldtk.io/json/#ldtk-LevelInstanceJson)
+
 use std::str::FromStr;
 
 use bevy_asset::{Asset, Handle, LoadContext};
@@ -24,6 +29,8 @@ use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
 use crate::uid::Uid;
 use crate::Result;
 
+/// Relatve direction of levels in the Neighbour list.
+#[allow(missing_docs)]
 #[derive(Debug, Reflect)]
 pub enum NeighbourDir {
     North,
@@ -60,6 +67,9 @@ impl NeighbourDir {
     }
 }
 
+/// An entry in the list of Neighbours, indicating the Iid of the adjacent level, and its relative
+/// direction.
+#[allow(missing_docs)]
 #[derive(Debug, Reflect)]
 pub struct Neighbour {
     pub dir: NeighbourDir,
@@ -74,6 +84,14 @@ impl Neighbour {
         Ok(Self { dir, level_iid })
     }
 }
+
+/// The background of the level. This is to be drawn below the associated layers.
+/// [LevelBackground::crop_corner], and [LevelBackground::crop_size] represent the region inside of
+/// the image that should be cropped out for use in the visualization of the [Layer].
+///
+/// [LevelBackground::corner] is relative to the top left corner of the level, and
+/// [LevelBackground::scale] is a scale factor which should be applied to the visualiztion.
+#[allow(missing_docs)]
 #[derive(Clone, Debug, Reflect)]
 pub struct LevelBackground {
     pub image: Handle<Image>,
@@ -118,19 +136,49 @@ impl LevelBackground {
     }
 }
 
+/// A level as represented in an LDtk project.
 #[derive(Asset, Debug, Reflect)]
 pub struct Level {
+    /// The background color. This should represent a rectangle exactly the size and location of the
+    /// [Level], represented by [Level::location] and [Level::size]. It should be drawn 'behind'
+    /// this level's associated [crate::layer::Layer]s, if any.
     pub bg_color: Color,
+    /// A list of [Neighbour]s, representing adjacent levels.
     pub neighbours: Vec<Neighbour>,
+    /// An optional level background image. If not present, the level's visualization is supposed
+    /// to be a square of color [Level::bg_color]. If this is present, then the image defined here
+    /// should be overlayed onto the colored square.
     pub background: Option<LevelBackground>,
+    /// The [crate::field_instance::FieldInstance]s associated with this Level.
     pub field_instances: HashMap<String, FieldInstance>,
+    /// A unique string representing this level.
     pub identifier: String,
+    /// A unique [Iid] representing this level.
     pub iid: Iid,
+    /// The size, in pixels, of this Level. In LDtk, all layer visualizations are cropped to fit
+    /// within this region.
     pub size: Vec2,
+    /// A soon to be deprecated value from LDtk. Added here for completeness, but likely to be
+    /// removed in the future.
     pub uid: Uid, // TODO: do we need this?
+    /// An integer representing the stacking of Levels in a levels given world. Positive world
+    /// depths are meant to be visualized 'above' lower value levels.
     pub world_depth: i64,
+    /// The relative location of this [Level] within its associated [crate::world::World].
+    ///
+    /// This is converted from LDtk's coordinate space to Bevy's pixel coordinate space by negating
+    /// the y value.
     pub location: Vec2,
+    /// Handles to all of the associated [Layer] instances, indexed by that layer's [Iid].
+    ///
+    /// NOTE: There is no meaning to the order within this field. If the order of the layers is
+    /// needed, the [Layer::index] field represents the order of  the layer within the set.
     pub layers: IidMap<Handle<Layer>>,
+    /// The unique index of this level.
+    ///
+    /// This only has meaning for
+    /// [crate::world::WorldLayout::LinearVertical] and
+    /// [crate::world::WorldLayout::LinearHorizontal] world layouts.
     pub index: usize,
 }
 

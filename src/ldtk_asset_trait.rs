@@ -6,6 +6,7 @@ use crate::iid::Iid;
 /// Trait representing the assets which would exist in an LDtk project world, such as
 /// [crate::project::Project], [crate::world::World], [crate::level::Level], [crate::layer::Layer],
 /// and [crate::entity::Entity].
+#[allow(missing_docs)]
 pub trait LdtkAsset: Asset {
     fn get_identifier(&self) -> &str;
     fn get_iid(&self) -> Iid;
