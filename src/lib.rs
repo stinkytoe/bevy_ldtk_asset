@@ -1,26 +1,32 @@
-// #![warn(missing_docs)]
+//! A [Bevy](https://bevyengine.org) plugin for loading [LDtk](https://ldtk.io) project files!
 
-mod common_components;
-mod entity;
-mod field_instance;
-mod layer;
+#![warn(missing_docs)]
+#![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
+
+mod anchor;
+mod color;
 mod ldtk;
-mod level;
-mod plugins;
-mod project;
-mod system_params;
-mod traits;
-mod util;
-mod world;
+mod ldtk_path;
+mod project_loader;
+mod systems;
 
-pub mod prelude {
-    pub use crate::common_components::*;
-    pub use crate::entity::*;
-    pub use crate::field_instance::*;
-    pub use crate::layer::*;
-    pub use crate::level::*;
-    pub use crate::plugins::*;
-    pub use crate::project::*;
-    pub use crate::system_params::*;
-    pub use crate::world::*;
-}
+pub mod asset_labels;
+pub mod entity;
+pub mod entity_definition;
+pub mod enum_definition;
+pub mod error;
+pub mod field_instance;
+pub mod iid;
+pub mod layer;
+pub mod layer_definition;
+pub mod ldtk_asset_trait;
+pub mod level;
+pub mod plugin;
+pub mod project;
+pub mod tile_instance;
+pub mod tileset_definition;
+pub mod tileset_rectangle;
+pub mod uid;
+pub mod world;
+
+pub use error::{Error, Result};
