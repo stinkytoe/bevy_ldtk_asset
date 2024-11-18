@@ -21,7 +21,7 @@ pub use uuid::uuid;
 #[macro_export]
 macro_rules! iid {
     ($iid:expr) => {
-        uuid::uuid!($iid)
+        $crate::uuid!($iid)
     };
 }
 pub use iid;
