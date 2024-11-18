@@ -16,10 +16,12 @@ use bevy_utils::HashSet;
 
 pub use uuid::Uuid as Iid;
 
+pub use uuid::uuid;
+
 #[macro_export]
 macro_rules! iid {
     ($iid:expr) => {
-        uuid!(iid)
+        uuid::uuid!($iid)
     };
 }
 pub use iid;
