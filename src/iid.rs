@@ -16,15 +16,15 @@ use bevy_utils::HashSet;
 
 pub use uuid::Uuid as Iid;
 
-pub use uuid::uuid;
+pub use uuid::uuid as iid;
 
-#[macro_export]
-macro_rules! iid {
-    ($iid:expr) => {
-        $crate::uuid::uuid!($iid)
-    };
-}
-pub use iid;
+//#[macro_export]
+//macro_rules! iid {
+//    ($iid:expr) => {
+//        $crate::uuid::uuid!($iid)
+//    };
+//}
+//pub use iid;
 
 pub type IidMap<T> = HashMap<Iid, T>;
 pub type IidSet = HashSet<Iid>;
