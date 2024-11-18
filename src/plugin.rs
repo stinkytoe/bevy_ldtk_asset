@@ -1,3 +1,5 @@
+#![allow(missing_docs)]
+
 use bevy_app::{App, Plugin};
 use bevy_asset::AssetApp;
 

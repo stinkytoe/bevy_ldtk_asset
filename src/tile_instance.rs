@@ -1,3 +1,5 @@
+#![allow(missing_docs)]
+
 use bevy_math::Vec2;
 use bevy_reflect::Reflect;
 
