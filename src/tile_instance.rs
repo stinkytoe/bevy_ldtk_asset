@@ -1,20 +1,28 @@
 #![allow(missing_docs)]
 
-use bevy_math::Vec2;
+use bevy_math::I64Vec2;
 use bevy_reflect::Reflect;
 
 use crate::ldtk;
 use crate::{ldtk_import_error, Result};
 
 /// An individual tile in a [crate::layer::TilesLayer] instance.
-#[allow(missing_docs)]
+///
+/// This represents a square region within the tileset layer which is associated with the
+/// containing layer instance. The size of the square, and the source image, are not defined here
+/// but in the layer instance and are common to all tiles in that layer.
 #[derive(Clone, Debug, Reflect)]
 pub struct TileInstance {
+    /// The overall opacity. This is applied even against pixels which already have opacity.
     pub opacity: f32,
+    /// If true, flip this image horizontally before blotting onto layer visualization.
     pub flip_x: bool,
+    /// If true, flip this image vertically before blotting onto layer visualization.
     pub flip_y: bool,
-    pub location: Vec2,
-    pub corner: Vec2,
+    /// Top left corner where this tile is to be blotted onto the layer visualization.
+    pub offset: I64Vec2,
+    /// The top left corner where we get the image from the associated tileset image.
+    pub source: I64Vec2,
 }
 
 impl TileInstance {
@@ -32,14 +40,14 @@ impl TileInstance {
                 ))
             }
         };
-        let location = (value.px.len() == 2)
-            .then(|| (value.px[0] as f32, value.px[1] as f32).into())
+        let offset = (value.px.len() == 2)
+            .then(|| (value.px[0], value.px[1]).into())
             .ok_or(ldtk_import_error!(
                 "Bad px vector in LDtk tile instance! given: {:?}",
                 value.px
             ))?;
-        let corner = (value.src.len() == 2)
-            .then(|| (value.src[0] as f32, value.src[1] as f32).into())
+        let source = (value.src.len() == 2)
+            .then(|| (value.src[0], value.src[1]).into())
             .ok_or(ldtk_import_error!(
                 "Bad src vector in LDtk tile instance! given: {:?}",
                 value.px
@@ -49,8 +57,8 @@ impl TileInstance {
             opacity,
             flip_x,
             flip_y,
-            location,
-            corner,
+            offset,
+            source,
         })
     }
 }

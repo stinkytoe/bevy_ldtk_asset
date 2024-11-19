@@ -8,6 +8,8 @@ use std::str::FromStr;
 use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_color::Color;
 use bevy_log::error;
+use bevy_math::DVec2;
+use bevy_math::I64Vec2;
 use bevy_math::Vec2;
 use bevy_reflect::Reflect;
 use bevy_render::texture::Image;
@@ -91,22 +93,25 @@ impl Neighbour {
 ///
 /// [LevelBackground::corner] is relative to the top left corner of the level, and
 /// [LevelBackground::scale] is a scale factor which should be applied to the visualiztion.
+///
+/// Even though crop_corner, and crop_size represent pixel space locations, they are given to us as
+/// f64 from LDtk so we will also pass them on as f64 values.
 #[allow(missing_docs)]
 #[derive(Clone, Debug, Reflect)]
 pub struct LevelBackground {
     pub image: Handle<Image>,
-    pub crop_corner: Vec2,
-    pub crop_size: Vec2,
-    pub scale: Vec2,
-    pub corner: Vec2,
+    pub crop_corner: DVec2,
+    pub crop_size: DVec2,
+    pub scale: DVec2,
+    pub corner: I64Vec2,
 }
 
 impl LevelBackground {
     pub(crate) fn new(value: &ldtk::LevelBackgroundPosition, image: Handle<Image>) -> Result<Self> {
         let (crop_corner, crop_size) = (value.crop_rect.len() == 4)
             .then(|| {
-                let crop_corner = (value.crop_rect[0] as f32, value.crop_rect[1] as f32).into();
-                let crop_size = Vec2::new(value.crop_rect[2] as f32, value.crop_rect[3] as f32);
+                let crop_corner = (value.crop_rect[0], value.crop_rect[1]).into();
+                let crop_size = (value.crop_rect[2], value.crop_rect[3]).into();
                 (crop_corner, crop_size)
             })
             .ok_or(ldtk_import_error!(
@@ -114,13 +119,13 @@ impl LevelBackground {
                 value.crop_rect
             ))?;
         let scale = (value.scale.len() == 2)
-            .then(|| (value.scale[0] as f32, value.scale[1] as f32).into())
+            .then(|| (value.scale[0], value.scale[1]).into())
             .ok_or(ldtk_import_error!(
                 "Bad value for scale! given: {:?}",
                 value.crop_rect
             ))?;
         let corner = (value.top_left_px.len() == 2)
-            .then(|| (value.top_left_px[0] as f32, value.top_left_px[1] as f32).into())
+            .then(|| (value.top_left_px[0], value.top_left_px[1]).into())
             .ok_or(ldtk_import_error!(
                 "Bad value for corner! given: {:?}",
                 value.crop_rect
