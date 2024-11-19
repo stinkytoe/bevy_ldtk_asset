@@ -152,6 +152,22 @@ example.ldtk#worlds:Underworld/Dungeon2/Entities
 example.ldtk#worlds:Underworld/Dungeon2/Entities/ShadyShopKeeper@55ae7dac-3158-41d1-a8c0-8b586ad19f4c
 example.ldtk#worlds:Underworld/Dungeon2/Entities/DubiousPotion@14500cf9-0bd3-440e-b7d0-085a64e79493
 example.ldtk#worlds:Underworld/Dungeon2/Trees
+example.ldtk#tileset_definitions:GroundTilemap
+example.ldtk#tileset_definitions:PlayerTilemap
+example.ldtk#tileset_definitions:NpcTilemap
+example.ldtk#tileset_definitions:DubiousPotionIcon
+example.ldtk#entity_definitions:Player
+example.ldtk#entity_definitions:NPC1
+example.ldtk#entity_definitions:NPC2
+example.ldtk#entity_definitions:NPC3
+example.ldtk#entity_definitions:NPC4
+example.ldtk#entity_definitions:Goblin
+example.ldtk#entity_definitions:TrapDoor
+example.ldtk#entity_definitions:ShadyShopKeeper
+example.ldtk#entity_definitions:DubiousPotion
+example.ldtk#layer_definitions:Ground
+example.ldtk#layer_definitions:Entities
+example.ldtk#layer_definitions:Trees
 ```
 
 See [asset_labels] for a full description.
@@ -263,12 +279,13 @@ stinkytoe
 * [x] Entity Definitions
 * [x] Tileset Definitions
 * [x] Enum Definitions
-* [ ] Nine-Slice Borders for Entities [#21](https://github.com/stinkytoe/bevy_ldtk_asset/issues/21)
+* [x] Nine-Slice Borders for Entities
 
 ## Compatability
 
-| bevy_ldtk_asset | bevy | LDtk  |
-| :-------------: | :--: | :---: |
+| bevy_ldtk_asset | bevy        | LDtk  |
+| :-------------: | :---------: | :---: |
+| 0.5.1           | 0.15.0-rc.3 | 1.5.3 |
 | 0.5.0           | 0.15.0-rc.3 | 1.5.3 |
 
 ## License
