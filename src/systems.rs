@@ -4,12 +4,12 @@ pub(crate) mod asset_events_debug {
     use bevy_ecs::event::EventReader;
     use bevy_log::debug;
 
-    use crate::project::Project;
+    use crate::ldtk_asset_trait::LdtkAsset;
 
-    pub(crate) fn project_asset_events_debug_output(
-        mut project_events: EventReader<AssetEvent<Project>>,
+    pub(crate) fn asset_events_debug_output<Asset: LdtkAsset>(
+        mut asset_events: EventReader<AssetEvent<Asset>>,
     ) {
-        project_events
+        asset_events
             .read()
             .for_each(|event| debug!("AssetEvent: {event:?}"));
     }
