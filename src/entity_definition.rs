@@ -118,9 +118,6 @@ impl TileRenderMode {
 }
 
 /// The definition for creating a new entity.
-///
-/// TODO: add nine_slice_borders field! [#21](https://github.com/stinkytoe/bevy_ldtk_asset/issues/21)
-/// TODO: how are we going to handle aseprite targets? [#20](https://github.com/stinkytoe/bevy_ldtk_asset/issues/20)
 #[derive(Asset, Debug, Reflect)]
 pub struct EntityDefinition {
     /// The identifier for this definition.
