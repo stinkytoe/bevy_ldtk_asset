@@ -14,15 +14,41 @@ use bevy_sprite::Anchor;
 use crate::anchor::bevy_anchor_from_ldtk;
 use crate::asset_labels::ProjectAssetPath;
 use crate::color::bevy_color_from_ldtk_string;
-use crate::ldtk;
 use crate::tileset_definition::TilesetDefinition;
 use crate::tileset_rectangle::TilesetRectangle;
 use crate::uid::{Uid, UidMap};
 use crate::Result;
+use crate::{ldtk, ldtk_import_error};
+
+/// A nine-slice pattern.
+///
+/// See [nineSliceBorders](https://ldtk.io/json/#ldtk-EntityDefJson;nineSliceBorders)
+/// from the LDtk documentation.
+#[derive(Debug, Reflect)]
+pub struct NineSlice {
+    up: i64,
+    right: i64,
+    down: i64,
+    left: i64,
+}
+
+impl NineSlice {
+    pub(crate) fn new(nine_slice: &[i64]) -> Result<Self> {
+        (nine_slice.len() == 4)
+            .then(|| Self {
+                up: nine_slice[0],
+                right: nine_slice[1],
+                down: nine_slice[2],
+                left: nine_slice[3],
+            })
+            .ok_or(ldtk_import_error!("bad nine_slice array! {nine_slice:?}"))
+    }
+}
 
 /// Hint from LDtk on how this entity's sprite should be rendered.
 ///
-/// See [LDtk documentation on tileRenderMode](https://ldtk.io/json/#ldtk-EntityDefJson;tileRenderMode)
+/// See [tileRenderMode](https://ldtk.io/json/#ldtk-EntityDefJson;tileRenderMode)
+/// from the LDtk documentation.
 #[allow(missing_docs)]
 #[derive(Debug, Reflect)]
 pub enum TileRenderMode {
@@ -32,19 +58,61 @@ pub enum TileRenderMode {
     Stretch,
     FullSizeCropped,
     FullSizeUncropped,
-    NineSlice,
+    NineSlice(NineSlice),
 }
 
-impl From<ldtk::TileRenderMode> for TileRenderMode {
-    fn from(value: ldtk::TileRenderMode) -> Self {
+impl TileRenderMode {
+    pub(crate) fn new(value: &ldtk::TileRenderMode, nine_slice: &[i64]) -> Result<Self> {
         match value {
-            ldtk::TileRenderMode::Cover => Self::Cover,
-            ldtk::TileRenderMode::FitInside => Self::FitInside,
-            ldtk::TileRenderMode::FullSizeCropped => Self::FullSizeCropped,
-            ldtk::TileRenderMode::FullSizeUncropped => Self::FullSizeUncropped,
-            ldtk::TileRenderMode::NineSlice => Self::NineSlice,
-            ldtk::TileRenderMode::Repeat => Self::Repeat,
-            ldtk::TileRenderMode::Stretch => Self::Stretch,
+            ldtk::TileRenderMode::Cover => {
+                nine_slice
+                    .is_empty()
+                    .then_some(Self::Cover)
+                    .ok_or(ldtk_import_error!(
+                        "tile_render_mode with non-empty nine_slice array of type: {:?}!",
+                        value
+                    ))
+            }
+            ldtk::TileRenderMode::FitInside => nine_slice
+                .is_empty()
+                .then_some(Self::FitInside)
+                .ok_or(ldtk_import_error!(
+                    "tile_render_mode with non-empty nine_slice array of type: {:?}!",
+                    value
+                )),
+            ldtk::TileRenderMode::FullSizeCropped => nine_slice
+                .is_empty()
+                .then_some(Self::FullSizeCropped)
+                .ok_or(ldtk_import_error!(
+                    "tile_render_mode with non-empty nine_slice array of type: {:?}!",
+                    value
+                )),
+            ldtk::TileRenderMode::FullSizeUncropped => nine_slice
+                .is_empty()
+                .then_some(Self::FullSizeUncropped)
+                .ok_or(ldtk_import_error!(
+                    "tile_render_mode with non-empty nine_slice array of type: {:?}!",
+                    value
+                )),
+            ldtk::TileRenderMode::Repeat => {
+                nine_slice
+                    .is_empty()
+                    .then_some(Self::Repeat)
+                    .ok_or(ldtk_import_error!(
+                        "tile_render_mode with non-empty nine_slice array of type: {:?}!",
+                        value
+                    ))
+            }
+            ldtk::TileRenderMode::Stretch => {
+                nine_slice
+                    .is_empty()
+                    .then_some(Self::Stretch)
+                    .ok_or(ldtk_import_error!(
+                        "tile_render_mode with non-empty nine_slice array of type: {:?}!",
+                        value
+                    ))
+            }
+            ldtk::TileRenderMode::NineSlice => Ok(Self::NineSlice(NineSlice::new(nine_slice)?)),
         }
     }
 }
@@ -99,7 +167,8 @@ impl EntityDefinition {
             .as_ref()
             .map(|value| TilesetRectangle::new(value, tileset_definitions))
             .transpose()?;
-        let render_mode = value.tile_render_mode.clone().into();
+        let render_mode =
+            TileRenderMode::new(&value.tile_render_mode, value.nine_slice_borders.as_slice())?;
 
         let path = project_asset_path.to_entity_definition_asset_path(&identifier)?;
 
