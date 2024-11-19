@@ -14,7 +14,7 @@ categories = [
   "graphics",
   "rendering::data-formats",
 ]
-exclude = [".github", "assets", "examples"]
+exclude = [".github", ".gitignore", "assets", "examples"]
 readme = "README.md"
 
 [dependencies]
