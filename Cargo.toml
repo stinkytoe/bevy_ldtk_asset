@@ -37,5 +37,5 @@ thiserror = "2.0"
 uuid = "1.11"
 
 [features]
-default = ["asset_events_debug"]
+default = []
 asset_events_debug = []
