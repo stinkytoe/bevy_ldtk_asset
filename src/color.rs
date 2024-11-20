@@ -1,32 +1,33 @@
 use bevy_color::Color;
+use bevy_utils::warn;
 
 use crate::ldtk_import_error;
+use crate::Result;
 
 // Format should be: Hex color "#rrggbb"
 // from: https://ldtk.io/json-2/#ldtk-ProjectJson;bgColor
 pub(crate) fn bevy_color_from_ldtk_string(color: &str) -> crate::Result<Color> {
-    if color.len() != 7 {
-        return Err(ldtk_import_error!(
-            "LDtk color field not seven characters! given: {color}"
-        ));
-    }
+    (color.len() == 7)
+        .then(|| {
+            let hashmark = &color[0..1];
+            let r = &color[1..3];
+            let g = &color[3..5];
+            let b = &color[5..7];
 
-    let hashmark = &color[0..1];
-    let r = &color[1..3];
-    let g = &color[3..5];
-    let b = &color[5..7];
-
-    if hashmark != "#" {
-        return Err(ldtk_import_error!(
-            "LDtk color field did not start with hash! given: {color}",
-        ));
-    };
-
-    Ok(Color::srgb_u8(
-        u8::from_str_radix(r, 16)?,
-        u8::from_str_radix(g, 16)?,
-        u8::from_str_radix(b, 16)?,
-    ))
+            (hashmark, r, g, b)
+        })
+        .filter(|(hashmark, _, _, _)| *hashmark == "#")
+        .map(|(_, r, g, b)| -> Result<Color> {
+            Ok(Color::srgb_u8(
+                u8::from_str_radix(r, 16)?,
+                u8::from_str_radix(g, 16)?,
+                u8::from_str_radix(b, 16)?,
+            ))
+        })
+        .transpose()?
+        .ok_or(ldtk_import_error!(
+            "Could not produce Bevy color from Ldtk input string! given: {color}"
+        ))
 }
 
 // Raw color stored in lower 24 bits of value.
