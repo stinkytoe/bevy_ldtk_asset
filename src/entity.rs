@@ -99,7 +99,6 @@ impl Entity {
         let anchor = bevy_anchor_from_ldtk(&value.pivot)?;
         let smart_color = bevy_color_from_ldtk_string(&value.smart_color)?;
         let tags = value.tags.clone();
-        //let tile: Option<TilesetRectangle> = value.tile.map(|tile| tile.into());
         let tile = value
             .tile
             .as_ref()

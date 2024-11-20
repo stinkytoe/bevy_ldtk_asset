@@ -1,5 +1,4 @@
 use bevy_color::Color;
-use bevy_utils::warn;
 
 use crate::ldtk_import_error;
 use crate::Result;
