@@ -263,7 +263,7 @@ or by filing an issue:
 
 stinkytoe
 [github](https://github.com/stinkytoe)
-[email](stinkytoe42@yahoo.com)
+[email](mailto:stinkytoe42@yahoo.com)
 
 ## Version History
 
