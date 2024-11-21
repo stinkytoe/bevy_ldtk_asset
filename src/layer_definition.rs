@@ -9,8 +9,7 @@
 
 use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_color::Color;
-use bevy_math::DVec2;
-use bevy_math::Vec2;
+use bevy_math::{DVec2, I64Vec2};
 use bevy_reflect::Reflect;
 use bevy_utils::HashMap;
 
@@ -59,7 +58,7 @@ pub struct LayerDefinition {
     pub int_grid_values_groups: Vec<IntGridValuesGroup>,
     pub parallax_factor: DVec2,
     pub parallax_scaling: bool,
-    pub offset: Vec2,
+    pub offset: I64Vec2,
     pub tileset_definition: Option<Handle<TilesetDefinition>>,
 }
 
@@ -92,7 +91,7 @@ impl LayerDefinition {
             .collect::<Result<_>>()?;
         let parallax_factor = (value.parallax_factor_x, value.parallax_factor_y).into();
         let parallax_scaling = value.parallax_scaling;
-        let offset = (value.px_offset_x as f32, value.px_offset_y as f32).into();
+        let offset = (value.px_offset_x, value.px_offset_y).into();
         let tileset_definition = value
             .tileset_def_uid
             .map(|tileset_def_uid| {

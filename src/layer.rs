@@ -7,7 +7,7 @@ use std::str::FromStr;
 
 use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_log::error;
-use bevy_math::{I64Vec2, Vec2};
+use bevy_math::I64Vec2;
 use bevy_reflect::Reflect;
 use bevy_render::texture::Image;
 
@@ -280,7 +280,7 @@ pub struct Layer {
     /// Derived from [pdTotalOffsetX](https://ldtk.io/json/#ldtk-LayerInstanceJson;__pxTotalOffsetX)
     /// and [pdTotalOffsetY](https://ldtk.io/json/#ldtk-LayerInstanceJson;__pxTotalOffsetY), and is
     /// the cumulative offset of both the definition and the specific instance.
-    pub location: Vec2,
+    pub location: I64Vec2,
     /// Index from 0 to (number of layers - 1), in ascending order. When developing a
     /// visualization, higher index values should be above lower ones.
     pub index: usize,
@@ -317,11 +317,7 @@ impl Layer {
             ))?
             .clone();
         let level_id = value.level_id;
-        let location = (
-            value.px_total_offset_x as f32,
-            -value.px_total_offset_y as f32,
-        )
-            .into();
+        let location = (value.px_total_offset_x, value.px_total_offset_y).into();
 
         // Sanity check to guarantee that the int_grid size makes sense
         let int_grid_len = value.int_grid_csv.len();

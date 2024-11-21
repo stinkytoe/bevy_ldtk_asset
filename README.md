@@ -24,9 +24,12 @@ No components, systems (except for debug output), events, resources, etc are pro
 When possible, we will convert items to a Bevy compatible format.
 
 * Fields describing a color will be stored as a [bevy color](https://docs.rs/bevy/latest/bevy/color/enum.Color.html)
-* If the field describes a location in the world, we will use a [Vec2](https://docs.rs/bevy/latest/bevy/math/struct.Vec2.html)
-  * The `y` will be inverted to be compatible with Bevy's screen space convention
-  of `x` positive to the right, and `y` being positive up
+* If the field describes a location in space, we will use an [I64Vec2](https://docs.rs/bevy/latest/bevy/math/struct.Vec2.html)
+  * NOTE: LDtk, and by extension, this library, uses the convention that the y-axis
+  is positive down. Implementers will need to take care to invert the y-axis when
+  creating components in Bevy's screen space, such as the transform vector in a
+  * NOTE: This behavior changed in v0.6.0 .
+  [bevy_transform::components::Transform] Component.
 * If the field describes a location within an image, we will use a [I64Vec2](https://docs.rs/bevy/latest/bevy/math/struct.I64Vec2.html)
 * Images will be stored as a `Handle<Image>`
 * Numeric fields which aren't coerced into a Bevy type will stored in an appropriate

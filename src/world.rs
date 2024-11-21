@@ -5,7 +5,7 @@ use std::str::FromStr;
 
 use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_log::trace;
-use bevy_math::Vec2;
+use bevy_math::I64Vec2;
 use bevy_reflect::Reflect;
 use bevy_tasks::block_on;
 
@@ -27,7 +27,7 @@ pub enum WorldLayout {
     /// Can be placed anywhere.
     Free,
     /// Worlds are freely placed, but constrained to a grid.
-    GridVania(Vec2),
+    GridVania(I64Vec2),
     /// Levels are layed out in order horizontally.
     ///
     /// The levels [crate::level::Level::index] field will be used to determine
@@ -46,7 +46,7 @@ impl WorldLayout {
     ) -> Result<Self> {
         match layout {
             Some(ldtk::WorldLayout::GridVania) => Ok(Self::GridVania(
-                (world_grid_width as f32, world_grid_height as f32).into(),
+                (world_grid_width, world_grid_height).into(),
             )),
             Some(ldtk::WorldLayout::Free) => Ok(Self::Free),
             Some(ldtk::WorldLayout::LinearHorizontal) => Ok(Self::LinearHorizontal),

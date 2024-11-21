@@ -8,7 +8,7 @@ use std::str::FromStr;
 use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_color::Color;
 use bevy_log::error;
-use bevy_math::{I64Vec2, Vec2};
+use bevy_math::I64Vec2;
 use bevy_reflect::Reflect;
 use bevy_sprite::Anchor;
 use bevy_utils::HashMap;
@@ -57,10 +57,7 @@ pub struct Entity {
     /// visualization as well.
     pub tile: Option<TilesetRectangle>,
     /// The entity's location in world space, as defined in the LDtk project.
-    ///
-    /// This is converted from LDtk's coordinate space to Bevy's pixel coordinate space by negating
-    /// the y value.
-    pub world_location: Option<Vec2>,
+    pub world_location: Option<I64Vec2>,
     /// A handle pointing to the [EntityDefinition] asset.
     pub entity_definition: Handle<EntityDefinition>,
     /// A hash map of [FieldInstance] entries, indexed by their identifier.
@@ -72,12 +69,9 @@ pub struct Entity {
     ///
     /// Note: this does not nesessarily correlate with the size of the entity's visualization, if
     /// it defines one.
-    pub size: Vec2,
+    pub size: I64Vec2,
     /// The entity's location in the space defined by its containing [crate::layer::Layer].
-    ///
-    /// This is converted from LDtk's coordinate space to Bevy's pixel coordinate space by negating
-    /// the y value.
-    pub location: Vec2,
+    pub location: I64Vec2,
 }
 
 impl Entity {
@@ -118,7 +112,7 @@ impl Entity {
                     "When constructing an entity, world_x was Some({x}) but world_y was None!",
                 ))
             }
-            (Some(x), Some(y)) => Some((x as f32, -y as f32).into()),
+            (Some(x), Some(y)) => Some((x, y).into()),
         };
         let entity_definition = project_definitions_context
             .entity_definitions
@@ -149,11 +143,11 @@ impl Entity {
                 ))
             })
             .collect::<Result<_>>()?;
-        let size = (value.width as f32, value.height as f32).into();
+        let size = (value.width, value.height).into();
         let location = (value.px.len() == 2)
-            .then(|| (value.px[0] as f32, -value.px[1] as f32).into())
+            .then(|| (value.px[0], value.px[1]).into())
             .ok_or(ldtk_import_error!(
-                "Unable to parse Vec2 from entity px field! given: {:?}",
+                "Unable to parse I64Vec2 from entity px field! given: {:?}",
                 value.grid
             ))?;
 

@@ -8,9 +8,7 @@ use std::str::FromStr;
 use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_color::Color;
 use bevy_log::error;
-use bevy_math::DVec2;
-use bevy_math::I64Vec2;
-use bevy_math::Vec2;
+use bevy_math::{DVec2, I64Vec2};
 use bevy_reflect::Reflect;
 use bevy_render::texture::Image;
 use bevy_utils::HashMap;
@@ -162,7 +160,7 @@ pub struct Level {
     pub iid: Iid,
     /// The size, in pixels, of this Level. In LDtk, all layer visualizations are cropped to fit
     /// within this region.
-    pub size: Vec2,
+    pub size: I64Vec2,
     /// A soon to be deprecated value from LDtk. Added here for completeness, but likely to be
     /// removed in the future.
     pub uid: Uid, // TODO: do we need this?
@@ -173,7 +171,7 @@ pub struct Level {
     ///
     /// This is converted from LDtk's coordinate space to Bevy's pixel coordinate space by negating
     /// the y value.
-    pub location: Vec2,
+    pub location: I64Vec2,
     /// Handles to all of the associated [Layer] instances, indexed by that layer's [Iid].
     ///
     /// NOTE: There is no meaning to the order within this field. If the order of the layers is
@@ -244,10 +242,10 @@ impl Level {
             .collect::<Result<_>>()?;
         let identifier = value.identifier.clone();
         let iid = Iid::from_str(&value.iid)?;
-        let size = (value.px_wid as f32, value.px_hei as f32).into();
+        let size = (value.px_wid, value.px_hei).into();
         let uid = value.uid;
         let world_depth = value.world_depth;
-        let location = (value.world_x as f32, -value.world_y as f32).into();
+        let location = (value.world_x, value.world_y).into();
 
         let level_asset_path = world_asset_path.to_level_asset_path(&identifier)?;
 
