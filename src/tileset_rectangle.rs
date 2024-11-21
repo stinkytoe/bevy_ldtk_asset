@@ -24,7 +24,6 @@ impl TilesetRectangle {
     ) -> Result<Self> {
         let corner = (value.x, value.y).into();
         let size = (value.w, value.h).into();
-        //let region = IRect::from_corners(corner, corner + size);
         let tileset_definition = tileset_definitions
             .get(&value.tileset_uid)
             .ok_or(ldtk_import_error!(
