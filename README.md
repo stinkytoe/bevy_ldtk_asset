@@ -283,6 +283,7 @@ stinkytoe
 * [x] Tileset Definitions
 * [x] Enum Definitions
 * [x] Nine-Slice Borders for Entities
+![✘](https://img.shields.io/static/v1?label=&message=✘&color=red)Embedded Atlas
 
 ## Compatability
 
