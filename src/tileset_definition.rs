@@ -1,7 +1,7 @@
 #![allow(missing_docs)]
 
 use bevy_asset::{Asset, Handle, LoadContext};
-use bevy_math::{I64Vec2, Vec2};
+use bevy_math::I64Vec2;
 use bevy_reflect::Reflect;
 use bevy_render::texture::Image;
 
@@ -52,7 +52,7 @@ pub struct TilesetDefinition {
     pub enum_tags: Vec<EnumTagValue>,
     pub identifier: String,
     pub padding: i64,
-    pub size: Vec2,
+    pub size: I64Vec2,
     pub tileset_image: Option<Handle<Image>>,
     pub tags: Vec<String>,
     pub tags_source_enum_uid: Option<i64>,
@@ -80,7 +80,7 @@ impl TilesetDefinition {
             .collect();
         let enum_tags = value.enum_tags.iter().map(EnumTagValue::new).collect();
         let padding = value.padding;
-        let size = (value.px_wid as f32, value.px_hei as f32).into();
+        let size = (value.px_wid, value.px_hei).into();
         let tileset_image = value.rel_path.as_ref().map(|rel_path| {
             let bevy_path = ldtk_path_to_bevy_path(project_context.project_directory, rel_path);
             load_context.load(bevy_path)
