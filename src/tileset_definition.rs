@@ -6,11 +6,11 @@ use bevy_reflect::Reflect;
 use bevy_render::texture::Image;
 
 use crate::asset_labels::ProjectAssetPath;
-use crate::ldtk;
 use crate::ldtk_path::ldtk_path_to_bevy_path;
 use crate::project_loader::ProjectContext;
 use crate::uid::Uid;
 use crate::Result;
+use crate::{ldtk, ldtk_import_error};
 
 #[derive(Debug, Reflect)]
 pub struct TileCustomMetadata {
@@ -66,6 +66,17 @@ impl TilesetDefinition {
         load_context: &mut LoadContext,
         project_context: &ProjectContext,
     ) -> Result<(Uid, Handle<Self>)> {
+        // see https://github.com/stinkytoe/bevy_ldtk_asset/issues/35
+        if value.embed_atlas.is_some() {
+            return Err(ldtk_import_error!(
+                "This LDtk project, {project_asset_path:?}, contains an embedded atlas!\
+                 Licensing prevents us from loading this asset. At this time we are considering\
+                 it to be an error to attempt to load an LDtk project with an embedded atlas!\
+                 See https://github.com/stinkytoe/bevy_ldtk_asset/issues/35 for a discussion\
+                 relating to this decision."
+            ));
+        }
+
         let identifier = value.identifier.clone();
         let uid = value.uid;
 
