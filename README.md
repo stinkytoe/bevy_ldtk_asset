@@ -28,8 +28,8 @@ When possible, we will convert items to a Bevy compatible format.
   * NOTE: LDtk, and by extension, this library, uses the convention that the y-axis
   is positive down. Implementers will need to take care to invert the y-axis when
   creating components in Bevy's screen space, such as the transform vector in a
+  [Transform](https://docs.rs/bevy/latest/bevy/prelude/struct.Transform.html) Component.
   * NOTE: This behavior changed in v0.6.0 .
-  [bevy_transform::components::Transform] Component.
 * If the field describes a location within an image, we will use a [I64Vec2](https://docs.rs/bevy/latest/bevy/math/struct.I64Vec2.html)
 * Images will be stored as a `Handle<Image>`
 * Numeric fields which aren't coerced into a Bevy type will stored in an appropriate
