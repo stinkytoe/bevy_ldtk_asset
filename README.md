@@ -1,4 +1,27 @@
-# bevy_ldtk_asset
+# Bevy LDtk Asset
+
+<!--toc:start-->
+- [Bevy LDtk Asset](#bevy-ldtk-asset)
+  - [Description](#description)
+    - [Philosophy](#philosophy)
+    - [Conventions](#conventions)
+  - [Assets](#assets)
+    - [Asset labeling](#asset-labeling)
+    - [LDtk dependencies (Images, etc)](#ldtk-dependencies-images-etc)
+    - [External Levels](#external-levels)
+    - [Multi Worlds Projects](#multi-worlds-projects)
+    - [Naming Collisions](#naming-collisions)
+  - [Getting Started](#getting-started)
+    - [Dependencies](#dependencies)
+    - [Installing](#installing)
+  - [Help](#help)
+  - [Authors](#authors)
+  - [Version History](#version-history)
+  - [Capabilities](#capabilities)
+  - [Compatability](#compatability)
+  - [License](#license)
+  - [Acknowledgments](#acknowledgments)
+<!--toc:end-->
 
 [![License](https://img.shields.io/badge/license-MIT%2FApache-blue.svg)](https://github.com/stinkytoe/bevy_ldtk_asset/tree/main#license)
 [![docs.rs](https://img.shields.io/docsrs/bevy_ldtk_asset)](https://docs.rs/bevy_ldtk_asset/latest/bevy_ldtk_asset/)
@@ -23,21 +46,21 @@ No components, systems (except for debug output), events, resources, etc are pro
 
 When possible, we will convert items to a Bevy compatible format.
 
-* Fields describing a color will be stored as a [bevy color](https://docs.rs/bevy/latest/bevy/color/enum.Color.html)
-* If the field describes a location in space, we will use an [I64Vec2](https://docs.rs/bevy/latest/bevy/math/struct.Vec2.html)
-  * NOTE: LDtk, and by extension, this library, uses the convention that the y-axis
+- Fields describing a color will be stored as a [bevy color](https://docs.rs/bevy/latest/bevy/color/enum.Color.html)
+- If the field describes a location in space, we will use an [I64Vec2](https://docs.rs/bevy/latest/bevy/math/struct.Vec2.html)
+  - NOTE: LDtk, and by extension, this library, uses the convention that the y-axis
   is positive down. Implementers will need to take care to invert the y-axis when
   creating components in Bevy's screen space, such as the transform vector in a
   [Transform](https://docs.rs/bevy/latest/bevy/prelude/struct.Transform.html) Component.
-  * NOTE: This behavior changed in v0.6.0 .
-* If the field describes a location within an image, we will use a [I64Vec2](https://docs.rs/bevy/latest/bevy/math/struct.I64Vec2.html)
-* Images will be stored as a `Handle<Image>`
-* Numeric fields which aren't coerced into a Bevy type will stored in an appropriate
+  - NOTE: This behavior changed in v0.6.0 .
+- If the field describes a location within an image, we will use a [I64Vec2](https://docs.rs/bevy/latest/bevy/math/struct.I64Vec2.html)
+- Images will be stored as a `Handle<Image>`
+- Numeric fields which aren't coerced into a Bevy type will stored in an appropriate
   64 bit field (`u64`, `i64`, `f64`)
-* `Iid`'s are parsed into our local [Iid] type. It is considered undefined behavior
+- `Iid`'s are parsed into our local [Iid] type. It is considered undefined behavior
   if these fail to be unique
-* `Uid`'s are represented by the [Uid] type, which is of type `i64`
-* LDtk pivot fields are converted to and stored as [Anchor](https://docs.rs/bevy/latest/bevy/sprite/enum.Anchor.html)
+- `Uid`'s are represented by the [Uid] type, which is of type `i64`
+- LDtk pivot fields are converted to and stored as [Anchor](https://docs.rs/bevy/latest/bevy/sprite/enum.Anchor.html)
   fields
 
 ## Assets
@@ -211,10 +234,10 @@ of the project in order to build our World asset.
 Unfortunately, there are many name collisions between the nomenclature used in
 Bevy and LDtk. Especially (but not exclusively):
 
-* World
-* Level
-* Layer
-* Entity
+- World
+- Level
+- Layer
+- Entity
 
 I will endeavor to refer to objects in Bevy as ECS objects, i.e. an
 ECS entity or ECS world when referring to objects from the Bevy ecosystem, and
@@ -267,22 +290,22 @@ stinkytoe
 
 ## Version History
 
-* 0.5:
-  * Release for Bevy 0.15 (WIP!)
-* 0.4 and prior:
-  * archived...
+- 0.5:
+  - Release for Bevy 0.15 (WIP!)
+- 0.4 and prior:
+  - archived...
 
 ## Capabilities
 
-* [x] Single World and Multi World projects
-* [x] External Level Files
-* [ ] Aseprite Files [#20](https://github.com/stinkytoe/bevy_ldtk_asset/issues/20)
-* [ ] Table of Contents export
-* [x] Layer Definitions
-* [x] Entity Definitions
-* [x] Tileset Definitions
-* [x] Enum Definitions
-* [x] Nine-Slice Borders for Entities
+- [x] Single World and Multi World projects
+- [x] External Level Files
+- [ ] Aseprite Files [#20](https://github.com/stinkytoe/bevy_ldtk_asset/issues/20)
+- [ ] Table of Contents export
+- [x] Layer Definitions
+- [x] Entity Definitions
+- [x] Tileset Definitions
+- [x] Enum Definitions
+- [x] Nine-Slice Borders for Entities
 
 ![✘](https://img.shields.io/static/v1?label=&message=✘&color=red)Embedded Atlas
 [see #35](https://github.com/stinkytoe/bevy_ldtk_asset/issues/35)
