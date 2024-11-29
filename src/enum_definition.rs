@@ -13,6 +13,7 @@ use bevy_reflect::Reflect;
 use crate::asset_labels::ProjectAssetPath;
 use crate::color::bevy_color_from_ldtk_int;
 use crate::ldtk;
+use crate::ldtk_asset_trait::LdtkAssetWithTags;
 use crate::ldtk_import_error;
 use crate::ldtk_path::ldtk_path_to_bevy_path;
 use crate::project_loader::ProjectContext;
@@ -114,6 +115,16 @@ impl EnumDefinition {
     /// Returns true iff this enum definition has the given tag in its tags field. This is filled
     /// out in the editor, by the level designer.
     pub fn has_tag(&self, tag: &str) -> bool {
+        self.tags.iter().any(|inner_tag| inner_tag == tag)
+    }
+}
+
+impl LdtkAssetWithTags for EnumDefinition {
+    fn get_tags(&self) -> &[String] {
+        &self.tags
+    }
+
+    fn has_tag(&self, tag: &str) -> bool {
         self.tags.iter().any(|inner_tag| inner_tag == tag)
     }
 }

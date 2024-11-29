@@ -19,7 +19,7 @@ use crate::color::bevy_color_from_ldtk_string;
 use crate::entity_definition::EntityDefinition;
 use crate::field_instance::FieldInstance;
 use crate::iid::Iid;
-use crate::ldtk_asset_trait::{LdtkAsset, LdtkAssetWithFieldInstances};
+use crate::ldtk_asset_trait::{LdtkAsset, LdtkAssetWithFieldInstances, LdtkAssetWithTags};
 use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
 use crate::tileset_rectangle::TilesetRectangle;
 use crate::Result;
@@ -174,12 +174,6 @@ impl Entity {
 
         Ok((iid, handle))
     }
-
-    /// Returns true iff this entity instance has the given tag in its tags field. This is filled
-    /// out in the editor, by the level designer.
-    pub fn has_tag(&self, tag: &str) -> bool {
-        self.tags.iter().any(|inner_tag| inner_tag == tag)
-    }
 }
 
 impl LdtkAsset for Entity {
@@ -195,5 +189,15 @@ impl LdtkAsset for Entity {
 impl LdtkAssetWithFieldInstances for Entity {
     fn get_field_instance(&self, identifier: &str) -> Option<&FieldInstance> {
         self.field_instances.get(identifier)
+    }
+}
+
+impl LdtkAssetWithTags for Entity {
+    fn get_tags(&self) -> &[String] {
+        &self.tags
+    }
+
+    fn has_tag(&self, tag: &str) -> bool {
+        self.tags.iter().any(|inner_tag| inner_tag == tag)
     }
 }
