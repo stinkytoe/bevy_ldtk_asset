@@ -53,7 +53,6 @@ pub struct LayerDefinition {
     pub display_opacity: f64,
     pub grid_cell_size: i64,
     pub identifier: String,
-    // TODO: consider changing this to a HashMap, indexed by its value?
     pub int_grid_values: UidMap<IntGridValue>,
     pub int_grid_values_groups: Vec<IntGridValuesGroup>,
     pub parallax_factor: DVec2,
