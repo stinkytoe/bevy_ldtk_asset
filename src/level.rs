@@ -234,6 +234,7 @@ impl Level {
                     value.identifier.clone(),
                     FieldInstance::new(
                         value,
+                        project_context.project_directory,
                         project_definition_context.tileset_definitions,
                         project_definition_context.enum_definitions,
                     )?,

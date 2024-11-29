@@ -7,6 +7,8 @@
 //!
 //! See [FieldInstance](https://ldtk.io/json/#ldtk-FieldInstanceJson) for a full description.
 
+use std::path::Path;
+use std::path::PathBuf;
 use std::str::FromStr;
 
 use bevy_asset::Handle;
@@ -20,6 +22,7 @@ use crate::enum_definition::EnumDefinition;
 use crate::iid::Iid;
 use crate::ldtk;
 use crate::ldtk_import_error;
+use crate::ldtk_path::ldtk_path_to_bevy_path;
 use crate::tileset_definition::TilesetDefinition;
 use crate::tileset_rectangle::TilesetRectangle;
 use crate::uid::{Uid, UidMap};
@@ -54,7 +57,7 @@ pub enum FieldInstanceType {
     Color(Color),
     EntityRef(EntityRef),
     Enum(EnumValue),
-    FilePath(String),
+    FilePath(PathBuf),
     Float(f64),
     Int(i64),
     Multilines(String),
@@ -85,6 +88,7 @@ impl FieldInstanceType {
     pub(crate) fn new(
         field_instance_type: &str,
         value: Option<&serde_json::Value>,
+        base_directory: &Path,
         tileset_definitions: &UidMap<Handle<TilesetDefinition>>,
         enum_definitions: &HashMap<String, Handle<EnumDefinition>>,
     ) -> Result<Self> {
@@ -171,9 +175,13 @@ impl FieldInstanceType {
             })),
             // TODO: Should we refactor this to a Bevy asset path with
             // ldtk_path_to_bevy_path?
-            "FilePath" => Ok(Self::FilePath(serde_json::from_value::<String>(
-                value.clone(),
-            )?)),
+            "FilePath" => Ok(Self::FilePath(
+                ldtk_path_to_bevy_path(
+                    base_directory,
+                    serde_json::from_value::<String>(value.clone())?,
+                )
+                .to_path_buf(),
+            )),
             "Float" => Ok(Self::Float(serde_json::from_value::<f64>(value.clone())?)),
             "Int" => Ok(Self::Int(serde_json::from_value::<i64>(value.clone())?)),
             "Point" => Ok(Self::Point(
@@ -336,6 +344,7 @@ pub struct FieldInstance {
 impl FieldInstance {
     pub(crate) fn new(
         value: &ldtk::FieldInstance,
+        base_directory: &Path,
         tileset_definitions: &UidMap<Handle<TilesetDefinition>>,
         enum_definitions: &HashMap<String, Handle<EnumDefinition>>,
     ) -> Result<Self> {
@@ -347,6 +356,7 @@ impl FieldInstance {
         let field_instance_type = FieldInstanceType::new(
             &value.field_instance_type,
             value.value.as_ref(),
+            base_directory,
             tileset_definitions,
             enum_definitions,
         )?;
@@ -457,7 +467,7 @@ impl FieldInstance {
     get_by_type!(get_color, FieldInstanceType::Color, Color);
     get_by_type!(get_array_entity_ref,FieldInstanceType::EntityRef, EntityRef);
     get_by_type!(get_enum, FieldInstanceType::Enum, EnumValue);
-    get_by_type!(get_file_path, FieldInstanceType::FilePath, String);
+    get_by_type!(get_file_path, FieldInstanceType::FilePath, PathBuf);
     get_by_type!(get_float, FieldInstanceType::Float, f64);
     get_by_type!(get_int, FieldInstanceType::Int, i64);
     get_by_type!(get_multilines, FieldInstanceType::Multilines, String);

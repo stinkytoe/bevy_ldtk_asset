@@ -79,7 +79,7 @@ impl Entity {
         value: &ldtk::EntityInstance,
         layer_asset_path: &LayerAssetPath,
         load_context: &mut LoadContext,
-        _project_context: &ProjectContext,
+        project_context: &ProjectContext,
         project_definitions_context: &ProjectDefinitionContext,
     ) -> Result<(Iid, Handle<Self>)> {
         let identifier = value.identifier.clone();
@@ -137,6 +137,7 @@ impl Entity {
                     value.identifier.clone(),
                     FieldInstance::new(
                         value,
+                        project_context.project_directory,
                         project_definitions_context.tileset_definitions,
                         project_definitions_context.enum_definitions,
                     )?,
