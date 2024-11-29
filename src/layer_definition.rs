@@ -53,8 +53,7 @@ pub struct LayerDefinition {
     pub display_opacity: f64,
     pub grid_cell_size: i64,
     pub identifier: String,
-    // TODO: consider changing this to a HashMap, indexed by its value?
-    pub int_grid_values: Vec<IntGridValue>,
+    pub int_grid_values: UidMap<IntGridValue>,
     pub int_grid_values_groups: Vec<IntGridValuesGroup>,
     pub parallax_factor: DVec2,
     pub parallax_scaling: bool,
@@ -82,7 +81,12 @@ impl LayerDefinition {
         let int_grid_values = value
             .int_grid_values
             .iter()
-            .map(|value| IntGridValue::new(value, tileset_definitions))
+            .map(|value| {
+                Ok((
+                    value.group_uid,
+                    IntGridValue::new(value, tileset_definitions)?,
+                ))
+            })
             .collect::<Result<_>>()?;
         let int_grid_values_groups = value
             .int_grid_values_groups
