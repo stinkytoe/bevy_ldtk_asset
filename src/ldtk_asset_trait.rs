@@ -29,3 +29,11 @@ pub trait LdtkAssetWithFieldInstances: LdtkAsset {
     #[allow(missing_docs)]
     fn get_field_instance(&self, identifier: &str) -> Option<&FieldInstance>;
 }
+
+pub trait LdtkAssetWithTags: Asset {
+    #[allow(missing_docs)]
+    fn get_tags(&self) -> &[String];
+
+    #[allow(missing_docs)]
+    fn has_tag(&self, tag: &str) -> bool;
+}

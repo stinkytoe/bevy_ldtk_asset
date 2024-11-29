@@ -6,6 +6,7 @@ use bevy_reflect::Reflect;
 use bevy_render::texture::Image;
 
 use crate::asset_labels::ProjectAssetPath;
+use crate::ldtk_asset_trait::LdtkAssetWithTags;
 use crate::ldtk_path::ldtk_path_to_bevy_path;
 use crate::project_loader::ProjectContext;
 use crate::uid::Uid;
@@ -123,10 +124,12 @@ impl TilesetDefinition {
     }
 }
 
-impl TilesetDefinition {
-    /// Returns true iff this entity instance has the given tag in its tags field. This is filled
-    /// out in the editor, by the level designer.
-    pub fn has_tag(&self, tag: &str) -> bool {
+impl LdtkAssetWithTags for TilesetDefinition {
+    fn get_tags(&self) -> &[String] {
+        &self.tags
+    }
+
+    fn has_tag(&self, tag: &str) -> bool {
         self.tags.iter().any(|inner_tag| inner_tag == tag)
     }
 }
