@@ -1,5 +1,10 @@
 # Bevy LDtk Asset
 
+[![License](https://img.shields.io/badge/license-MIT%2FApache-blue.svg)](https://github.com/stinkytoe/bevy_ldtk_asset/tree/main#license)
+[![docs.rs](https://img.shields.io/docsrs/bevy_ldtk_asset)](https://docs.rs/bevy_ldtk_asset/latest/bevy_ldtk_asset/)
+[![Crates.io Version](https://img.shields.io/crates/v/bevy_ldtk_asset)](https://crates.io/crates/bevy_ldtk_asset/)
+[![CI](https://github.com/stinkytoe/bevy_ldtk_asset/workflows/CI/badge.svg)](https://github.com/stinkytoe/bevy_ldtk_asset/actions)
+
 <!--toc:start-->
 - [Bevy LDtk Asset](#bevy-ldtk-asset)
   - [Description](#description)
@@ -22,11 +27,6 @@
   - [License](#license)
   - [Acknowledgments](#acknowledgments)
 <!--toc:end-->
-
-[![License](https://img.shields.io/badge/license-MIT%2FApache-blue.svg)](https://github.com/stinkytoe/bevy_ldtk_asset/tree/main#license)
-[![docs.rs](https://img.shields.io/docsrs/bevy_ldtk_asset)](https://docs.rs/bevy_ldtk_asset/latest/bevy_ldtk_asset/)
-[![Crates.io Version](https://img.shields.io/crates/v/bevy_ldtk_asset)](https://crates.io/crates/bevy_ldtk_asset/)
-[![CI](https://github.com/stinkytoe/bevy_ldtk_asset/workflows/CI/badge.svg)](https://github.com/stinkytoe/bevy_ldtk_asset/actions)
 
 A plugin for the [Bevy Engine](https://bevyengine.org) for loading projects
 from the [LDtk](https://ldtk.io) level editor.
