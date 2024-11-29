@@ -7,10 +7,10 @@ use std::str::FromStr;
 
 use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_color::Color;
+use bevy_image::Image;
 use bevy_log::error;
 use bevy_math::{DVec2, I64Vec2};
 use bevy_reflect::Reflect;
-use bevy_render::texture::Image;
 use bevy_utils::HashMap;
 
 use crate::asset_labels::WorldAssetPath;

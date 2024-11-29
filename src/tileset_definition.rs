@@ -1,9 +1,9 @@
 #![allow(missing_docs)]
 
 use bevy_asset::{Asset, Handle, LoadContext};
+use bevy_image::Image;
 use bevy_math::I64Vec2;
 use bevy_reflect::Reflect;
-use bevy_render::texture::Image;
 
 use crate::asset_labels::ProjectAssetPath;
 use crate::ldtk_asset_trait::LdtkAssetWithTags;

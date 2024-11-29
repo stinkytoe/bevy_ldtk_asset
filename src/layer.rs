@@ -6,10 +6,10 @@
 use std::str::FromStr;
 
 use bevy_asset::{Asset, Handle, LoadContext};
+use bevy_image::Image;
 use bevy_log::error;
 use bevy_math::I64Vec2;
 use bevy_reflect::Reflect;
-use bevy_render::texture::Image;
 
 use crate::asset_labels::{LayerAssetPath, LevelAssetPath};
 use crate::entity::Entity;
