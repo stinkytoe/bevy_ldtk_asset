@@ -9,6 +9,7 @@ use std::path::PathBuf;
 use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_color::Color;
 use bevy_reflect::Reflect;
+use bevy_utils::HashMap;
 
 use crate::asset_labels::ProjectAssetPath;
 use crate::color::bevy_color_from_ldtk_int;
@@ -61,7 +62,7 @@ pub struct EnumDefinition {
     pub external_rel_path: Option<PathBuf>,
     icon_tileset_definition: Option<Handle<TilesetDefinition>>,
     pub tags: Vec<String>,
-    pub values: Vec<EnumValueDefinition>,
+    pub values: HashMap<String, EnumValueDefinition>,
 }
 
 impl EnumDefinition {
@@ -91,8 +92,13 @@ impl EnumDefinition {
         let values = value
             .values
             .iter()
-            .map(|value| EnumValueDefinition::new(value, tileset_definitions))
-            .collect::<Result<Vec<_>>>()?;
+            .map(|value| {
+                Ok((
+                    value.id.clone(),
+                    EnumValueDefinition::new(value, tileset_definitions)?,
+                ))
+            })
+            .collect::<Result<_>>()?;
 
         let path = project_asset_path.to_enum_definition_asset_path(&identifier)?;
 
