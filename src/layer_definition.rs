@@ -81,12 +81,7 @@ impl LayerDefinition {
         let int_grid_values = value
             .int_grid_values
             .iter()
-            .map(|value| {
-                Ok((
-                    value.group_uid,
-                    IntGridValue::new(value, tileset_definitions)?,
-                ))
-            })
+            .map(|value| Ok((value.value, IntGridValue::new(value, tileset_definitions)?)))
             .collect::<Result<_>>()?;
         let int_grid_values_groups = value
             .int_grid_values_groups
