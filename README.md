@@ -50,16 +50,18 @@ When possible, we will convert items to a Bevy compatible format.
 - If the field describes a location in space, we will use an [I64Vec2](https://docs.rs/bevy/latest/bevy/math/struct.Vec2.html)
   - NOTE: LDtk, and by extension, this library, uses the convention that the y-axis
   is positive down. Implementers will need to take care to invert the y-axis when
-  creating components in Bevy's screen space, such as the transform vector in a
+  creating components in Bevy's screen space, such as the translation vector in a
   [Transform](https://docs.rs/bevy/latest/bevy/prelude/struct.Transform.html) Component.
   - NOTE: This behavior changed in v0.6.0 .
 - If the field describes a location within an image, we will use a [I64Vec2](https://docs.rs/bevy/latest/bevy/math/struct.I64Vec2.html)
 - Images will be stored as a `Handle<Image>`
 - Numeric fields which aren't coerced into a Bevy type will stored in an appropriate
   64 bit field (`u64`, `i64`, `f64`)
-- `Iid`'s are parsed into our local [Iid] type. It is considered undefined behavior
-  if these fail to be unique
-- `Uid`'s are represented by the [Uid] type, which is of type `i64`
+  - We use 64 bit fields to match the precision provided by LDtk, even though Bevy
+  typically uses 32 bit floats
+- `Iid`'s are parsed into our local [Iid](src/iid.rs) type. It is considered undefined
+  behavior if these are not unique.
+- `Uid`'s are represented by the [Uid](src/uid.rs) type, which is of type `i64`
 - LDtk pivot fields are converted to and stored as [Anchor](https://docs.rs/bevy/latest/bevy/sprite/enum.Anchor.html)
   fields
 
@@ -314,6 +316,7 @@ stinkytoe
 
 | bevy_ldtk_asset | bevy        | LDtk  |
 | :-------------: | :---------: | :---: |
+| 0.6.0           | 0.15.0 | 1.5.3 |
 | 0.5.1           | 0.15.0-rc.3 | 1.5.3 |
 | 0.5.0           | 0.15.0-rc.3 | 1.5.3 |
 
