@@ -3,7 +3,7 @@
 //! This is used by LDtk for creating new entity instances.
 //!
 //! This is an import of an LDtk
-//! [EntityDefinition](https://ldtk.io/json/#ldtk-EntityDefJson)
+//! [EntityDefinition](https://ldtk.io/json/#ldtk-EntityDefJson).
 
 use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_color::Color;

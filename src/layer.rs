@@ -1,7 +1,7 @@
 //! The LDtk layer, represented as a Bevy asset.
 //!
 //! This is an import of an LDtk
-//! [LayerInstance](https://ldtk.io/json/#ldtk-LayerInstanceJson)
+//! [LayerInstance](https://ldtk.io/json/#ldtk-LayerInstanceJson).
 
 use std::str::FromStr;
 

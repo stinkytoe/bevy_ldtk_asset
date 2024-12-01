@@ -9,7 +9,9 @@ use crate::uid::UidMap;
 use crate::{ldtk_import_error, Result};
 
 /// The visualization for an [crate::entity::Entity] asset.
-/// This can also be stored in [crate::field_instance::FieldInstance]s for reference
+/// This can also be stored in [crate::field_instance::FieldInstance]s for reference.
+///
+/// The Anchor and underlying tile set are defined in the entity instance.
 #[derive(Clone, Debug, Reflect)]
 pub struct TilesetRectangle {
     pub corner: I64Vec2,

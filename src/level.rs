@@ -1,7 +1,7 @@
 //! The LDtk level, represented as a Bevy asset.
 //!
 //! This is an import of an LDtk
-//! [LevelInstance](https://ldtk.io/json/#ldtk-LevelInstanceJson)
+//! [LevelInstance](https://ldtk.io/json/#ldtk-LevelInstanceJson).
 
 use std::str::FromStr;
 
@@ -140,6 +140,8 @@ impl LevelBackground {
 }
 
 /// A level as represented in an LDtk project.
+///
+/// See [LevelInstance](https://ldtk.io/json/#ldtk-LevelInstanceJson).
 #[derive(Asset, Debug, Reflect)]
 pub struct Level {
     /// The background color. This should represent a rectangle exactly the size and location of the

@@ -173,8 +173,6 @@ impl FieldInstanceType {
                     world_iid,
                 }
             })),
-            // TODO: Should we refactor this to a Bevy asset path with
-            // ldtk_path_to_bevy_path?
             "FilePath" => Ok(Self::FilePath(
                 ldtk_path_to_bevy_path(
                     base_directory,
@@ -328,11 +326,16 @@ impl FieldInstanceType {
     }
 }
 
-/// An individual field instance type.
+/// An individual field instance value.
 ///
-/// Typically, this will be stored in a vec in either an
+/// Typically, this will be stored in a collection in either an
 /// [crate::entity::Entity] or a [crate::level::Level], and be associated with that particular
 /// asset.
+///
+/// Note: Optional field instance values which have not been given a value are not exported by
+/// this plugin. If the field is required by LDtk, but not supplied, then the LDtk editor will
+/// flash a red border around the entity warning the user to fill in the field. If the field is
+/// allowed to be null, then we simply will not export it.
 #[allow(missing_docs)]
 #[derive(Debug, Reflect)]
 pub struct FieldInstance {

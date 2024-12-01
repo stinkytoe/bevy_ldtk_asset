@@ -1,7 +1,7 @@
 //! The LDtk entity, represented as a Bevy asset.
 //!
 //! This is an import of an LDtk
-//! [EntityInstance](https://ldtk.io/json/#ldtk-EntityInstanceJson)
+//! [EntityInstance](https://ldtk.io/json/#ldtk-EntityInstanceJson).
 
 use std::str::FromStr;
 
@@ -25,7 +25,7 @@ use crate::tileset_rectangle::TilesetRectangle;
 use crate::Result;
 use crate::{ldtk, ldtk_import_error};
 
-/// An asset representing an [LDtk Entity Instance](https://ldtk.io/json/#ldtk-EntityInstanceJson)
+/// An asset representing an [LDtk Entity Instance](https://ldtk.io/json/#ldtk-EntityInstanceJson).
 ///
 /// See [crate::asset_labels] for a description of the label format.
 #[derive(Asset, Debug, Reflect)]

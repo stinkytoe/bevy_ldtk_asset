@@ -16,6 +16,8 @@ use crate::world::World;
 ///
 /// External levels, if present, will be parsed along with this top level definition and included
 /// as sub assets of this.
+///
+/// See [LDtk Project](https://ldtk.io/json/#ldtk-ProjectJson) for a full description.
 #[derive(Asset, Debug, Reflect)]
 pub struct Project {
     /// A unique [Iid] representing this entire project.
