@@ -204,10 +204,10 @@ See [asset_labels] for a full description.
 
 ### LDtk dependencies (Images, etc)
 
-An LDtk project will itself point to other assets, such as [Image] files used
+An LDtk project will itself point to other assets, such as image files used
 for tile maps. For these to also work in [Bevy](https://bevyengine.org), these
 assets should be in the same asset storage as the `.ldtk` file. Typically this
-will be the Rust crate's assets folder. `bevy_ldtk_asset` will attempt to
+will be the Rust crate's assets folder. This crate will attempt to
 reconcile the locations of these assets by assuming the paths in the `.ldtk`
 file are relative to the file itself, and that those paths also exist
 within the same asset storage location as the `.ldtk` file.
@@ -235,7 +235,7 @@ See [Asset Labeling](#asset-labeling).
 
 LDtk is currently experimenting with a Multi World project. The current default
 is for an LDtk project to describe a single `world`, though the option is available
-to select the multi world behavior in the LDtk software. See [Ldtk World](https://ldtk.io/json/#ldtk-WorldJson).
+to select the multi world behavior in the LDtk software. See [LDtk's World documentation](https://ldtk.io/json/#ldtk-WorldJson).
 
 Although the feature is still experimental, we have chosen to support it as a first
 class integration.
