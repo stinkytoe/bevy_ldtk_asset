@@ -55,13 +55,15 @@ When possible, we will convert items to a Bevy compatible format.
   - NOTE: This behavior changed in v0.6.0 .
 - If the field describes a location within an image, we will use a [I64Vec2](https://docs.rs/bevy/latest/bevy/math/struct.I64Vec2.html)
 - Images will be stored as a `Handle<Image>`
-- Numeric fields which aren't coerced into a Bevy type will stored in an appropriate
+- Numeric fields which aren't coerced into a Bevy type are stored in an appropriate
   64 bit field (`u64`, `i64`, `f64`)
   - We use 64 bit fields to match the precision provided by LDtk, even though Bevy
-  typically uses 32 bit floats
+  typically uses 32 bit floats, for example.
 - `Iid`'s are parsed into our local [Iid](src/iid.rs) type. It is considered undefined
   behavior if these are not unique.
-- `Uid`'s are represented by the [Uid](src/uid.rs) type, which is of type `i64`
+- `Uid`'s are represented by the [Uid](src/uid.rs) type, which is of type `i64`.
+  These are being phased out of LDtk, and may be removed here as well in the future.
+  See [here](https://ldtk.io/docs/game-dev/json-overview/unique-identifiers/#important-future-deprecation-of-integer-uids).
 - LDtk pivot fields are converted to and stored as [Anchor](https://docs.rs/bevy/latest/bevy/sprite/enum.Anchor.html)
   fields
 
@@ -292,8 +294,12 @@ stinkytoe
 
 ## Version History
 
-- 0.5:
-  - Release for Bevy 0.15 (WIP!)
+- 0.6.0
+  - Release for Bevy 0.15.0
+- 0.5.1:
+  - Bug fixes and small redesigns
+- 0.5.0:
+  - Working release with Bevy 0.15.0-rc3 release candidate
 - 0.4 and prior:
   - archived...
 
@@ -308,9 +314,8 @@ stinkytoe
 - [x] Tileset Definitions
 - [x] Enum Definitions
 - [x] Nine-Slice Borders for Entities
-
-![✘](https://img.shields.io/static/v1?label=&message=✘&color=red)Embedded Atlas
-[see #35](https://github.com/stinkytoe/bevy_ldtk_asset/issues/35)
+- [ ] ![✘](https://img.shields.io/static/v1?label=&message=✘&color=red)Embedded Atlas
+  [#35](https://github.com/stinkytoe/bevy_ldtk_asset/issues/35)
 
 ## Compatability
 
