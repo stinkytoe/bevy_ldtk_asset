@@ -64,7 +64,7 @@ When possible, we will convert items to a Bevy compatible format.
 - `Uid`'s are represented by the [Uid](src/uid.rs) type, which is of type `i64`.
   These are being phased out of LDtk, and may be removed here as well in the future.
   See [here](https://ldtk.io/docs/game-dev/json-overview/unique-identifiers/#important-future-deprecation-of-integer-uids).
-- LDtk pivot fields are converted to and stored as [Anchor](https://docs.rs/bevy/latest/bevy/sprite/enum.Anchor.html)
+- LDtk pivot fields are converted to and stored as Bevy [Anchor](https://docs.rs/bevy/latest/bevy/sprite/enum.Anchor.html)
   fields
 
 ## Assets
@@ -211,6 +211,9 @@ will be the Rust crate's assets folder. `bevy_ldtk_asset` will attempt to
 reconcile the locations of these assets by assuming the paths in the `.ldtk`
 file are relative to the file itself, and that those paths also exist
 within the same asset storage location as the `.ldtk` file.
+
+In general, though, if you put both your tile maps, and the LDtk project, in
+the Bevy project `assets/` folder, then Bevy will have no problem finding them.
 
 ### External Levels
 
