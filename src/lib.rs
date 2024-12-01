@@ -22,6 +22,7 @@ pub mod layer_definition;
 pub mod ldtk_asset_trait;
 pub mod level;
 pub mod plugin;
+pub mod prelude;
 pub mod project;
 pub mod tile_instance;
 pub mod tileset_definition;
