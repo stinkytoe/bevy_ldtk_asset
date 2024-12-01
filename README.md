@@ -14,7 +14,7 @@
     - [Asset labeling](#asset-labeling)
     - [LDtk dependencies (Images, etc)](#ldtk-dependencies-images-etc)
     - [External Levels](#external-levels)
-    - [Multi Worlds Projects](#multi-worlds-projects)
+    - [Multi World Projects](#multi-world-projects)
     - [Naming Collisions](#naming-collisions)
   - [Getting Started](#getting-started)
     - [Dependencies](#dependencies)
@@ -23,7 +23,7 @@
   - [Authors](#authors)
   - [Version History](#version-history)
   - [Capabilities](#capabilities)
-  - [Compatability](#compatability)
+  - [Compatibility](#compatibility)
   - [License](#license)
   - [Acknowledgments](#acknowledgments)
 <!--toc:end-->
@@ -214,23 +214,32 @@ within the same asset storage location as the `.ldtk` file.
 
 ### External Levels
 
-LDtk enabled the option to save levels into separate files, with extension `.ldtkl`.
+An LDtk project can enable the option to save levels into separate files, with
+extension `.ldtkl`. See [External Levels](https://ldtk.io/json/#ldtk-LevelJson;externalRelPath).
 
-This is fully supported by this plugin, however they cannot be loaded directly. The
-entire project file must be loaded, though a user can simply refer to the level's
-asset path directly. See [Asset Labeling](#asset-labeling).
+This is fully supported by this plugin, however the external level files cannot be
+loaded directly. The entire project file must be loaded, though a user can simply
+refer to the level's asset path directly. Keep in mind that the entire project
+file is parsed, even if only a single level label is specified.
 
 Unfortunately there is metadata in the main project which is needed to properly
 describe a level, and all of it's sub assets. So, loading the entire project is
 the only option.
 
-### Multi Worlds Projects
+See [Asset Labeling](#asset-labeling).
 
-Originally LDtk only supported a single 'World' per project file. In these
-projects, the world does not have an identifier or its own Iid. Recently they
-have added an option for multi world projects.
+### Multi World Projects
 
-For single world projects, we add the identifier of "World", and clone the Iid
+LDtk is currently experimenting with a Multi World project. The current default
+is for an LDtk project to describe a single `world`, though the option is available
+to select the multi world behavior in the LDtk software. See [Ldtk World](https://ldtk.io/json/#ldtk-WorldJson).
+
+Although the feature is still experimental, we have chosen to support it as a first
+class integration.
+
+- For multi world projects, we will export all the worlds as their own assets, with
+the appropriate levels, layers, etc as sub assets.
+- For single world projects, we add the identifier of "World", and clone the Iid
 of the project in order to build our World asset.
 
 ### Naming Collisions
@@ -249,10 +258,12 @@ LDtk objects for things either from this library or LDtk itself, i.e. an LDtk
 entity or LDtk world.
 
 Users are recommended to use the `use ... as ...` pattern in their own code when
-importing these types to help avoid any pitfalls, such as:
+importing these types to help avoid any pitfalls.
+
+For example, to import the LDtk Entity asset, I recommend importing the type as such:
 
 ```rust
-use bevy_ldtk_asset::project::Project as ProjectAsset;
+use bevy_ldtk_asset::entity::Entity as EntityAsset;
 ```
 
 ## Getting Started
@@ -272,11 +283,11 @@ You can add this plugin to your project using Cargo:
 cargo add bevy_ldtk_asset # from within your project directory
 ```
 
-Or by adding to your `Cargo.toml` file:
+Or by adding `bevy_ldtk_asset` to your `Cargo.toml` file dependencies section:
 
 ```toml
 [dependencies]
-bevy_ldtk_asset = "0.5"
+bevy_ldtk_asset = "0.6"
 ```
 
 ## Help
@@ -317,7 +328,7 @@ stinkytoe
 - [ ] ![✘](https://img.shields.io/static/v1?label=&message=✘&color=red)Embedded Atlas
   [#35](https://github.com/stinkytoe/bevy_ldtk_asset/issues/35)
 
-## Compatability
+## Compatibility
 
 | bevy_ldtk_asset | bevy        | LDtk  |
 | :-------------: | :---------: | :---: |
