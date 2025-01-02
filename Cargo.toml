@@ -18,23 +18,25 @@ exclude = [".github", ".gitignore", "assets", "examples"]
 readme = "README.md"
 
 [dependencies]
-bevy_app = "0.15.0"
-bevy_asset = "0.15.0"
-bevy_color = "0.15.1"
-bevy_ecs = "0.15.0"
-bevy_image = "0.15.0"
-bevy_log = "0.15.0"
-bevy_math = "0.15.0"
-bevy_reflect = { version = "0.15.0", features = ["uuid"] }
-bevy_sprite = "0.15.0"
-bevy_utils = "0.15.0"
-bevy_tasks = "0.15.0"
-path-clean = "1.0"
-either = "1.13"
-serde = "1.0"
-serde_json = "1.0"
-thiserror = "2.0"
-uuid = "1.11"
+bevy_app = { version = "0.15.0", default-features = false }
+bevy_asset = { version = "0.15.0", default-features = false }
+bevy_color = { version = "0.15.1", default-features = false }
+bevy_ecs = { version = "0.15.0", default-features = false }
+bevy_image = { version = "0.15.0", default-features = false }
+bevy_log = { version = "0.15.0", default-features = false }
+bevy_math = { version = "0.15.0", default-features = false }
+bevy_reflect = { version = "0.15.0", default-features = false, features = [
+  "uuid",
+] }
+bevy_sprite = { version = "0.15.0", default-features = false }
+bevy_utils = { version = "0.15.0", default-features = false }
+bevy_tasks = { version = "0.15.0", default-features = false }
+path-clean = { version = "1.0", default-features = false }
+either = { version = "1.13", default-features = false }
+serde = { version = "1.0", default-features = false }
+serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
+thiserror = { version = "2.0", default-features = false }
+uuid = { version = "1.11", default-features = false }
 
 [features]
 default = []
