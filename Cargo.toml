@@ -1,6 +1,6 @@
 [package]
 name = "bevy_ldtk_asset"
-version = "0.6.0"
+version = "0.6.1"
 authors = ["Randal Robinson <stinkytoe42@yahoo.com>"]
 edition = "2021"
 description = "A Bevy plugin to support LDtk files as assets!"
