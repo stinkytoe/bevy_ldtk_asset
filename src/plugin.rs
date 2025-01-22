@@ -42,6 +42,10 @@ impl Plugin for BevyLdtkAssetPlugin {
             .register_asset_reflect::<Level>()
             .register_asset_reflect::<Project>()
             .register_asset_reflect::<World>()
+            .register_asset_reflect::<EntityDefinition>()
+            .register_asset_reflect::<LayerDefinition>()
+            .register_asset_reflect::<TilesetDefinition>()
+            .register_asset_reflect::<EnumDefinition>()
             .register_type::<Iid>()
             .register_type::<LevelBackground>();
 
