@@ -196,6 +196,8 @@ impl Level {
         project_context: &ProjectContext,
         project_definition_context: &ProjectDefinitionContext,
     ) -> Result<(Iid, Handle<Self>)> {
+        let mut level_load_context = load_context.begin_labeled_asset();
+
         let bg_color = bevy_color_from_ldtk_string(&value.bg_color)?;
         let neighbours = value
             .neighbours
@@ -216,7 +218,7 @@ impl Level {
             }
             (Some(bg_pos), Some(bg_rel_path)) => {
                 let path = ldtk_path_to_bevy_path(project_context.project_directory, bg_rel_path);
-                let image = load_context.load(path);
+                let image = level_load_context.load(path);
                 let background = LevelBackground::new(bg_pos, image)?;
                 Some(background)
             }
@@ -256,8 +258,6 @@ impl Level {
             "layer_instances is None? \
                     Are we opening the local layer definition instead of the external one?"
         ))?;
-
-        let mut level_load_context = load_context.begin_labeled_asset();
 
         let layers = layer_instances
             .iter()

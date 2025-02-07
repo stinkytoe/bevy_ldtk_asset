@@ -295,14 +295,13 @@ impl Layer {
         project_context: &ProjectContext,
         project_definition_context: &ProjectDefinitionContext,
     ) -> Result<(Iid, Handle<Self>)> {
+        let mut layer_load_context = load_context.begin_labeled_asset();
+
         let grid_size: I64Vec2 = (value.c_wid, value.c_hei).into();
         let grid_cell_size = value.grid_size;
         let identifier = value.identifier.clone();
         let layer_asset_path = level_asset_path.to_layer_asset_path(&identifier)?;
         let opacity = value.opacity;
-
-        let mut layer_load_context = load_context.begin_labeled_asset();
-
         let layer_type = LayerType::new(
             value,
             &layer_asset_path,
@@ -310,7 +309,6 @@ impl Layer {
             project_context,
             project_definition_context,
         )?;
-
         let iid = Iid::from_str(&value.iid)?;
         let layer_definition = project_definition_context
             .layer_definitions
