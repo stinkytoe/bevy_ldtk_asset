@@ -310,6 +310,10 @@ stinkytoe
 
 ## Version History
 
+- 0.6.2:
+  - Release for Bevy 0.6.2
+  - Asset dependencies more hierarchical. See [#45](https://github.com/stinkytoe/bevy_ldtk_asset/issues/45)
+  - registered the *Definition asset types with Bevy's reflect system
 - 0.6.1:
   - Release for Bevy 0.15.1
   - build systems improvements (hopefully faster compile times)
@@ -340,6 +344,7 @@ stinkytoe
 
 | bevy_ldtk_asset | bevy        | LDtk  |
 | :-------------: | :---------: | :---: |
+| 0.6.2           | 0.15.2 | 1.5.3 |
 | 0.6.1           | 0.15.1 | 1.5.3 |
 | 0.6.0           | 0.15.0 | 1.5.3 |
 | 0.5.1           | 0.15.0-rc.3 | 1.5.3 |
