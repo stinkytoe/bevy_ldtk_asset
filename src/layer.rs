@@ -300,13 +300,17 @@ impl Layer {
         let identifier = value.identifier.clone();
         let layer_asset_path = level_asset_path.to_layer_asset_path(&identifier)?;
         let opacity = value.opacity;
+
+        let mut layer_load_context = load_context.begin_labeled_asset();
+
         let layer_type = LayerType::new(
             value,
             &layer_asset_path,
-            load_context,
+            &mut layer_load_context,
             project_context,
             project_definition_context,
         )?;
+
         let iid = Iid::from_str(&value.iid)?;
         let layer_definition = project_definition_context
             .layer_definitions
@@ -339,8 +343,9 @@ impl Layer {
             level_id,
             location,
             index,
-        }
-        .into();
+        };
+
+        let layer = layer_load_context.finish(layer, None);
 
         let handle =
             load_context.add_loaded_labeled_asset(layer_asset_path.to_asset_label(), layer);

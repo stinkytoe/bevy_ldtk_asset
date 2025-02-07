@@ -257,6 +257,8 @@ impl Level {
                     Are we opening the local layer definition instead of the external one?"
         ))?;
 
+        let mut level_load_context = load_context.begin_labeled_asset();
+
         let layers = layer_instances
             .iter()
             .rev()
@@ -266,7 +268,7 @@ impl Level {
                     ldtk_layer_instance,
                     index,
                     &level_asset_path,
-                    load_context,
+                    &mut level_load_context,
                     project_context,
                     project_definition_context,
                 )
@@ -286,8 +288,9 @@ impl Level {
             location,
             layers,
             index,
-        }
-        .into();
+        };
+
+        let level = level_load_context.finish(level, None);
 
         let handle =
             load_context.add_loaded_labeled_asset(level_asset_path.to_asset_label(), level);
