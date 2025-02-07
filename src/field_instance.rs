@@ -50,7 +50,7 @@ pub struct EnumValue {
 pub enum FieldInstanceType {
     ArrayInt(Vec<i64>),
     ArrayEnum(Vec<EnumValue>),
-    ArrayMultilines(Vec<String>),
+    ArrayString(Vec<String>),
     ArrayPoint(Vec<I64Vec2>),
     ArrayTile(Vec<TilesetRectangle>),
     Bool(bool),
@@ -105,7 +105,7 @@ impl FieldInstanceType {
                     .map(|value| serde_json::from_value::<i64>(value.clone()).map_err(|e| e.into()))
                     .collect::<Result<Vec<_>>>()?,
             )),
-            "Array<Multilines>" => Ok(Self::ArrayMultilines(
+            "Array<String>" => Ok(Self::ArrayString(
                 value
                     .as_array()
                     .ok_or(ldtk_import_error!(
@@ -389,8 +389,8 @@ impl FieldInstance {
         is_type!(self, FieldInstanceType::ArrayEnum)
     }
 
-    pub fn is_array_multilines(&self) -> bool {
-        is_type!(self, FieldInstanceType::ArrayMultilines)
+    pub fn is_array_string(&self) -> bool {
+        is_type!(self, FieldInstanceType::ArrayString)
     }
 
     pub fn is_array_point(&self) -> bool {
@@ -463,7 +463,7 @@ macro_rules! get_by_type {
 impl FieldInstance {
     get_by_type!(get_array_int, FieldInstanceType::ArrayInt, Vec<i64>);
     get_by_type!(get_array_enum, FieldInstanceType::ArrayEnum, Vec<EnumValue>);
-    get_by_type!(get_array_multilines, FieldInstanceType::ArrayMultilines, Vec<String>);
+    get_by_type!(get_array_string, FieldInstanceType::ArrayString, Vec<String>);
     get_by_type!(get_array_point, FieldInstanceType::ArrayPoint, Vec<I64Vec2>);
     get_by_type!(get_array_tile, FieldInstanceType::ArrayTile, Vec<TilesetRectangle>);
     get_by_type!(get_bool, FieldInstanceType::Bool, bool);
