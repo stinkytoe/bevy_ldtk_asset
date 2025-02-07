@@ -114,6 +114,8 @@ impl World {
             &ldtk_world.levels
         };
 
+        let mut world_load_context = load_context.begin_labeled_asset();
+
         let levels = levels_iter
             .iter()
             .enumerate()
@@ -122,7 +124,7 @@ impl World {
                     ldtk_level,
                     index,
                     &world_asset_path,
-                    load_context,
+                    &mut world_load_context,
                     project_context,
                     project_definition_context,
                 )
@@ -134,8 +136,9 @@ impl World {
             iid,
             world_layout,
             levels,
-        }
-        .into();
+        };
+
+        let world = world_load_context.finish(world, None);
 
         let handle =
             load_context.add_loaded_labeled_asset(world_asset_path.to_asset_label(), world);
