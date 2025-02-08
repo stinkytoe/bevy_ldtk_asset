@@ -61,7 +61,6 @@ pub enum FieldInstanceType {
     FilePath(PathBuf),
     Float(f64),
     Int(i64),
-    Multilines(String),
     Point(I64Vec2),
     String(String),
     Tile(TilesetRectangle),
@@ -190,9 +189,6 @@ impl FieldInstanceType {
                 )
                     .into(),
             )),
-            "Multilines" => Ok(Self::Multilines(serde_json::from_value::<String>(
-                value.clone(),
-            )?)),
             "String" => Ok(Self::String(serde_json::from_value::<String>(
                 value.clone(),
             )?)),
@@ -465,10 +461,6 @@ impl FieldInstance {
         is_type!(self, FieldInstanceType::Int)
     }
 
-    pub fn is_multilines(&self) -> bool {
-        is_type!(self, FieldInstanceType::Multilines)
-    }
-
     pub fn is_point(&self) -> bool {
         is_type!(self, FieldInstanceType::Point)
     }
@@ -509,7 +501,6 @@ impl FieldInstance {
     get_by_type!(get_file_path, FieldInstanceType::FilePath, PathBuf);
     get_by_type!(get_float, FieldInstanceType::Float, f64);
     get_by_type!(get_int, FieldInstanceType::Int, i64);
-    get_by_type!(get_multilines, FieldInstanceType::Multilines, String);
     get_by_type!(get_point, FieldInstanceType::Point, I64Vec2);
     get_by_type!(get_string, FieldInstanceType::String, String);
     get_by_type!(get_tile, FieldInstanceType::Tile, TilesetRectangle);
