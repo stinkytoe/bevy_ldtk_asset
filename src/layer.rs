@@ -5,7 +5,7 @@
 
 use std::str::FromStr;
 
-use bevy_asset::{Asset, Handle, LoadContext};
+use bevy_asset::{Asset, Handle, LoadContext, VisitAssetDependencies};
 use bevy_image::Image;
 use bevy_log::error;
 use bevy_math::I64Vec2;
@@ -247,7 +247,7 @@ impl LayerType {
 /// An asset representing an [LDtk Layer Instance](https://ldtk.io/json/#ldtk-LayerInstanceJson).
 ///
 /// See [crate::asset_labels] for a description of the label format.
-#[derive(Asset, Debug, Reflect)]
+#[derive(Debug, Reflect)]
 pub struct Layer {
     /// The size of the logical grid, in two dimensions.
     ///
@@ -370,5 +370,24 @@ impl LdtkAssetWithChildren<Entity> for Layer {
                 either::Right([].iter())
             }
         }
+    }
+}
+
+impl Asset for Layer {}
+impl VisitAssetDependencies for Layer {
+    fn visit_dependencies(&self, visit: &mut impl FnMut(bevy_asset::UntypedAssetId)) {
+        VisitAssetDependencies::visit_dependencies(&self.layer_definition, visit);
+
+        match &self.layer_type {
+            LayerType::Tiles(tiles_layer)
+            | LayerType::IntGrid(tiles_layer)
+            | LayerType::AutoLayer(tiles_layer) => {
+                if let Some(tileset_definition) = tiles_layer.tileset_definition.as_ref() {
+                    VisitAssetDependencies::visit_dependencies(tileset_definition, visit);
+                }
+            }
+            _ => {}
+        }
+        todo!()
     }
 }

@@ -58,6 +58,7 @@ pub struct LayerDefinition {
     pub parallax_factor: DVec2,
     pub parallax_scaling: bool,
     pub offset: I64Vec2,
+    #[dependency]
     pub tileset_definition: Option<Handle<TilesetDefinition>>,
 }
 

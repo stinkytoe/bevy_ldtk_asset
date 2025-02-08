@@ -12,6 +12,7 @@ use std::path::PathBuf;
 use std::str::FromStr;
 
 use bevy_asset::Handle;
+use bevy_asset::VisitAssetDependencies;
 use bevy_color::Color;
 use bevy_math::I64Vec2;
 use bevy_reflect::Reflect;
@@ -370,6 +371,41 @@ impl FieldInstance {
             field_instance_type,
             def_uid,
         })
+    }
+
+    pub(crate) fn visit_dependencies(&self, visit: &mut impl FnMut(bevy_asset::UntypedAssetId)) {
+        if let Some(tileset_rectangle) = self.tileset_rectangle.as_ref() {
+            VisitAssetDependencies::visit_dependencies(
+                &tileset_rectangle.tileset_definition,
+                visit,
+            );
+        }
+
+        match &self.field_instance_type {
+            FieldInstanceType::ArrayEnum(vec) => {
+                vec.iter().for_each(|enum_value| {
+                    VisitAssetDependencies::visit_dependencies(&enum_value.enum_definition, visit);
+                });
+            }
+            FieldInstanceType::ArrayTile(vec) => {
+                vec.iter().for_each(|tileset_rectangle| {
+                    VisitAssetDependencies::visit_dependencies(
+                        &tileset_rectangle.tileset_definition,
+                        visit,
+                    );
+                });
+            }
+            FieldInstanceType::Enum(enum_value) => {
+                VisitAssetDependencies::visit_dependencies(&enum_value.enum_definition, visit);
+            }
+            FieldInstanceType::Tile(tileset_rectangle) => {
+                VisitAssetDependencies::visit_dependencies(
+                    &tileset_rectangle.tileset_definition,
+                    visit,
+                );
+            }
+            _ => {}
+        }
     }
 }
 

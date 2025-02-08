@@ -5,6 +5,7 @@
 
 use std::str::FromStr;
 
+use bevy_asset::VisitAssetDependencies;
 use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_color::Color;
 use bevy_image::Image;
@@ -142,7 +143,7 @@ impl LevelBackground {
 /// A level as represented in an LDtk project.
 ///
 /// See [LevelInstance](https://ldtk.io/json/#ldtk-LevelInstanceJson).
-#[derive(Asset, Debug, Reflect)]
+#[derive(Debug, Reflect)]
 pub struct Level {
     /// The background color. This should represent a rectangle exactly the size and location of the
     /// [Level], represented by [Level::location] and [Level::size]. It should be drawn 'behind'
@@ -318,5 +319,18 @@ impl LdtkAssetWithChildren<Layer> for Level {
 impl LdtkAssetWithFieldInstances for Level {
     fn get_field_instance(&self, identifier: &str) -> Option<&FieldInstance> {
         self.field_instances.get(identifier)
+    }
+}
+
+impl Asset for Level {}
+impl VisitAssetDependencies for Level {
+    fn visit_dependencies(&self, visit: &mut impl FnMut(bevy_asset::UntypedAssetId)) {
+        if let Some(background) = self.background.as_ref() {
+            VisitAssetDependencies::visit_dependencies(&background.image, visit);
+        }
+
+        self.field_instances.values().for_each(|field_instance| {
+            field_instance.visit_dependencies(visit);
+        });
     }
 }

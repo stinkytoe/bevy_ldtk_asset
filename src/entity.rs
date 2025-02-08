@@ -5,7 +5,7 @@
 
 use std::str::FromStr;
 
-use bevy_asset::{Asset, Handle, LoadContext};
+use bevy_asset::{Asset, Handle, LoadContext, VisitAssetDependencies};
 use bevy_color::Color;
 use bevy_log::debug;
 use bevy_math::I64Vec2;
@@ -28,7 +28,7 @@ use crate::{ldtk, ldtk_import_error};
 /// An asset representing an [LDtk Entity Instance](https://ldtk.io/json/#ldtk-EntityInstanceJson).
 ///
 /// See [crate::asset_labels] for a description of the label format.
-#[derive(Asset, Debug, Reflect)]
+#[derive(Debug, Reflect)]
 pub struct Entity {
     /// The identifier for this specific entity.
     ///
@@ -200,5 +200,14 @@ impl LdtkAssetWithTags for Entity {
 
     fn has_tag(&self, tag: &str) -> bool {
         self.tags.iter().any(|inner_tag| inner_tag == tag)
+    }
+}
+
+impl Asset for Entity {}
+impl VisitAssetDependencies for Entity {
+    fn visit_dependencies(&self, visit: &mut impl FnMut(bevy_asset::UntypedAssetId)) {
+        self.field_instances.values().for_each(|field_instance| {
+            field_instance.visit_dependencies(visit);
+        });
     }
 }
