@@ -347,10 +347,10 @@ stinkytoe
 
 | bevy_ldtk_asset | bevy        | LDtk  |
 | :-------------: | :---------: | :---: |
-| 0.6.3           | 0.15.2 | 1.5.3 |
-| 0.6.2           | 0.15.2 | 1.5.3 |
-| 0.6.1           | 0.15.1 | 1.5.3 |
-| 0.6.0           | 0.15.0 | 1.5.3 |
+| 0.6.3           | 0.15.2      | 1.5.3 |
+| 0.6.2           | 0.15.2      | 1.5.3 |
+| 0.6.1           | 0.15.1      | 1.5.3 |
+| 0.6.0           | 0.15.0      | 1.5.3 |
 | 0.5.1           | 0.15.0-rc.3 | 1.5.3 |
 | 0.5.0           | 0.15.0-rc.3 | 1.5.3 |
 
@@ -367,6 +367,6 @@ Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or [http://www.apa
 This project would not exist without the awesome efforts of the Bevy team, and
 Deepknight of Deepknight Games!
 
-[bevy](https://bevyengine.org)
+[Bevy](https://bevyengine.org)
 
 [LDtk](https://ldtk.io)
