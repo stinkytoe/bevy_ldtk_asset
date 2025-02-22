@@ -370,35 +370,32 @@ impl FieldInstance {
     }
 
     pub(crate) fn visit_dependencies(&self, visit: &mut impl FnMut(bevy_asset::UntypedAssetId)) {
-        if let Some(tileset_rectangle) = self.tileset_rectangle.as_ref() {
-            VisitAssetDependencies::visit_dependencies(
-                &tileset_rectangle.tileset_definition,
-                visit,
-            );
-        }
+        self.tileset_rectangle.iter().for_each(|tileset_rectangle| {
+            tileset_rectangle
+                .tileset_definition
+                .visit_dependencies(visit)
+        });
 
         match &self.field_instance_type {
             FieldInstanceType::ArrayEnum(vec) => {
                 vec.iter().for_each(|enum_value| {
-                    VisitAssetDependencies::visit_dependencies(&enum_value.enum_definition, visit);
+                    enum_value.enum_definition.visit_dependencies(visit);
                 });
             }
             FieldInstanceType::ArrayTile(vec) => {
                 vec.iter().for_each(|tileset_rectangle| {
-                    VisitAssetDependencies::visit_dependencies(
-                        &tileset_rectangle.tileset_definition,
-                        visit,
-                    );
+                    tileset_rectangle
+                        .tileset_definition
+                        .visit_dependencies(visit);
                 });
             }
             FieldInstanceType::Enum(enum_value) => {
-                VisitAssetDependencies::visit_dependencies(&enum_value.enum_definition, visit);
+                enum_value.enum_definition.visit_dependencies(visit);
             }
             FieldInstanceType::Tile(tileset_rectangle) => {
-                VisitAssetDependencies::visit_dependencies(
-                    &tileset_rectangle.tileset_definition,
-                    visit,
-                );
+                tileset_rectangle
+                    .tileset_definition
+                    .visit_dependencies(visit);
             }
             _ => {}
         }
