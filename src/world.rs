@@ -3,7 +3,7 @@
 use std::path::Path;
 use std::str::FromStr;
 
-use bevy_asset::{Asset, Handle, LoadContext};
+use bevy_asset::{Asset, Handle, LoadContext, VisitAssetDependencies};
 use bevy_log::trace;
 use bevy_math::I64Vec2;
 use bevy_reflect::Reflect;
@@ -59,7 +59,7 @@ impl WorldLayout {
 
 /// A single world instance.
 #[allow(missing_docs)]
-#[derive(Asset, Debug, Reflect)]
+#[derive(Debug, Reflect)]
 pub struct World {
     pub identifier: String,
     pub iid: Iid,
@@ -75,8 +75,6 @@ impl World {
         project_context: &ProjectContext,
         project_definition_context: &ProjectDefinitionContext,
     ) -> Result<(Iid, Handle<Self>)> {
-        let mut world_load_context = load_context.begin_labeled_asset();
-
         let identifier = ldtk_world.identifier.clone();
         let iid = Iid::from_str(&ldtk_world.iid)?;
         let world_layout = WorldLayout::new(
@@ -107,8 +105,7 @@ impl World {
                     let ldtk_path = Path::new(external_rel_path);
                     let bevy_path =
                         ldtk_path_to_bevy_path(project_context.project_directory, ldtk_path);
-                    let bytes =
-                        block_on(async { world_load_context.read_asset_bytes(bevy_path).await })?;
+                    let bytes = block_on(async { load_context.read_asset_bytes(bevy_path).await })?;
                     let level: ldtk::Level = serde_json::from_slice(&bytes)?;
                     Ok(level)
                 })
@@ -125,7 +122,7 @@ impl World {
                     ldtk_level,
                     index,
                     &world_asset_path,
-                    &mut world_load_context,
+                    load_context,
                     project_context,
                     project_definition_context,
                 )
@@ -139,10 +136,8 @@ impl World {
             levels,
         };
 
-        let world = world_load_context.finish(world, None);
-
         let handle =
-            load_context.add_loaded_labeled_asset(world_asset_path.to_asset_label(), world);
+            load_context.add_loaded_labeled_asset(world_asset_path.to_asset_label(), world.into());
 
         Ok((iid, handle))
     }
@@ -161,5 +156,14 @@ impl LdtkAsset for World {
 impl LdtkAssetWithChildren<Level> for World {
     fn get_children(&self) -> impl Iterator<Item = &Handle<Level>> {
         self.levels.values()
+    }
+}
+
+impl Asset for World {}
+impl VisitAssetDependencies for World {
+    fn visit_dependencies(&self, visit: &mut impl FnMut(bevy_asset::UntypedAssetId)) {
+        self.levels
+            .values()
+            .for_each(|handle| handle.visit_dependencies(visit));
     }
 }

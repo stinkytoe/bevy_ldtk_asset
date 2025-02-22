@@ -197,8 +197,6 @@ impl Level {
         project_context: &ProjectContext,
         project_definition_context: &ProjectDefinitionContext,
     ) -> Result<(Iid, Handle<Self>)> {
-        let mut level_load_context = load_context.begin_labeled_asset();
-
         let bg_color = bevy_color_from_ldtk_string(&value.bg_color)?;
         let neighbours = value
             .neighbours
@@ -219,7 +217,7 @@ impl Level {
             }
             (Some(bg_pos), Some(bg_rel_path)) => {
                 let path = ldtk_path_to_bevy_path(project_context.project_directory, bg_rel_path);
-                let image = level_load_context.load(path);
+                let image = load_context.load(path);
                 let background = LevelBackground::new(bg_pos, image)?;
                 Some(background)
             }
@@ -269,7 +267,7 @@ impl Level {
                     ldtk_layer_instance,
                     index,
                     &level_asset_path,
-                    &mut level_load_context,
+                    load_context,
                     project_context,
                     project_definition_context,
                 )
@@ -291,10 +289,8 @@ impl Level {
             index,
         };
 
-        let level = level_load_context.finish(level, None);
-
         let handle =
-            load_context.add_loaded_labeled_asset(level_asset_path.to_asset_label(), level);
+            load_context.add_loaded_labeled_asset(level_asset_path.to_asset_label(), level.into());
 
         Ok((iid, handle))
     }
@@ -325,9 +321,9 @@ impl LdtkAssetWithFieldInstances for Level {
 impl Asset for Level {}
 impl VisitAssetDependencies for Level {
     fn visit_dependencies(&self, visit: &mut impl FnMut(bevy_asset::UntypedAssetId)) {
-        if let Some(background) = self.background.as_ref() {
-            VisitAssetDependencies::visit_dependencies(&background.image, visit);
-        }
+        self.background
+            .iter()
+            .for_each(|background| background.image.visit_dependencies(visit));
 
         self.field_instances.values().for_each(|field_instance| {
             field_instance.visit_dependencies(visit);

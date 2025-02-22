@@ -295,8 +295,6 @@ impl Layer {
         project_context: &ProjectContext,
         project_definition_context: &ProjectDefinitionContext,
     ) -> Result<(Iid, Handle<Self>)> {
-        let mut layer_load_context = load_context.begin_labeled_asset();
-
         let grid_size: I64Vec2 = (value.c_wid, value.c_hei).into();
         let grid_cell_size = value.grid_size;
         let identifier = value.identifier.clone();
@@ -305,7 +303,7 @@ impl Layer {
         let layer_type = LayerType::new(
             value,
             &layer_asset_path,
-            &mut layer_load_context,
+            load_context,
             project_context,
             project_definition_context,
         )?;
@@ -343,10 +341,8 @@ impl Layer {
             index,
         };
 
-        let layer = layer_load_context.finish(layer, None);
-
         let handle =
-            load_context.add_loaded_labeled_asset(layer_asset_path.to_asset_label(), layer);
+            load_context.add_loaded_labeled_asset(layer_asset_path.to_asset_label(), layer.into());
 
         Ok((iid, handle))
     }
@@ -376,18 +372,23 @@ impl LdtkAssetWithChildren<Entity> for Layer {
 impl Asset for Layer {}
 impl VisitAssetDependencies for Layer {
     fn visit_dependencies(&self, visit: &mut impl FnMut(bevy_asset::UntypedAssetId)) {
-        VisitAssetDependencies::visit_dependencies(&self.layer_definition, visit);
+        self.layer_definition.visit_dependencies(visit);
 
         match &self.layer_type {
             LayerType::Tiles(tiles_layer)
             | LayerType::IntGrid(tiles_layer)
             | LayerType::AutoLayer(tiles_layer) => {
-                if let Some(tileset_definition) = tiles_layer.tileset_definition.as_ref() {
-                    VisitAssetDependencies::visit_dependencies(tileset_definition, visit);
-                }
+                tiles_layer
+                    .tileset_definition
+                    .iter()
+                    .for_each(|handle| handle.visit_dependencies(visit));
             }
-            _ => {}
+            LayerType::Entities(entities_layer) => {
+                entities_layer
+                    .entities
+                    .values()
+                    .for_each(|handle| handle.visit_dependencies(visit));
+            }
         }
-        todo!()
     }
 }

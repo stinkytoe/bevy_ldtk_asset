@@ -1,6 +1,7 @@
 //! The LDtk project top level representation!
 use bevy_asset::Asset;
 use bevy_asset::Handle;
+use bevy_asset::VisitAssetDependencies;
 use bevy_reflect::Reflect;
 
 use crate::iid::Iid;
@@ -18,7 +19,7 @@ use crate::world::World;
 /// as sub assets of this.
 ///
 /// See [LDtk Project](https://ldtk.io/json/#ldtk-ProjectJson) for a full description.
-#[derive(Asset, Debug, Reflect)]
+#[derive(Debug, Reflect)]
 pub struct Project {
     /// A unique [Iid] representing this entire project.
     pub iid: Iid,
@@ -46,5 +47,14 @@ impl LdtkAsset for Project {
 impl LdtkAssetWithChildren<World> for Project {
     fn get_children(&self) -> impl Iterator<Item = &Handle<World>> {
         self.worlds.values()
+    }
+}
+
+impl Asset for Project {}
+impl VisitAssetDependencies for Project {
+    fn visit_dependencies(&self, visit: &mut impl FnMut(bevy_asset::UntypedAssetId)) {
+        self.worlds
+            .values()
+            .for_each(|handle| handle.visit_dependencies(visit));
     }
 }
