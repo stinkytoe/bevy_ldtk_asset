@@ -310,11 +310,14 @@ stinkytoe
 
 ## Version History
 
+- 0.6.4:
+  - Release for Bevy 0.15.3
+  - Fixed bug where only top level asset labels were being registered.
 - 0.6.3:
   - Fixed bug in field instances of String type
   - Further refinement of the asset hierarchy, by explicit visiting of descendants
 - 0.6.2:
-  - Release for Bevy 0.6.2
+  - Release for Bevy 0.15.2
   - Asset dependencies more hierarchical. See [#45](https://github.com/stinkytoe/bevy_ldtk_asset/issues/45)
   - registered the *Definition asset types with Bevy's reflect system
 - 0.6.1:
@@ -347,6 +350,7 @@ stinkytoe
 
 | bevy_ldtk_asset | bevy        | LDtk  |
 | :-------------: | :---------: | :---: |
+| 0.6.4           | 0.15.3      | 1.5.3 |
 | 0.6.3           | 0.15.2      | 1.5.3 |
 | 0.6.2           | 0.15.2      | 1.5.3 |
 | 0.6.1           | 0.15.1      | 1.5.3 |
