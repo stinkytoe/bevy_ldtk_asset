@@ -15,8 +15,8 @@ use bevy_asset::Handle;
 use bevy_asset::VisitAssetDependencies;
 use bevy_color::Color;
 use bevy_math::I64Vec2;
+use bevy_platform_support::collections::HashMap;
 use bevy_reflect::Reflect;
-use bevy_utils::HashMap;
 
 use crate::color::bevy_color_from_ldtk_string;
 use crate::enum_definition::EnumDefinition;

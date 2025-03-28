@@ -4,7 +4,7 @@ use std::str::FromStr;
 use bevy_asset::AssetLoader;
 use bevy_asset::Handle;
 use bevy_log::debug;
-use bevy_utils::HashMap;
+use bevy_platform_support::collections::HashMap;
 
 use crate::asset_labels::ProjectAssetPath;
 use crate::entity_definition::EntityDefinition;

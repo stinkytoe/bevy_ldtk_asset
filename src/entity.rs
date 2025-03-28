@@ -9,9 +9,9 @@ use bevy_asset::{Asset, Handle, LoadContext, VisitAssetDependencies};
 use bevy_color::Color;
 use bevy_log::debug;
 use bevy_math::I64Vec2;
+use bevy_platform_support::collections::HashMap;
 use bevy_reflect::Reflect;
 use bevy_sprite::Anchor;
-use bevy_utils::HashMap;
 
 use crate::anchor::bevy_anchor_from_ldtk;
 use crate::asset_labels::LayerAssetPath;
@@ -167,11 +167,9 @@ impl Entity {
             field_instances,
             size,
             location,
-        }
-        .into();
+        };
 
-        let handle =
-            load_context.add_loaded_labeled_asset(entity_asset_path.to_asset_label(), entity);
+        let handle = load_context.add_labeled_asset(entity_asset_path.to_asset_label(), entity)?;
 
         Ok((iid, handle))
     }

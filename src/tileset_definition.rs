@@ -112,13 +112,12 @@ impl TilesetDefinition {
             tags,
             tags_source_enum_uid,
             tile_grid_size,
-        }
-        .into();
+        };
 
-        let handle = load_context.add_loaded_labeled_asset(
+        let handle = load_context.add_labeled_asset(
             tileset_definition_asset_path.to_asset_label(),
             tileset_definition,
-        );
+        )?;
 
         Ok((uid, handle))
     }

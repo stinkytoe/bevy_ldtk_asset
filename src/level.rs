@@ -11,8 +11,8 @@ use bevy_color::Color;
 use bevy_image::Image;
 use bevy_log::debug;
 use bevy_math::{DVec2, I64Vec2};
+use bevy_platform_support::collections::HashMap;
 use bevy_reflect::Reflect;
-use bevy_utils::HashMap;
 
 use crate::asset_labels::WorldAssetPath;
 use crate::color::bevy_color_from_ldtk_string;
@@ -289,8 +289,7 @@ impl Level {
             index,
         };
 
-        let handle =
-            load_context.add_loaded_labeled_asset(level_asset_path.to_asset_label(), level.into());
+        let handle = load_context.add_labeled_asset(level_asset_path.to_asset_label(), level)?;
 
         Ok((iid, handle))
     }

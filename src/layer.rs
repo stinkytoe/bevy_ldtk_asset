@@ -341,8 +341,7 @@ impl Layer {
             index,
         };
 
-        let handle =
-            load_context.add_loaded_labeled_asset(layer_asset_path.to_asset_label(), layer.into());
+        let handle = load_context.add_labeled_asset(layer_asset_path.to_asset_label(), layer)?;
 
         Ok((iid, handle))
     }

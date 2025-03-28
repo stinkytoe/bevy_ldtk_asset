@@ -136,8 +136,7 @@ impl World {
             levels,
         };
 
-        let handle =
-            load_context.add_loaded_labeled_asset(world_asset_path.to_asset_label(), world.into());
+        let handle = load_context.add_labeled_asset(world_asset_path.to_asset_label(), world)?;
 
         Ok((iid, handle))
     }

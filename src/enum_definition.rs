@@ -8,8 +8,8 @@ use std::path::PathBuf;
 
 use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_color::Color;
+use bevy_platform_support::collections::HashMap;
 use bevy_reflect::Reflect;
-use bevy_utils::HashMap;
 
 use crate::asset_labels::ProjectAssetPath;
 use crate::color::bevy_color_from_ldtk_int;
@@ -108,10 +108,9 @@ impl EnumDefinition {
             icon_tileset_definition,
             tags,
             values,
-        }
-        .into();
+        };
 
-        let handle = load_context.add_loaded_labeled_asset(path.to_asset_label(), asset);
+        let handle = load_context.add_labeled_asset(path.to_asset_label(), asset)?;
 
         Ok((identifier, handle))
     }

@@ -177,10 +177,9 @@ impl EntityDefinition {
             tile,
             ui_tile,
             render_mode,
-        }
-        .into();
+        };
 
-        let handle = load_context.add_loaded_labeled_asset(path.to_asset_label(), asset);
+        let handle = load_context.add_labeled_asset(path.to_asset_label(), asset)?;
 
         Ok((uid, handle))
     }
