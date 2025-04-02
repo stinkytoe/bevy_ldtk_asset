@@ -13,6 +13,7 @@ use bevy_math::{DVec2, I64Vec2};
 use bevy_platform_support::collections::HashMap;
 use bevy_reflect::Reflect;
 
+use crate::Result;
 use crate::asset_labels::ProjectAssetPath;
 use crate::color::bevy_color_from_ldtk_string;
 use crate::ldtk;
@@ -20,7 +21,6 @@ use crate::ldtk_import_error;
 use crate::tileset_definition::TilesetDefinition;
 use crate::tileset_rectangle::TilesetRectangle;
 use crate::uid::{Uid, UidMap};
-use crate::Result;
 
 #[derive(Debug, Reflect)]
 pub enum LayerDefinitionType {
@@ -40,7 +40,7 @@ impl LayerDefinitionType {
             _ => {
                 return Err(ldtk_import_error!(
                     "Could not build LayerDefinitionType from input! given: {ldtk_type}"
-                ))
+                ));
             }
         })
     }
@@ -119,7 +119,7 @@ impl LayerDefinition {
         let handle = load_context.add_labeled_asset(
             layer_definition_asset_path.to_asset_label(),
             layer_definition,
-        )?;
+        );
 
         Ok((uid, handle))
     }

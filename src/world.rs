@@ -16,7 +16,7 @@ use crate::ldtk_asset_trait::{LdtkAsset, LdtkAssetWithChildren};
 use crate::ldtk_path::ldtk_path_to_bevy_path;
 use crate::level::Level;
 use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
-use crate::{ldtk_import_error, Result};
+use crate::{Result, ldtk_import_error};
 
 /// The layout of the world's levels.
 ///
@@ -136,7 +136,7 @@ impl World {
             levels,
         };
 
-        let handle = load_context.add_labeled_asset(world_asset_path.to_asset_label(), world)?;
+        let handle = load_context.add_labeled_asset(world_asset_path.to_asset_label(), world);
 
         Ok((iid, handle))
     }

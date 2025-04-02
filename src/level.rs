@@ -14,6 +14,7 @@ use bevy_math::{DVec2, I64Vec2};
 use bevy_platform_support::collections::HashMap;
 use bevy_reflect::Reflect;
 
+use crate::Result;
 use crate::asset_labels::WorldAssetPath;
 use crate::color::bevy_color_from_ldtk_string;
 use crate::field_instance::FieldInstance;
@@ -28,7 +29,6 @@ use crate::ldtk_import_error;
 use crate::ldtk_path::ldtk_path_to_bevy_path;
 use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
 use crate::uid::Uid;
-use crate::Result;
 
 /// Relatve direction of levels in the Neighbour list.
 #[allow(missing_docs)]
@@ -208,12 +208,12 @@ impl Level {
             (None, Some(_)) => {
                 return Err(ldtk_import_error!(
                     "bg_pos is None while bg_rel_path is Some(_)!"
-                ))
+                ));
             }
             (Some(_), None) => {
                 return Err(ldtk_import_error!(
                     "bg_pos is Some(_) while bg_rel_path is None!"
-                ))
+                ));
             }
             (Some(bg_pos), Some(bg_rel_path)) => {
                 let path = ldtk_path_to_bevy_path(project_context.project_directory, bg_rel_path);
@@ -289,7 +289,7 @@ impl Level {
             index,
         };
 
-        let handle = load_context.add_labeled_asset(level_asset_path.to_asset_label(), level)?;
+        let handle = load_context.add_labeled_asset(level_asset_path.to_asset_label(), level);
 
         Ok((iid, handle))
     }

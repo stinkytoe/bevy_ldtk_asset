@@ -22,7 +22,7 @@ use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
 use crate::tile_instance::TileInstance;
 use crate::tileset_definition::TilesetDefinition;
 use crate::uid::Uid;
-use crate::{ldtk_import_error, Result};
+use crate::{Result, ldtk_import_error};
 
 /// A layer instance which contains [Entity] children.
 ///
@@ -341,7 +341,7 @@ impl Layer {
             index,
         };
 
-        let handle = load_context.add_labeled_asset(layer_asset_path.to_asset_label(), layer)?;
+        let handle = load_context.add_labeled_asset(layer_asset_path.to_asset_label(), layer);
 
         Ok((iid, handle))
     }

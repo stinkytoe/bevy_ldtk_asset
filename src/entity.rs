@@ -13,6 +13,7 @@ use bevy_platform_support::collections::HashMap;
 use bevy_reflect::Reflect;
 use bevy_sprite::Anchor;
 
+use crate::Result;
 use crate::anchor::bevy_anchor_from_ldtk;
 use crate::asset_labels::LayerAssetPath;
 use crate::color::bevy_color_from_ldtk_string;
@@ -22,7 +23,6 @@ use crate::iid::Iid;
 use crate::ldtk_asset_trait::{LdtkAsset, LdtkAssetWithFieldInstances, LdtkAssetWithTags};
 use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
 use crate::tileset_rectangle::TilesetRectangle;
-use crate::Result;
 use crate::{ldtk, ldtk_import_error};
 
 /// An asset representing an [LDtk Entity Instance](https://ldtk.io/json/#ldtk-EntityInstanceJson).
@@ -105,12 +105,12 @@ impl Entity {
             (None, Some(y)) => {
                 return Err(ldtk_import_error!(
                     "When constructing an entity, world_x was None but world_y was Some({y})!",
-                ))
+                ));
             }
             (Some(x), None) => {
                 return Err(ldtk_import_error!(
                     "When constructing an entity, world_x was Some({x}) but world_y was None!",
-                ))
+                ));
             }
             (Some(x), Some(y)) => Some((x, y).into()),
         };
@@ -169,7 +169,7 @@ impl Entity {
             location,
         };
 
-        let handle = load_context.add_labeled_asset(entity_asset_path.to_asset_label(), entity)?;
+        let handle = load_context.add_labeled_asset(entity_asset_path.to_asset_label(), entity);
 
         Ok((iid, handle))
     }

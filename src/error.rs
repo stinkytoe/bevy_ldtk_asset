@@ -17,9 +17,6 @@ pub enum Error {
     #[error(transparent)]
     ReadAssetBytesError(#[from] bevy_asset::ReadAssetBytesError),
 
-    #[error(transparent)]
-    DupAssError(#[from] bevy_asset::DuplicateLabelAssetError),
-
     #[error("Failure importing ldtk file! {0}")]
     LdtkImportError(String),
 }
