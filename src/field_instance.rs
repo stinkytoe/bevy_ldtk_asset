@@ -18,6 +18,7 @@ use bevy_math::I64Vec2;
 use bevy_platform_support::collections::HashMap;
 use bevy_reflect::Reflect;
 
+use crate::Result;
 use crate::color::bevy_color_from_ldtk_string;
 use crate::enum_definition::EnumDefinition;
 use crate::iid::Iid;
@@ -27,7 +28,6 @@ use crate::ldtk_path::ldtk_path_to_bevy_path;
 use crate::tileset_definition::TilesetDefinition;
 use crate::tileset_rectangle::TilesetRectangle;
 use crate::uid::{Uid, UidMap};
-use crate::Result;
 
 /// The internal value of a field instance of type [FieldInstanceType::EntityRef]
 #[allow(missing_docs)]

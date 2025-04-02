@@ -6,6 +6,7 @@ use bevy_asset::Handle;
 use bevy_log::debug;
 use bevy_platform_support::collections::HashMap;
 
+use crate::Result;
 use crate::asset_labels::ProjectAssetPath;
 use crate::entity_definition::EntityDefinition;
 use crate::enum_definition::EnumDefinition;
@@ -18,7 +19,6 @@ use crate::project::Project;
 use crate::tileset_definition::TilesetDefinition;
 use crate::uid::UidMap;
 use crate::world::World;
-use crate::Result;
 
 pub(crate) struct ProjectContext<'a> {
     pub(crate) project_directory: &'a Path,

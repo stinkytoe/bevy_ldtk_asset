@@ -21,7 +21,7 @@ pub use crate::tile_instance::TileInstance;
 pub use crate::tileset_rectangle::TilesetRectangle;
 
 // Iids/Uids
-pub use crate::iid::{iid, Iid, IidMap, IidSet};
+pub use crate::iid::{Iid, IidMap, IidSet, iid};
 pub use crate::uid::{Uid, UidMap, UidSet};
 
 // Traits

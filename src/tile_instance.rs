@@ -4,7 +4,7 @@ use bevy_math::I64Vec2;
 use bevy_reflect::Reflect;
 
 use crate::ldtk;
-use crate::{ldtk_import_error, Result};
+use crate::{Result, ldtk_import_error};
 
 /// An individual tile in a [crate::layer::TilesLayer] instance.
 ///
@@ -37,7 +37,7 @@ impl TileInstance {
                 return Err(ldtk_import_error!(
                     "Bad value for tile flip bits! given: {}",
                     value.f
-                ))
+                ));
             }
         };
         let offset = (value.px.len() == 2)
