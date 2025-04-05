@@ -5,7 +5,7 @@
 
 use std::str::FromStr;
 
-use bevy_asset::{Asset, Handle, LoadContext, VisitAssetDependencies};
+use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_color::Color;
 use bevy_log::debug;
 use bevy_math::I64Vec2;
@@ -28,7 +28,7 @@ use crate::{ldtk, ldtk_import_error};
 /// An asset representing an [LDtk Entity Instance](https://ldtk.io/json/#ldtk-EntityInstanceJson).
 ///
 /// See [crate::asset_labels] for a description of the label format.
-#[derive(Debug, Reflect)]
+#[derive(Debug, Asset, Reflect)]
 pub struct Entity {
     /// The identifier for this specific entity.
     ///
@@ -84,6 +84,9 @@ impl Entity {
     ) -> Result<(Iid, Handle<Self>)> {
         let identifier = value.identifier.clone();
         let iid = Iid::from_str(&value.iid)?;
+        let entity_asset_path = layer_asset_path.to_entity_asset_path(&identifier, iid)?;
+        let entity_load_context = load_context.begin_labeled_asset();
+
         let grid = (value.grid.len() == 2)
             .then(|| (value.grid[0], value.grid[1]).into())
             .ok_or(ldtk_import_error!(
@@ -152,8 +155,6 @@ impl Entity {
                 value.grid
             ))?;
 
-        let entity_asset_path = layer_asset_path.to_entity_asset_path(&identifier, iid)?;
-
         let entity = Self {
             identifier,
             iid,
@@ -169,7 +170,10 @@ impl Entity {
             location,
         };
 
-        let handle = load_context.add_labeled_asset(entity_asset_path.to_asset_label(), entity);
+        let finished_entity = entity_load_context.finish(entity);
+
+        let handle = load_context
+            .add_loaded_labeled_asset(entity_asset_path.to_asset_label(), finished_entity);
 
         Ok((iid, handle))
     }
@@ -198,14 +202,5 @@ impl LdtkAssetWithTags for Entity {
 
     fn has_tag(&self, tag: &str) -> bool {
         self.tags.iter().any(|inner_tag| inner_tag == tag)
-    }
-}
-
-impl Asset for Entity {}
-impl VisitAssetDependencies for Entity {
-    fn visit_dependencies(&self, visit: &mut impl FnMut(bevy_asset::UntypedAssetId)) {
-        self.field_instances.values().for_each(|field_instance| {
-            field_instance.visit_dependencies(visit);
-        });
     }
 }
