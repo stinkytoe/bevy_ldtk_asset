@@ -15,7 +15,7 @@ use crate::ldtk;
 use crate::ldtk_asset_trait::{LdtkAsset, LdtkAssetWithChildren};
 use crate::ldtk_path::ldtk_path_to_bevy_path;
 use crate::level::Level;
-use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
+use crate::project_loader::{ProjectContext, ProjectDefinitionContext, UniqueIidAuditor};
 use crate::{Result, ldtk_import_error};
 
 /// The layout of the world's levels.
@@ -72,6 +72,7 @@ impl World {
         ldtk_world: &ldtk::World,
         project_asset_path: &ProjectAssetPath,
         load_context: &mut LoadContext,
+        unique_iid_auditor: &mut UniqueIidAuditor,
         project_context: &ProjectContext,
         project_definition_context: &ProjectDefinitionContext,
     ) -> Result<(Iid, Handle<Self>)> {
@@ -80,6 +81,7 @@ impl World {
         let mut world_load_context = load_context.begin_labeled_asset();
 
         let iid = Iid::from_str(&ldtk_world.iid)?;
+        unique_iid_auditor.check(iid)?;
         let world_layout = WorldLayout::new(
             &ldtk_world.world_layout,
             ldtk_world.world_grid_width,
@@ -125,6 +127,7 @@ impl World {
                     index,
                     &world_asset_path,
                     &mut world_load_context,
+                    unique_iid_auditor,
                     project_context,
                     project_definition_context,
                 )

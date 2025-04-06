@@ -10,8 +10,10 @@ use crate::Result;
 use crate::asset_labels::ProjectAssetPath;
 use crate::entity_definition::EntityDefinition;
 use crate::enum_definition::EnumDefinition;
+use crate::error::Error;
 use crate::iid::Iid;
 use crate::iid::IidMap;
+use crate::iid::IidSet;
 use crate::layer_definition::LayerDefinition;
 use crate::ldtk;
 use crate::ldtk_import_error;
@@ -19,6 +21,25 @@ use crate::project::Project;
 use crate::tileset_definition::TilesetDefinition;
 use crate::uid::UidMap;
 use crate::world::World;
+
+pub(crate) struct UniqueIidAuditor {
+    known_iids: IidSet,
+}
+
+impl UniqueIidAuditor {
+    pub(crate) fn new() -> Self {
+        let known_iids = IidSet::default();
+
+        Self { known_iids }
+    }
+
+    pub(crate) fn check(&mut self, iid: Iid) -> Result<()> {
+        self.known_iids
+            .insert(iid)
+            .then_some(())
+            .ok_or(Error::DuplicateIidError(iid))
+    }
+}
 
 pub(crate) struct ProjectContext<'a> {
     pub(crate) project_directory: &'a Path,
@@ -69,9 +90,12 @@ impl AssetLoader for ProjectLoader {
 
         let project_asset_path = ProjectAssetPath::new(&project_path)?;
 
+        let mut unique_iid_auditor = UniqueIidAuditor::new();
+
         debug!("Loading LDtk project: {project_path}");
 
         let project_iid = Iid::from_str(&ldtk_project.iid)?;
+        unique_iid_auditor.check(project_iid)?;
 
         let json_version = ldtk_project.json_version.clone();
 
@@ -186,6 +210,7 @@ impl AssetLoader for ProjectLoader {
                     ldtk_world,
                     &project_asset_path,
                     load_context,
+                    &mut unique_iid_auditor,
                     &project_context,
                     &project_definitions_context,
                 )

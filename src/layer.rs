@@ -18,7 +18,7 @@ use crate::layer_definition::LayerDefinition;
 use crate::ldtk;
 use crate::ldtk_asset_trait::{LdtkAsset, LdtkAssetWithChildren};
 use crate::ldtk_path::ldtk_path_to_bevy_path;
-use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
+use crate::project_loader::{ProjectContext, ProjectDefinitionContext, UniqueIidAuditor};
 use crate::tile_instance::TileInstance;
 use crate::tileset_definition::TilesetDefinition;
 use crate::uid::Uid;
@@ -38,6 +38,7 @@ impl EntitiesLayer {
         value: &ldtk::LayerInstance,
         layer_asset_path: &LayerAssetPath,
         load_context: &mut LoadContext,
+        unique_iid_auditor: &mut UniqueIidAuditor,
         project_context: &ProjectContext,
         project_definitions_context: &ProjectDefinitionContext,
     ) -> Result<Self> {
@@ -55,6 +56,7 @@ impl EntitiesLayer {
                         value,
                         layer_asset_path,
                         load_context,
+                        unique_iid_auditor,
                         project_context,
                         project_definitions_context,
                     )
@@ -222,6 +224,7 @@ impl LayerType {
         value: &ldtk::LayerInstance,
         layer_asset_path: &LayerAssetPath,
         load_context: &mut LoadContext,
+        unique_iid_auditor: &mut UniqueIidAuditor,
         project_context: &ProjectContext,
         project_definition_context: &ProjectDefinitionContext,
     ) -> Result<Self> {
@@ -230,6 +233,7 @@ impl LayerType {
                 value,
                 layer_asset_path,
                 load_context,
+                unique_iid_auditor,
                 project_context,
                 project_definition_context,
             )?)),
@@ -292,6 +296,7 @@ impl Layer {
         index: usize,
         level_asset_path: &LevelAssetPath,
         load_context: &mut LoadContext,
+        unique_iid_auditor: &mut UniqueIidAuditor,
         project_context: &ProjectContext,
         project_definition_context: &ProjectDefinitionContext,
     ) -> Result<(Iid, Handle<Self>)> {
@@ -306,10 +311,12 @@ impl Layer {
             value,
             &layer_asset_path,
             &mut layer_load_context,
+            unique_iid_auditor,
             project_context,
             project_definition_context,
         )?;
         let iid = Iid::from_str(&value.iid)?;
+        unique_iid_auditor.check(iid)?;
         let layer_definition = project_definition_context
             .layer_definitions
             .get(&value.layer_def_uid)

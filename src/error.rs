@@ -19,6 +19,9 @@ pub enum Error {
 
     #[error("Failure importing ldtk file! {0}")]
     LdtkImportError(String),
+
+    #[error("Duplicate Iid error! {0}")]
+    DuplicateIidError(crate::iid::Iid),
 }
 
 #[macro_export]

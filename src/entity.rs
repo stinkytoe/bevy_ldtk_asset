@@ -21,7 +21,7 @@ use crate::entity_definition::EntityDefinition;
 use crate::field_instance::FieldInstance;
 use crate::iid::Iid;
 use crate::ldtk_asset_trait::{LdtkAsset, LdtkAssetWithFieldInstances, LdtkAssetWithTags};
-use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
+use crate::project_loader::{ProjectContext, ProjectDefinitionContext, UniqueIidAuditor};
 use crate::tileset_rectangle::TilesetRectangle;
 use crate::{ldtk, ldtk_import_error};
 
@@ -79,11 +79,13 @@ impl Entity {
         value: &ldtk::EntityInstance,
         layer_asset_path: &LayerAssetPath,
         load_context: &mut LoadContext,
+        unique_iid_auditor: &mut UniqueIidAuditor,
         project_context: &ProjectContext,
         project_definitions_context: &ProjectDefinitionContext,
     ) -> Result<(Iid, Handle<Self>)> {
         let identifier = value.identifier.clone();
         let iid = Iid::from_str(&value.iid)?;
+        unique_iid_auditor.check(iid)?;
         let entity_asset_path = layer_asset_path.to_entity_asset_path(&identifier, iid)?;
         let entity_load_context = load_context.begin_labeled_asset();
 

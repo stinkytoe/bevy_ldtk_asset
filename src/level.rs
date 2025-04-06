@@ -26,6 +26,7 @@ use crate::ldtk_asset_trait::LdtkAssetWithChildren;
 use crate::ldtk_asset_trait::LdtkAssetWithFieldInstances;
 use crate::ldtk_import_error;
 use crate::ldtk_path::ldtk_path_to_bevy_path;
+use crate::project_loader::UniqueIidAuditor;
 use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
 use crate::uid::Uid;
 
@@ -193,6 +194,7 @@ impl Level {
         index: usize,
         world_asset_path: &WorldAssetPath,
         load_context: &mut LoadContext,
+        unique_iid_auditor: &mut UniqueIidAuditor,
         project_context: &ProjectContext,
         project_definition_context: &ProjectDefinitionContext,
     ) -> Result<(Iid, Handle<Self>)> {
@@ -248,6 +250,7 @@ impl Level {
             })
             .collect::<Result<_>>()?;
         let iid = Iid::from_str(&value.iid)?;
+        unique_iid_auditor.check(iid)?;
         let size = (value.px_wid, value.px_hei).into();
         let uid = value.uid;
         let world_depth = value.world_depth;
@@ -268,6 +271,7 @@ impl Level {
                     index,
                     &level_asset_path,
                     &mut level_load_context,
+                    unique_iid_auditor,
                     project_context,
                     project_definition_context,
                 )
