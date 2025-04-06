@@ -139,16 +139,6 @@ impl TilesLayer {
                     .map(|bevy_path| load_context.load(bevy_path))
                     .unwrap_or_default();
 
-                // Not a parse error, but should be reported to the user.
-                if tileset_definition.is_none() {
-                    error!(
-                        "tileset_definition is None in layer: {}! This is technically \
-                        a valid LDtk file, but the editor will show an error message for the layer \
-                        with the missing tileset. Please correct inside of LDtk!",
-                        value.identifier
-                    );
-                }
-
                 Ok(Self {
                     int_grid,
                     tiles,
