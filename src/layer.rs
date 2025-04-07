@@ -7,7 +7,6 @@ use std::str::FromStr;
 
 use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_image::Image;
-use bevy_log::error;
 use bevy_math::I64Vec2;
 use bevy_reflect::Reflect;
 
