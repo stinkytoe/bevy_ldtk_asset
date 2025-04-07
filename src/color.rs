@@ -1,7 +1,7 @@
 use bevy_color::Color;
 
-use crate::ldtk_import_error;
 use crate::Result;
+use crate::ldtk_import_error;
 
 // Format should be: Hex color "#rrggbb"
 // from: https://ldtk.io/json-2/#ldtk-ProjectJson;bgColor

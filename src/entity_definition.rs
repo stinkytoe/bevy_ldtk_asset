@@ -11,13 +11,13 @@ use bevy_math::I64Vec2;
 use bevy_reflect::Reflect;
 use bevy_sprite::Anchor;
 
+use crate::Result;
 use crate::anchor::bevy_anchor_from_ldtk;
 use crate::asset_labels::ProjectAssetPath;
 use crate::color::bevy_color_from_ldtk_string;
 use crate::tileset_definition::TilesetDefinition;
 use crate::tileset_rectangle::TilesetRectangle;
 use crate::uid::{Uid, UidMap};
-use crate::Result;
 use crate::{ldtk, ldtk_import_error};
 
 /// A nine-slice pattern.
@@ -177,10 +177,9 @@ impl EntityDefinition {
             tile,
             ui_tile,
             render_mode,
-        }
-        .into();
+        };
 
-        let handle = load_context.add_loaded_labeled_asset(path.to_asset_label(), asset);
+        let handle = load_context.add_labeled_asset(path.to_asset_label(), asset);
 
         Ok((uid, handle))
     }

@@ -5,14 +5,14 @@
 //! [uuid::uuid].
 //!
 //! I chose to wrap these values for two reasons:
-//! * To match the nomenclature of LDtk.
+//! * To match the nomenclature of LDtk (using Iid instead of Uuid as the name).
 //! * I had originally written my own implementation, but switched to the superior [uuid] crate
 //!   after I realized it offered better features while remaining compatable with LDtk.
 
 #![allow(missing_docs)]
 
-use bevy_utils::HashMap;
-use bevy_utils::HashSet;
+use bevy_platform_support::collections::HashMap;
+use bevy_platform_support::collections::HashSet;
 
 /// A re-export of the [uuid::uuid] macro.
 pub use uuid::uuid as iid;

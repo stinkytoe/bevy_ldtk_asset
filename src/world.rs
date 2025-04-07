@@ -3,7 +3,7 @@
 use std::path::Path;
 use std::str::FromStr;
 
-use bevy_asset::{Asset, Handle, LoadContext, VisitAssetDependencies};
+use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_log::trace;
 use bevy_math::I64Vec2;
 use bevy_reflect::Reflect;
@@ -15,8 +15,8 @@ use crate::ldtk;
 use crate::ldtk_asset_trait::{LdtkAsset, LdtkAssetWithChildren};
 use crate::ldtk_path::ldtk_path_to_bevy_path;
 use crate::level::Level;
-use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
-use crate::{ldtk_import_error, Result};
+use crate::project_loader::{ProjectContext, ProjectDefinitionContext, UniqueIidAuditor};
+use crate::{Result, ldtk_import_error};
 
 /// The layout of the world's levels.
 ///
@@ -59,7 +59,7 @@ impl WorldLayout {
 
 /// A single world instance.
 #[allow(missing_docs)]
-#[derive(Debug, Reflect)]
+#[derive(Debug, Asset, Reflect)]
 pub struct World {
     pub identifier: String,
     pub iid: Iid,
@@ -72,18 +72,21 @@ impl World {
         ldtk_world: &ldtk::World,
         project_asset_path: &ProjectAssetPath,
         load_context: &mut LoadContext,
+        unique_iid_auditor: &mut UniqueIidAuditor,
         project_context: &ProjectContext,
         project_definition_context: &ProjectDefinitionContext,
     ) -> Result<(Iid, Handle<Self>)> {
         let identifier = ldtk_world.identifier.clone();
+        let world_asset_path = project_asset_path.to_world_asset_path(&identifier)?;
+        let mut world_load_context = load_context.begin_labeled_asset();
+
         let iid = Iid::from_str(&ldtk_world.iid)?;
+        unique_iid_auditor.check(iid)?;
         let world_layout = WorldLayout::new(
             &ldtk_world.world_layout,
             ldtk_world.world_grid_width,
             ldtk_world.world_grid_height,
         )?;
-
-        let world_asset_path = project_asset_path.to_world_asset_path(&identifier)?;
 
         // TODO: I think we can clean this up and remove some allocations while avoiding the
         // temporary binding. Possibly with Either:: or similar.
@@ -105,7 +108,8 @@ impl World {
                     let ldtk_path = Path::new(external_rel_path);
                     let bevy_path =
                         ldtk_path_to_bevy_path(project_context.project_directory, ldtk_path);
-                    let bytes = block_on(async { load_context.read_asset_bytes(bevy_path).await })?;
+                    let bytes =
+                        block_on(async { world_load_context.read_asset_bytes(bevy_path).await })?;
                     let level: ldtk::Level = serde_json::from_slice(&bytes)?;
                     Ok(level)
                 })
@@ -122,7 +126,8 @@ impl World {
                     ldtk_level,
                     index,
                     &world_asset_path,
-                    load_context,
+                    &mut world_load_context,
+                    unique_iid_auditor,
                     project_context,
                     project_definition_context,
                 )
@@ -136,8 +141,10 @@ impl World {
             levels,
         };
 
+        let loaded_world = world_load_context.finish(world);
+
         let handle =
-            load_context.add_loaded_labeled_asset(world_asset_path.to_asset_label(), world.into());
+            load_context.add_loaded_labeled_asset(world_asset_path.to_asset_label(), loaded_world);
 
         Ok((iid, handle))
     }
@@ -156,14 +163,5 @@ impl LdtkAsset for World {
 impl LdtkAssetWithChildren<Level> for World {
     fn get_children(&self) -> impl Iterator<Item = &Handle<Level>> {
         self.levels.values()
-    }
-}
-
-impl Asset for World {}
-impl VisitAssetDependencies for World {
-    fn visit_dependencies(&self, visit: &mut impl FnMut(bevy_asset::UntypedAssetId)) {
-        self.levels
-            .values()
-            .for_each(|handle| handle.visit_dependencies(visit));
     }
 }

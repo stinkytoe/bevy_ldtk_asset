@@ -31,7 +31,7 @@
 use bevy_reflect::Reflect;
 
 use crate::iid::Iid;
-use crate::{ldtk_import_error, Result};
+use crate::{Result, ldtk_import_error};
 
 #[derive(Debug, PartialEq, Eq, Reflect)]
 pub struct ProjectAssetPath {
@@ -381,20 +381,30 @@ mod test {
         assert!(project_asset_path.to_world_asset_path("garbage!").is_err());
         assert!(world_asset_path.to_level_asset_path("has spaces?").is_err());
         assert!(level_asset_path.to_layer_asset_path("--dashes--").is_err());
-        assert!(layer_asset_path
-            .to_entity_asset_path("--dashes--", entity_iid)
-            .is_err());
-        assert!(project_asset_path
-            .to_tileset_definition_asset_path("Tá Unicode uamhnach!")
-            .is_err());
-        assert!(project_asset_path
-            .to_layer_definition_asset_path("यूनिकोड कमाल")
-            .is_err());
-        assert!(project_asset_path
-            .to_entity_definition_asset_path("Юнікод чудовий!")
-            .is_err());
-        assert!(project_asset_path
-            .to_enum_definition_asset_path("Unicode គឺអស្ចារ្យណាស់!")
-            .is_err());
+        assert!(
+            layer_asset_path
+                .to_entity_asset_path("--dashes--", entity_iid)
+                .is_err()
+        );
+        assert!(
+            project_asset_path
+                .to_tileset_definition_asset_path("Tá Unicode uamhnach!")
+                .is_err()
+        );
+        assert!(
+            project_asset_path
+                .to_layer_definition_asset_path("यूनिकोड कमाल")
+                .is_err()
+        );
+        assert!(
+            project_asset_path
+                .to_entity_definition_asset_path("Юнікод чудовий!")
+                .is_err()
+        );
+        assert!(
+            project_asset_path
+                .to_enum_definition_asset_path("Unicode គឺអស្ចារ្យណាស់!")
+                .is_err()
+        );
     }
 }

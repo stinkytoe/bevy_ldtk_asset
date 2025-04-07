@@ -5,15 +5,15 @@
 
 use std::str::FromStr;
 
-use bevy_asset::VisitAssetDependencies;
 use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_color::Color;
 use bevy_image::Image;
 use bevy_log::debug;
 use bevy_math::{DVec2, I64Vec2};
+use bevy_platform_support::collections::HashMap;
 use bevy_reflect::Reflect;
-use bevy_utils::HashMap;
 
+use crate::Result;
 use crate::asset_labels::WorldAssetPath;
 use crate::color::bevy_color_from_ldtk_string;
 use crate::field_instance::FieldInstance;
@@ -26,9 +26,9 @@ use crate::ldtk_asset_trait::LdtkAssetWithChildren;
 use crate::ldtk_asset_trait::LdtkAssetWithFieldInstances;
 use crate::ldtk_import_error;
 use crate::ldtk_path::ldtk_path_to_bevy_path;
+use crate::project_loader::UniqueIidAuditor;
 use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
 use crate::uid::Uid;
-use crate::Result;
 
 /// Relatve direction of levels in the Neighbour list.
 #[allow(missing_docs)]
@@ -143,7 +143,7 @@ impl LevelBackground {
 /// A level as represented in an LDtk project.
 ///
 /// See [LevelInstance](https://ldtk.io/json/#ldtk-LevelInstanceJson).
-#[derive(Debug, Reflect)]
+#[derive(Debug, Asset, Reflect)]
 pub struct Level {
     /// The background color. This should represent a rectangle exactly the size and location of the
     /// [Level], represented by [Level::location] and [Level::size]. It should be drawn 'behind'
@@ -194,9 +194,14 @@ impl Level {
         index: usize,
         world_asset_path: &WorldAssetPath,
         load_context: &mut LoadContext,
+        unique_iid_auditor: &mut UniqueIidAuditor,
         project_context: &ProjectContext,
         project_definition_context: &ProjectDefinitionContext,
     ) -> Result<(Iid, Handle<Self>)> {
+        let identifier = value.identifier.clone();
+        let level_asset_path = world_asset_path.to_level_asset_path(&identifier)?;
+        let mut level_load_context = load_context.begin_labeled_asset();
+
         let bg_color = bevy_color_from_ldtk_string(&value.bg_color)?;
         let neighbours = value
             .neighbours
@@ -208,16 +213,16 @@ impl Level {
             (None, Some(_)) => {
                 return Err(ldtk_import_error!(
                     "bg_pos is None while bg_rel_path is Some(_)!"
-                ))
+                ));
             }
             (Some(_), None) => {
                 return Err(ldtk_import_error!(
                     "bg_pos is Some(_) while bg_rel_path is None!"
-                ))
+                ));
             }
             (Some(bg_pos), Some(bg_rel_path)) => {
                 let path = ldtk_path_to_bevy_path(project_context.project_directory, bg_rel_path);
-                let image = load_context.load(path);
+                let image = level_load_context.load(path);
                 let background = LevelBackground::new(bg_pos, image)?;
                 Some(background)
             }
@@ -244,14 +249,12 @@ impl Level {
                 ))
             })
             .collect::<Result<_>>()?;
-        let identifier = value.identifier.clone();
         let iid = Iid::from_str(&value.iid)?;
+        unique_iid_auditor.check(iid)?;
         let size = (value.px_wid, value.px_hei).into();
         let uid = value.uid;
         let world_depth = value.world_depth;
         let location = (value.world_x, value.world_y).into();
-
-        let level_asset_path = world_asset_path.to_level_asset_path(&identifier)?;
 
         let layer_instances = value.layer_instances.as_ref().ok_or(ldtk_import_error!(
             "layer_instances is None? \
@@ -267,7 +270,8 @@ impl Level {
                     ldtk_layer_instance,
                     index,
                     &level_asset_path,
-                    load_context,
+                    &mut level_load_context,
+                    unique_iid_auditor,
                     project_context,
                     project_definition_context,
                 )
@@ -289,8 +293,10 @@ impl Level {
             index,
         };
 
+        let loaded_level = level_load_context.finish(level);
+
         let handle =
-            load_context.add_loaded_labeled_asset(level_asset_path.to_asset_label(), level.into());
+            load_context.add_loaded_labeled_asset(level_asset_path.to_asset_label(), loaded_level);
 
         Ok((iid, handle))
     }
@@ -315,18 +321,5 @@ impl LdtkAssetWithChildren<Layer> for Level {
 impl LdtkAssetWithFieldInstances for Level {
     fn get_field_instance(&self, identifier: &str) -> Option<&FieldInstance> {
         self.field_instances.get(identifier)
-    }
-}
-
-impl Asset for Level {}
-impl VisitAssetDependencies for Level {
-    fn visit_dependencies(&self, visit: &mut impl FnMut(bevy_asset::UntypedAssetId)) {
-        self.background
-            .iter()
-            .for_each(|background| background.image.visit_dependencies(visit));
-
-        self.field_instances.values().for_each(|field_instance| {
-            field_instance.visit_dependencies(visit);
-        });
     }
 }

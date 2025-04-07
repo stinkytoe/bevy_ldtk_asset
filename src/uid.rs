@@ -6,7 +6,7 @@
 
 #![allow(missing_docs)]
 
-use bevy_utils::{HashMap, HashSet};
+use bevy_platform_support::collections::{HashMap, HashSet};
 
 pub type Uid = i64;
 

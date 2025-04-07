@@ -8,9 +8,10 @@ use std::path::PathBuf;
 
 use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_color::Color;
+use bevy_platform_support::collections::HashMap;
 use bevy_reflect::Reflect;
-use bevy_utils::HashMap;
 
+use crate::Result;
 use crate::asset_labels::ProjectAssetPath;
 use crate::color::bevy_color_from_ldtk_int;
 use crate::ldtk;
@@ -21,7 +22,6 @@ use crate::project_loader::ProjectContext;
 use crate::tileset_definition::TilesetDefinition;
 use crate::tileset_rectangle::TilesetRectangle;
 use crate::uid::UidMap;
-use crate::Result;
 
 /// Data associated with a specific enum.
 #[allow(missing_docs)]
@@ -108,10 +108,9 @@ impl EnumDefinition {
             icon_tileset_definition,
             tags,
             values,
-        }
-        .into();
+        };
 
-        let handle = load_context.add_loaded_labeled_asset(path.to_asset_label(), asset);
+        let handle = load_context.add_labeled_asset(path.to_asset_label(), asset);
 
         Ok((identifier, handle))
     }

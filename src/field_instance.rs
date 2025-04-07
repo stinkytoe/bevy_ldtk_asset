@@ -12,12 +12,12 @@ use std::path::PathBuf;
 use std::str::FromStr;
 
 use bevy_asset::Handle;
-use bevy_asset::VisitAssetDependencies;
 use bevy_color::Color;
 use bevy_math::I64Vec2;
+use bevy_platform_support::collections::HashMap;
 use bevy_reflect::Reflect;
-use bevy_utils::HashMap;
 
+use crate::Result;
 use crate::color::bevy_color_from_ldtk_string;
 use crate::enum_definition::EnumDefinition;
 use crate::iid::Iid;
@@ -27,7 +27,6 @@ use crate::ldtk_path::ldtk_path_to_bevy_path;
 use crate::tileset_definition::TilesetDefinition;
 use crate::tileset_rectangle::TilesetRectangle;
 use crate::uid::{Uid, UidMap};
-use crate::Result;
 
 /// The internal value of a field instance of type [FieldInstanceType::EntityRef]
 #[allow(missing_docs)]
@@ -367,38 +366,6 @@ impl FieldInstance {
             field_instance_type,
             def_uid,
         })
-    }
-
-    pub(crate) fn visit_dependencies(&self, visit: &mut impl FnMut(bevy_asset::UntypedAssetId)) {
-        self.tileset_rectangle.iter().for_each(|tileset_rectangle| {
-            tileset_rectangle
-                .tileset_definition
-                .visit_dependencies(visit)
-        });
-
-        match &self.field_instance_type {
-            FieldInstanceType::ArrayEnum(vec) => {
-                vec.iter().for_each(|enum_value| {
-                    enum_value.enum_definition.visit_dependencies(visit);
-                });
-            }
-            FieldInstanceType::ArrayTile(vec) => {
-                vec.iter().for_each(|tileset_rectangle| {
-                    tileset_rectangle
-                        .tileset_definition
-                        .visit_dependencies(visit);
-                });
-            }
-            FieldInstanceType::Enum(enum_value) => {
-                enum_value.enum_definition.visit_dependencies(visit);
-            }
-            FieldInstanceType::Tile(tileset_rectangle) => {
-                tileset_rectangle
-                    .tileset_definition
-                    .visit_dependencies(visit);
-            }
-            _ => {}
-        }
     }
 }
 

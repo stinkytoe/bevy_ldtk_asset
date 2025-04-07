@@ -5,12 +5,12 @@ use bevy_image::Image;
 use bevy_math::I64Vec2;
 use bevy_reflect::Reflect;
 
+use crate::Result;
 use crate::asset_labels::ProjectAssetPath;
 use crate::ldtk_asset_trait::LdtkAssetWithTags;
 use crate::ldtk_path::ldtk_path_to_bevy_path;
 use crate::project_loader::ProjectContext;
 use crate::uid::Uid;
-use crate::Result;
 use crate::{ldtk, ldtk_import_error};
 
 #[derive(Debug, Reflect)]
@@ -112,10 +112,9 @@ impl TilesetDefinition {
             tags,
             tags_source_enum_uid,
             tile_grid_size,
-        }
-        .into();
+        };
 
-        let handle = load_context.add_loaded_labeled_asset(
+        let handle = load_context.add_labeled_asset(
             tileset_definition_asset_path.to_asset_label(),
             tileset_definition,
         );

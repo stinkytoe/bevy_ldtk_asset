@@ -6,7 +6,7 @@ use bevy_reflect::Reflect;
 use crate::ldtk;
 use crate::tileset_definition::TilesetDefinition;
 use crate::uid::UidMap;
-use crate::{ldtk_import_error, Result};
+use crate::{Result, ldtk_import_error};
 
 /// The visualization for an [crate::entity::Entity] asset.
 /// This can also be stored in [crate::field_instance::FieldInstance]s for reference.

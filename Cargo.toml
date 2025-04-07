@@ -2,7 +2,7 @@
 name = "bevy_ldtk_asset"
 version = "0.6.4"
 authors = ["Randal Robinson <stinkytoe42@yahoo.com>"]
-edition = "2021"
+edition = "2024"
 description = "A Bevy plugin to support LDtk files as assets!"
 repository = "https://github.com/stinkytoe/bevy_ldtk_asset"
 license = "MIT OR Apache-2.0"
@@ -18,19 +18,21 @@ exclude = [".github", ".gitignore", "assets", "examples"]
 readme = "README.md"
 
 [dependencies]
-bevy_app = { version = "0.15.3", default-features = false }
-bevy_asset = { version = "0.15.3", default-features = false }
-bevy_color = { version = "0.15.4", default-features = false }
-bevy_ecs = { version = "0.15.3", default-features = false }
-bevy_image = { version = "0.15.3", default-features = false }
-bevy_log = { version = "0.15.3", default-features = false }
-bevy_math = { version = "0.15.3", default-features = false }
-bevy_reflect = { version = "0.15.3", default-features = false, features = [
+bevy_app = { git = "https://github.com/bevyengine/bevy.git", tag = "v0.16.0-rc.3", default-features = false }
+bevy_asset = { git = "https://github.com/bevyengine/bevy.git", tag = "v0.16.0-rc.3", default-features = false }
+bevy_color = { git = "https://github.com/bevyengine/bevy.git", tag = "v0.16.0-rc.3", default-features = false }
+bevy_ecs = { git = "https://github.com/bevyengine/bevy.git", tag = "v0.16.0-rc.3", default-features = false }
+bevy_image = { git = "https://github.com/bevyengine/bevy.git", tag = "v0.16.0-rc.3", default-features = false }
+bevy_log = { git = "https://github.com/bevyengine/bevy.git", tag = "v0.16.0-rc.3", default-features = false }
+bevy_math = { git = "https://github.com/bevyengine/bevy.git", tag = "v0.16.0-rc.3", default-features = false }
+bevy_platform_support = { git = "https://github.com/bevyengine/bevy.git", tag = "v0.16.0-rc.3", default-features = false }
+bevy_reflect = { git = "https://github.com/bevyengine/bevy.git", tag = "v0.16.0-rc.3", default-features = false, features = [
 	"uuid",
 ] }
-bevy_sprite = { version = "0.15.3", default-features = false }
-bevy_tasks = { version = "0.15.3", default-features = false }
-bevy_utils = { version = "0.15.3", default-features = false }
+bevy_sprite = { git = "https://github.com/bevyengine/bevy.git", tag = "v0.16.0-rc.3", default-features = false }
+bevy_tasks = { git = "https://github.com/bevyengine/bevy.git", tag = "v0.16.0-rc.3", default-features = false }
+bevy_utils = { git = "https://github.com/bevyengine/bevy.git", tag = "v0.16.0-rc.3", default-features = false }
+
 path-clean = { version = "1.0", default-features = false }
 either = { version = "1.13", default-features = false }
 serde = { version = "1.0", default-features = false }

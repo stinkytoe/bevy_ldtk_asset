@@ -5,14 +5,15 @@
 
 use std::str::FromStr;
 
-use bevy_asset::{Asset, Handle, LoadContext, VisitAssetDependencies};
+use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_color::Color;
 use bevy_log::debug;
 use bevy_math::I64Vec2;
+use bevy_platform_support::collections::HashMap;
 use bevy_reflect::Reflect;
 use bevy_sprite::Anchor;
-use bevy_utils::HashMap;
 
+use crate::Result;
 use crate::anchor::bevy_anchor_from_ldtk;
 use crate::asset_labels::LayerAssetPath;
 use crate::color::bevy_color_from_ldtk_string;
@@ -20,15 +21,14 @@ use crate::entity_definition::EntityDefinition;
 use crate::field_instance::FieldInstance;
 use crate::iid::Iid;
 use crate::ldtk_asset_trait::{LdtkAsset, LdtkAssetWithFieldInstances, LdtkAssetWithTags};
-use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
+use crate::project_loader::{ProjectContext, ProjectDefinitionContext, UniqueIidAuditor};
 use crate::tileset_rectangle::TilesetRectangle;
-use crate::Result;
 use crate::{ldtk, ldtk_import_error};
 
 /// An asset representing an [LDtk Entity Instance](https://ldtk.io/json/#ldtk-EntityInstanceJson).
 ///
 /// See [crate::asset_labels] for a description of the label format.
-#[derive(Debug, Reflect)]
+#[derive(Debug, Asset, Reflect)]
 pub struct Entity {
     /// The identifier for this specific entity.
     ///
@@ -79,11 +79,16 @@ impl Entity {
         value: &ldtk::EntityInstance,
         layer_asset_path: &LayerAssetPath,
         load_context: &mut LoadContext,
+        unique_iid_auditor: &mut UniqueIidAuditor,
         project_context: &ProjectContext,
         project_definitions_context: &ProjectDefinitionContext,
     ) -> Result<(Iid, Handle<Self>)> {
         let identifier = value.identifier.clone();
         let iid = Iid::from_str(&value.iid)?;
+        unique_iid_auditor.check(iid)?;
+        let entity_asset_path = layer_asset_path.to_entity_asset_path(&identifier, iid)?;
+        let entity_load_context = load_context.begin_labeled_asset();
+
         let grid = (value.grid.len() == 2)
             .then(|| (value.grid[0], value.grid[1]).into())
             .ok_or(ldtk_import_error!(
@@ -105,12 +110,12 @@ impl Entity {
             (None, Some(y)) => {
                 return Err(ldtk_import_error!(
                     "When constructing an entity, world_x was None but world_y was Some({y})!",
-                ))
+                ));
             }
             (Some(x), None) => {
                 return Err(ldtk_import_error!(
                     "When constructing an entity, world_x was Some({x}) but world_y was None!",
-                ))
+                ));
             }
             (Some(x), Some(y)) => Some((x, y).into()),
         };
@@ -152,8 +157,6 @@ impl Entity {
                 value.grid
             ))?;
 
-        let entity_asset_path = layer_asset_path.to_entity_asset_path(&identifier, iid)?;
-
         let entity = Self {
             identifier,
             iid,
@@ -167,11 +170,12 @@ impl Entity {
             field_instances,
             size,
             location,
-        }
-        .into();
+        };
 
-        let handle =
-            load_context.add_loaded_labeled_asset(entity_asset_path.to_asset_label(), entity);
+        let finished_entity = entity_load_context.finish(entity);
+
+        let handle = load_context
+            .add_loaded_labeled_asset(entity_asset_path.to_asset_label(), finished_entity);
 
         Ok((iid, handle))
     }
@@ -200,14 +204,5 @@ impl LdtkAssetWithTags for Entity {
 
     fn has_tag(&self, tag: &str) -> bool {
         self.tags.iter().any(|inner_tag| inner_tag == tag)
-    }
-}
-
-impl Asset for Entity {}
-impl VisitAssetDependencies for Entity {
-    fn visit_dependencies(&self, visit: &mut impl FnMut(bevy_asset::UntypedAssetId)) {
-        self.field_instances.values().for_each(|field_instance| {
-            field_instance.visit_dependencies(visit);
-        });
     }
 }

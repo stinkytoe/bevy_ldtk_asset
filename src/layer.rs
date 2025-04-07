@@ -5,9 +5,8 @@
 
 use std::str::FromStr;
 
-use bevy_asset::{Asset, Handle, LoadContext, VisitAssetDependencies};
+use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_image::Image;
-use bevy_log::error;
 use bevy_math::I64Vec2;
 use bevy_reflect::Reflect;
 
@@ -18,11 +17,11 @@ use crate::layer_definition::LayerDefinition;
 use crate::ldtk;
 use crate::ldtk_asset_trait::{LdtkAsset, LdtkAssetWithChildren};
 use crate::ldtk_path::ldtk_path_to_bevy_path;
-use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
+use crate::project_loader::{ProjectContext, ProjectDefinitionContext, UniqueIidAuditor};
 use crate::tile_instance::TileInstance;
 use crate::tileset_definition::TilesetDefinition;
 use crate::uid::Uid;
-use crate::{ldtk_import_error, Result};
+use crate::{Result, ldtk_import_error};
 
 /// A layer instance which contains [Entity] children.
 ///
@@ -38,6 +37,7 @@ impl EntitiesLayer {
         value: &ldtk::LayerInstance,
         layer_asset_path: &LayerAssetPath,
         load_context: &mut LoadContext,
+        unique_iid_auditor: &mut UniqueIidAuditor,
         project_context: &ProjectContext,
         project_definitions_context: &ProjectDefinitionContext,
     ) -> Result<Self> {
@@ -55,6 +55,7 @@ impl EntitiesLayer {
                         value,
                         layer_asset_path,
                         load_context,
+                        unique_iid_auditor,
                         project_context,
                         project_definitions_context,
                     )
@@ -137,16 +138,6 @@ impl TilesLayer {
                     .map(|bevy_path| load_context.load(bevy_path))
                     .unwrap_or_default();
 
-                // Not a parse error, but should be reported to the user.
-                if tileset_definition.is_none() {
-                    error!(
-                        "tileset_definition is None in layer: {}! This is technically \
-                        a valid LDtk file, but the editor will show an error message for the layer \
-                        with the missing tileset. Please correct inside of LDtk!",
-                        value.identifier
-                    );
-                }
-
                 Ok(Self {
                     int_grid,
                     tiles,
@@ -222,6 +213,7 @@ impl LayerType {
         value: &ldtk::LayerInstance,
         layer_asset_path: &LayerAssetPath,
         load_context: &mut LoadContext,
+        unique_iid_auditor: &mut UniqueIidAuditor,
         project_context: &ProjectContext,
         project_definition_context: &ProjectDefinitionContext,
     ) -> Result<Self> {
@@ -230,6 +222,7 @@ impl LayerType {
                 value,
                 layer_asset_path,
                 load_context,
+                unique_iid_auditor,
                 project_context,
                 project_definition_context,
             )?)),
@@ -247,7 +240,7 @@ impl LayerType {
 /// An asset representing an [LDtk Layer Instance](https://ldtk.io/json/#ldtk-LayerInstanceJson).
 ///
 /// See [crate::asset_labels] for a description of the label format.
-#[derive(Debug, Reflect)]
+#[derive(Debug, Asset, Reflect)]
 pub struct Layer {
     /// The size of the logical grid, in two dimensions.
     ///
@@ -292,22 +285,27 @@ impl Layer {
         index: usize,
         level_asset_path: &LevelAssetPath,
         load_context: &mut LoadContext,
+        unique_iid_auditor: &mut UniqueIidAuditor,
         project_context: &ProjectContext,
         project_definition_context: &ProjectDefinitionContext,
     ) -> Result<(Iid, Handle<Self>)> {
-        let grid_size: I64Vec2 = (value.c_wid, value.c_hei).into();
-        let grid_cell_size = value.grid_size;
         let identifier = value.identifier.clone();
         let layer_asset_path = level_asset_path.to_layer_asset_path(&identifier)?;
+        let mut layer_load_context = load_context.begin_labeled_asset();
+
+        let grid_size: I64Vec2 = (value.c_wid, value.c_hei).into();
+        let grid_cell_size = value.grid_size;
         let opacity = value.opacity;
         let layer_type = LayerType::new(
             value,
             &layer_asset_path,
-            load_context,
+            &mut layer_load_context,
+            unique_iid_auditor,
             project_context,
             project_definition_context,
         )?;
         let iid = Iid::from_str(&value.iid)?;
+        unique_iid_auditor.check(iid)?;
         let layer_definition = project_definition_context
             .layer_definitions
             .get(&value.layer_def_uid)
@@ -341,8 +339,10 @@ impl Layer {
             index,
         };
 
-        let handle =
-            load_context.add_loaded_labeled_asset(layer_asset_path.to_asset_label(), layer.into());
+        let finished_layer = layer_load_context.finish(layer);
+
+        let handle = load_context
+            .add_loaded_labeled_asset(layer_asset_path.to_asset_label(), finished_layer);
 
         Ok((iid, handle))
     }
@@ -364,30 +364,6 @@ impl LdtkAssetWithChildren<Entity> for Layer {
             LayerType::Entities(entities_layer) => either::Left(entities_layer.entities.values()),
             LayerType::IntGrid(_) | LayerType::Tiles(_) | LayerType::AutoLayer(_) => {
                 either::Right([].iter())
-            }
-        }
-    }
-}
-
-impl Asset for Layer {}
-impl VisitAssetDependencies for Layer {
-    fn visit_dependencies(&self, visit: &mut impl FnMut(bevy_asset::UntypedAssetId)) {
-        self.layer_definition.visit_dependencies(visit);
-
-        match &self.layer_type {
-            LayerType::Tiles(tiles_layer)
-            | LayerType::IntGrid(tiles_layer)
-            | LayerType::AutoLayer(tiles_layer) => {
-                tiles_layer
-                    .tileset_definition
-                    .iter()
-                    .for_each(|handle| handle.visit_dependencies(visit));
-            }
-            LayerType::Entities(entities_layer) => {
-                entities_layer
-                    .entities
-                    .values()
-                    .for_each(|handle| handle.visit_dependencies(visit));
             }
         }
     }
