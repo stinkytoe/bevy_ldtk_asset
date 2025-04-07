@@ -1,9 +1,10 @@
 # Bevy LDtk Asset
 
-[![License](https://img.shields.io/badge/license-MIT%2FApache-blue.svg)](https://github.com/stinkytoe/bevy_ldtk_asset/tree/main#license)
 [![docs.rs](https://img.shields.io/docsrs/bevy_ldtk_asset)](https://docs.rs/bevy_ldtk_asset/latest/bevy_ldtk_asset/)
-[![Crates.io Version](https://img.shields.io/crates/v/bevy_ldtk_asset)](https://crates.io/crates/bevy_ldtk_asset/)
 [![CI](https://github.com/stinkytoe/bevy_ldtk_asset/workflows/CI/badge.svg)](https://github.com/stinkytoe/bevy_ldtk_asset/actions)
+[![Crates.io Version](https://img.shields.io/crates/v/bevy_ldtk_asset)](https://crates.io/crates/bevy_ldtk_asset/)
+[![Crates.io Total Downloads](https://img.shields.io/crates/d/bevy_ldtk_asset)](https://crates.io/crates/bevy_ldtk_asset/)
+[![License](https://img.shields.io/badge/license-MIT%2FApache-blue.svg)](https://github.com/stinkytoe/bevy_ldtk_asset/tree/main#license)
 
 <!--toc:start-->
 - [Bevy LDtk Asset](#bevy-ldtk-asset)
@@ -31,7 +32,7 @@
 A plugin for the [Bevy Engine](https://bevyengine.org) for loading projects
 from the [LDtk](https://ldtk.io) level editor.
 
-## Description  
+## Description
 
 This plugin aims to provide an asset through Bevy's asset loader system, providing
 access to the data in an LDtk project.
@@ -292,7 +293,7 @@ Or by adding `bevy_ldtk_asset` to your `Cargo.toml` file dependencies section:
 
 ```toml
 [dependencies]
-bevy_ldtk_asset = "0.6"
+bevy_ldtk_asset = "0.7"
 ```
 
 ## Help
@@ -310,6 +311,11 @@ stinkytoe
 
 ## Version History
 
+- 0.7.0:
+  - Release for Bevy 0.16.0
+  - Removed nuisance message for tiles type layers without layer definitions
+  - Further improvements to sub-asset dependency loading detection
+  - Asset loader now fails if duplicate Iids are found in an LDtk project
 - 0.6.4:
   - Release for Bevy 0.15.3
   - Fixed bug where only top level asset labels were being registered.
@@ -350,6 +356,7 @@ stinkytoe
 
 | bevy_ldtk_asset | bevy        | LDtk  |
 | :-------------: | :---------: | :---: |
+| 0.7.0           | 0.16.0      | 1.5.3 |
 | 0.6.4           | 0.15.3      | 1.5.3 |
 | 0.6.3           | 0.15.2      | 1.5.3 |
 | 0.6.2           | 0.15.2      | 1.5.3 |
@@ -371,6 +378,5 @@ Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or [http://www.apa
 This project would not exist without the awesome efforts of the Bevy team, and
 Deepknight of Deepknight Games!
 
-[Bevy](https://bevyengine.org)
-
+[Bevy](https://bevyengine.org),
 [LDtk](https://ldtk.io)
