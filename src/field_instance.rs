@@ -30,7 +30,7 @@ use crate::uid::{Uid, UidMap};
 
 /// The internal value of a field instance of type [FieldInstanceType::EntityRef]
 #[allow(missing_docs)]
-#[derive(Debug, Reflect)]
+#[derive(Clone, Copy, Debug, Reflect)]
 pub struct EntityRef {
     pub entity_iid: Iid,
     pub layer_iid: Iid,
@@ -39,14 +39,14 @@ pub struct EntityRef {
 }
 
 #[allow(missing_docs)]
-#[derive(Debug, Reflect)]
+#[derive(Clone, Debug, Reflect)]
 pub struct EnumValue {
     value: String,
     enum_definition: Handle<EnumDefinition>,
 }
 
 #[allow(missing_docs)]
-#[derive(Debug, Reflect)]
+#[derive(Clone, Debug, Reflect)]
 pub enum FieldInstanceType {
     ArrayInt(Vec<i64>),
     ArrayEnum(Vec<EnumValue>),
@@ -333,7 +333,7 @@ impl FieldInstanceType {
 /// flash a red border around the entity warning the user to fill in the field. If the field is
 /// allowed to be null, then we simply will not export it.
 #[allow(missing_docs)]
-#[derive(Debug, Reflect)]
+#[derive(Clone, Debug, Reflect)]
 pub struct FieldInstance {
     pub tileset_rectangle: Option<TilesetRectangle>,
     pub field_instance_type: FieldInstanceType,
