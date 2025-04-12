@@ -87,7 +87,6 @@ impl Entity {
         let iid = Iid::from_str(&value.iid)?;
         unique_iid_auditor.check(iid)?;
         let entity_asset_path = layer_asset_path.to_entity_asset_path(&identifier, iid)?;
-        let entity_load_context = load_context.begin_labeled_asset();
 
         let grid = (value.grid.len() == 2)
             .then(|| (value.grid[0], value.grid[1]).into())
@@ -172,10 +171,7 @@ impl Entity {
             location,
         };
 
-        let finished_entity = entity_load_context.finish(entity);
-
-        let handle = load_context
-            .add_loaded_labeled_asset(entity_asset_path.to_asset_label(), finished_entity);
+        let handle = load_context.add_labeled_asset(entity_asset_path.to_asset_label(), entity);
 
         Ok((iid, handle))
     }

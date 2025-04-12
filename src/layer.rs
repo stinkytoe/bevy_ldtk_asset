@@ -291,7 +291,6 @@ impl Layer {
     ) -> Result<(Iid, Handle<Self>)> {
         let identifier = value.identifier.clone();
         let layer_asset_path = level_asset_path.to_layer_asset_path(&identifier)?;
-        let mut layer_load_context = load_context.begin_labeled_asset();
 
         let grid_size: I64Vec2 = (value.c_wid, value.c_hei).into();
         let grid_cell_size = value.grid_size;
@@ -299,7 +298,7 @@ impl Layer {
         let layer_type = LayerType::new(
             value,
             &layer_asset_path,
-            &mut layer_load_context,
+            load_context,
             unique_iid_auditor,
             project_context,
             project_definition_context,
@@ -339,10 +338,7 @@ impl Layer {
             index,
         };
 
-        let finished_layer = layer_load_context.finish(layer);
-
-        let handle = load_context
-            .add_loaded_labeled_asset(layer_asset_path.to_asset_label(), finished_layer);
+        let handle = load_context.add_labeled_asset(layer_asset_path.to_asset_label(), layer);
 
         Ok((iid, handle))
     }
