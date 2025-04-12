@@ -315,7 +315,9 @@ stinkytoe
   - Release for Bevy 0.16.0
   - Removed nuisance message for tiles type layers without layer definitions
   - Further improvements to sub-asset dependency loading detection
+  - FieldInstance now implements Clone
   - Asset loader now fails if duplicate Iids are found in an LDtk project
+  - Updated to require rust 2024 edition
 - 0.6.4:
   - Release for Bevy 0.15.3
   - Fixed bug where only top level asset labels were being registered.
