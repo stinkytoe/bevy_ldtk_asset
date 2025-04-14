@@ -24,6 +24,7 @@ use crate::{ldtk, ldtk_import_error};
 ///
 /// See [nineSliceBorders](https://ldtk.io/json/#ldtk-EntityDefJson;nineSliceBorders)
 /// from the LDtk documentation.
+#[allow(missing_docs)]
 #[derive(Debug, Reflect)]
 pub struct NineSlice {
     pub up: i64,
