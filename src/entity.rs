@@ -9,7 +9,7 @@ use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_color::Color;
 use bevy_log::debug;
 use bevy_math::I64Vec2;
-use bevy_platform_support::collections::HashMap;
+use bevy_platform::collections::HashMap;
 use bevy_reflect::Reflect;
 use bevy_sprite::Anchor;
 

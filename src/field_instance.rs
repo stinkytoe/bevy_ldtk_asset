@@ -14,7 +14,7 @@ use std::str::FromStr;
 use bevy_asset::Handle;
 use bevy_color::Color;
 use bevy_math::I64Vec2;
-use bevy_platform_support::collections::HashMap;
+use bevy_platform::collections::HashMap;
 use bevy_reflect::Reflect;
 
 use crate::Result;
