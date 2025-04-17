@@ -16,7 +16,6 @@
     - [LDtk dependencies (Images, etc)](#ldtk-dependencies-images-etc)
     - [External Levels](#external-levels)
     - [Multi World Projects](#multi-world-projects)
-    - [Naming Collisions](#naming-collisions)
   - [Getting Started](#getting-started)
     - [Dependencies](#dependencies)
     - [Installing](#installing)
@@ -248,30 +247,6 @@ the appropriate levels, layers, etc as sub assets.
 - For single world projects, we add the identifier of "World", and clone the Iid
 of the project in order to build our World asset.
 
-### Naming Collisions
-
-Unfortunately, there are many name collisions between the nomenclature used in
-Bevy and LDtk. Especially (but not exclusively):
-
-- World
-- Level
-- Layer
-- Entity
-
-I will endeavor to refer to objects in Bevy as ECS objects, i.e. an
-ECS entity or ECS world when referring to objects from the Bevy ecosystem, and
-LDtk objects for things either from this library or LDtk itself, i.e. an LDtk
-entity or LDtk world.
-
-Users are recommended to use the `use ... as ...` pattern in their own code when
-importing these types to help avoid any pitfalls.
-
-For example, to import the LDtk Entity asset, I recommend importing the type as such:
-
-```rust
-use bevy_ldtk_asset::entity::Entity as EntityAsset;
-```
-
 ## Getting Started
 
 ### Dependencies
@@ -318,6 +293,8 @@ stinkytoe
   - FieldInstance now implements Clone
   - Asset loader now fails if duplicate Iids are found in an LDtk project
   - Updated to require rust 2024 edition
+  - Renamed Layer to LayerInstance
+  - Renamed Entity to EntityInstance
 - 0.6.4:
   - Release for Bevy 0.15.3
   - Fixed bug where only top level asset labels were being registered.
