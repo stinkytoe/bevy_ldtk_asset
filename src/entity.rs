@@ -29,7 +29,7 @@ use crate::{ldtk, ldtk_import_error};
 ///
 /// See [crate::asset_labels] for a description of the label format.
 #[derive(Debug, Asset, Reflect)]
-pub struct Entity {
+pub struct EntityInstance {
     /// The identifier for this specific entity.
     ///
     /// Unlike other identifiers, there is no guarantee that this is unique.
@@ -74,7 +74,7 @@ pub struct Entity {
     pub location: I64Vec2,
 }
 
-impl Entity {
+impl EntityInstance {
     pub(crate) fn create_handle_pair(
         value: &ldtk::EntityInstance,
         layer_asset_path: &LayerAssetPath,
@@ -177,7 +177,7 @@ impl Entity {
     }
 }
 
-impl LdtkAsset for Entity {
+impl LdtkAsset for EntityInstance {
     fn get_identifier(&self) -> &str {
         &self.identifier
     }
@@ -187,13 +187,13 @@ impl LdtkAsset for Entity {
     }
 }
 
-impl LdtkAssetWithFieldInstances for Entity {
+impl LdtkAssetWithFieldInstances for EntityInstance {
     fn get_field_instance(&self, identifier: &str) -> Option<&FieldInstance> {
         self.field_instances.get(identifier)
     }
 }
 
-impl LdtkAssetWithTags for Entity {
+impl LdtkAssetWithTags for EntityInstance {
     fn get_tags(&self) -> &[String] {
         &self.tags
     }

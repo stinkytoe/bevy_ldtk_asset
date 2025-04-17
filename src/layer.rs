@@ -11,7 +11,7 @@ use bevy_math::I64Vec2;
 use bevy_reflect::Reflect;
 
 use crate::asset_labels::{LayerAssetPath, LevelAssetPath};
-use crate::entity::Entity;
+use crate::entity::EntityInstance;
 use crate::iid::{Iid, IidMap};
 use crate::layer_definition::LayerDefinition;
 use crate::ldtk;
@@ -29,7 +29,7 @@ use crate::{Result, ldtk_import_error};
 #[derive(Debug, Reflect)]
 pub struct EntitiesLayer {
     /// Handles pointing to the [Entity] instances which belong to this layer.
-    pub entities: IidMap<Handle<Entity>>,
+    pub entities: IidMap<Handle<EntityInstance>>,
 }
 
 impl EntitiesLayer {
@@ -51,7 +51,7 @@ impl EntitiesLayer {
                 .entity_instances
                 .iter()
                 .map(|value| {
-                    Entity::create_handle_pair(
+                    EntityInstance::create_handle_pair(
                         value,
                         layer_asset_path,
                         load_context,
@@ -241,7 +241,7 @@ impl LayerType {
 ///
 /// See [crate::asset_labels] for a description of the label format.
 #[derive(Debug, Asset, Reflect)]
-pub struct Layer {
+pub struct LayerInstance {
     /// The size of the logical grid, in two dimensions.
     ///
     /// This is derived from the `c_wid` and `c_hei` LDtk fields.
@@ -279,7 +279,7 @@ pub struct Layer {
     pub index: usize,
 }
 
-impl Layer {
+impl LayerInstance {
     pub(crate) fn create_handle_pair(
         value: &ldtk::LayerInstance,
         index: usize,
@@ -325,7 +325,7 @@ impl Layer {
             ));
         }
 
-        let layer = Layer {
+        let layer = LayerInstance {
             grid_size,
             grid_cell_size,
             identifier,
@@ -344,7 +344,7 @@ impl Layer {
     }
 }
 
-impl LdtkAsset for Layer {
+impl LdtkAsset for LayerInstance {
     fn get_identifier(&self) -> &str {
         &self.identifier
     }
@@ -354,8 +354,8 @@ impl LdtkAsset for Layer {
     }
 }
 
-impl LdtkAssetWithChildren<Entity> for Layer {
-    fn get_children(&self) -> impl Iterator<Item = &Handle<Entity>> {
+impl LdtkAssetWithChildren<EntityInstance> for LayerInstance {
+    fn get_children(&self) -> impl Iterator<Item = &Handle<EntityInstance>> {
         match &self.layer_type {
             LayerType::Entities(entities_layer) => either::Left(entities_layer.entities.values()),
             LayerType::IntGrid(_) | LayerType::Tiles(_) | LayerType::AutoLayer(_) => {

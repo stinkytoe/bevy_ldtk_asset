@@ -1,8 +1,8 @@
 //! A convenient place to re-export the most used types.
 
 // The main LDtk types.
-pub use crate::entity::Entity;
-pub use crate::layer::Layer;
+pub use crate::entity::EntityInstance;
+pub use crate::layer::LayerInstance;
 pub use crate::level::{Level, LevelBackground, Neighbour, NeighbourDir};
 pub use crate::project::Project;
 pub use crate::world::{World, WorldLayout};

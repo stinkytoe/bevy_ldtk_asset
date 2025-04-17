@@ -19,7 +19,7 @@ use crate::color::bevy_color_from_ldtk_string;
 use crate::field_instance::FieldInstance;
 use crate::iid::Iid;
 use crate::iid::IidMap;
-use crate::layer::Layer;
+use crate::layer::LayerInstance;
 use crate::ldtk;
 use crate::ldtk_asset_trait::LdtkAsset;
 use crate::ldtk_asset_trait::LdtkAssetWithChildren;
@@ -179,7 +179,7 @@ pub struct Level {
     ///
     /// NOTE: There is no meaning to the order within this field. If the order of the layers is
     /// needed, the [Layer::index] field represents the order of  the layer within the set.
-    pub layers: IidMap<Handle<Layer>>,
+    pub layers: IidMap<Handle<LayerInstance>>,
     /// The unique index of this level.
     ///
     /// This only has meaning for
@@ -265,7 +265,7 @@ impl Level {
             .rev()
             .enumerate()
             .map(|(index, ldtk_layer_instance)| {
-                Layer::create_handle_pair(
+                LayerInstance::create_handle_pair(
                     ldtk_layer_instance,
                     index,
                     &level_asset_path,
@@ -308,8 +308,8 @@ impl LdtkAsset for Level {
     }
 }
 
-impl LdtkAssetWithChildren<Layer> for Level {
-    fn get_children(&self) -> impl Iterator<Item = &Handle<Layer>> {
+impl LdtkAssetWithChildren<LayerInstance> for Level {
+    fn get_children(&self) -> impl Iterator<Item = &Handle<LayerInstance>> {
         self.layers.values()
     }
 }
