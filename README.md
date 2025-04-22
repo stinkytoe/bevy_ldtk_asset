@@ -357,5 +357,6 @@ Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or [http://www.apa
 This project would not exist without the awesome efforts of the Bevy team, and
 Deepknight of Deepknight Games!
 
-[Bevy](https://bevyengine.org),
-[LDtk](https://ldtk.io)
+[<img src="https://bevyengine.org/assets/bevy_logo_dark.svg" width=600px/>](https://bevyengine.org)
+
+[<img src="https://ldtk.io/wp-content/themes/ldtk/img/logo-iconText.png" width=600px/>](https://itch.io)
