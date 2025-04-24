@@ -7,9 +7,8 @@ use std::str::FromStr;
 
 use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_color::Color;
-use bevy_log::debug;
 use bevy_math::I64Vec2;
-use bevy_platform_support::collections::HashMap;
+use bevy_platform::collections::HashMap;
 use bevy_reflect::Reflect;
 use bevy_sprite::Anchor;
 
@@ -29,7 +28,7 @@ use crate::{ldtk, ldtk_import_error};
 ///
 /// See [crate::asset_labels] for a description of the label format.
 #[derive(Debug, Asset, Reflect)]
-pub struct Entity {
+pub struct EntityInstance {
     /// The identifier for this specific entity.
     ///
     /// Unlike other identifiers, there is no guarantee that this is unique.
@@ -74,7 +73,7 @@ pub struct Entity {
     pub location: I64Vec2,
 }
 
-impl Entity {
+impl EntityInstance {
     pub(crate) fn create_handle_pair(
         value: &ldtk::EntityInstance,
         layer_asset_path: &LayerAssetPath,
@@ -87,7 +86,6 @@ impl Entity {
         let iid = Iid::from_str(&value.iid)?;
         unique_iid_auditor.check(iid)?;
         let entity_asset_path = layer_asset_path.to_entity_asset_path(&identifier, iid)?;
-        let entity_load_context = load_context.begin_labeled_asset();
 
         let grid = (value.grid.len() == 2)
             .then(|| (value.grid[0], value.grid[1]).into())
@@ -130,13 +128,7 @@ impl Entity {
         let field_instances = value
             .field_instances
             .iter()
-            .filter(|value| {
-                let ret = value.value.is_some();
-                if !ret {
-                    debug!("Skipping field instance {value:?} because inner value is None!");
-                }
-                ret
-            })
+            .filter(|value| value.value.is_some())
             .map(|value| -> Result<(String, FieldInstance)> {
                 Ok((
                     value.identifier.clone(),
@@ -172,16 +164,13 @@ impl Entity {
             location,
         };
 
-        let finished_entity = entity_load_context.finish(entity);
-
-        let handle = load_context
-            .add_loaded_labeled_asset(entity_asset_path.to_asset_label(), finished_entity);
+        let handle = load_context.add_labeled_asset(entity_asset_path.to_asset_label(), entity);
 
         Ok((iid, handle))
     }
 }
 
-impl LdtkAsset for Entity {
+impl LdtkAsset for EntityInstance {
     fn get_identifier(&self) -> &str {
         &self.identifier
     }
@@ -191,13 +180,13 @@ impl LdtkAsset for Entity {
     }
 }
 
-impl LdtkAssetWithFieldInstances for Entity {
+impl LdtkAssetWithFieldInstances for EntityInstance {
     fn get_field_instance(&self, identifier: &str) -> Option<&FieldInstance> {
         self.field_instances.get(identifier)
     }
 }
 
-impl LdtkAssetWithTags for Entity {
+impl LdtkAssetWithTags for EntityInstance {
     fn get_tags(&self) -> &[String] {
         &self.tags
     }

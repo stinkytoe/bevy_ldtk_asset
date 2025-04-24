@@ -11,8 +11,8 @@
 
 #![allow(missing_docs)]
 
-use bevy_platform_support::collections::HashMap;
-use bevy_platform_support::collections::HashSet;
+use bevy_platform::collections::HashMap;
+use bevy_platform::collections::HashSet;
 
 /// A re-export of the [uuid::uuid] macro.
 pub use uuid::uuid as iid;

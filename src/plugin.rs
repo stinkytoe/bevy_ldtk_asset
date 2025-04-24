@@ -3,11 +3,11 @@
 use bevy_app::{App, Plugin};
 use bevy_asset::AssetApp;
 
-use crate::entity::Entity;
+use crate::entity::EntityInstance;
 use crate::entity_definition::EntityDefinition;
 use crate::enum_definition::EnumDefinition;
 use crate::iid::Iid;
-use crate::layer::Layer;
+use crate::layer::LayerInstance;
 use crate::layer_definition::LayerDefinition;
 use crate::level::{Level, LevelBackground};
 use crate::project::Project;
@@ -27,8 +27,8 @@ pub struct BevyLdtkAssetPlugin;
 impl Plugin for BevyLdtkAssetPlugin {
     fn build(&self, app: &mut App) {
         app //
-            .init_asset::<Entity>()
-            .init_asset::<Layer>()
+            .init_asset::<EntityInstance>()
+            .init_asset::<LayerInstance>()
             .init_asset::<Level>()
             .init_asset::<Project>()
             .init_asset::<World>()
@@ -37,8 +37,8 @@ impl Plugin for BevyLdtkAssetPlugin {
             .init_asset::<TilesetDefinition>()
             .init_asset::<EnumDefinition>()
             .init_asset_loader::<ProjectLoader>()
-            .register_asset_reflect::<Entity>()
-            .register_asset_reflect::<Layer>()
+            .register_asset_reflect::<EntityInstance>()
+            .register_asset_reflect::<LayerInstance>()
             .register_asset_reflect::<Level>()
             .register_asset_reflect::<Project>()
             .register_asset_reflect::<World>()
@@ -61,8 +61,8 @@ impl Plugin for BevyLdtkAssetPlugin {
                     asset_events_debug_output::<Project>,
                     asset_events_debug_output::<World>,
                     asset_events_debug_output::<Level>,
-                    asset_events_debug_output::<Layer>,
-                    asset_events_debug_output::<Entity>,
+                    asset_events_debug_output::<LayerInstance>,
+                    asset_events_debug_output::<EntityInstance>,
                 ),
             );
         }

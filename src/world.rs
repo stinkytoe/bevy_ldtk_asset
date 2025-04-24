@@ -78,7 +78,6 @@ impl World {
     ) -> Result<(Iid, Handle<Self>)> {
         let identifier = ldtk_world.identifier.clone();
         let world_asset_path = project_asset_path.to_world_asset_path(&identifier)?;
-        let mut world_load_context = load_context.begin_labeled_asset();
 
         let iid = Iid::from_str(&ldtk_world.iid)?;
         unique_iid_auditor.check(iid)?;
@@ -108,8 +107,7 @@ impl World {
                     let ldtk_path = Path::new(external_rel_path);
                     let bevy_path =
                         ldtk_path_to_bevy_path(project_context.project_directory, ldtk_path);
-                    let bytes =
-                        block_on(async { world_load_context.read_asset_bytes(bevy_path).await })?;
+                    let bytes = block_on(async { load_context.read_asset_bytes(bevy_path).await })?;
                     let level: ldtk::Level = serde_json::from_slice(&bytes)?;
                     Ok(level)
                 })
@@ -126,7 +124,7 @@ impl World {
                     ldtk_level,
                     index,
                     &world_asset_path,
-                    &mut world_load_context,
+                    load_context,
                     unique_iid_auditor,
                     project_context,
                     project_definition_context,
@@ -141,10 +139,7 @@ impl World {
             levels,
         };
 
-        let loaded_world = world_load_context.finish(world);
-
-        let handle =
-            load_context.add_loaded_labeled_asset(world_asset_path.to_asset_label(), loaded_world);
+        let handle = load_context.add_labeled_asset(world_asset_path.to_asset_label(), world);
 
         Ok((iid, handle))
     }

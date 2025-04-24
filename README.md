@@ -1,9 +1,10 @@
 # Bevy LDtk Asset
 
-[![License](https://img.shields.io/badge/license-MIT%2FApache-blue.svg)](https://github.com/stinkytoe/bevy_ldtk_asset/tree/main#license)
 [![docs.rs](https://img.shields.io/docsrs/bevy_ldtk_asset)](https://docs.rs/bevy_ldtk_asset/latest/bevy_ldtk_asset/)
-[![Crates.io Version](https://img.shields.io/crates/v/bevy_ldtk_asset)](https://crates.io/crates/bevy_ldtk_asset/)
 [![CI](https://github.com/stinkytoe/bevy_ldtk_asset/workflows/CI/badge.svg)](https://github.com/stinkytoe/bevy_ldtk_asset/actions)
+[![Crates.io Version](https://img.shields.io/crates/v/bevy_ldtk_asset)](https://crates.io/crates/bevy_ldtk_asset/)
+[![Crates.io Total Downloads](https://img.shields.io/crates/d/bevy_ldtk_asset)](https://crates.io/crates/bevy_ldtk_asset/)
+[![License](https://img.shields.io/badge/license-MIT%2FApache-blue.svg)](https://github.com/stinkytoe/bevy_ldtk_asset/tree/main#license)
 
 <!--toc:start-->
 - [Bevy LDtk Asset](#bevy-ldtk-asset)
@@ -15,7 +16,6 @@
     - [LDtk dependencies (Images, etc)](#ldtk-dependencies-images-etc)
     - [External Levels](#external-levels)
     - [Multi World Projects](#multi-world-projects)
-    - [Naming Collisions](#naming-collisions)
   - [Getting Started](#getting-started)
     - [Dependencies](#dependencies)
     - [Installing](#installing)
@@ -31,10 +31,18 @@
 A plugin for the [Bevy Engine](https://bevyengine.org) for loading projects
 from the [LDtk](https://ldtk.io) level editor.
 
-## Description  
+## Description
 
-This plugin aims to provide an asset through Bevy's asset loader system, providing
-access to the data in an LDtk project.
+This plugin provides assets to the Bevy game engine representing elements of an LDtk project. 
+Our aim is to allow plugin developers and game designers to include their work from LDtk into their 
+projects, with little fuss over the details. 
+
+Almost all aspects of the LDtk project are represented as Bevy assets (see [Capabilities](#capabilities)),
+with a uniform and well defined asset label scheme allowing users to pull the parts of the 
+project into Bevy components and/or resources wherever they need them!
+
+It is not a complete solution, however. My other project `shieldtank` (coming soon!) will aim to be a more
+complete framework for developing Bevy games using LDtk.
 
 ### Philosophy
 
@@ -50,9 +58,11 @@ When possible, we will convert items to a Bevy compatible format.
 - If the field describes a location in space, we will use an [I64Vec2](https://docs.rs/bevy/latest/bevy/math/struct.Vec2.html)
   - LDtk, and by extension this library, uses the convention that the y-axis
   is positive down. Implementers will need to take care to invert the y-axis when
-  creating components in Bevy's screen space, such as the translation vector in a
+  creating components in Bevy's world space, such as the translation vector in a
   [Transform](https://docs.rs/bevy/latest/bevy/prelude/struct.Transform.html) Component.
-  - This behavior changed in v0.6.0 .
+  - The `z` component is not represented, but `LayerInstance`s and `LevelInstance`s both contain an `index` field which can be 
+  used to derive one.
+  - This behavior changed in `v0.6.0`.
 - If the field describes a location within an image, we will use a [I64Vec2](https://docs.rs/bevy/latest/bevy/math/struct.I64Vec2.html)
   - The convention of y-axis being positive down is used here, to match the
   convention of LDtk, bevy_image, WGSL, and most image formats.
@@ -64,7 +74,7 @@ When possible, we will convert items to a Bevy compatible format.
 - `Iid`'s are parsed into our local [Iid](src/iid.rs) type. It is considered undefined
   behavior if these are not unique.
 - `Uid`'s are represented by the [Uid](src/uid.rs) type, which is of type `i64`.
-  These are being phased out of LDtk, and may be removed here as well in the future.
+  These are being phased out of LDtk, and will be removed here as well in the future.
   See [here](https://ldtk.io/docs/game-dev/json-overview/unique-identifiers/#important-future-deprecation-of-integer-uids).
 - LDtk pivot fields are converted to and stored as Bevy [Anchor](https://docs.rs/bevy/latest/bevy/sprite/enum.Anchor.html)
   fields
@@ -83,7 +93,7 @@ struct MyComponent {
 fn example_system(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(MyComponent {
         project_handle: asset_server.load("some_project.ldtk");
-    })
+    });
 }
 ```
 
@@ -237,39 +247,14 @@ See [Asset Labeling](#asset-labeling).
 
 LDtk is currently experimenting with a Multi World project. The current default
 is for an LDtk project to describe a single `world`, though the option is available
-to select the multi world behavior in the LDtk software. See [LDtk's World documentation](https://ldtk.io/json/#ldtk-WorldJson).
+to select the multi world behavior in LDtk. See [LDtk's World documentation](https://ldtk.io/json/#ldtk-WorldJson).
 
-Although the feature is still experimental, we have chosen to support it as a first
-class integration.
+Although the feature is still experimental, we have chosen to support it.
 
 - For multi world projects, we will export all the worlds as their own assets, with
 the appropriate levels, layers, etc as sub assets.
 - For single world projects, we add the identifier of "World", and clone the Iid
 of the project in order to build our World asset.
-
-### Naming Collisions
-
-Unfortunately, there are many name collisions between the nomenclature used in
-Bevy and LDtk. Especially (but not exclusively):
-
-- World
-- Level
-- Layer
-- Entity
-
-I will endeavor to refer to objects in Bevy as ECS objects, i.e. an
-ECS entity or ECS world when referring to objects from the Bevy ecosystem, and
-LDtk objects for things either from this library or LDtk itself, i.e. an LDtk
-entity or LDtk world.
-
-Users are recommended to use the `use ... as ...` pattern in their own code when
-importing these types to help avoid any pitfalls.
-
-For example, to import the LDtk Entity asset, I recommend importing the type as such:
-
-```rust
-use bevy_ldtk_asset::entity::Entity as EntityAsset;
-```
 
 ## Getting Started
 
@@ -292,7 +277,7 @@ Or by adding `bevy_ldtk_asset` to your `Cargo.toml` file dependencies section:
 
 ```toml
 [dependencies]
-bevy_ldtk_asset = "0.6"
+bevy_ldtk_asset = "0.7"
 ```
 
 ## Help
@@ -310,6 +295,15 @@ stinkytoe
 
 ## Version History
 
+- 0.7.0:
+  - Release for Bevy 0.16.0
+  - Removed nuisance message for tiles type layers without layer definitions
+  - Further improvements to sub-asset dependency loading detection
+  - FieldInstance now implements Clone
+  - Asset loader now fails if duplicate Iids are found in an LDtk project
+  - Updated to require rust 2024 edition
+  - Renamed Layer to LayerInstance
+  - Renamed Entity to EntityInstance
 - 0.6.4:
   - Release for Bevy 0.15.3
   - Fixed bug where only top level asset labels were being registered.
@@ -350,6 +344,7 @@ stinkytoe
 
 | bevy_ldtk_asset | bevy        | LDtk  |
 | :-------------: | :---------: | :---: |
+| 0.7.0           | 0.16.0      | 1.5.3 |
 | 0.6.4           | 0.15.3      | 1.5.3 |
 | 0.6.3           | 0.15.2      | 1.5.3 |
 | 0.6.2           | 0.15.2      | 1.5.3 |
@@ -371,6 +366,6 @@ Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or [http://www.apa
 This project would not exist without the awesome efforts of the Bevy team, and
 Deepknight of Deepknight Games!
 
-[Bevy](https://bevyengine.org)
+[<img src="https://bevyengine.org/assets/bevy_logo_dark.svg" width=600px/>](https://bevyengine.org)
 
-[LDtk](https://ldtk.io)
+[<img src="https://ldtk.io/wp-content/themes/ldtk/img/logo-iconText.png" width=600px/>](https://itch.io)

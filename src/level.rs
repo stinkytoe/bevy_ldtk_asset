@@ -8,9 +8,8 @@ use std::str::FromStr;
 use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_color::Color;
 use bevy_image::Image;
-use bevy_log::debug;
 use bevy_math::{DVec2, I64Vec2};
-use bevy_platform_support::collections::HashMap;
+use bevy_platform::collections::HashMap;
 use bevy_reflect::Reflect;
 
 use crate::Result;
@@ -19,7 +18,7 @@ use crate::color::bevy_color_from_ldtk_string;
 use crate::field_instance::FieldInstance;
 use crate::iid::Iid;
 use crate::iid::IidMap;
-use crate::layer::Layer;
+use crate::layer::LayerInstance;
 use crate::ldtk;
 use crate::ldtk_asset_trait::LdtkAsset;
 use crate::ldtk_asset_trait::LdtkAssetWithChildren;
@@ -179,7 +178,7 @@ pub struct Level {
     ///
     /// NOTE: There is no meaning to the order within this field. If the order of the layers is
     /// needed, the [Layer::index] field represents the order of  the layer within the set.
-    pub layers: IidMap<Handle<Layer>>,
+    pub layers: IidMap<Handle<LayerInstance>>,
     /// The unique index of this level.
     ///
     /// This only has meaning for
@@ -200,7 +199,6 @@ impl Level {
     ) -> Result<(Iid, Handle<Self>)> {
         let identifier = value.identifier.clone();
         let level_asset_path = world_asset_path.to_level_asset_path(&identifier)?;
-        let mut level_load_context = load_context.begin_labeled_asset();
 
         let bg_color = bevy_color_from_ldtk_string(&value.bg_color)?;
         let neighbours = value
@@ -222,7 +220,7 @@ impl Level {
             }
             (Some(bg_pos), Some(bg_rel_path)) => {
                 let path = ldtk_path_to_bevy_path(project_context.project_directory, bg_rel_path);
-                let image = level_load_context.load(path);
+                let image = load_context.load(path);
                 let background = LevelBackground::new(bg_pos, image)?;
                 Some(background)
             }
@@ -230,13 +228,7 @@ impl Level {
         let field_instances = value
             .field_instances
             .iter()
-            .filter(|value| {
-                let ret = value.value.is_some();
-                if !ret {
-                    debug!("Skipping field instance {value:?} because inner value is None!");
-                }
-                ret
-            })
+            .filter(|value| value.value.is_some())
             .map(|value| -> Result<(String, FieldInstance)> {
                 Ok((
                     value.identifier.clone(),
@@ -266,11 +258,11 @@ impl Level {
             .rev()
             .enumerate()
             .map(|(index, ldtk_layer_instance)| {
-                Layer::create_handle_pair(
+                LayerInstance::create_handle_pair(
                     ldtk_layer_instance,
                     index,
                     &level_asset_path,
-                    &mut level_load_context,
+                    load_context,
                     unique_iid_auditor,
                     project_context,
                     project_definition_context,
@@ -293,10 +285,7 @@ impl Level {
             index,
         };
 
-        let loaded_level = level_load_context.finish(level);
-
-        let handle =
-            load_context.add_loaded_labeled_asset(level_asset_path.to_asset_label(), loaded_level);
+        let handle = load_context.add_labeled_asset(level_asset_path.to_asset_label(), level);
 
         Ok((iid, handle))
     }
@@ -312,8 +301,8 @@ impl LdtkAsset for Level {
     }
 }
 
-impl LdtkAssetWithChildren<Layer> for Level {
-    fn get_children(&self) -> impl Iterator<Item = &Handle<Layer>> {
+impl LdtkAssetWithChildren<LayerInstance> for Level {
+    fn get_children(&self) -> impl Iterator<Item = &Handle<LayerInstance>> {
         self.layers.values()
     }
 }
