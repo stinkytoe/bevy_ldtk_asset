@@ -33,8 +33,16 @@ from the [LDtk](https://ldtk.io) level editor.
 
 ## Description
 
-This plugin aims to provide an asset through Bevy's asset loader system, providing
-access to the data in an LDtk project.
+This plugin provides assets to the Bevy game engine representing elements of an LDtk project. 
+Our aim is to allow plugin developers and game designers to include their work from LDtk into their 
+projects, with little fuss over the details. 
+
+Almost all aspects of the LDtk project are represented as Bevy assets (see [Capabilities](#capabilities)),
+with a uniform and well defined asset label scheme allowing users to pull the parts of the 
+project into Bevy components and/or resources wherever they need them!
+
+It is not a complete solution, however. My other project `shieldtank` (coming soon!) will aim to be a more
+complete framework for developing Bevy games using LDtk.
 
 ### Philosophy
 
@@ -50,9 +58,11 @@ When possible, we will convert items to a Bevy compatible format.
 - If the field describes a location in space, we will use an [I64Vec2](https://docs.rs/bevy/latest/bevy/math/struct.Vec2.html)
   - LDtk, and by extension this library, uses the convention that the y-axis
   is positive down. Implementers will need to take care to invert the y-axis when
-  creating components in Bevy's screen space, such as the translation vector in a
+  creating components in Bevy's world space, such as the translation vector in a
   [Transform](https://docs.rs/bevy/latest/bevy/prelude/struct.Transform.html) Component.
-  - This behavior changed in v0.6.0 .
+  - The `z` component is not represented, but `LayerInstance`s and `LevelInstance`s both contain an `index` field which can be 
+  used to derive one.
+  - This behavior changed in `v0.6.0`.
 - If the field describes a location within an image, we will use a [I64Vec2](https://docs.rs/bevy/latest/bevy/math/struct.I64Vec2.html)
   - The convention of y-axis being positive down is used here, to match the
   convention of LDtk, bevy_image, WGSL, and most image formats.
@@ -64,7 +74,7 @@ When possible, we will convert items to a Bevy compatible format.
 - `Iid`'s are parsed into our local [Iid](src/iid.rs) type. It is considered undefined
   behavior if these are not unique.
 - `Uid`'s are represented by the [Uid](src/uid.rs) type, which is of type `i64`.
-  These are being phased out of LDtk, and may be removed here as well in the future.
+  These are being phased out of LDtk, and will be removed here as well in the future.
   See [here](https://ldtk.io/docs/game-dev/json-overview/unique-identifiers/#important-future-deprecation-of-integer-uids).
 - LDtk pivot fields are converted to and stored as Bevy [Anchor](https://docs.rs/bevy/latest/bevy/sprite/enum.Anchor.html)
   fields
@@ -83,7 +93,7 @@ struct MyComponent {
 fn example_system(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(MyComponent {
         project_handle: asset_server.load("some_project.ldtk");
-    })
+    });
 }
 ```
 
@@ -237,10 +247,9 @@ See [Asset Labeling](#asset-labeling).
 
 LDtk is currently experimenting with a Multi World project. The current default
 is for an LDtk project to describe a single `world`, though the option is available
-to select the multi world behavior in the LDtk software. See [LDtk's World documentation](https://ldtk.io/json/#ldtk-WorldJson).
+to select the multi world behavior in LDtk. See [LDtk's World documentation](https://ldtk.io/json/#ldtk-WorldJson).
 
-Although the feature is still experimental, we have chosen to support it as a first
-class integration.
+Although the feature is still experimental, we have chosen to support it.
 
 - For multi world projects, we will export all the worlds as their own assets, with
 the appropriate levels, layers, etc as sub assets.
