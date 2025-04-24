@@ -229,13 +229,7 @@ impl Level {
         let field_instances = value
             .field_instances
             .iter()
-            .filter(|value| {
-                let ret = value.value.is_some();
-                if !ret {
-                    debug!("Skipping field instance {value:?} because inner value is None!");
-                }
-                ret
-            })
+            .filter(|value| value.value.is_some())
             .map(|value| -> Result<(String, FieldInstance)> {
                 Ok((
                     value.identifier.clone(),
