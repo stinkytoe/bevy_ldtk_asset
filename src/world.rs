@@ -69,6 +69,7 @@ pub struct World {
 
 impl World {
     pub(crate) fn create_handle_pair(
+        multi_world: bool,
         ldtk_world: &ldtk::World,
         project_asset_path: &ProjectAssetPath,
         load_context: &mut LoadContext,
@@ -80,7 +81,10 @@ impl World {
         let world_asset_path = project_asset_path.to_world_asset_path(&identifier)?;
 
         let iid = Iid::from_str(&ldtk_world.iid)?;
-        unique_iid_auditor.check(iid)?;
+        if multi_world {
+            unique_iid_auditor.check(iid)?;
+        }
+
         let world_layout = WorldLayout::new(
             &ldtk_world.world_layout,
             ldtk_world.world_grid_width,

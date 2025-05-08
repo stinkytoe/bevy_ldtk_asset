@@ -106,12 +106,14 @@ impl AssetLoader for ProjectLoader {
             ));
         }
 
+        let multi_world = !ldtk_project.worlds.is_empty();
+
         // If the worlds vec is empty, then this is likely a single world LDtk project. To simplify
         // things, though, I only parse the world objects. So... in the event of a single world
         // project (the most common type), we simply create a vec of one element, with an
         // [ldtk::World] that we construct ourselves. We insert the name "World" as its identifier
         // as a default since projects, and therefore, single worlds do not have identifiers.
-        let ldtk_worlds = if ldtk_project.worlds.is_empty() {
+        let ldtk_worlds = if !multi_world {
             &[ldtk::World {
                 default_level_height: ldtk_project.default_level_height.ok_or(
                     ldtk_import_error!("default_level_height is None in single world project?"),
@@ -207,6 +209,7 @@ impl AssetLoader for ProjectLoader {
             .iter()
             .map(|ldtk_world| {
                 World::create_handle_pair(
+                    multi_world,
                     ldtk_world,
                     &project_asset_path,
                     load_context,
