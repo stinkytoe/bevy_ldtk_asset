@@ -295,6 +295,8 @@ stinkytoe
 
 ## Version History
 
+- 0.7.1:
+  - Fixed single world iid clash bug
 - 0.7.0:
   - Release for Bevy 0.16.0
   - Removed nuisance message for tiles type layers without layer definitions
@@ -344,6 +346,7 @@ stinkytoe
 
 | bevy_ldtk_asset | bevy        | LDtk  |
 | :-------------: | :---------: | :---: |
+| 0.7.1           | 0.16.0      | 1.5.3 |
 | 0.7.0           | 0.16.0      | 1.5.3 |
 | 0.6.4           | 0.15.3      | 1.5.3 |
 | 0.6.3           | 0.15.2      | 1.5.3 |
