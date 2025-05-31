@@ -371,4 +371,4 @@ Deepknight of Deepknight Games!
 
 [<img src="https://bevyengine.org/assets/bevy_logo_dark.svg" width=600px/>](https://bevyengine.org)
 
-[<img src="https://ldtk.io/wp-content/themes/ldtk/img/logo-iconText.png" width=600px/>](https://itch.io)
+[<img src="https://ldtk.io/wp-content/themes/ldtk/img/logo-iconText.png" width=600px/>](https://ldtk.io)
