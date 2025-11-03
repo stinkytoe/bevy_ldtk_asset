@@ -12,7 +12,7 @@ use bevy_platform::collections::HashMap;
 use bevy_reflect::Reflect;
 use bevy_sprite::Anchor;
 
-use crate::Result;
+use crate::LdtkResult;
 use crate::anchor::bevy_anchor_from_ldtk;
 use crate::asset_labels::LayerAssetPath;
 use crate::color::bevy_color_from_ldtk_string;
@@ -81,7 +81,7 @@ impl EntityInstance {
         unique_iid_auditor: &mut UniqueIidAuditor,
         project_context: &ProjectContext,
         project_definitions_context: &ProjectDefinitionContext,
-    ) -> Result<(Iid, Handle<Self>)> {
+    ) -> LdtkResult<(Iid, Handle<Self>)> {
         let identifier = value.identifier.clone();
         let iid = Iid::from_str(&value.iid)?;
         unique_iid_auditor.check(iid)?;
@@ -129,7 +129,7 @@ impl EntityInstance {
             .field_instances
             .iter()
             .filter(|value| value.value.is_some())
-            .map(|value| -> Result<(String, FieldInstance)> {
+            .map(|value| -> LdtkResult<(String, FieldInstance)> {
                 Ok((
                     value.identifier.clone(),
                     FieldInstance::new(
@@ -140,7 +140,7 @@ impl EntityInstance {
                     )?,
                 ))
             })
-            .collect::<Result<_>>()?;
+            .collect::<LdtkResult<_>>()?;
         let size = (value.width, value.height).into();
         let location = (value.px.len() == 2)
             .then(|| (value.px[0], value.px[1]).into())
@@ -171,10 +171,6 @@ impl EntityInstance {
 }
 
 impl LdtkAsset for EntityInstance {
-    fn get_identifier(&self) -> &str {
-        &self.identifier
-    }
-
     fn get_iid(&self) -> Iid {
         self.iid
     }

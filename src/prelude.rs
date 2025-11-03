@@ -13,7 +13,7 @@ pub use crate::enum_definition::{EnumDefinition, EnumValueDefinition};
 pub use crate::layer_definition::{
     IntGridValue, IntGridValuesGroup, IntGridValuesGroups, LayerDefinition, LayerDefinitionType,
 };
-pub use crate::tileset_definition::{EnumTagValue, TileCustomMetadata, TilesetDefinition};
+pub use crate::tileset_definition::TilesetDefinition;
 
 // Others
 pub use crate::field_instance::{EntityRef, EnumValue, FieldInstance, FieldInstanceType};

@@ -17,7 +17,7 @@ use bevy_math::I64Vec2;
 use bevy_platform::collections::HashMap;
 use bevy_reflect::Reflect;
 
-use crate::Result;
+use crate::LdtkResult;
 use crate::color::bevy_color_from_ldtk_string;
 use crate::enum_definition::EnumDefinition;
 use crate::iid::Iid;
@@ -90,7 +90,7 @@ impl FieldInstanceType {
         base_directory: &Path,
         tileset_definitions: &UidMap<Handle<TilesetDefinition>>,
         enum_definitions: &HashMap<String, Handle<EnumDefinition>>,
-    ) -> Result<Self> {
+    ) -> LdtkResult<Self> {
         let value = value.ok_or(ldtk_import_error!("Field instance value is None!"))?;
         match field_instance_type {
             "Array<Int>" => Ok(Self::ArrayInt(
@@ -102,7 +102,7 @@ impl FieldInstanceType {
                     ))?
                     .iter()
                     .map(|value| serde_json::from_value::<i64>(value.clone()).map_err(|e| e.into()))
-                    .collect::<Result<Vec<_>>>()?,
+                    .collect::<LdtkResult<Vec<_>>>()?,
             )),
             "Array<String>" => Ok(Self::ArrayString(
                 value
@@ -115,7 +115,7 @@ impl FieldInstanceType {
                     .map(|value| {
                         serde_json::from_value::<String>(value.clone()).map_err(|e| e.into())
                     })
-                    .collect::<Result<Vec<_>>>()?,
+                    .collect::<LdtkResult<Vec<_>>>()?,
             )),
             "Array<Point>" => Ok(Self::ArrayPoint(
                 value
@@ -130,7 +130,7 @@ impl FieldInstanceType {
                         let cy = field_instance_map_get!(value, "cy", "Point", as_i64);
                         Ok((cx, cy).into())
                     })
-                    .collect::<Result<Vec<_>>>()?,
+                    .collect::<LdtkResult<Vec<_>>>()?,
             )),
             "Array<Tile>" => Ok(Self::ArrayTile(
                 value
@@ -145,7 +145,7 @@ impl FieldInstanceType {
                             serde_json::from_value::<ldtk::TilesetRectangle>(value.clone())?;
                         TilesetRectangle::new(&value, tileset_definitions)
                     })
-                    .collect::<Result<Vec<_>>>()?,
+                    .collect::<LdtkResult<Vec<_>>>()?,
             )),
             "Bool" => Ok(Self::Bool(serde_json::from_value::<bool>(value.clone())?)),
             "Color" => Ok(Self::Color({
@@ -210,7 +210,7 @@ impl FieldInstanceType {
         field_instance_type: &str,
         value: &serde_json::Value,
         enum_definitions: &HashMap<String, Handle<EnumDefinition>>,
-    ) -> Result<Self> {
+    ) -> LdtkResult<Self> {
         // If we make it here, we should have one of four things:
         // * "LocalEnum.{Enum Group Name}"
         // * "ExternEnum.{Enum Group Name}"
@@ -304,7 +304,7 @@ impl FieldInstanceType {
                         enum_definition,
                     })
                 })
-                .collect::<Result<Vec<_>>>()?;
+                .collect::<LdtkResult<Vec<_>>>()?;
 
             Ok(Self::ArrayEnum(array_enum))
         } else {
@@ -346,7 +346,7 @@ impl FieldInstance {
         base_directory: &Path,
         tileset_definitions: &UidMap<Handle<TilesetDefinition>>,
         enum_definitions: &HashMap<String, Handle<EnumDefinition>>,
-    ) -> Result<Self> {
+    ) -> LdtkResult<Self> {
         let tileset_rectangle = value
             .tile
             .as_ref()

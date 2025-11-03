@@ -21,7 +21,7 @@ use crate::project_loader::{ProjectContext, ProjectDefinitionContext, UniqueIidA
 use crate::tile_instance::TileInstance;
 use crate::tileset_definition::TilesetDefinition;
 use crate::uid::Uid;
-use crate::{Result, ldtk_import_error};
+use crate::{LdtkResult, ldtk_import_error};
 
 /// A layer instance which contains [Entity] children.
 ///
@@ -40,13 +40,13 @@ impl EntitiesLayer {
         unique_iid_auditor: &mut UniqueIidAuditor,
         project_context: &ProjectContext,
         project_definitions_context: &ProjectDefinitionContext,
-    ) -> Result<Self> {
+    ) -> LdtkResult<Self> {
         (value.int_grid_csv.is_empty()
             && value.grid_tiles.is_empty()
             && value.auto_layer_tiles.is_empty()
             && value.tileset_rel_path.is_none()
             && value.tileset_def_uid.is_none())
-        .then(|| -> Result<_> {
+        .then(|| -> LdtkResult<_> {
             let entity_handles = value
                 .entity_instances
                 .iter()
@@ -60,7 +60,7 @@ impl EntitiesLayer {
                         project_definitions_context,
                     )
                 })
-                .collect::<Result<_>>()?;
+                .collect::<LdtkResult<_>>()?;
             Ok(Self {
                 entities: entity_handles,
             })
@@ -110,7 +110,7 @@ impl TilesLayer {
         load_context: &mut LoadContext,
         project_context: &ProjectContext,
         project_definition_context: &ProjectDefinitionContext,
-    ) -> Result<TilesLayer> {
+    ) -> LdtkResult<TilesLayer> {
         let tiles: &[_] = match value.layer_instance_type.as_str() {
             "Tiles" => &value.grid_tiles,
             "AutoLayer" | "IntGrid" => &value.auto_layer_tiles,
@@ -122,9 +122,12 @@ impl TilesLayer {
         value
             .entity_instances
             .is_empty()
-            .then(|| -> Result<_> {
+            .then(|| -> LdtkResult<_> {
                 let int_grid = value.int_grid_csv.clone();
-                let tiles = tiles.iter().map(TileInstance::new).collect::<Result<_>>()?;
+                let tiles = tiles
+                    .iter()
+                    .map(TileInstance::new)
+                    .collect::<LdtkResult<_>>()?;
                 let tileset_definition = value
                     .tileset_def_uid
                     .and_then(|uid| project_definition_context.tileset_definitions.get(&uid))
@@ -216,7 +219,7 @@ impl LayerType {
         unique_iid_auditor: &mut UniqueIidAuditor,
         project_context: &ProjectContext,
         project_definition_context: &ProjectDefinitionContext,
-    ) -> Result<Self> {
+    ) -> LdtkResult<Self> {
         match value.layer_instance_type.as_str() {
             "Entities" => Ok(Self::Entities(EntitiesLayer::new(
                 value,
@@ -288,7 +291,7 @@ impl LayerInstance {
         unique_iid_auditor: &mut UniqueIidAuditor,
         project_context: &ProjectContext,
         project_definition_context: &ProjectDefinitionContext,
-    ) -> Result<(Iid, Handle<Self>)> {
+    ) -> LdtkResult<(Iid, Handle<Self>)> {
         let identifier = value.identifier.clone();
         let layer_asset_path = level_asset_path.to_layer_asset_path(&identifier)?;
 
@@ -345,10 +348,6 @@ impl LayerInstance {
 }
 
 impl LdtkAsset for LayerInstance {
-    fn get_identifier(&self) -> &str {
-        &self.identifier
-    }
-
     fn get_iid(&self) -> Iid {
         self.iid
     }

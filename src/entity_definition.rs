@@ -11,7 +11,7 @@ use bevy_math::I64Vec2;
 use bevy_reflect::Reflect;
 use bevy_sprite::Anchor;
 
-use crate::Result;
+use crate::LdtkResult;
 use crate::anchor::bevy_anchor_from_ldtk;
 use crate::asset_labels::ProjectAssetPath;
 use crate::color::bevy_color_from_ldtk_string;
@@ -34,7 +34,7 @@ pub struct NineSlice {
 }
 
 impl NineSlice {
-    pub(crate) fn new(nine_slice: &[i64]) -> Result<Self> {
+    pub(crate) fn new(nine_slice: &[i64]) -> LdtkResult<Self> {
         (nine_slice.len() == 4)
             .then(|| Self {
                 up: nine_slice[0],
@@ -63,7 +63,7 @@ pub enum TileRenderMode {
 }
 
 impl TileRenderMode {
-    pub(crate) fn new(value: &ldtk::TileRenderMode, nine_slice: &[i64]) -> Result<Self> {
+    pub(crate) fn new(value: &ldtk::TileRenderMode, nine_slice: &[i64]) -> LdtkResult<Self> {
         match value {
             ldtk::TileRenderMode::Cover => {
                 nine_slice
@@ -149,7 +149,7 @@ impl EntityDefinition {
         project_asset_path: &ProjectAssetPath,
         load_context: &mut LoadContext,
         tileset_definitions: &UidMap<Handle<TilesetDefinition>>,
-    ) -> Result<(Uid, Handle<Self>)> {
+    ) -> LdtkResult<(Uid, Handle<Self>)> {
         let identifier = value.identifier.clone();
         let uid = value.uid;
         let color = bevy_color_from_ldtk_string(&value.color)?;

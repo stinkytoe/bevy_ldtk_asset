@@ -13,7 +13,7 @@ use bevy_math::{DVec2, I64Vec2};
 use bevy_platform::collections::HashMap;
 use bevy_reflect::Reflect;
 
-use crate::Result;
+use crate::LdtkResult;
 use crate::asset_labels::ProjectAssetPath;
 use crate::color::bevy_color_from_ldtk_string;
 use crate::ldtk;
@@ -31,7 +31,7 @@ pub enum LayerDefinitionType {
 }
 
 impl LayerDefinitionType {
-    pub fn new(ldtk_type: &str) -> Result<LayerDefinitionType> {
+    pub fn new(ldtk_type: &str) -> LdtkResult<LayerDefinitionType> {
         Ok(match ldtk_type {
             "IntGrid" => LayerDefinitionType::IntGrid,
             "Entities" => LayerDefinitionType::Entities,
@@ -68,7 +68,7 @@ impl LayerDefinition {
         project_asset_path: &ProjectAssetPath,
         load_context: &mut LoadContext,
         tileset_definitions: &UidMap<Handle<TilesetDefinition>>,
-    ) -> Result<(Uid, Handle<Self>)> {
+    ) -> LdtkResult<(Uid, Handle<Self>)> {
         let identifier = value.identifier.clone();
         let uid = value.uid;
 
@@ -83,12 +83,12 @@ impl LayerDefinition {
             .int_grid_values
             .iter()
             .map(|value| Ok((value.value, IntGridValue::new(value, tileset_definitions)?)))
-            .collect::<Result<_>>()?;
+            .collect::<LdtkResult<_>>()?;
         let int_grid_values_groups = value
             .int_grid_values_groups
             .iter()
             .map(IntGridValuesGroup::new)
-            .collect::<Result<_>>()?;
+            .collect::<LdtkResult<_>>()?;
         let parallax_factor = (value.parallax_factor_x, value.parallax_factor_y).into();
         let parallax_scaling = value.parallax_scaling;
         let offset = (value.px_offset_x, value.px_offset_y).into();
@@ -138,7 +138,7 @@ impl IntGridValue {
     pub(crate) fn new(
         int_grid_value: &ldtk::IntGridValueDefinition,
         tileset_definitions: &UidMap<Handle<TilesetDefinition>>,
-    ) -> Result<Self> {
+    ) -> LdtkResult<Self> {
         let color = bevy_color_from_ldtk_string(&int_grid_value.color)?;
         let group_uid = int_grid_value.group_uid;
         let identifier = int_grid_value.identifier.clone();
@@ -169,7 +169,7 @@ pub struct IntGridValuesGroup {
 }
 
 impl IntGridValuesGroup {
-    pub(crate) fn new(value: &ldtk::IntGridValueGroupDefinition) -> Result<Self> {
+    pub(crate) fn new(value: &ldtk::IntGridValueGroupDefinition) -> LdtkResult<Self> {
         let color = value
             .color
             .as_deref()

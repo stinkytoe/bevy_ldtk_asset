@@ -31,7 +31,7 @@
 use bevy_reflect::Reflect;
 
 use crate::iid::Iid;
-use crate::{Result, ldtk_import_error};
+use crate::{LdtkResult, ldtk_import_error};
 
 #[derive(Debug, PartialEq, Eq, Reflect)]
 pub struct ProjectAssetPath {
@@ -39,7 +39,7 @@ pub struct ProjectAssetPath {
 }
 
 impl ProjectAssetPath {
-    pub fn new(path: &str) -> Result<Self> {
+    pub fn new(path: &str) -> LdtkResult<Self> {
         validate_path(path)
             .then(|| Self {
                 path: path.to_string(),
@@ -53,7 +53,7 @@ impl ProjectAssetPath {
     pub fn to_entity_definition_asset_path(
         &self,
         entity_definition_identifier: &str,
-    ) -> Result<EntityDefinitionAssetPath> {
+    ) -> LdtkResult<EntityDefinitionAssetPath> {
         validate_label(entity_definition_identifier)
             .then(|| EntityDefinitionAssetPath {
                 path: self.path.clone(),
@@ -68,7 +68,7 @@ impl ProjectAssetPath {
     pub fn to_layer_definition_asset_path(
         &self,
         layer_definition_identifier: &str,
-    ) -> Result<LayerDefinitionAssetPath> {
+    ) -> LdtkResult<LayerDefinitionAssetPath> {
         validate_label(layer_definition_identifier)
             .then(|| LayerDefinitionAssetPath {
                 path: self.path.clone(),
@@ -83,7 +83,7 @@ impl ProjectAssetPath {
     pub fn to_tileset_definition_asset_path(
         &self,
         tileset_definition_identifier: &str,
-    ) -> Result<TilesetDefinitionAssetPath> {
+    ) -> LdtkResult<TilesetDefinitionAssetPath> {
         validate_label(tileset_definition_identifier)
             .then(|| TilesetDefinitionAssetPath {
                 path: self.path.clone(),
@@ -97,7 +97,7 @@ impl ProjectAssetPath {
     pub fn to_enum_definition_asset_path(
         &self,
         enum_definition_identifier: &str,
-    ) -> Result<EnumDefinitionAssetPath> {
+    ) -> LdtkResult<EnumDefinitionAssetPath> {
         validate_label(enum_definition_identifier).then(|| EnumDefinitionAssetPath {
                 path: self.path.clone(),
                 enum_definition_identifier: enum_definition_identifier.to_string(),
@@ -107,7 +107,7 @@ impl ProjectAssetPath {
             ))
     }
 
-    pub fn to_world_asset_path(&self, world_identifier: &str) -> Result<WorldAssetPath> {
+    pub fn to_world_asset_path(&self, world_identifier: &str) -> LdtkResult<WorldAssetPath> {
         validate_label(world_identifier)
             .then_some(WorldAssetPath {
                 path: self.path.clone(),
@@ -174,7 +174,7 @@ pub struct WorldAssetPath {
 }
 
 impl WorldAssetPath {
-    pub fn to_level_asset_path(&self, level_identifier: &str) -> Result<LevelAssetPath> {
+    pub fn to_level_asset_path(&self, level_identifier: &str) -> LdtkResult<LevelAssetPath> {
         validate_label(level_identifier)
             .then(|| LevelAssetPath {
                 path: self.path.clone(),
@@ -203,7 +203,7 @@ pub struct LevelAssetPath {
 }
 
 impl LevelAssetPath {
-    pub fn to_layer_asset_path(&self, layer_identifier: &str) -> Result<LayerAssetPath> {
+    pub fn to_layer_asset_path(&self, layer_identifier: &str) -> LdtkResult<LayerAssetPath> {
         validate_label(layer_identifier)
             .then(|| LayerAssetPath {
                 path: self.path.clone(),
@@ -234,7 +234,7 @@ impl LayerAssetPath {
         &self,
         entity_identifier: &str,
         entity_iid: Iid,
-    ) -> Result<EntityAssetPath> {
+    ) -> LdtkResult<EntityAssetPath> {
         validate_label(entity_identifier)
             .then(|| EntityAssetPath {
                 path: self.path.clone(),

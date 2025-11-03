@@ -1,76 +1,71 @@
-#![allow(missing_docs)]
+//! Tileset Definitions
+//!
+//! Information about a tileset.
+//!
+//! See [Tileset Definition: LDtk docs](https://ldtk.io/json/#ldtk-TilesetDefJson)
 
-use bevy_asset::{Asset, Handle, LoadContext};
+use bevy_asset::{Asset, Handle};
 use bevy_image::Image;
 use bevy_math::I64Vec2;
+use bevy_platform::collections::HashMap;
 use bevy_reflect::Reflect;
 
-use crate::Result;
-use crate::asset_labels::ProjectAssetPath;
 use crate::ldtk_asset_trait::LdtkAssetWithTags;
-use crate::ldtk_path::ldtk_path_to_bevy_path;
-use crate::project_loader::ProjectContext;
+use crate::result::Result;
 use crate::uid::Uid;
 use crate::{ldtk, ldtk_import_error};
-
-#[derive(Debug, Reflect)]
-pub struct TileCustomMetadata {
-    pub data: String,
-    pub tile_id: Uid,
-}
-
-impl TileCustomMetadata {
-    pub(crate) fn new(value: &ldtk::TileCustomMetadata) -> Self {
-        Self {
-            data: value.data.clone(),
-            tile_id: value.tile_id,
-        }
-    }
-}
-
-#[derive(Debug, Reflect)]
-pub struct EnumTagValue {
-    pub enum_value_id: String,
-    pub tile_ids: Vec<i64>,
-}
-
-impl EnumTagValue {
-    pub(crate) fn new(value: &ldtk::EnumTagValue) -> Self {
-        Self {
-            enum_value_id: value.enum_value_id.clone(),
-            tile_ids: value.tile_ids.clone(),
-        }
-    }
-}
 
 /// A tileset definition for use in visualizations.
 ///
 /// See [TilesetDefinition](https://ldtk.io/json/#ldtk-TilesetDefJson)
 #[derive(Asset, Debug, Reflect)]
 pub struct TilesetDefinition {
-    pub cell_size: I64Vec2,
-    pub custom_data: Vec<TileCustomMetadata>,
-    pub enum_tags: Vec<EnumTagValue>,
+    /// Grid based cell size.
+    ///
+    /// From the `__cHei` and `__cWid` LDtk JSON fields
+    pub tile_grid_size: I64Vec2,
+    /// Optional Custom data for tiles.
+    ///
+    /// User provided data. Indexed by the tile id.
+    pub custom_data: HashMap<i64, String>,
+    /// A collection of enum value ids, and a list of tileset ids which are
+    /// marked with the given enum value id.
+    pub enum_tags: HashMap<String, Vec<i64>>,
+    /// User defined unique identifier.
     pub identifier: String,
+    /// Distance in pixels from image borders.
     pub padding: i64,
-    pub size: I64Vec2,
+    /// Size of the tileset image, in pixels.
+    ///
+    /// From the `pixHei` and `pixWid` LDtk JSON fields.
+    pub tileset_image_size: I64Vec2,
+    /// Optional handle to the linked tile set image's object.
+    ///
+    /// This is passed along from the LDtk project, and it is not guaranteed
+    /// that the image actually exists, or can be successfully loaded. If the
+    /// asset fails to load, then we will hold onto the failed asset handle.
+    ///
+    /// From the `relPath` LDtk JSON fields.
     pub tileset_image: Option<Handle<Image>>,
+    /// An array of user defined tags.
     pub tags: Vec<String>,
-    pub tags_source_enum_uid: Option<i64>,
-    pub tile_grid_size: i64,
+    /// Optional [Uid] for an associated enum definition.
+    pub tags_source_enum_uid: Option<Uid>,
+    /// Size of tiles, in pixels. Only square tiles supported.
+    ///
+    /// From the `tileGridSize` LDtk JSON fields.
+    pub tile_grid_pixel_size: i64,
 }
 
 impl TilesetDefinition {
-    pub(crate) fn create_handle_pair(
-        value: &ldtk::TilesetDefinition,
-        project_asset_path: &ProjectAssetPath,
-        load_context: &mut LoadContext,
-        project_context: &ProjectContext,
-    ) -> Result<(Uid, Handle<Self>)> {
+    pub(crate) async fn new(
+        value: ldtk::TilesetDefinition,
+        tileset_definition_images: &HashMap<String, Handle<Image>>,
+    ) -> Result<Self> {
         // see https://github.com/stinkytoe/bevy_ldtk_asset/issues/35
         if value.embed_atlas.is_some() {
             return Err(ldtk_import_error!(
-                "This LDtk project, {project_asset_path:?}, contains an embedded atlas!\
+                "This LDtk project contains an embedded atlas!\
                  Licensing prevents us from loading this asset. At this time we are considering\
                  it to be an error to attempt to load an LDtk project with an embedded atlas!\
                  See https://github.com/stinkytoe/bevy_ldtk_asset/issues/35 for a discussion\
@@ -79,47 +74,39 @@ impl TilesetDefinition {
         }
 
         let identifier = value.identifier.clone();
-        let uid = value.uid;
-
-        let tileset_definition_asset_path =
-            project_asset_path.to_tileset_definition_asset_path(&identifier)?;
-
         let cell_size = (value.c_wid, value.c_hei).into();
         let custom_data = value
             .custom_data
-            .iter()
-            .map(TileCustomMetadata::new)
+            .into_iter()
+            .map(|tile| (tile.tile_id, tile.data))
             .collect();
-        let enum_tags = value.enum_tags.iter().map(EnumTagValue::new).collect();
+        let enum_tags = value
+            .enum_tags
+            .into_iter()
+            .map(|enum_tag| (enum_tag.enum_value_id, enum_tag.tile_ids))
+            .collect();
         let padding = value.padding;
-        let size = (value.px_wid, value.px_hei).into();
-        let tileset_image = value.rel_path.as_ref().map(|rel_path| {
-            let bevy_path = ldtk_path_to_bevy_path(project_context.project_directory, rel_path);
-            load_context.load(bevy_path)
-        });
+        let tileset_image_size = (value.px_wid, value.px_hei).into();
+        let tileset_image = value
+            .rel_path
+            .and_then(|rel_path| tileset_definition_images.get(&rel_path))
+            .cloned();
         let tags = value.tags.clone();
         let tags_source_enum_uid = value.tags_source_enum_uid;
-        let tile_grid_size = value.tile_grid_size;
+        let tile_grid_pixel_size = value.tile_grid_size;
 
-        let tileset_definition = TilesetDefinition {
+        Ok(TilesetDefinition {
             identifier,
-            cell_size,
+            tile_grid_size: cell_size,
             custom_data,
             enum_tags,
             padding,
-            size,
+            tileset_image_size,
             tileset_image,
             tags,
             tags_source_enum_uid,
-            tile_grid_size,
-        };
-
-        let handle = load_context.add_labeled_asset(
-            tileset_definition_asset_path.to_asset_label(),
-            tileset_definition,
-        );
-
-        Ok((uid, handle))
+            tile_grid_pixel_size,
+        })
     }
 }
 

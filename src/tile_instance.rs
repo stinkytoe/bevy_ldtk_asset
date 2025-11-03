@@ -4,7 +4,7 @@ use bevy_math::I64Vec2;
 use bevy_reflect::Reflect;
 
 use crate::ldtk;
-use crate::{Result, ldtk_import_error};
+use crate::{LdtkResult, ldtk_import_error};
 
 /// An individual tile in a [crate::layer::TilesLayer] instance.
 ///
@@ -26,7 +26,7 @@ pub struct TileInstance {
 }
 
 impl TileInstance {
-    pub(crate) fn new(value: &ldtk::TileInstance) -> Result<Self> {
+    pub(crate) fn new(value: &ldtk::TileInstance) -> LdtkResult<Self> {
         let opacity = value.a as f32;
         let (flip_x, flip_y) = match value.f {
             0 => (false, false),

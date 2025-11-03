@@ -16,7 +16,7 @@ use crate::ldtk_asset_trait::{LdtkAsset, LdtkAssetWithChildren};
 use crate::ldtk_path::ldtk_path_to_bevy_path;
 use crate::level::Level;
 use crate::project_loader::{ProjectContext, ProjectDefinitionContext, UniqueIidAuditor};
-use crate::{Result, ldtk_import_error};
+use crate::{LdtkResult, ldtk_import_error};
 
 /// The layout of the world's levels.
 ///
@@ -43,7 +43,7 @@ impl WorldLayout {
         layout: &Option<ldtk::WorldLayout>,
         world_grid_width: i64,
         world_grid_height: i64,
-    ) -> Result<Self> {
+    ) -> LdtkResult<Self> {
         match layout {
             Some(ldtk::WorldLayout::GridVania) => Ok(Self::GridVania(
                 (world_grid_width, world_grid_height).into(),
@@ -76,7 +76,7 @@ impl World {
         unique_iid_auditor: &mut UniqueIidAuditor,
         project_context: &ProjectContext,
         project_definition_context: &ProjectDefinitionContext,
-    ) -> Result<(Iid, Handle<Self>)> {
+    ) -> LdtkResult<(Iid, Handle<Self>)> {
         let identifier = ldtk_world.identifier.clone();
         let world_asset_path = project_asset_path.to_world_asset_path(&identifier)?;
 
@@ -97,7 +97,7 @@ impl World {
             &ldtk_world
                 .levels
                 .iter()
-                .map(|ldtk_level| -> Result<ldtk::Level> {
+                .map(|ldtk_level| -> LdtkResult<ldtk::Level> {
                     let external_rel_path =
                         ldtk_level
                             .external_rel_path
@@ -115,7 +115,7 @@ impl World {
                     let level: ldtk::Level = serde_json::from_slice(&bytes)?;
                     Ok(level)
                 })
-                .collect::<Result<_>>()?
+                .collect::<LdtkResult<_>>()?
         } else {
             &ldtk_world.levels
         };
@@ -134,7 +134,7 @@ impl World {
                     project_definition_context,
                 )
             })
-            .collect::<Result<_>>()?;
+            .collect::<LdtkResult<_>>()?;
 
         let world = World {
             identifier,
@@ -150,10 +150,6 @@ impl World {
 }
 
 impl LdtkAsset for World {
-    fn get_identifier(&self) -> &str {
-        &self.identifier
-    }
-
     fn get_iid(&self) -> Iid {
         self.iid
     }

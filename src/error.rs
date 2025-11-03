@@ -30,5 +30,3 @@ macro_rules! ldtk_import_error {
         $crate::error::Error::LdtkImportError(format!($($args)*))
     };
 }
-
-pub type Result<T> = core::result::Result<T, Error>;

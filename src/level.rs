@@ -12,7 +12,7 @@ use bevy_math::{DVec2, I64Vec2};
 use bevy_platform::collections::HashMap;
 use bevy_reflect::Reflect;
 
-use crate::Result;
+use crate::LdtkResult;
 use crate::asset_labels::WorldAssetPath;
 use crate::color::bevy_color_from_ldtk_string;
 use crate::field_instance::FieldInstance;
@@ -47,7 +47,7 @@ pub enum NeighbourDir {
 }
 
 impl NeighbourDir {
-    fn new(dir: &str) -> Result<Self> {
+    fn new(dir: &str) -> LdtkResult<Self> {
         match dir {
             "n" => Ok(Self::North),
             "s" => Ok(Self::South),
@@ -77,7 +77,7 @@ pub struct Neighbour {
 }
 
 impl Neighbour {
-    pub(crate) fn new(value: &ldtk::NeighbourLevel) -> Result<Self> {
+    pub(crate) fn new(value: &ldtk::NeighbourLevel) -> LdtkResult<Self> {
         let dir = NeighbourDir::new(&value.dir)?;
         let level_iid = Iid::from_str(&value.level_iid)?;
 
@@ -105,7 +105,10 @@ pub struct LevelBackground {
 }
 
 impl LevelBackground {
-    pub(crate) fn new(value: &ldtk::LevelBackgroundPosition, image: Handle<Image>) -> Result<Self> {
+    pub(crate) fn new(
+        value: &ldtk::LevelBackgroundPosition,
+        image: Handle<Image>,
+    ) -> LdtkResult<Self> {
         let (crop_corner, crop_size) = (value.crop_rect.len() == 4)
             .then(|| {
                 let crop_corner = (value.crop_rect[0], value.crop_rect[1]).into();
@@ -196,7 +199,7 @@ impl Level {
         unique_iid_auditor: &mut UniqueIidAuditor,
         project_context: &ProjectContext,
         project_definition_context: &ProjectDefinitionContext,
-    ) -> Result<(Iid, Handle<Self>)> {
+    ) -> LdtkResult<(Iid, Handle<Self>)> {
         let identifier = value.identifier.clone();
         let level_asset_path = world_asset_path.to_level_asset_path(&identifier)?;
 
@@ -205,7 +208,7 @@ impl Level {
             .neighbours
             .iter()
             .map(Neighbour::new)
-            .collect::<Result<_>>()?;
+            .collect::<LdtkResult<_>>()?;
         let background = match (value.bg_pos.as_ref(), value.bg_rel_path.as_ref()) {
             (None, None) => None,
             (None, Some(_)) => {
@@ -229,7 +232,7 @@ impl Level {
             .field_instances
             .iter()
             .filter(|value| value.value.is_some())
-            .map(|value| -> Result<(String, FieldInstance)> {
+            .map(|value| -> LdtkResult<(String, FieldInstance)> {
                 Ok((
                     value.identifier.clone(),
                     FieldInstance::new(
@@ -240,7 +243,7 @@ impl Level {
                     )?,
                 ))
             })
-            .collect::<Result<_>>()?;
+            .collect::<LdtkResult<_>>()?;
         let iid = Iid::from_str(&value.iid)?;
         unique_iid_auditor.check(iid)?;
         let size = (value.px_wid, value.px_hei).into();
@@ -268,7 +271,7 @@ impl Level {
                     project_definition_context,
                 )
             })
-            .collect::<Result<_>>()?;
+            .collect::<LdtkResult<_>>()?;
 
         let level = Level {
             bg_color,
@@ -292,10 +295,6 @@ impl Level {
 }
 
 impl LdtkAsset for Level {
-    fn get_identifier(&self) -> &str {
-        &self.identifier
-    }
-
     fn get_iid(&self) -> Iid {
         self.iid
     }

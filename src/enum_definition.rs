@@ -11,7 +11,7 @@ use bevy_color::Color;
 use bevy_platform::collections::HashMap;
 use bevy_reflect::Reflect;
 
-use crate::Result;
+use crate::LdtkResult;
 use crate::asset_labels::ProjectAssetPath;
 use crate::color::bevy_color_from_ldtk_int;
 use crate::ldtk;
@@ -36,7 +36,7 @@ impl EnumValueDefinition {
     pub(crate) fn new(
         value: &ldtk::EnumValueDefinition,
         tileset_definitions: &UidMap<Handle<TilesetDefinition>>,
-    ) -> Result<Self> {
+    ) -> LdtkResult<Self> {
         let color = bevy_color_from_ldtk_int(value.color);
         let id = value.id.clone();
         let tile = value
@@ -72,7 +72,7 @@ impl EnumDefinition {
         load_context: &mut LoadContext,
         project_context: &ProjectContext,
         tileset_definitions: &UidMap<Handle<TilesetDefinition>>,
-    ) -> Result<(String, Handle<Self>)> {
+    ) -> LdtkResult<(String, Handle<Self>)> {
         let identifier = value.identifier.clone();
         let external_rel_path = value
             .external_rel_path
@@ -98,7 +98,7 @@ impl EnumDefinition {
                     EnumValueDefinition::new(value, tileset_definitions)?,
                 ))
             })
-            .collect::<Result<_>>()?;
+            .collect::<LdtkResult<_>>()?;
 
         let path = project_asset_path.to_enum_definition_asset_path(&identifier)?;
 
