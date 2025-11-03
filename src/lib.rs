@@ -30,8 +30,8 @@ pub mod tileset_definition;
 pub mod uid;
 // pub mod world;
 
+#[allow(missing_docs)]
 pub mod result {
-    #[must_use]
     pub type Result<T> = core::result::Result<T, crate::error::Error>;
 }
 
