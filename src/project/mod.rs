@@ -1,5 +1,6 @@
 //! The LDtk project top level representation!
 
+mod construct_layer_definitions;
 mod construct_tileset_definitions;
 
 use bevy_asset::Asset;
@@ -10,6 +11,7 @@ use crate::iid::Iid;
 use crate::ldtk;
 use crate::ldtk_asset_trait::LdtkAsset;
 use crate::ldtk_import_error;
+use crate::project::construct_layer_definitions::construct_layer_definitions;
 use crate::result::Result;
 
 use construct_tileset_definitions::construct_tileset_definitions;
@@ -39,6 +41,8 @@ pub struct Project {
 }
 
 impl Project {
+    const SUPPORTED_VERSION: &str = "1.5.3";
+
     pub(crate) async fn new(
         project_json: ldtk::LdtkProject,
         load_context: &mut LoadContext<'_>,
@@ -46,6 +50,13 @@ impl Project {
         let iid: Iid = project_json.iid.try_into()?;
 
         let ldtk_version = project_json.json_version;
+        if ldtk_version != Self::SUPPORTED_VERSION {
+            return Err(ldtk_import_error!(
+                "Bad LDtk JSON version! expected: {} given: {}",
+                Self::SUPPORTED_VERSION,
+                ldtk_version
+            ));
+        }
 
         let project_directory = load_context
             .path()
@@ -53,9 +64,16 @@ impl Project {
             .ok_or(ldtk_import_error!("Unable to get project_directory!"))?
             .to_path_buf();
 
-        let _tileset_definitions = construct_tileset_definitions(
-            &project_directory,
+        let tileset_definitions = construct_tileset_definitions(
             project_json.defs.tilesets,
+            &project_directory,
+            load_context,
+        )
+        .await?;
+
+        let _layer_definitions = construct_layer_definitions(
+            project_json.defs.layers,
+            &tileset_definitions,
             load_context,
         )
         .await?;

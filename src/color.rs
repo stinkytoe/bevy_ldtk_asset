@@ -1,11 +1,11 @@
 use bevy_color::Color;
 
-use crate::LdtkResult;
 use crate::ldtk_import_error;
+use crate::result::Result;
 
 // Format should be: Hex color "#rrggbb"
 // from: https://ldtk.io/json-2/#ldtk-ProjectJson;bgColor
-pub(crate) fn bevy_color_from_ldtk_string(color: &str) -> crate::LdtkResult<Color> {
+pub(crate) fn bevy_color_from_ldtk_string(color: &str) -> Result<Color> {
     (color.len() == 7)
         .then(|| {
             let hashmark = &color[0..1];
@@ -16,7 +16,7 @@ pub(crate) fn bevy_color_from_ldtk_string(color: &str) -> crate::LdtkResult<Colo
             (hashmark, r, g, b)
         })
         .filter(|(hashmark, _, _, _)| *hashmark == "#")
-        .map(|(_, r, g, b)| -> LdtkResult<Color> {
+        .map(|(_, r, g, b)| -> Result<Color> {
             Ok(Color::srgb_u8(
                 u8::from_str_radix(r, 16)?,
                 u8::from_str_radix(g, 16)?,

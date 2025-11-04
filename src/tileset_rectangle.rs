@@ -1,12 +1,12 @@
-#![allow(missing_docs)]
 use bevy_asset::Handle;
 use bevy_math::I64Vec2;
 use bevy_reflect::Reflect;
 
 use crate::ldtk;
+use crate::ldtk_import_error;
+use crate::result::Result;
 use crate::tileset_definition::TilesetDefinition;
 use crate::uid::UidMap;
-use crate::{LdtkResult, ldtk_import_error};
 
 /// The visualization for an [crate::entity::Entity] asset.
 /// This can also be stored in [crate::field_instance::FieldInstance]s for reference.
@@ -23,7 +23,7 @@ impl TilesetRectangle {
     pub(crate) fn new(
         value: &ldtk::TilesetRectangle,
         tileset_definitions: &UidMap<Handle<TilesetDefinition>>,
-    ) -> LdtkResult<Self> {
+    ) -> Result<Self> {
         let corner = (value.x, value.y).into();
         let size = (value.w, value.h).into();
         let tileset_definition = tileset_definitions

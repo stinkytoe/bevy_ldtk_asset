@@ -73,8 +73,8 @@ impl TilesetDefinition {
             ));
         }
 
-        let identifier = value.identifier.clone();
-        let cell_size = (value.c_wid, value.c_hei).into();
+        let identifier = value.identifier;
+        let tile_grid_size = (value.c_wid, value.c_hei).into();
         let custom_data = value
             .custom_data
             .into_iter()
@@ -89,15 +89,21 @@ impl TilesetDefinition {
         let tileset_image_size = (value.px_wid, value.px_hei).into();
         let tileset_image = value
             .rel_path
-            .and_then(|rel_path| tileset_definition_images.get(&rel_path))
+            .map(|rel_path| {
+                tileset_definition_images
+                    .get(&rel_path)
+                    .ok_or(ldtk_import_error!("Bad rel path! {rel_path}"))
+            })
+            .transpose()?
             .cloned();
-        let tags = value.tags.clone();
+
+        let tags = value.tags;
         let tags_source_enum_uid = value.tags_source_enum_uid;
         let tile_grid_pixel_size = value.tile_grid_size;
 
         Ok(TilesetDefinition {
             identifier,
-            tile_grid_size: cell_size,
+            tile_grid_size,
             custom_data,
             enum_tags,
             padding,

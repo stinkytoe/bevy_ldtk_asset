@@ -11,8 +11,8 @@ use crate::tileset_definition::TilesetDefinition;
 use crate::uid::UidMap;
 
 pub(super) async fn construct_tileset_definitions(
-    project_directory: &Path,
     tileset_definitions: Vec<ldtk::TilesetDefinition>,
+    project_directory: &Path,
     load_context: &mut LoadContext<'_>,
 ) -> Result<UidMap<Handle<TilesetDefinition>>> {
     let tileset_definition_images = tileset_definitions
