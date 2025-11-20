@@ -45,11 +45,11 @@ impl EntitiesLayer {
     ) -> LdtkResult<Self> {
         macro_rules! should_be {
             ($field:ident, $discr:ident) => {
-                (!entities_layer_json.$field.$discr())
+                (entities_layer_json.$field.$discr())
                     .then(|| ())
                     .ok_or(ldtk_import_error!(
                         "Entity Layer with values in {}?",
-                        stringify!(field)
+                        stringify!($field)
                     ))
             };
         }

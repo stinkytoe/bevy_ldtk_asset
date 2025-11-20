@@ -15,6 +15,7 @@ use crate::iid::{Iid, IidMap};
 use crate::ldtk;
 use crate::ldtk_asset_trait::{LdtkAsset, LdtkAssetWithChildren};
 use crate::ldtk_import_error;
+use crate::ldtk_path::ldtk_path_to_bevy_path;
 use crate::level::Level;
 use crate::project::ProjectContext;
 use crate::result::LdtkResult;
@@ -94,12 +95,19 @@ impl World {
                     .into_iter()
                     .enumerate()
                     .map(|(index, level_json)| {
+                        let project_context = project_context.clone();
                         let load_context = load_context.clone();
 
                         async move {
-                            let path = level_json.external_rel_path.ok_or(ldtk_import_error!(
-                                "external_rel_path is `None` in an external_levels project?"
-                            ))?;
+                            let ldtk_path =
+                                level_json.external_rel_path.ok_or(ldtk_import_error!(
+                                    "external_rel_path is `None` in an external_levels project?"
+                                ))?;
+
+                            let path = ldtk_path_to_bevy_path(
+                                &project_context.read()?.project_directory,
+                                ldtk_path,
+                            );
 
                             let external_level_json =
                                 load_context.lock().await.read_asset_bytes(path).await?;
