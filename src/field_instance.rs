@@ -7,9 +7,10 @@
 //!
 //! See [FieldInstance](https://ldtk.io/json/#ldtk-FieldInstanceJson) for a full description.
 
-use std::path::Path;
 use std::path::PathBuf;
 use std::str::FromStr;
+use std::sync::Arc;
+use std::sync::RwLock;
 
 use bevy_asset::Handle;
 use bevy_color::Color;
@@ -17,16 +18,16 @@ use bevy_math::I64Vec2;
 use bevy_platform::collections::HashMap;
 use bevy_reflect::Reflect;
 
-use crate::LdtkResult;
 use crate::color::bevy_color_from_ldtk_string;
 use crate::enum_definition::EnumDefinition;
 use crate::iid::Iid;
 use crate::ldtk;
 use crate::ldtk_import_error;
 use crate::ldtk_path::ldtk_path_to_bevy_path;
-use crate::tileset_definition::TilesetDefinition;
+use crate::project::ProjectContext;
+use crate::result::LdtkResult;
 use crate::tileset_rectangle::TilesetRectangle;
-use crate::uid::{Uid, UidMap};
+use crate::uid::Uid;
 
 /// The internal value of a field instance of type [FieldInstanceType::EntityRef]
 #[allow(missing_docs)]
@@ -84,12 +85,10 @@ macro_rules! field_instance_map_get {
 }
 
 impl FieldInstanceType {
-    pub(crate) fn new(
+    pub(crate) async fn new(
         field_instance_type: &str,
         value: Option<&serde_json::Value>,
-        base_directory: &Path,
-        tileset_definitions: &UidMap<Handle<TilesetDefinition>>,
-        enum_definitions: &HashMap<String, Handle<EnumDefinition>>,
+        project_context: Arc<RwLock<ProjectContext>>,
     ) -> LdtkResult<Self> {
         let value = value.ok_or(ldtk_import_error!("Field instance value is None!"))?;
         match field_instance_type {
@@ -143,7 +142,7 @@ impl FieldInstanceType {
                     .map(|value| {
                         let value =
                             serde_json::from_value::<ldtk::TilesetRectangle>(value.clone())?;
-                        TilesetRectangle::new(&value, tileset_definitions)
+                        TilesetRectangle::new(value, &project_context.read()?.tileset_definitions)
                     })
                     .collect::<LdtkResult<Vec<_>>>()?,
             )),
@@ -174,7 +173,7 @@ impl FieldInstanceType {
             })),
             "FilePath" => Ok(Self::FilePath(
                 ldtk_path_to_bevy_path(
-                    base_directory,
+                    &project_context.read()?.project_directory,
                     serde_json::from_value::<String>(value.clone())?,
                 )
                 .to_path_buf(),
@@ -193,14 +192,14 @@ impl FieldInstanceType {
             )?)),
             "Tile" => Ok(Self::Tile({
                 let value = serde_json::from_value::<ldtk::TilesetRectangle>(value.clone())?;
-                TilesetRectangle::new(&value, tileset_definitions)?
+                TilesetRectangle::new(value, &project_context.read()?.tileset_definitions)?
             })),
             _ => {
                 // try to parse as an enum
                 Self::parse_non_obvious_field_instance_type(
                     field_instance_type,
                     value,
-                    enum_definitions,
+                    &project_context.read()?.enum_definitions,
                 )
             }
         }
@@ -341,25 +340,23 @@ pub struct FieldInstance {
 }
 
 impl FieldInstance {
-    pub(crate) fn new(
-        value: &ldtk::FieldInstance,
-        base_directory: &Path,
-        tileset_definitions: &UidMap<Handle<TilesetDefinition>>,
-        enum_definitions: &HashMap<String, Handle<EnumDefinition>>,
+    pub(crate) async fn new(
+        field_instance_json: ldtk::FieldInstance,
+        project_context: Arc<RwLock<ProjectContext>>,
     ) -> LdtkResult<Self> {
-        let tileset_rectangle = value
+        let tileset_rectangle = field_instance_json
             .tile
-            .as_ref()
-            .map(|value| TilesetRectangle::new(value, tileset_definitions))
+            .map(|value| TilesetRectangle::new(value, &project_context.read()?.tileset_definitions))
             .transpose()?;
+
         let field_instance_type = FieldInstanceType::new(
-            &value.field_instance_type,
-            value.value.as_ref(),
-            base_directory,
-            tileset_definitions,
-            enum_definitions,
-        )?;
-        let def_uid = value.def_uid;
+            &field_instance_json.field_instance_type,
+            field_instance_json.value.as_ref(),
+            project_context.clone(),
+        )
+        .await?;
+
+        let def_uid = field_instance_json.def_uid;
 
         Ok(Self {
             tileset_rectangle,

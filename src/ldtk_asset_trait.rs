@@ -2,7 +2,7 @@
 use bevy_asset::{Asset, Handle};
 
 // use crate::field_instance::FieldInstance;
-use crate::iid::Iid;
+use crate::{field_instance::FieldInstance, iid::Iid};
 
 /// Trait representing the assets which would exist in an LDtk project world, such as
 /// [crate::project::Project], [crate::world::World], [crate::level::Level], [crate::layer::Layer],
@@ -23,11 +23,11 @@ pub trait LdtkAssetWithChildren<ChildAsset: LdtkAsset>: LdtkAsset {
     fn get_children(&self) -> impl Iterator<Item = &Handle<ChildAsset>>;
 }
 
-// /// Trait representing assets which have field instances.
-// #[allow(missing_docs)]
-// pub trait LdtkAssetWithFieldInstances: LdtkAsset {
-//     fn get_field_instance(&self, identifier: &str) -> Option<&FieldInstance>;
-// }
+/// Trait representing assets which have field instances.
+#[allow(missing_docs)]
+pub trait LdtkAssetWithFieldInstances: LdtkAsset {
+    fn get_field_instance(&self, identifier: &str) -> Option<&FieldInstance>;
+}
 
 /// Trait representing assets with a `tags` field. This is a Vec of strings allowing the user to
 /// organize [crate::entity::Entity], [crate::tileset_definition::TilesetDefinition], and

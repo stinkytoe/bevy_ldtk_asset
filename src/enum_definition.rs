@@ -4,21 +4,22 @@
 //!
 //! See [Enumerations](https://ldtk.io/docs/general/editor-components/enumerations-enums/)
 //! in the LDtk documentation for a description.
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
-use bevy_asset::{Asset, Handle, LoadContext};
+use bevy_asset::{Asset, Handle};
 use bevy_color::Color;
 use bevy_platform::collections::HashMap;
 use bevy_reflect::Reflect;
+use futures::future::try_join_all;
 
-use crate::LdtkResult;
-use crate::asset_labels::ProjectAssetPath;
+use crate::result::LdtkResult;
+// use crate::asset_labels::ProjectAssetPath;
 use crate::color::bevy_color_from_ldtk_int;
 use crate::ldtk;
 use crate::ldtk_asset_trait::LdtkAssetWithTags;
 use crate::ldtk_import_error;
 use crate::ldtk_path::ldtk_path_to_bevy_path;
-use crate::project_loader::ProjectContext;
+// use crate::project_loader::ProjectContext;
 use crate::tileset_definition::TilesetDefinition;
 use crate::tileset_rectangle::TilesetRectangle;
 use crate::uid::UidMap;
@@ -33,15 +34,16 @@ pub struct EnumValueDefinition {
 }
 
 impl EnumValueDefinition {
-    pub(crate) fn new(
-        value: &ldtk::EnumValueDefinition,
+    pub(crate) async fn new(
+        value: ldtk::EnumValueDefinition,
         tileset_definitions: &UidMap<Handle<TilesetDefinition>>,
     ) -> LdtkResult<Self> {
         let color = bevy_color_from_ldtk_int(value.color);
-        let id = value.id.clone();
+
+        let id = value.id;
+
         let tile = value
             .tile_rect
-            .as_ref()
             .map(|value| TilesetRectangle::new(value, tileset_definitions))
             .transpose()?;
 
@@ -66,53 +68,46 @@ pub struct EnumDefinition {
 }
 
 impl EnumDefinition {
-    pub(crate) fn create_handle_pair(
-        value: &ldtk::EnumDefinition,
-        project_asset_path: &ProjectAssetPath,
-        load_context: &mut LoadContext,
-        project_context: &ProjectContext,
+    pub(crate) async fn new(
+        enum_definition_json: ldtk::EnumDefinition,
         tileset_definitions: &UidMap<Handle<TilesetDefinition>>,
-    ) -> LdtkResult<(String, Handle<Self>)> {
-        let identifier = value.identifier.clone();
-        let external_rel_path = value
+        project_directory: &Path,
+    ) -> LdtkResult<Self> {
+        let identifier = enum_definition_json.identifier.clone();
+
+        let external_rel_path = enum_definition_json
             .external_rel_path
             .as_ref()
-            .map(|path| ldtk_path_to_bevy_path(project_context.project_directory, path));
-        let icon_tileset_definition = value
+            .map(|path| ldtk_path_to_bevy_path(project_directory, path));
+
+        let icon_tileset_definition = enum_definition_json
             .icon_tileset_uid
-            .as_ref()
             .map(|uid| {
                 tileset_definitions
-                    .get(uid)
+                    .get(&uid)
                     .ok_or(ldtk_import_error!("bad tileset definition uid! {}", uid))
             })
             .transpose()?
             .cloned();
-        let tags = value.tags.clone();
-        let values = value
-            .values
-            .iter()
-            .map(|value| {
-                Ok((
-                    value.id.clone(),
-                    EnumValueDefinition::new(value, tileset_definitions)?,
-                ))
-            })
-            .collect::<LdtkResult<_>>()?;
 
-        let path = project_asset_path.to_enum_definition_asset_path(&identifier)?;
+        let tags = enum_definition_json.tags;
 
-        let asset = Self {
-            identifier: identifier.clone(),
+        let values = enum_definition_json.values.into_iter().map(|value| async {
+            let id = value.id.clone();
+            let enum_value_definition =
+                EnumValueDefinition::new(value, tileset_definitions).await?;
+            LdtkResult::Ok((id, enum_value_definition))
+        });
+
+        let values = try_join_all(values).await?.into_iter().collect();
+
+        Ok(Self {
+            identifier,
             external_rel_path,
             icon_tileset_definition,
             tags,
             values,
-        };
-
-        let handle = load_context.add_labeled_asset(path.to_asset_label(), asset);
-
-        Ok((identifier, handle))
+        })
     }
 }
 

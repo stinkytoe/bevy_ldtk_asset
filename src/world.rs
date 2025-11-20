@@ -1,22 +1,23 @@
 #![allow(missing_docs)]
 
-use std::path::Path;
 use std::str::FromStr;
+use std::sync::{Arc, RwLock};
 
 use bevy_asset::{Asset, Handle, LoadContext};
-use bevy_log::trace;
+use bevy_log::debug;
 use bevy_math::I64Vec2;
 use bevy_reflect::Reflect;
-use bevy_tasks::block_on;
+use either::Either;
+use futures::future::try_join_all;
+use futures::lock::Mutex;
 
-use crate::asset_labels::ProjectAssetPath;
 use crate::iid::{Iid, IidMap};
 use crate::ldtk;
 use crate::ldtk_asset_trait::{LdtkAsset, LdtkAssetWithChildren};
-use crate::ldtk_path::ldtk_path_to_bevy_path;
+use crate::ldtk_import_error;
 use crate::level::Level;
-use crate::project_loader::{ProjectContext, ProjectDefinitionContext, UniqueIidAuditor};
-use crate::{LdtkResult, ldtk_import_error};
+use crate::project::ProjectContext;
+use crate::result::LdtkResult;
 
 /// The layout of the world's levels.
 ///
@@ -68,84 +69,86 @@ pub struct World {
 }
 
 impl World {
-    pub(crate) fn create_handle_pair(
-        multi_world: bool,
-        ldtk_world: &ldtk::World,
-        project_asset_path: &ProjectAssetPath,
-        load_context: &mut LoadContext,
-        unique_iid_auditor: &mut UniqueIidAuditor,
-        project_context: &ProjectContext,
-        project_definition_context: &ProjectDefinitionContext,
-    ) -> LdtkResult<(Iid, Handle<Self>)> {
-        let identifier = ldtk_world.identifier.clone();
-        let world_asset_path = project_asset_path.to_world_asset_path(&identifier)?;
+    pub(crate) async fn new(
+        world_json: ldtk::World,
+        project_context: Arc<RwLock<ProjectContext>>,
+        load_context: Arc<Mutex<&mut LoadContext<'_>>>,
+        world_label: &str,
+    ) -> LdtkResult<Self> {
+        let identifier = world_json.identifier;
 
-        let iid = Iid::from_str(&ldtk_world.iid)?;
-        if multi_world {
-            unique_iid_auditor.check(iid)?;
-        }
+        let iid = Iid::from_str(&world_json.iid)?;
 
         let world_layout = WorldLayout::new(
-            &ldtk_world.world_layout,
-            ldtk_world.world_grid_width,
-            ldtk_world.world_grid_height,
+            &world_json.world_layout,
+            world_json.world_grid_width,
+            world_json.world_grid_height,
         )?;
 
-        // TODO: I think we can clean this up and remove some allocations while avoiding the
-        // temporary binding. Possibly with Either:: or similar.
-        let levels_iter = if project_context.external_levels {
-            &ldtk_world
-                .levels
-                .iter()
-                .map(|ldtk_level| -> LdtkResult<ldtk::Level> {
-                    let external_rel_path =
-                        ldtk_level
-                            .external_rel_path
-                            .as_ref()
-                            .ok_or(ldtk_import_error!(
-                                "external_rel_path is None when external_levels is true!"
+        let external_levels = project_context.read()?.external_levels;
+
+        let levels_json = if external_levels {
+            let levels_json_iter =
+                world_json
+                    .levels
+                    .into_iter()
+                    .enumerate()
+                    .map(|(index, level_json)| {
+                        let load_context = load_context.clone();
+
+                        async move {
+                            let path = level_json.external_rel_path.ok_or(ldtk_import_error!(
+                                "external_rel_path is `None` in an external_levels project?"
                             ))?;
 
-                    trace!("Attempting to load external level from path: {external_rel_path}");
+                            let external_level_json =
+                                load_context.lock().await.read_asset_bytes(path).await?;
+                            let external_level_json: ldtk::Level =
+                                serde_json::from_slice(&external_level_json)?;
 
-                    let ldtk_path = Path::new(external_rel_path);
-                    let bevy_path =
-                        ldtk_path_to_bevy_path(project_context.project_directory, ldtk_path);
-                    let bytes = block_on(async { load_context.read_asset_bytes(bevy_path).await })?;
-                    let level: ldtk::Level = serde_json::from_slice(&bytes)?;
-                    Ok(level)
-                })
-                .collect::<LdtkResult<_>>()?
+                            LdtkResult::Ok((index, external_level_json))
+                        }
+                    });
+
+            let levels_json_iter = try_join_all(levels_json_iter).await?.into_iter();
+            Either::Left(levels_json_iter)
         } else {
-            &ldtk_world.levels
+            let levels_json_iter = world_json.levels.into_iter().enumerate();
+            Either::Right(levels_json_iter)
         };
 
-        let levels = levels_iter
-            .iter()
-            .enumerate()
-            .map(|(index, ldtk_level)| {
-                Level::create_handle_pair(
-                    ldtk_level,
-                    index,
-                    &world_asset_path,
-                    load_context,
-                    unique_iid_auditor,
-                    project_context,
-                    project_definition_context,
-                )
-            })
-            .collect::<LdtkResult<_>>()?;
+        let levels_iter = levels_json.into_iter().map(|(index, level_json)| {
+            let load_context = load_context.clone();
+            let project_context = project_context.clone();
 
-        let world = World {
+            async move {
+                let level_label = format!("{world_label}/{}", level_json.identifier);
+                debug!("constructing level asset: {level_label}");
+                let level = Level::new(
+                    level_json,
+                    index,
+                    project_context,
+                    load_context.clone(),
+                    &level_label,
+                )
+                .await?;
+                let iid = level.iid;
+                let handle = load_context
+                    .lock()
+                    .await
+                    .add_labeled_asset(level_label, level);
+                LdtkResult::Ok((iid, handle))
+            }
+        });
+
+        let levels = try_join_all(levels_iter).await?.into_iter().collect();
+
+        Ok(Self {
             identifier,
             iid,
             world_layout,
             levels,
-        };
-
-        let handle = load_context.add_labeled_asset(world_asset_path.to_asset_label(), world);
-
-        Ok((iid, handle))
+        })
     }
 }
 

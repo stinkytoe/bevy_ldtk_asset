@@ -1,10 +1,14 @@
+//! This represents the region of a [TilesetDefinition] which is used by an
+//! LDtk entity for representing its sprite. Also by field instances.
+//!
+//! TODO: Improve this doc
 use bevy_asset::Handle;
 use bevy_math::I64Vec2;
 use bevy_reflect::Reflect;
 
 use crate::ldtk;
 use crate::ldtk_import_error;
-use crate::result::Result;
+use crate::result::LdtkResult;
 use crate::tileset_definition::TilesetDefinition;
 use crate::uid::UidMap;
 
@@ -12,6 +16,7 @@ use crate::uid::UidMap;
 /// This can also be stored in [crate::field_instance::FieldInstance]s for reference.
 ///
 /// The Anchor and underlying tile set are defined in the entity instance.
+#[allow(missing_docs)]
 #[derive(Clone, Debug, Reflect)]
 pub struct TilesetRectangle {
     pub corner: I64Vec2,
@@ -21,9 +26,9 @@ pub struct TilesetRectangle {
 
 impl TilesetRectangle {
     pub(crate) fn new(
-        value: &ldtk::TilesetRectangle,
+        value: ldtk::TilesetRectangle,
         tileset_definitions: &UidMap<Handle<TilesetDefinition>>,
-    ) -> Result<Self> {
+    ) -> LdtkResult<Self> {
         let corner = (value.x, value.y).into();
         let size = (value.w, value.h).into();
         let tileset_definition = tileset_definitions

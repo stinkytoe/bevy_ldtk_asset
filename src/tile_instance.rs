@@ -4,7 +4,8 @@ use bevy_math::I64Vec2;
 use bevy_reflect::Reflect;
 
 use crate::ldtk;
-use crate::{LdtkResult, ldtk_import_error};
+use crate::ldtk_import_error;
+use crate::result::LdtkResult;
 
 /// An individual tile in a [crate::layer::TilesLayer] instance.
 ///
@@ -26,13 +27,13 @@ pub struct TileInstance {
 }
 
 impl TileInstance {
-    pub(crate) fn new(value: &ldtk::TileInstance) -> LdtkResult<Self> {
+    pub(crate) fn new(value: ldtk::TileInstance) -> LdtkResult<Self> {
         let opacity = value.a as f32;
         let (flip_x, flip_y) = match value.f {
-            0 => (false, false),
-            1 => (true, false),
-            2 => (false, true),
-            3 => (true, true),
+            0b00 => (false, false),
+            0b01 => (true, false),
+            0b10 => (false, true),
+            0b11 => (true, true),
             _ => {
                 return Err(ldtk_import_error!(
                     "Bad value for tile flip bits! given: {}",

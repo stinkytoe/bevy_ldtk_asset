@@ -4,30 +4,28 @@
 //! [LevelInstance](https://ldtk.io/json/#ldtk-LevelInstanceJson).
 
 use std::str::FromStr;
+use std::sync::{Arc, RwLock};
 
 use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_color::Color;
 use bevy_image::Image;
+use bevy_log::debug;
 use bevy_math::{DVec2, I64Vec2};
 use bevy_platform::collections::HashMap;
 use bevy_reflect::Reflect;
+use futures::future::try_join_all;
+use futures::lock::Mutex;
 
-use crate::LdtkResult;
-use crate::asset_labels::WorldAssetPath;
 use crate::color::bevy_color_from_ldtk_string;
 use crate::field_instance::FieldInstance;
-use crate::iid::Iid;
-use crate::iid::IidMap;
+use crate::iid::{Iid, IidMap};
 use crate::layer::LayerInstance;
-use crate::ldtk;
-use crate::ldtk_asset_trait::LdtkAsset;
-use crate::ldtk_asset_trait::LdtkAssetWithChildren;
-use crate::ldtk_asset_trait::LdtkAssetWithFieldInstances;
-use crate::ldtk_import_error;
+use crate::ldtk_asset_trait::{LdtkAsset, LdtkAssetWithChildren, LdtkAssetWithFieldInstances};
 use crate::ldtk_path::ldtk_path_to_bevy_path;
-use crate::project_loader::UniqueIidAuditor;
-use crate::project_loader::{ProjectContext, ProjectDefinitionContext};
+use crate::project::ProjectContext;
+use crate::result::LdtkResult;
 use crate::uid::Uid;
+use crate::{ldtk, ldtk_import_error};
 
 /// Relatve direction of levels in the Neighbour list.
 #[allow(missing_docs)]
@@ -77,7 +75,7 @@ pub struct Neighbour {
 }
 
 impl Neighbour {
-    pub(crate) fn new(value: &ldtk::NeighbourLevel) -> LdtkResult<Self> {
+    pub(crate) fn new(value: ldtk::NeighbourLevel) -> LdtkResult<Self> {
         let dir = NeighbourDir::new(&value.dir)?;
         let level_iid = Iid::from_str(&value.level_iid)?;
 
@@ -106,7 +104,7 @@ pub struct LevelBackground {
 
 impl LevelBackground {
     pub(crate) fn new(
-        value: &ldtk::LevelBackgroundPosition,
+        value: ldtk::LevelBackgroundPosition,
         image: Handle<Image>,
     ) -> LdtkResult<Self> {
         let (crop_corner, crop_size) = (value.crop_rect.len() == 4)
@@ -174,8 +172,7 @@ pub struct Level {
     pub world_depth: i64,
     /// The relative location of this [Level] within its associated [crate::world::World].
     ///
-    /// This is converted from LDtk's coordinate space to Bevy's pixel coordinate space by negating
-    /// the y value.
+    /// This is in LDtk's coordinate space.
     pub location: I64Vec2,
     /// Handles to all of the associated [Layer] instances, indexed by that layer's [Iid].
     ///
@@ -191,25 +188,23 @@ pub struct Level {
 }
 
 impl Level {
-    pub(crate) fn create_handle_pair(
-        value: &ldtk::Level,
+    pub(crate) async fn new(
+        level_json: ldtk::Level,
         index: usize,
-        world_asset_path: &WorldAssetPath,
-        load_context: &mut LoadContext,
-        unique_iid_auditor: &mut UniqueIidAuditor,
-        project_context: &ProjectContext,
-        project_definition_context: &ProjectDefinitionContext,
-    ) -> LdtkResult<(Iid, Handle<Self>)> {
-        let identifier = value.identifier.clone();
-        let level_asset_path = world_asset_path.to_level_asset_path(&identifier)?;
+        project_context: Arc<RwLock<ProjectContext>>,
+        load_context: Arc<Mutex<&mut LoadContext<'_>>>,
+        level_label: &str,
+    ) -> LdtkResult<Self> {
+        let identifier = level_json.identifier;
 
-        let bg_color = bevy_color_from_ldtk_string(&value.bg_color)?;
-        let neighbours = value
+        let bg_color = bevy_color_from_ldtk_string(&level_json.bg_color)?;
+        let neighbours = level_json
             .neighbours
-            .iter()
+            .into_iter()
             .map(Neighbour::new)
             .collect::<LdtkResult<_>>()?;
-        let background = match (value.bg_pos.as_ref(), value.bg_rel_path.as_ref()) {
+
+        let background = match (level_json.bg_pos, level_json.bg_rel_path) {
             (None, None) => None,
             (None, Some(_)) => {
                 return Err(ldtk_import_error!(
@@ -222,75 +217,94 @@ impl Level {
                 ));
             }
             (Some(bg_pos), Some(bg_rel_path)) => {
-                let path = ldtk_path_to_bevy_path(project_context.project_directory, bg_rel_path);
-                let image = load_context.load(path);
+                let path = ldtk_path_to_bevy_path(
+                    project_context.read()?.project_directory.as_path(),
+                    bg_rel_path,
+                );
+                let image = load_context.lock().await.load(path);
                 let background = LevelBackground::new(bg_pos, image)?;
                 Some(background)
             }
         };
-        let field_instances = value
-            .field_instances
-            .iter()
-            .filter(|value| value.value.is_some())
-            .map(|value| -> LdtkResult<(String, FieldInstance)> {
-                Ok((
-                    value.identifier.clone(),
-                    FieldInstance::new(
-                        value,
-                        project_context.project_directory,
-                        project_definition_context.tileset_definitions,
-                        project_definition_context.enum_definitions,
-                    )?,
-                ))
-            })
-            .collect::<LdtkResult<_>>()?;
-        let iid = Iid::from_str(&value.iid)?;
-        unique_iid_auditor.check(iid)?;
-        let size = (value.px_wid, value.px_hei).into();
-        let uid = value.uid;
-        let world_depth = value.world_depth;
-        let location = (value.world_x, value.world_y).into();
 
-        let layer_instances = value.layer_instances.as_ref().ok_or(ldtk_import_error!(
-            "layer_instances is None? \
-                    Are we opening the local layer definition instead of the external one?"
+        let iid = Iid::from_str(&level_json.iid)?;
+
+        let field_instances_iter = level_json
+            .field_instances
+            .into_iter()
+            .filter(|field_instance_json| field_instance_json.value.is_some())
+            .map(|field_instance_json| {
+                let project_context = project_context.clone();
+                async move {
+                    let identifier = field_instance_json.identifier.clone();
+                    let field_instance =
+                        FieldInstance::new(field_instance_json, project_context).await?;
+
+                    LdtkResult::Ok((identifier, field_instance))
+                }
+            });
+
+        let field_instances = try_join_all(field_instances_iter)
+            .await?
+            .into_iter()
+            .collect();
+
+        let size = (level_json.px_wid, level_json.px_hei).into();
+
+        let uid = level_json.uid;
+
+        let world_depth = level_json.world_depth;
+
+        let location = (level_json.world_x, level_json.world_y).into();
+
+        let layer_instances = level_json.layer_instances.ok_or(ldtk_import_error!(
+            "layer_instances is None? Are we opening the local layer definition instead of the external one?"
         ))?;
 
-        let layers = layer_instances
-            .iter()
-            .rev()
-            .enumerate()
-            .map(|(index, ldtk_layer_instance)| {
-                LayerInstance::create_handle_pair(
-                    ldtk_layer_instance,
-                    index,
-                    &level_asset_path,
-                    load_context,
-                    unique_iid_auditor,
-                    project_context,
-                    project_definition_context,
-                )
-            })
-            .collect::<LdtkResult<_>>()?;
+        let layers_iter = layer_instances.into_iter().map(|layer_instance_json| {
+            let project_context = project_context.clone();
+            let load_context = load_context.clone();
 
-        let level = Level {
+            async move {
+                let layer_label = format!("{level_label}/{}", layer_instance_json.identifier);
+                debug!("constructing layer asset: {layer_label}");
+
+                let iid = Iid::parse_str(&layer_instance_json.iid)?;
+
+                let layer = LayerInstance::new(
+                    layer_instance_json,
+                    index,
+                    project_context,
+                    load_context.clone(),
+                    &layer_label,
+                )
+                .await?;
+
+                let handle = load_context
+                    .lock()
+                    .await
+                    .add_labeled_asset(layer_label, layer);
+
+                LdtkResult::Ok((iid, handle))
+            }
+        });
+
+        let layers = try_join_all(layers_iter).await?.into_iter().collect();
+
+        Ok(Self {
             bg_color,
             neighbours,
             background,
-            field_instances,
             identifier,
             iid,
+            field_instances,
             size,
             uid,
             world_depth,
             location,
             layers,
             index,
-        };
-
-        let handle = load_context.add_labeled_asset(level_asset_path.to_asset_label(), level);
-
-        Ok((iid, handle))
+        })
     }
 }
 

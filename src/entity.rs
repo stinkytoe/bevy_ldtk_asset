@@ -4,23 +4,24 @@
 //! [EntityInstance](https://ldtk.io/json/#ldtk-EntityInstanceJson).
 
 use std::str::FromStr;
+use std::sync::{Arc, RwLock};
 
-use bevy_asset::{Asset, Handle, LoadContext};
+use bevy_asset::{Asset, Handle};
 use bevy_color::Color;
 use bevy_math::I64Vec2;
 use bevy_platform::collections::HashMap;
 use bevy_reflect::Reflect;
 use bevy_sprite::Anchor;
+use futures::future::try_join_all;
 
-use crate::LdtkResult;
 use crate::anchor::bevy_anchor_from_ldtk;
-use crate::asset_labels::LayerAssetPath;
 use crate::color::bevy_color_from_ldtk_string;
 use crate::entity_definition::EntityDefinition;
 use crate::field_instance::FieldInstance;
 use crate::iid::Iid;
 use crate::ldtk_asset_trait::{LdtkAsset, LdtkAssetWithFieldInstances, LdtkAssetWithTags};
-use crate::project_loader::{ProjectContext, ProjectDefinitionContext, UniqueIidAuditor};
+use crate::project::ProjectContext;
+use crate::result::LdtkResult;
 use crate::tileset_rectangle::TilesetRectangle;
 use crate::{ldtk, ldtk_import_error};
 
@@ -74,82 +75,82 @@ pub struct EntityInstance {
 }
 
 impl EntityInstance {
-    pub(crate) fn create_handle_pair(
-        value: &ldtk::EntityInstance,
-        layer_asset_path: &LayerAssetPath,
-        load_context: &mut LoadContext,
-        unique_iid_auditor: &mut UniqueIidAuditor,
-        project_context: &ProjectContext,
-        project_definitions_context: &ProjectDefinitionContext,
-    ) -> LdtkResult<(Iid, Handle<Self>)> {
-        let identifier = value.identifier.clone();
-        let iid = Iid::from_str(&value.iid)?;
-        unique_iid_auditor.check(iid)?;
-        let entity_asset_path = layer_asset_path.to_entity_asset_path(&identifier, iid)?;
+    pub(crate) async fn new(
+        entity_instance_json: ldtk::EntityInstance,
+        project_context: Arc<RwLock<ProjectContext>>,
+    ) -> LdtkResult<Self> {
+        let identifier = entity_instance_json.identifier;
 
-        let grid = (value.grid.len() == 2)
-            .then(|| (value.grid[0], value.grid[1]).into())
+        let iid = Iid::from_str(&entity_instance_json.iid)?;
+
+        let grid = (entity_instance_json.grid.len() == 2)
+            .then(|| (entity_instance_json.grid[0], entity_instance_json.grid[1]).into())
             .ok_or(ldtk_import_error!(
                 "Bad value for grid! given: {:?}",
-                value.grid
-            ))?;
-        let anchor = bevy_anchor_from_ldtk(&value.pivot)?;
-        let smart_color = bevy_color_from_ldtk_string(&value.smart_color)?;
-        let tags = value.tags.clone();
-        let tile = value
-            .tile
-            .as_ref()
-            .map(|value| {
-                TilesetRectangle::new(value, project_definitions_context.tileset_definitions)
-            })
-            .transpose()?;
-        let world_location = match (value.world_x, value.world_y) {
-            (None, None) => None,
-            (None, Some(y)) => {
-                return Err(ldtk_import_error!(
-                    "When constructing an entity, world_x was None but world_y was Some({y})!",
-                ));
-            }
-            (Some(x), None) => {
-                return Err(ldtk_import_error!(
-                    "When constructing an entity, world_x was Some({x}) but world_y was None!",
-                ));
-            }
-            (Some(x), Some(y)) => Some((x, y).into()),
-        };
-        let entity_definition = project_definitions_context
-            .entity_definitions
-            .get(&value.def_uid)
-            .ok_or(ldtk_import_error!(
-                "bad entity definition uid! given: {}",
-                value.def_uid
-            ))?
-            .clone();
-        let field_instances = value
-            .field_instances
-            .iter()
-            .filter(|value| value.value.is_some())
-            .map(|value| -> LdtkResult<(String, FieldInstance)> {
-                Ok((
-                    value.identifier.clone(),
-                    FieldInstance::new(
-                        value,
-                        project_context.project_directory,
-                        project_definitions_context.tileset_definitions,
-                        project_definitions_context.enum_definitions,
-                    )?,
-                ))
-            })
-            .collect::<LdtkResult<_>>()?;
-        let size = (value.width, value.height).into();
-        let location = (value.px.len() == 2)
-            .then(|| (value.px[0], value.px[1]).into())
-            .ok_or(ldtk_import_error!(
-                "Unable to parse I64Vec2 from entity px field! given: {:?}",
-                value.grid
+                entity_instance_json.grid
             ))?;
 
-        let entity = Self {
+        let anchor = bevy_anchor_from_ldtk(&entity_instance_json.pivot)?;
+
+        let smart_color = bevy_color_from_ldtk_string(&entity_instance_json.smart_color)?;
+
+        let tags = entity_instance_json.tags.clone();
+
+        let tile = entity_instance_json
+            .tile
+            .map(|value| TilesetRectangle::new(value, &project_context.read()?.tileset_definitions))
+            .transpose()?;
+
+        let world_location = match (entity_instance_json.world_x, entity_instance_json.world_y) {
+            (None, None) => Ok(None),
+            (None, Some(y)) => Err(ldtk_import_error!(
+                "When constructing an entity, world_x was None but world_y was Some({y})!",
+            )),
+            (Some(x), None) => Err(ldtk_import_error!(
+                "When constructing an entity, world_x was Some({x}) but world_y was None!",
+            )),
+            (Some(x), Some(y)) => Ok(Some((x, y).into())),
+        }?;
+
+        let entity_definition = project_context
+            .read()?
+            .entity_definitions
+            .get(&entity_instance_json.def_uid)
+            .ok_or(ldtk_import_error!(
+                "bad entity definition uid! given: {}",
+                entity_instance_json.def_uid
+            ))?
+            .clone();
+
+        let field_instances_iter = entity_instance_json
+            .field_instances
+            .into_iter()
+            .filter(|value| value.value.is_some())
+            .map(|value| {
+                let project_context = project_context.clone();
+                async {
+                    LdtkResult::Ok((
+                        value.identifier.clone(),
+                        FieldInstance::new(value, project_context).await?,
+                    ))
+                }
+            });
+
+        let field_instances = try_join_all(field_instances_iter)
+            .await?
+            .into_iter()
+            .collect();
+
+        let size = (entity_instance_json.width, entity_instance_json.height).into();
+
+        let location = (entity_instance_json.px.len() == 2)
+            .then(|| (entity_instance_json.px[0], entity_instance_json.px[1]).into())
+            .ok_or(ldtk_import_error!(
+                "Unable to parse I64Vec2 from entity px field! given: {:?}",
+                entity_instance_json.grid
+            ))?;
+
+        Ok(Self {
             identifier,
             iid,
             grid,
@@ -162,23 +163,13 @@ impl EntityInstance {
             field_instances,
             size,
             location,
-        };
-
-        let handle = load_context.add_labeled_asset(entity_asset_path.to_asset_label(), entity);
-
-        Ok((iid, handle))
+        })
     }
 }
 
 impl LdtkAsset for EntityInstance {
     fn get_iid(&self) -> Iid {
         self.iid
-    }
-}
-
-impl LdtkAssetWithFieldInstances for EntityInstance {
-    fn get_field_instance(&self, identifier: &str) -> Option<&FieldInstance> {
-        self.field_instances.get(identifier)
     }
 }
 
@@ -189,5 +180,11 @@ impl LdtkAssetWithTags for EntityInstance {
 
     fn has_tag(&self, tag: &str) -> bool {
         self.tags.iter().any(|inner_tag| inner_tag == tag)
+    }
+}
+
+impl LdtkAssetWithFieldInstances for EntityInstance {
+    fn get_field_instance(&self, identifier: &str) -> Option<&FieldInstance> {
+        self.field_instances.get(identifier)
     }
 }

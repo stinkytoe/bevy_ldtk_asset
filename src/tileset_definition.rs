@@ -11,7 +11,7 @@ use bevy_platform::collections::HashMap;
 use bevy_reflect::Reflect;
 
 use crate::ldtk_asset_trait::LdtkAssetWithTags;
-use crate::result::Result;
+use crate::result::LdtkResult;
 use crate::uid::Uid;
 use crate::{ldtk, ldtk_import_error};
 
@@ -22,7 +22,7 @@ use crate::{ldtk, ldtk_import_error};
 pub struct TilesetDefinition {
     /// Grid based cell size.
     ///
-    /// From the `__cHei` and `__cWid` LDtk JSON fields
+    /// From the `__cHei` and `__cWid` LDtk JSON fields.
     pub tile_grid_size: I64Vec2,
     /// Optional Custom data for tiles.
     ///
@@ -61,7 +61,7 @@ impl TilesetDefinition {
     pub(crate) async fn new(
         value: ldtk::TilesetDefinition,
         tileset_definition_images: &HashMap<String, Handle<Image>>,
-    ) -> Result<Self> {
+    ) -> LdtkResult<Self> {
         // see https://github.com/stinkytoe/bevy_ldtk_asset/issues/35
         if value.embed_atlas.is_some() {
             return Err(ldtk_import_error!(

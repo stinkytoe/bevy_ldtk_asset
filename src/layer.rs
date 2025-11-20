@@ -4,24 +4,28 @@
 //! [LayerInstance](https://ldtk.io/json/#ldtk-LayerInstanceJson).
 
 use std::str::FromStr;
+use std::sync::{Arc, RwLock};
 
 use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_image::Image;
+use bevy_log::debug;
 use bevy_math::I64Vec2;
 use bevy_reflect::Reflect;
+use futures::future::try_join_all;
+use futures::lock::Mutex;
 
-use crate::asset_labels::{LayerAssetPath, LevelAssetPath};
 use crate::entity::EntityInstance;
 use crate::iid::{Iid, IidMap};
 use crate::layer_definition::LayerDefinition;
 use crate::ldtk;
 use crate::ldtk_asset_trait::{LdtkAsset, LdtkAssetWithChildren};
+use crate::ldtk_import_error;
 use crate::ldtk_path::ldtk_path_to_bevy_path;
-use crate::project_loader::{ProjectContext, ProjectDefinitionContext, UniqueIidAuditor};
+use crate::project::ProjectContext;
+use crate::result::LdtkResult;
 use crate::tile_instance::TileInstance;
 use crate::tileset_definition::TilesetDefinition;
 use crate::uid::Uid;
-use crate::{LdtkResult, ldtk_import_error};
 
 /// A layer instance which contains [Entity] children.
 ///
@@ -33,40 +37,57 @@ pub struct EntitiesLayer {
 }
 
 impl EntitiesLayer {
-    pub(crate) fn new(
-        value: &ldtk::LayerInstance,
-        layer_asset_path: &LayerAssetPath,
-        load_context: &mut LoadContext,
-        unique_iid_auditor: &mut UniqueIidAuditor,
-        project_context: &ProjectContext,
-        project_definitions_context: &ProjectDefinitionContext,
+    async fn new(
+        entities_layer_json: ldtk::LayerInstance,
+        layer_label: &str,
+        project_context: Arc<RwLock<ProjectContext>>,
+        load_context: Arc<Mutex<&mut LoadContext<'_>>>,
     ) -> LdtkResult<Self> {
-        (value.int_grid_csv.is_empty()
-            && value.grid_tiles.is_empty()
-            && value.auto_layer_tiles.is_empty()
-            && value.tileset_rel_path.is_none()
-            && value.tileset_def_uid.is_none())
-        .then(|| -> LdtkResult<_> {
-            let entity_handles = value
-                .entity_instances
-                .iter()
-                .map(|value| {
-                    EntityInstance::create_handle_pair(
-                        value,
-                        layer_asset_path,
-                        load_context,
-                        unique_iid_auditor,
-                        project_context,
-                        project_definitions_context,
-                    )
-                })
-                .collect::<LdtkResult<_>>()?;
-            Ok(Self {
-                entities: entity_handles,
-            })
-        })
-        .transpose()?
-        .ok_or(ldtk_import_error!("Entities layer with Tile data!"))
+        macro_rules! should_be {
+            ($field:ident, $discr:ident) => {
+                (!entities_layer_json.$field.$discr())
+                    .then(|| ())
+                    .ok_or(ldtk_import_error!(
+                        "Entity Layer with values in {}?",
+                        stringify!(field)
+                    ))
+            };
+        }
+
+        should_be!(int_grid_csv, is_empty)?;
+        should_be!(grid_tiles, is_empty)?;
+        should_be!(tileset_rel_path, is_none)?;
+        should_be!(tileset_def_uid, is_none)?;
+
+        let entity_handles_iter = entities_layer_json
+            .entity_instances
+            .into_iter()
+            .map(|value| {
+                let project_context = project_context.clone();
+                let load_context = load_context.clone();
+                async move {
+                    let entity = EntityInstance::new(value, project_context).await?;
+
+                    let iid = entity.iid;
+
+                    let entity_label = format!("{layer_label}/{}@{}", entity.identifier, iid);
+                    debug!("constructing entity asset: {entity_label}");
+
+                    let handle = load_context
+                        .lock()
+                        .await
+                        .add_labeled_asset(entity_label, entity);
+
+                    LdtkResult::Ok((iid, handle))
+                }
+            });
+
+        let entities = try_join_all(entity_handles_iter)
+            .await?
+            .into_iter()
+            .collect();
+
+        Ok(Self { entities })
     }
 }
 
@@ -98,58 +119,76 @@ pub struct TilesLayer {
     pub tileset_definition: Option<Handle<TilesetDefinition>>,
     /// The image that the instances of [TileInstance] in the field [TilesLayer::tiles] are
     /// referring to.
-    ///
-    /// This will be filled with the default image handle if the JSON is null (a single white
-    /// pixel). See [TilesLayer::tileset_definition] for a description on how this can occur.
-    pub tileset_image: Handle<Image>,
+    pub tileset_image: Option<Handle<Image>>,
 }
 
 impl TilesLayer {
-    pub(crate) fn new(
-        value: &ldtk::LayerInstance,
-        load_context: &mut LoadContext,
-        project_context: &ProjectContext,
-        project_definition_context: &ProjectDefinitionContext,
+    async fn new(
+        layer_instance_json: ldtk::LayerInstance,
+        project_context: Arc<RwLock<ProjectContext>>,
+        load_context: Arc<Mutex<&mut LoadContext<'_>>>,
     ) -> LdtkResult<TilesLayer> {
-        let tiles: &[_] = match value.layer_instance_type.as_str() {
-            "Tiles" => &value.grid_tiles,
-            "AutoLayer" | "IntGrid" => &value.auto_layer_tiles,
-            // Since this was checked in LayerType::new(..), things are screwy if we reach here and
-            // therefore we panic!
+        // Check that the entities array is empty.
+        if !layer_instance_json.entity_instances.is_empty() {
+            Err(ldtk_import_error!("Entities layer with Tile data!"))?;
+        }
+
+        let int_grid = layer_instance_json.int_grid_csv.clone();
+
+        let layer_instance_type = layer_instance_json.layer_instance_type.as_str();
+
+        let tiles = match (
+            layer_instance_type,
+            layer_instance_json.grid_tiles.len(),
+            layer_instance_json.auto_layer_tiles.len(),
+        ) {
+            // Failure cases.
+            ("Tiles", _, a) if a != 0 => {
+                Err(ldtk_import_error!("auto layer tiles in a Tiles layer?"))?
+            }
+            ("AutoLayer" | "IntGrid", g, _) if g != 0 => Err(ldtk_import_error!(
+                "grid tiles in a {} layer?",
+                layer_instance_type
+            ))?,
+
+            // Good cases.
+            ("Tiles", _, _) => layer_instance_json.grid_tiles.into_iter(),
+            ("AutoLayer" | "IntGrid", _, _) => layer_instance_json.auto_layer_tiles.into_iter(),
             _ => unreachable!(),
+        }
+        .map(TileInstance::new)
+        .collect::<LdtkResult<_>>()?;
+
+        let tileset_definition = layer_instance_json
+            .tileset_def_uid
+            .map(|uid| {
+                project_context
+                    .read()?
+                    .tileset_definitions
+                    .get(&uid)
+                    .cloned()
+                    .ok_or(ldtk_import_error!(
+                        "could not find a tileset_definition with uid {uid}!"
+                    ))
+            })
+            .transpose()?;
+
+        let tileset_image = if let Some(path) = layer_instance_json.tileset_rel_path {
+            let path = ldtk_path_to_bevy_path(&project_context.read()?.project_directory, path);
+
+            let handle = load_context.lock().await.load(path);
+
+            Some(handle)
+        } else {
+            None
         };
 
-        value
-            .entity_instances
-            .is_empty()
-            .then(|| -> LdtkResult<_> {
-                let int_grid = value.int_grid_csv.clone();
-                let tiles = tiles
-                    .iter()
-                    .map(TileInstance::new)
-                    .collect::<LdtkResult<_>>()?;
-                let tileset_definition = value
-                    .tileset_def_uid
-                    .and_then(|uid| project_definition_context.tileset_definitions.get(&uid))
-                    .cloned();
-                let tileset_image = value
-                    .tileset_rel_path
-                    .as_deref()
-                    .map(|ldtk_path| {
-                        ldtk_path_to_bevy_path(project_context.project_directory, ldtk_path)
-                    })
-                    .map(|bevy_path| load_context.load(bevy_path))
-                    .unwrap_or_default();
-
-                Ok(Self {
-                    int_grid,
-                    tiles,
-                    tileset_definition,
-                    tileset_image,
-                })
-            })
-            .transpose()?
-            .ok_or(ldtk_import_error!("Entities layer with Tile data!"))
+        Ok(Self {
+            int_grid,
+            tiles,
+            tileset_definition,
+            tileset_image,
+        })
     }
 }
 
@@ -212,37 +251,33 @@ impl LayerType {
 }
 
 impl LayerType {
-    fn new(
-        value: &ldtk::LayerInstance,
-        layer_asset_path: &LayerAssetPath,
-        load_context: &mut LoadContext,
-        unique_iid_auditor: &mut UniqueIidAuditor,
-        project_context: &ProjectContext,
-        project_definition_context: &ProjectDefinitionContext,
+    async fn new(
+        layer_instance_json: ldtk::LayerInstance,
+        layer_label: &str,
+        project_context: Arc<RwLock<ProjectContext>>,
+        load_context: Arc<Mutex<&mut LoadContext<'_>>>,
     ) -> LdtkResult<Self> {
-        match value.layer_instance_type.as_str() {
-            "Entities" => Ok(Self::Entities(EntitiesLayer::new(
-                value,
-                layer_asset_path,
-                load_context,
-                unique_iid_auditor,
-                project_context,
-                project_definition_context,
-            )?)),
-            "Tiles" | "AutoLayer" | "IntGrid" => Ok(Self::Tiles(TilesLayer::new(
-                value,
-                load_context,
-                project_context,
-                project_definition_context,
-            )?)),
+        match layer_instance_json.layer_instance_type.as_str() {
+            "Entities" => Ok(Self::Entities(
+                EntitiesLayer::new(
+                    layer_instance_json,
+                    layer_label,
+                    project_context,
+                    load_context,
+                )
+                .await?,
+            )),
+
+            "Tiles" | "AutoLayer" | "IntGrid" => Ok(Self::Tiles(
+                TilesLayer::new(layer_instance_json, project_context, load_context).await?,
+            )),
+
             unknown => Err(ldtk_import_error!("Unknown layer type! given: {unknown}")),
         }
     }
 }
 
 /// An asset representing an [LDtk Layer Instance](https://ldtk.io/json/#ldtk-LayerInstanceJson).
-///
-/// See [crate::asset_labels] for a description of the label format.
 #[derive(Debug, Asset, Reflect)]
 pub struct LayerInstance {
     /// The size of the logical grid, in two dimensions.
@@ -263,12 +298,8 @@ pub struct LayerInstance {
     /// Represented by a value betwween 0.0 to 1.0, with 1.0 being completely opaque and 0.0 being
     /// completely transparent.
     pub opacity: f64,
-    /// The layer type of this specific layer.
-    pub layer_type: LayerType,
     /// The Iid. This will likely always be unique, even across projects.
     pub iid: Iid,
-    /// A handle pointing to the [LayerDefinition] asset.
-    pub layer_definition: Handle<LayerDefinition>,
     /// The [Uid] of the containing level.
     pub level_id: Uid,
     /// Location of this layer in relation to its containing [crate::level::Level].
@@ -277,50 +308,53 @@ pub struct LayerInstance {
     /// and [pdTotalOffsetY](https://ldtk.io/json/#ldtk-LayerInstanceJson;__pxTotalOffsetY), and is
     /// the cumulative offset of both the definition and the specific instance.
     pub location: I64Vec2,
+    /// The layer type of this specific layer.
+    pub layer_type: LayerType,
+    /// A handle pointing to the [LayerDefinition] asset.
+    pub layer_definition: Handle<LayerDefinition>,
     /// Index from 0 to (number of layers - 1), in ascending order. When developing a
     /// visualization, higher index values should be above lower ones.
     pub index: usize,
 }
 
 impl LayerInstance {
-    pub(crate) fn create_handle_pair(
-        value: &ldtk::LayerInstance,
+    pub(crate) async fn new(
+        layer_instance_json: ldtk::LayerInstance,
         index: usize,
-        level_asset_path: &LevelAssetPath,
-        load_context: &mut LoadContext,
-        unique_iid_auditor: &mut UniqueIidAuditor,
-        project_context: &ProjectContext,
-        project_definition_context: &ProjectDefinitionContext,
-    ) -> LdtkResult<(Iid, Handle<Self>)> {
-        let identifier = value.identifier.clone();
-        let layer_asset_path = level_asset_path.to_layer_asset_path(&identifier)?;
+        project_context: Arc<RwLock<ProjectContext>>,
+        load_context: Arc<Mutex<&mut LoadContext<'_>>>,
+        layer_label: &str,
+    ) -> LdtkResult<Self> {
+        let identifier = layer_instance_json.identifier.clone();
 
-        let grid_size: I64Vec2 = (value.c_wid, value.c_hei).into();
-        let grid_cell_size = value.grid_size;
-        let opacity = value.opacity;
-        let layer_type = LayerType::new(
-            value,
-            &layer_asset_path,
-            load_context,
-            unique_iid_auditor,
-            project_context,
-            project_definition_context,
-        )?;
-        let iid = Iid::from_str(&value.iid)?;
-        unique_iid_auditor.check(iid)?;
-        let layer_definition = project_definition_context
+        let grid_size: I64Vec2 = (layer_instance_json.c_wid, layer_instance_json.c_hei).into();
+
+        let grid_cell_size = layer_instance_json.grid_size;
+
+        let opacity = layer_instance_json.opacity;
+
+        let iid = Iid::from_str(&layer_instance_json.iid)?;
+
+        let level_id = layer_instance_json.level_id;
+
+        let location = (
+            layer_instance_json.px_total_offset_x,
+            layer_instance_json.px_total_offset_y,
+        )
+            .into();
+
+        let layer_definition = project_context
+            .read()?
             .layer_definitions
-            .get(&value.layer_def_uid)
+            .get(&layer_instance_json.layer_def_uid)
             .ok_or(ldtk_import_error!(
                 "Bad layer definition uid! given: {}",
-                value.layer_def_uid
+                layer_instance_json.layer_def_uid
             ))?
             .clone();
-        let level_id = value.level_id;
-        let location = (value.px_total_offset_x, value.px_total_offset_y).into();
 
         // Sanity check to guarantee that the int_grid size makes sense
-        let int_grid_len = value.int_grid_csv.len();
+        let int_grid_len = layer_instance_json.int_grid_csv.len();
         let total_grids = (grid_size.x * grid_size.y) as usize;
         if int_grid_len != 0 && int_grid_len != total_grids {
             return Err(ldtk_import_error!(
@@ -328,22 +362,26 @@ impl LayerInstance {
             ));
         }
 
-        let layer = LayerInstance {
+        let layer_type = LayerType::new(
+            layer_instance_json,
+            layer_label,
+            project_context,
+            load_context,
+        )
+        .await?;
+
+        Ok(Self {
             grid_size,
             grid_cell_size,
             identifier,
             opacity,
-            layer_type,
             iid,
-            layer_definition,
             level_id,
             location,
+            layer_definition,
+            layer_type,
             index,
-        };
-
-        let handle = load_context.add_labeled_asset(layer_asset_path.to_asset_label(), layer);
-
-        Ok((iid, handle))
+        })
     }
 }
 

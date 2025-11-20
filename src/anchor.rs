@@ -2,8 +2,9 @@ use bevy_math::Vec2;
 use bevy_sprite::Anchor;
 
 use crate::ldtk_import_error;
+use crate::result::LdtkResult;
 
-pub(crate) fn bevy_anchor_from_ldtk(pivot: &[f64]) -> crate::LdtkResult<Anchor> {
+pub(crate) fn bevy_anchor_from_ldtk(pivot: &[f64]) -> LdtkResult<Anchor> {
     (pivot.len() == 2)
         .then(|| match (pivot[0] as f32, pivot[1] as f32) {
             (0.0, 0.0) => Anchor::TOP_LEFT,

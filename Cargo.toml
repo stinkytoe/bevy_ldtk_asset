@@ -42,5 +42,5 @@ thiserror = { version = "2.0", default-features = false }
 uuid = { version = "1.11", default-features = false }
 
 [features]
-default = []
-asset_events_debug = []
+default = ["asset_messages_debug"]
+asset_messages_debug = []

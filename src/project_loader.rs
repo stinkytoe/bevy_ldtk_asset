@@ -7,7 +7,7 @@ use bevy_asset::AssetLoader;
 // use crate::layer_definition::LayerDefinition;
 use crate::ldtk;
 use crate::project::Project;
-use crate::result::Result;
+use crate::result::LdtkResult;
 // use crate::world::World;
 
 #[derive(Default)]
@@ -16,14 +16,14 @@ pub(crate) struct ProjectLoader;
 impl AssetLoader for ProjectLoader {
     type Asset = Project;
     type Settings = ();
-    type Error = crate::error::Error;
+    type Error = crate::error::LdtkError;
 
     async fn load(
         &self,
         reader: &mut dyn bevy_asset::io::Reader,
         _settings: &Self::Settings,
         load_context: &mut bevy_asset::LoadContext<'_>,
-    ) -> Result<Self::Asset> {
+    ) -> LdtkResult<Self::Asset> {
         let ldtk_project: ldtk::LdtkProject = {
             let mut bytes = Vec::new();
             reader.read_to_end(&mut bytes).await?;

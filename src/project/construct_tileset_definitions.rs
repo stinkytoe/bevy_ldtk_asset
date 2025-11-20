@@ -1,12 +1,12 @@
 use std::path::Path;
 
-use bevy_asset::Handle;
-use bevy_asset::LoadContext;
+use bevy_asset::{Handle, LoadContext};
+use bevy_image::Image;
 use futures::future::try_join_all;
 
 use crate::ldtk;
 use crate::ldtk_path::ldtk_path_to_bevy_path;
-use crate::result::Result;
+use crate::result::LdtkResult;
 use crate::tileset_definition::TilesetDefinition;
 use crate::uid::UidMap;
 
@@ -14,19 +14,19 @@ pub(super) async fn construct_tileset_definitions(
     tileset_definitions: Vec<ldtk::TilesetDefinition>,
     project_directory: &Path,
     load_context: &mut LoadContext<'_>,
-) -> Result<UidMap<Handle<TilesetDefinition>>> {
+) -> LdtkResult<UidMap<Handle<TilesetDefinition>>> {
     let tileset_definition_images = tileset_definitions
         .iter()
         .filter_map(|ldtk_tileset_definition| ldtk_tileset_definition.rel_path.clone())
         .map(|rel_path| {
-            let tileset_image = {
+            let tileset_image: Handle<Image> = {
                 let bevy_path = ldtk_path_to_bevy_path(project_directory, &rel_path);
                 load_context.load(bevy_path)
             };
 
-            (rel_path, tileset_image)
+            LdtkResult::Ok((rel_path, tileset_image))
         })
-        .collect();
+        .collect::<LdtkResult<_>>()?;
 
     let tileset_definitions =
         tileset_definitions
@@ -38,7 +38,7 @@ pub(super) async fn construct_tileset_definitions(
                     TilesetDefinition::new(tileset_definition_json, &tileset_definition_images)
                         .await?;
 
-                Result::Ok((uid, tileset_definition))
+                LdtkResult::Ok((uid, tileset_definition))
             });
 
     Ok(try_join_all(tileset_definitions)

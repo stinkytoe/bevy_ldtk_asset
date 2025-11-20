@@ -14,7 +14,7 @@ use bevy_reflect::Reflect;
 use crate::color::bevy_color_from_ldtk_string;
 use crate::ldtk;
 use crate::ldtk_import_error;
-use crate::result::Result;
+use crate::result::LdtkResult;
 use crate::tileset_definition::TilesetDefinition;
 use crate::tileset_rectangle::TilesetRectangle;
 use crate::uid::{Uid, UidMap};
@@ -30,7 +30,7 @@ pub enum LayerDefinitionType {
 }
 
 impl LayerDefinitionType {
-    pub(crate) fn new(ldtk_type: &str) -> Result<LayerDefinitionType> {
+    pub(crate) async fn new(ldtk_type: &str) -> LdtkResult<LayerDefinitionType> {
         Ok(match ldtk_type {
             "IntGrid" => LayerDefinitionType::IntGrid,
             "Entities" => LayerDefinitionType::Entities,
@@ -89,9 +89,9 @@ impl LayerDefinition {
     pub(crate) async fn new(
         value: ldtk::LayerDefinition,
         tileset_definitions: &UidMap<Handle<TilesetDefinition>>,
-    ) -> Result<Self> {
+    ) -> LdtkResult<Self> {
         let identifier = value.identifier;
-        let layer_definition_type = LayerDefinitionType::new(&value.layer_definition_type)?;
+        let layer_definition_type = LayerDefinitionType::new(&value.layer_definition_type).await?;
         let auto_source_layer_def_uid = value.auto_source_layer_def_uid;
         let display_opacity = value.display_opacity;
         let grid_cell_size = value.grid_size;
@@ -99,12 +99,12 @@ impl LayerDefinition {
             .int_grid_values
             .into_iter()
             .map(|value| Ok((value.value, IntGridValue::new(value, tileset_definitions)?)))
-            .collect::<Result<_>>()?;
+            .collect::<LdtkResult<_>>()?;
         let int_grid_values_groups = value
             .int_grid_values_groups
             .into_iter()
             .map(|value| Ok((value.uid, IntGridValuesGroup::new(value)?)))
-            .collect::<Result<_>>()?;
+            .collect::<LdtkResult<_>>()?;
         let parallax_factor = (value.parallax_factor_x, value.parallax_factor_y).into();
         let parallax_scaling = value.parallax_scaling;
         let offset = (value.px_offset_x, value.px_offset_y).into();
@@ -150,13 +150,15 @@ impl IntGridValue {
     pub(crate) fn new(
         int_grid_value: ldtk::IntGridValueDefinition,
         tileset_definitions: &UidMap<Handle<TilesetDefinition>>,
-    ) -> Result<Self> {
+    ) -> LdtkResult<Self> {
         let color = bevy_color_from_ldtk_string(&int_grid_value.color)?;
+
         let group_uid = int_grid_value.group_uid;
+
         let identifier = int_grid_value.identifier;
+
         let tile = int_grid_value
             .tile
-            .as_ref()
             .map(|value| TilesetRectangle::new(value, tileset_definitions))
             .transpose()?;
 
@@ -186,7 +188,7 @@ pub struct IntGridValuesGroup {
 }
 
 impl IntGridValuesGroup {
-    pub(crate) fn new(value: ldtk::IntGridValueGroupDefinition) -> Result<Self> {
+    pub(crate) fn new(value: ldtk::IntGridValueGroupDefinition) -> LdtkResult<Self> {
         let color = value
             .color
             .as_deref()
