@@ -54,7 +54,6 @@ jobs:
     name: Unit Test
     runs-on: ubuntu-latest
     steps:
-      - name: 
       - name: Checkout sources
         uses: actions/checkout@v4
       - name: Install stable toolchain
