@@ -295,6 +295,9 @@ stinkytoe
 
 ## Version History
 
+- 0.9.0:
+  - Better compatibility with async runtime
+  - TilesLayer tileset_image now an `Option<Handle<Image>>`
 - 0.8.0:
   - Release for Bevy 0.17
   - Will now support major/minor version of Bevy, and not lock on a revision.
@@ -349,6 +352,7 @@ stinkytoe
 
 | bevy_ldtk_asset | bevy        | LDtk  |
 | :-------------: | :---------: | :---: |
+| 0.9.0           | 0.17        | 1.5.3 |
 | 0.8.0           | 0.17        | 1.5.3 |
 | 0.7.1           | 0.16.0      | 1.5.3 |
 | 0.7.0           | 0.16.0      | 1.5.3 |
