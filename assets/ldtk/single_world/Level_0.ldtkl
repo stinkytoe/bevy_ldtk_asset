@@ -29,6 +29,48 @@
 	"fieldInstances": [],
 	"layerInstances": [
 		{
+			"__identifier": "Things",
+			"__type": "Entities",
+			"__cWid": 16,
+			"__cHei": 16,
+			"__gridSize": 16,
+			"__opacity": 1,
+			"__pxTotalOffsetX": 0,
+			"__pxTotalOffsetY": 0,
+			"__tilesetDefUid": null,
+			"__tilesetRelPath": null,
+			"iid": "b9a6ba70-ac70-11f0-9854-f397063a23ed",
+			"levelId": 0,
+			"layerDefUid": 167,
+			"pxOffsetX": 0,
+			"pxOffsetY": 0,
+			"visible": true,
+			"optionalRules": [],
+			"intGridCsv": [],
+			"autoLayerTiles": [],
+			"seed": 7336584,
+			"overrideTilesetUid": null,
+			"gridTiles": [],
+			"entityInstances": [
+				{
+					"__identifier": "Door",
+					"__grid": [12,8],
+					"__pivot": [0,0],
+					"__tags": [],
+					"__tile": { "tilesetUid": 1, "x": 176, "y": 176, "w": 16, "h": 16 },
+					"__smartColor": "#BE4A2F",
+					"iid": "de1e0e30-ac70-11f0-9854-a5862cb5a481",
+					"width": 16,
+					"height": 16,
+					"defUid": 168,
+					"px": [192,128],
+					"fieldInstances": [{ "__identifier": "Integer", "__type": "Int", "__value": 99, "__tile": null, "defUid": 169, "realEditorValues": [{ "id": "V_Int", "params": [99] }] }],
+					"__worldX": 192,
+					"__worldY": 128
+				}
+			]
+		},
+		{
 			"__identifier": "Objects",
 			"__type": "Tiles",
 			"__cWid": 16,
