@@ -1,14 +1,8 @@
-use bevy_asset::AssetLoader;
+use bevy_asset::io::Reader;
+use bevy_asset::{AssetLoader, LoadContext};
 
-// use crate::LdtkResult;
-// use crate::asset_labels::ProjectAssetPath;
-// use crate::entity_definition::EntityDefinition;
-// use crate::enum_definition::EnumDefinition;
-// use crate::layer_definition::LayerDefinition;
-use crate::ldtk;
 use crate::project::Project;
 use crate::result::LdtkResult;
-// use crate::world::World;
 
 #[derive(Default)]
 pub(crate) struct ProjectLoader;
@@ -20,15 +14,13 @@ impl AssetLoader for ProjectLoader {
 
     async fn load(
         &self,
-        reader: &mut dyn bevy_asset::io::Reader,
+        reader: &mut dyn Reader,
         _settings: &Self::Settings,
-        load_context: &mut bevy_asset::LoadContext<'_>,
+        load_context: &mut LoadContext<'_>,
     ) -> LdtkResult<Self::Asset> {
-        let ldtk_project: ldtk::LdtkProject = {
-            let mut bytes = Vec::new();
-            reader.read_to_end(&mut bytes).await?;
-            serde_json::from_slice(&bytes)?
-        };
+        let mut bytes = Vec::new();
+        reader.read_to_end(&mut bytes).await?;
+        let ldtk_project = serde_json::from_slice(&bytes)?;
 
         let project = Project::new(ldtk_project, load_context).await?;
 

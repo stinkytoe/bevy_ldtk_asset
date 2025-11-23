@@ -22,16 +22,16 @@ use crate::layer_definition::LayerDefinition;
 use crate::ldtk;
 use crate::ldtk_asset_trait::LdtkAsset;
 use crate::ldtk_import_error;
-use crate::project::construct_entity_definitions::construct_entity_definitions;
-use crate::project::construct_enum_definitions::construct_enum_definitions;
-use crate::project::construct_layer_definitions::construct_layer_definitions;
-use crate::project::construct_worlds_from_world_json::construct_worlds_from_world_json;
 use crate::result::LdtkResult;
 use crate::tileset_definition::TilesetDefinition;
 use crate::uid::UidMap;
 use crate::world::World;
 
+use construct_entity_definitions::construct_entity_definitions;
+use construct_enum_definitions::construct_enum_definitions;
+use construct_layer_definitions::construct_layer_definitions;
 use construct_tileset_definitions::construct_tileset_definitions;
+use construct_worlds_from_world_json::construct_worlds_from_world_json;
 
 /// This asset represents the entirety of an LDtk project file.
 ///
@@ -176,8 +176,6 @@ impl Project {
         })
     }
 }
-
-impl Project {}
 
 impl LdtkAsset for Project {
     fn get_iid(&self) -> Iid {
