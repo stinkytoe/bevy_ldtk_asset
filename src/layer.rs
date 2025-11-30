@@ -386,6 +386,10 @@ impl LayerInstance {
 }
 
 impl LdtkAsset for LayerInstance {
+    fn get_identifier(&self) -> &str {
+        &self.identifier
+    }
+
     fn get_iid(&self) -> Iid {
         self.iid
     }

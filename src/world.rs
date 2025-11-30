@@ -161,6 +161,10 @@ impl World {
 }
 
 impl LdtkAsset for World {
+    fn get_identifier(&self) -> &str {
+        &self.identifier
+    }
+
     fn get_iid(&self) -> Iid {
         self.iid
     }

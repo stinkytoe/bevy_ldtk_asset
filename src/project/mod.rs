@@ -178,6 +178,10 @@ impl Project {
 }
 
 impl LdtkAsset for Project {
+    fn get_identifier(&self) -> &str {
+        "project"
+    }
+
     fn get_iid(&self) -> Iid {
         self.iid
     }

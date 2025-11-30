@@ -9,6 +9,7 @@ use crate::{field_instance::FieldInstance, iid::Iid};
 /// and [crate::entity::Entity].
 #[allow(missing_docs)]
 pub trait LdtkAsset: Asset {
+    fn get_identifier(&self) -> &str;
     fn get_iid(&self) -> Iid;
 }
 

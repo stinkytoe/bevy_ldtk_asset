@@ -261,33 +261,41 @@ impl Level {
             "layer_instances is None? Are we opening the local layer definition instead of the external one?"
         ))?;
 
-        let layers_iter = layer_instances.into_iter().map(|layer_instance_json| {
-            let project_context = project_context.clone();
-            let load_context = load_context.clone();
+        let num_layers = layer_instances.len();
 
-            async move {
-                let layer_label = format!("{level_label}/{}", layer_instance_json.identifier);
-                debug!("constructing layer asset: {layer_label}");
+        let layers_iter =
+            layer_instances
+                .into_iter()
+                .enumerate()
+                .map(|(index, layer_instance_json)| {
+                    let project_context = project_context.clone();
+                    let load_context = load_context.clone();
+                    let index = num_layers - index - 1;
 
-                let iid = Iid::parse_str(&layer_instance_json.iid)?;
+                    async move {
+                        let layer_label =
+                            format!("{level_label}/{}", layer_instance_json.identifier);
+                        debug!("constructing layer asset: {layer_label}");
 
-                let layer = LayerInstance::new(
-                    layer_instance_json,
-                    index,
-                    project_context,
-                    load_context.clone(),
-                    &layer_label,
-                )
-                .await?;
+                        let iid = Iid::parse_str(&layer_instance_json.iid)?;
 
-                let handle = load_context
-                    .lock()
-                    .await
-                    .add_labeled_asset(layer_label, layer);
+                        let layer = LayerInstance::new(
+                            layer_instance_json,
+                            index,
+                            project_context,
+                            load_context.clone(),
+                            &layer_label,
+                        )
+                        .await?;
 
-                LdtkResult::Ok((iid, handle))
-            }
-        });
+                        let handle = load_context
+                            .lock()
+                            .await
+                            .add_labeled_asset(layer_label, layer);
+
+                        LdtkResult::Ok((iid, handle))
+                    }
+                });
 
         let layers = try_join_all(layers_iter).await?.into_iter().collect();
 
@@ -309,6 +317,10 @@ impl Level {
 }
 
 impl LdtkAsset for Level {
+    fn get_identifier(&self) -> &str {
+        &self.identifier
+    }
+
     fn get_iid(&self) -> Iid {
         self.iid
     }
