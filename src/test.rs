@@ -128,3 +128,10 @@ fn multi_world() {
         iid!("f4fecfc0-ac70-11f0-9854-79ba2b0a16c2")
     );
 }
+
+#[test]
+#[should_panic]
+fn embedded_asset_fail() {
+    let (_project_handle, _app, _asset_server) =
+        perpare_and_wait_on_project("ldtk/embedded_assets.ldtk");
+}
