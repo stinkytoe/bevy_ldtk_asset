@@ -298,6 +298,7 @@ stinkytoe
 - 0.9.0:
   - Better compatibility with async runtime
   - TilesLayer tileset_image now an `Option<Handle<Image>>`
+  - Added basic unit testing
 - 0.8.0:
   - Release for Bevy 0.17
   - Will now support major/minor version of Bevy, and not lock on a revision.
