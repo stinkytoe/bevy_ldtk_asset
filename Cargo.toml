@@ -18,28 +18,28 @@ exclude = [".github", ".gitignore", "assets", "examples", "gimp"]
 readme = "README.md"
 
 [dependencies]
-bevy_app = { version = "0.17.0", default-features = false }
-bevy_asset = { version = "0.17.0", default-features = false }
-bevy_color = { version = "0.17.0", default-features = false }
-bevy_ecs = { version = "0.17.0", default-features = false }
-bevy_image = { version = "0.17.0", default-features = false }
-bevy_log = { version = "0.17.0", default-features = false }
-bevy_math = { version = "0.17.0", default-features = false }
-bevy_platform = { version = "0.17.0", default-features = false }
-bevy_reflect = { version = "0.17.0", default-features = false, features = [
+bevy_app = { version = "0.18.0-rc.1", default-features = false }
+bevy_asset = { version = "0.18.0-rc.1", default-features = false }
+bevy_color = { version = "0.18.0-rc.1", default-features = false }
+bevy_ecs = { version = "0.18.0-rc.1", default-features = false }
+bevy_image = { version = "0.18.0-rc.1", default-features = false }
+bevy_log = { version = "0.18.0-rc.1", default-features = false }
+bevy_math = { version = "0.18.0-rc.1", default-features = false }
+bevy_platform = { version = "0.18.0-rc.1", default-features = false }
+bevy_reflect = { version = "0.18.0-rc.1", default-features = false, features = [
 	"uuid",
 ] }
-bevy_sprite = { version = "0.17.0", default-features = false }
-bevy_tasks = { version = "0.17.0", default-features = false }
-bevy_utils = { version = "0.17.0", default-features = false }
+bevy_sprite = { version = "0.18.0-rc.1", default-features = false }
+bevy_tasks = { version = "0.18.0-rc.1", default-features = false }
+bevy_utils = { version = "0.18.0-rc.1", default-features = false }
 
 path-clean = { version = "1.0", default-features = false }
-either = { version = "1.13", default-features = false }
+either = { version = "1.15", default-features = false }
 futures = "0.3"
 serde = { version = "1.0", default-features = false }
 serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
 thiserror = { version = "2.0", default-features = false }
-uuid = { version = "1.11", default-features = false }
+uuid = { version = "1.19", default-features = false }
 
 [features]
 default = ["asset_messages_debug"]

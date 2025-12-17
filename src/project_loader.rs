@@ -1,10 +1,11 @@
 use bevy_asset::io::Reader;
 use bevy_asset::{AssetLoader, LoadContext};
+use bevy_reflect::Reflect;
 
 use crate::project::Project;
 use crate::result::LdtkResult;
 
-#[derive(Default)]
+#[derive(Default, Reflect)]
 pub(crate) struct ProjectLoader;
 
 impl AssetLoader for ProjectLoader {

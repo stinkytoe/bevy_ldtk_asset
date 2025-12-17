@@ -89,6 +89,7 @@ impl Project {
             .path()
             .parent()
             .ok_or(ldtk_import_error!("Unable to get project_directory!"))?
+            .path()
             .to_path_buf();
 
         let tileset_definitions = construct_tileset_definitions(
