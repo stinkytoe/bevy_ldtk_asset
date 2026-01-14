@@ -267,17 +267,17 @@ from Bevy's documentation for instructions.
 
 ### Installing
 
-You can add this plugin to your project using Cargo:
+You can add this plugin to your project by running the following from within your project's directory:
 
 ```bash
-cargo add bevy_ldtk_asset # from within your project directory
+cargo add bevy_ldtk_asset
 ```
 
 Or by adding `bevy_ldtk_asset` to your `Cargo.toml` file dependencies section:
 
 ```toml
 [dependencies]
-bevy_ldtk_asset = "0.7"
+bevy_ldtk_asset = "0.10"
 ```
 
 ## Help
@@ -295,6 +295,8 @@ stinkytoe
 
 ## Version History
 
+- 0.10.0:
+  - Release for Bevy 0.18
 - 0.9.0:
   - Better compatibility with async runtime
   - TilesLayer tileset_image now an `Option<Handle<Image>>`
@@ -353,6 +355,7 @@ stinkytoe
 
 | bevy_ldtk_asset | bevy        | LDtk  |
 | :-------------: | :---------: | :---: |
+| 0.10.0          | 0.18        | 1.5.3 |
 | 0.9.0           | 0.17        | 1.5.3 |
 | 0.8.0           | 0.17        | 1.5.3 |
 | 0.7.1           | 0.16.0      | 1.5.3 |
