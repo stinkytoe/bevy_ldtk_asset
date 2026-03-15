@@ -13,7 +13,7 @@ use crate::world::World;
 
 pub(super) async fn construct_worlds_from_world_json(
     worlds_json: IidMap<ldtk::World>,
-    project_context: Arc<RwLock<ProjectContext>>,
+    project_context: Arc<RwLock<ProjectContext<'_>>>,
     load_context: &mut LoadContext<'_>,
 ) -> LdtkResult<IidMap<Handle<World>>> {
     let load_context = Arc::new(Mutex::new(load_context));

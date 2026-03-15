@@ -1,6 +1,4 @@
-use std::path::Path;
-
-use bevy_asset::{Handle, LoadContext};
+use bevy_asset::{AssetPath, Handle, LoadContext};
 use bevy_image::Image;
 use futures::future::try_join_all;
 
@@ -12,7 +10,7 @@ use crate::uid::UidMap;
 
 pub(super) async fn construct_tileset_definitions(
     tileset_definitions: Vec<ldtk::TilesetDefinition>,
-    project_directory: &Path,
+    project_directory: &AssetPath<'_>,
     load_context: &mut LoadContext<'_>,
 ) -> LdtkResult<UidMap<Handle<TilesetDefinition>>> {
     let tileset_definition_images = tileset_definitions

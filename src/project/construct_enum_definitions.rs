@@ -1,6 +1,4 @@
-use std::path::Path;
-
-use bevy_asset::{Handle, LoadContext};
+use bevy_asset::{AssetPath, Handle, LoadContext};
 use bevy_platform::collections::HashMap;
 use futures::future::try_join_all;
 
@@ -13,7 +11,7 @@ use crate::uid::UidMap;
 pub(super) async fn construct_enum_definitions(
     enum_definitions_json: Vec<ldtk::EnumDefinition>,
     tileset_definitions: &UidMap<Handle<TilesetDefinition>>,
-    project_directory: &Path,
+    project_directory: &AssetPath<'_>,
     load_context: &mut LoadContext<'_>,
 ) -> LdtkResult<HashMap<String, Handle<EnumDefinition>>> {
     let enum_definitions = enum_definitions_json

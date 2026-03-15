@@ -72,7 +72,7 @@ pub struct World {
 impl World {
     pub(crate) async fn new(
         world_json: ldtk::World,
-        project_context: Arc<RwLock<ProjectContext>>,
+        project_context: Arc<RwLock<ProjectContext<'_>>>,
         load_context: Arc<Mutex<&mut LoadContext<'_>>>,
         world_label: &str,
     ) -> LdtkResult<Self> {

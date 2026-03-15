@@ -75,7 +75,7 @@ pub struct EntityInstance {
 impl EntityInstance {
     pub(crate) async fn new(
         entity_instance_json: ldtk::EntityInstance,
-        project_context: Arc<RwLock<ProjectContext>>,
+        project_context: Arc<RwLock<ProjectContext<'_>>>,
     ) -> LdtkResult<Self> {
         let identifier = entity_instance_json.identifier;
 

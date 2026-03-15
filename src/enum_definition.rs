@@ -4,9 +4,9 @@
 //!
 //! See [Enumerations](https://ldtk.io/docs/general/editor-components/enumerations-enums/)
 //! in the LDtk documentation for a description.
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
-use bevy_asset::{Asset, Handle};
+use bevy_asset::{Asset, AssetPath, Handle};
 use bevy_color::Color;
 use bevy_platform::collections::HashMap;
 use bevy_reflect::Reflect;
@@ -71,7 +71,7 @@ impl EnumDefinition {
     pub(crate) async fn new(
         enum_definition_json: ldtk::EnumDefinition,
         tileset_definitions: &UidMap<Handle<TilesetDefinition>>,
-        project_directory: &Path,
+        project_directory: &AssetPath<'_>,
     ) -> LdtkResult<Self> {
         let identifier = enum_definition_json.identifier.clone();
 

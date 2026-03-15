@@ -42,7 +42,7 @@ impl EntitiesLayer {
     async fn new(
         entities_layer_json: ldtk::LayerInstance,
         layer_label: &str,
-        project_context: Arc<RwLock<ProjectContext>>,
+        project_context: Arc<RwLock<ProjectContext<'_>>>,
         load_context: Arc<Mutex<&mut LoadContext<'_>>>,
     ) -> LdtkResult<Self> {
         macro_rules! should_be {
@@ -127,7 +127,7 @@ pub struct TilesLayer {
 impl TilesLayer {
     async fn new(
         layer_instance_json: ldtk::LayerInstance,
-        project_context: Arc<RwLock<ProjectContext>>,
+        project_context: Arc<RwLock<ProjectContext<'_>>>,
         load_context: Arc<Mutex<&mut LoadContext<'_>>>,
     ) -> LdtkResult<Self> {
         // Check that the entities array is empty.
@@ -255,7 +255,7 @@ impl LayerType {
     async fn new(
         layer_instance_json: ldtk::LayerInstance,
         layer_label: &str,
-        project_context: Arc<RwLock<ProjectContext>>,
+        project_context: Arc<RwLock<ProjectContext<'_>>>,
         load_context: Arc<Mutex<&mut LoadContext<'_>>>,
     ) -> LdtkResult<Self> {
         match layer_instance_json.layer_instance_type.as_str() {
@@ -322,7 +322,7 @@ impl LayerInstance {
     pub(crate) async fn new(
         layer_instance_json: ldtk::LayerInstance,
         index: usize,
-        project_context: Arc<RwLock<ProjectContext>>,
+        project_context: Arc<RwLock<ProjectContext<'_>>>,
         load_context: Arc<Mutex<&mut LoadContext<'_>>>,
         layer_label: &str,
     ) -> LdtkResult<Self> {

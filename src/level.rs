@@ -190,7 +190,7 @@ impl Level {
     pub(crate) async fn new(
         level_json: ldtk::Level,
         index: usize,
-        project_context: Arc<RwLock<ProjectContext>>,
+        project_context: Arc<RwLock<ProjectContext<'_>>>,
         load_context: Arc<Mutex<&mut LoadContext<'_>>>,
         level_label: &str,
     ) -> LdtkResult<Self> {
@@ -216,10 +216,8 @@ impl Level {
                 ));
             }
             (Some(bg_pos), Some(bg_rel_path)) => {
-                let path = ldtk_path_to_bevy_path(
-                    project_context.read()?.project_directory.as_path(),
-                    bg_rel_path,
-                );
+                let path =
+                    ldtk_path_to_bevy_path(&project_context.read()?.project_directory, bg_rel_path);
                 let image = load_context.lock().await.load(path);
                 let background = LevelBackground::new(bg_pos, image)?;
                 Some(background)

@@ -88,7 +88,7 @@ impl FieldInstanceType {
     pub(crate) async fn new(
         field_instance_type: &str,
         value: Option<&serde_json::Value>,
-        project_context: Arc<RwLock<ProjectContext>>,
+        project_context: Arc<RwLock<ProjectContext<'_>>>,
     ) -> LdtkResult<Self> {
         let value = value.ok_or_else(|| ldtk_import_error!("Field instance value is None!"))?;
         match field_instance_type {
@@ -349,7 +349,7 @@ pub struct FieldInstance {
 impl FieldInstance {
     pub(crate) async fn new(
         field_instance_json: ldtk::FieldInstance,
-        project_context: Arc<RwLock<ProjectContext>>,
+        project_context: Arc<RwLock<ProjectContext<'_>>>,
     ) -> LdtkResult<Self> {
         let tileset_rectangle = field_instance_json
             .tile

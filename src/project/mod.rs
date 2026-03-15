@@ -6,10 +6,10 @@ mod construct_layer_definitions;
 mod construct_tileset_definitions;
 mod construct_worlds_from_world_json;
 
-use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::RwLock;
 
+use bevy_asset::AssetPath;
 use bevy_asset::{Asset, Handle, LoadContext};
 use bevy_platform::collections::HashMap;
 use bevy_reflect::Reflect;
@@ -58,13 +58,13 @@ pub struct Project {
 }
 
 #[allow(unused)] // DELETE ME!
-pub(crate) struct ProjectContext {
+pub(crate) struct ProjectContext<'a> {
     pub(crate) tileset_definitions: UidMap<Handle<TilesetDefinition>>,
     pub(crate) layer_definitions: UidMap<Handle<LayerDefinition>>,
     pub(crate) enum_definitions: HashMap<String, Handle<EnumDefinition>>,
     pub(crate) entity_definitions: UidMap<Handle<EntityDefinition>>,
     pub(crate) external_levels: bool,
-    pub(crate) project_directory: PathBuf,
+    pub(crate) project_directory: AssetPath<'a>,
 }
 
 impl Project {
@@ -88,9 +88,7 @@ impl Project {
         let project_directory = load_context
             .path()
             .parent()
-            .ok_or_else(|| ldtk_import_error!("Unable to get project_directory!"))?
-            .path()
-            .to_path_buf();
+            .ok_or_else(|| ldtk_import_error!("Unable to get project_directory!"))?;
 
         let tileset_definitions = construct_tileset_definitions(
             project_json.defs.tilesets,
