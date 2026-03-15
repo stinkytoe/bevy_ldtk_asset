@@ -126,7 +126,7 @@ impl World {
             Either::Right(levels_json_iter)
         };
 
-        let levels_iter = levels_json.into_iter().map(|(index, level_json)| {
+        let levels_iter = levels_json.map(|(index, level_json)| {
             let load_context = load_context.clone();
             let project_context = project_context.clone();
 

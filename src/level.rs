@@ -204,25 +204,21 @@ impl Level {
             .collect::<LdtkResult<_>>()?;
 
         let background = match (level_json.bg_pos, level_json.bg_rel_path) {
-            (None, None) => None,
-            (None, Some(_)) => {
-                return Err(ldtk_import_error!(
-                    "bg_pos is None while bg_rel_path is Some(_)!"
-                ));
-            }
-            (Some(_), None) => {
-                return Err(ldtk_import_error!(
-                    "bg_pos is Some(_) while bg_rel_path is None!"
-                ));
-            }
+            (None, None) => Ok(None),
+            (None, Some(_)) => Err(ldtk_import_error!(
+                "bg_pos is None while bg_rel_path is Some(_)!"
+            )),
+            (Some(_), None) => Err(ldtk_import_error!(
+                "bg_pos is Some(_) while bg_rel_path is None!"
+            )),
             (Some(bg_pos), Some(bg_rel_path)) => {
                 let path =
                     ldtk_path_to_bevy_path(&project_context.read()?.project_directory, bg_rel_path);
                 let image = load_context.lock().await.load(path);
                 let background = LevelBackground::new(bg_pos, image)?;
-                Some(background)
+                Ok(Some(background))
             }
-        };
+        }?;
 
         let iid = Iid::from_str(&level_json.iid)?;
 

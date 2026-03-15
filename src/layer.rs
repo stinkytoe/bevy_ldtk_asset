@@ -156,6 +156,8 @@ impl TilesLayer {
             // Good cases.
             ("Tiles", _, _) => layer_instance_json.grid_tiles.into_iter(),
             ("AutoLayer" | "IntGrid", _, _) => layer_instance_json.auto_layer_tiles.into_iter(),
+
+            // Anything else should have been filtered by this point, so panic.
             _ => unreachable!(),
         }
         .map(TileInstance::new)
