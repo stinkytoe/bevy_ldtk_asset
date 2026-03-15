@@ -99,10 +99,11 @@ impl World {
                         let load_context = load_context.clone();
 
                         async move {
-                            let ldtk_path =
-                                level_json.external_rel_path.ok_or(ldtk_import_error!(
+                            let ldtk_path = level_json.external_rel_path.ok_or_else(|| {
+                                ldtk_import_error!(
                                     "external_rel_path is `None` in an external_levels project?"
-                                ))?;
+                                )
+                            })?;
 
                             let path = ldtk_path_to_bevy_path(
                                 &project_context.read()?.project_directory,

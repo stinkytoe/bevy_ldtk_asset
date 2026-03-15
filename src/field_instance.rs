@@ -90,15 +90,17 @@ impl FieldInstanceType {
         value: Option<&serde_json::Value>,
         project_context: Arc<RwLock<ProjectContext>>,
     ) -> LdtkResult<Self> {
-        let value = value.ok_or(ldtk_import_error!("Field instance value is None!"))?;
+        let value = value.ok_or_else(|| ldtk_import_error!("Field instance value is None!"))?;
         match field_instance_type {
             "Array<Int>" => Ok(Self::ArrayInt(
                 value
                     .as_array()
-                    .ok_or(ldtk_import_error!(
-                        "Field Instance with type Array<Int>, value not an array! {:?}",
-                        value
-                    ))?
+                    .ok_or_else(|| {
+                        ldtk_import_error!(
+                            "Field Instance with type Array<Int>, value not an array! {:?}",
+                            value
+                        )
+                    })?
                     .iter()
                     .map(|value| serde_json::from_value::<i64>(value.clone()).map_err(|e| e.into()))
                     .collect::<LdtkResult<Vec<_>>>()?,
@@ -106,10 +108,12 @@ impl FieldInstanceType {
             "Array<String>" => Ok(Self::ArrayString(
                 value
                     .as_array()
-                    .ok_or(ldtk_import_error!(
-                        "Field Instance with type Array<Multilines>, value not an array! {:?}",
-                        value
-                    ))?
+                    .ok_or_else(|| {
+                        ldtk_import_error!(
+                            "Field Instance with type Array<Multilines>, value not an array! {:?}",
+                            value
+                        )
+                    })?
                     .iter()
                     .map(|value| {
                         serde_json::from_value::<String>(value.clone()).map_err(|e| e.into())
@@ -119,10 +123,12 @@ impl FieldInstanceType {
             "Array<Point>" => Ok(Self::ArrayPoint(
                 value
                     .as_array()
-                    .ok_or(ldtk_import_error!(
-                        "Field Instance with type Array<Point>, value not an array! {:?}",
-                        value
-                    ))?
+                    .ok_or_else(|| {
+                        ldtk_import_error!(
+                            "Field Instance with type Array<Point>, value not an array! {:?}",
+                            value
+                        )
+                    })?
                     .iter()
                     .map(|value| {
                         let cx = field_instance_map_get!(value, "cx", "Point", as_i64);
@@ -134,10 +140,12 @@ impl FieldInstanceType {
             "Array<Tile>" => Ok(Self::ArrayTile(
                 value
                     .as_array()
-                    .ok_or(ldtk_import_error!(
-                        "Field Instance with type Array<Tile>, value not an array! {:?}",
-                        value
-                    ))?
+                    .ok_or_else(|| {
+                        ldtk_import_error!(
+                            "Field Instance with type Array<Tile>, value not an array! {:?}",
+                            value
+                        )
+                    })?
                     .iter()
                     .map(|value| {
                         let value =
@@ -171,13 +179,10 @@ impl FieldInstanceType {
                     world_iid,
                 }
             })),
-            "FilePath" => Ok(Self::FilePath(
-                ldtk_path_to_bevy_path(
-                    &project_context.read()?.project_directory,
-                    serde_json::from_value::<String>(value.clone())?,
-                )
-                ,
-            )),
+            "FilePath" => Ok(Self::FilePath(ldtk_path_to_bevy_path(
+                &project_context.read()?.project_directory,
+                serde_json::from_value::<String>(value.clone())?,
+            ))),
             "Float" => Ok(Self::Float(serde_json::from_value::<f64>(value.clone())?)),
             "Int" => Ok(Self::Int(serde_json::from_value::<i64>(value.clone())?)),
             "Point" => Ok(Self::Point(
@@ -287,15 +292,17 @@ impl FieldInstanceType {
         if is_array {
             let array_enum = value
                 .as_array()
-                .ok_or(ldtk_import_error!(
-                    "Field Instance with type Array<*Enum.*>, value not an array!"
-                ))?
+                .ok_or_else(|| {
+                    ldtk_import_error!(
+                        "Field Instance with type Array<*Enum.*>, value not an array!"
+                    )
+                })?
                 .iter()
                 .map(|value| {
                     let value = serde_json::from_value::<String>(value.clone())?;
                     let enum_definition = enum_definitions
                         .get(enum_name)
-                        .ok_or(ldtk_import_error!("bad enum identifier! {}", enum_name))?
+                        .ok_or_else(|| ldtk_import_error!("bad enum identifier! {}", enum_name))?
                         .clone();
 
                     Ok(EnumValue {
@@ -310,7 +317,7 @@ impl FieldInstanceType {
             let value = serde_json::from_value::<String>(value.clone())?;
             let enum_definition = enum_definitions
                 .get(enum_name)
-                .ok_or(ldtk_import_error!("bad enum identifier! {}", enum_name))?
+                .ok_or_else(|| ldtk_import_error!("bad enum identifier! {}", enum_name))?
                 .clone();
 
             Ok(Self::Enum(EnumValue {

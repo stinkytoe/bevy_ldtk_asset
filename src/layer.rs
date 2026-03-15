@@ -169,9 +169,9 @@ impl TilesLayer {
                     .tileset_definitions
                     .get(&uid)
                     .cloned()
-                    .ok_or(ldtk_import_error!(
-                        "could not find a tileset_definition with uid {uid}!"
-                    ))
+                    .ok_or_else(|| {
+                        ldtk_import_error!("could not find a tileset_definition with uid {uid}!")
+                    })
             })
             .transpose()?;
 
@@ -348,10 +348,12 @@ impl LayerInstance {
             .read()?
             .layer_definitions
             .get(&layer_instance_json.layer_def_uid)
-            .ok_or(ldtk_import_error!(
-                "Bad layer definition uid! given: {}",
-                layer_instance_json.layer_def_uid
-            ))?
+            .ok_or_else(|| {
+                ldtk_import_error!(
+                    "Bad layer definition uid! given: {}",
+                    layer_instance_json.layer_def_uid
+                )
+            })?
             .clone();
 
         // Sanity check to guarantee that the int_grid size makes sense

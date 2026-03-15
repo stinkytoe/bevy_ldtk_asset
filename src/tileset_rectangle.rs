@@ -33,10 +33,9 @@ impl TilesetRectangle {
         let size = (value.w, value.h).into();
         let tileset_definition = tileset_definitions
             .get(&value.tileset_uid)
-            .ok_or(ldtk_import_error!(
-                "Bad tileset definition uid! given: {}",
-                value.tileset_uid
-            ))?
+            .ok_or_else(|| {
+                ldtk_import_error!("Bad tileset definition uid! given: {}", value.tileset_uid)
+            })?
             .clone();
 
         Ok(Self {

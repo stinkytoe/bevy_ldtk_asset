@@ -85,7 +85,7 @@ impl EnumDefinition {
             .map(|uid| {
                 tileset_definitions
                     .get(&uid)
-                    .ok_or(ldtk_import_error!("bad tileset definition uid! {}", uid))
+                    .ok_or_else(|| ldtk_import_error!("bad tileset definition uid! {}", uid))
             })
             .transpose()?
             .cloned();

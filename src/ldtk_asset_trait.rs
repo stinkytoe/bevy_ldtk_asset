@@ -4,9 +4,12 @@ use bevy_asset::{Asset, Handle};
 // use crate::field_instance::FieldInstance;
 use crate::{field_instance::FieldInstance, iid::Iid};
 
-/// Trait representing the assets which would exist in an LDtk project world, such as
-/// [crate::project::Project], [crate::world::World], [crate::level::Level],
-/// [crate::layer::LayerInstance], and [crate::entity::EntityInstance].
+/// Trait representing the assets which would exist in an LDtk project world, such as:
+/// - [crate::project::Project]
+/// - [crate::world::World]
+/// - [crate::level::Level],
+/// - [crate::layer::LayerInstance]
+/// - [crate::entity::EntityInstance].
 #[allow(missing_docs)]
 pub trait LdtkAsset: Asset {
     fn get_identifier(&self) -> &str;
@@ -30,9 +33,10 @@ pub trait LdtkAssetWithFieldInstances: LdtkAsset {
     fn get_field_instance(&self, identifier: &str) -> Option<&FieldInstance>;
 }
 
-/// Trait representing assets with a `tags` field. This is a Vec of strings allowing the user to
-/// organize [crate::entity::EntityInstance], [crate::tileset_definition::TilesetDefinition], and
-/// [crate::enum_definition::EnumDefinition] instances.
+/// Trait representing assets with a `tags` field. The following types use this:
+/// - [crate::entity::EntityInstance]
+/// - [crate::tileset_definition::TilesetDefinition]
+/// - [crate::enum_definition::EnumDefinition]
 #[allow(missing_docs)]
 pub trait LdtkAssetWithTags: Asset {
     fn get_tags(&self) -> &[String];

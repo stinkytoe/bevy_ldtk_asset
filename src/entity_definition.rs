@@ -99,24 +99,24 @@ impl TileRenderMode {
                         value
                     )
                 }),
-            ldtk::TileRenderMode::Repeat => {
-                nine_slice
-                    .is_empty()
-                    .then_some(Self::Repeat)
-                    .ok_or(ldtk_import_error!(
+            ldtk::TileRenderMode::Repeat => nine_slice
+                .is_empty()
+                .then_some(Self::Repeat)
+                .ok_or_else(|| {
+                    ldtk_import_error!(
                         "tile_render_mode with non-empty nine_slice array of type: {:?}!",
                         value
-                    ))
-            }
-            ldtk::TileRenderMode::Stretch => {
-                nine_slice
-                    .is_empty()
-                    .then_some(Self::Stretch)
-                    .ok_or(ldtk_import_error!(
+                    )
+                }),
+            ldtk::TileRenderMode::Stretch => nine_slice
+                .is_empty()
+                .then_some(Self::Stretch)
+                .ok_or_else(|| {
+                    ldtk_import_error!(
                         "tile_render_mode with non-empty nine_slice array of type: {:?}!",
                         value
-                    ))
-            }
+                    )
+                }),
             ldtk::TileRenderMode::NineSlice => Ok(Self::NineSlice(NineSlice::new(nine_slice)?)),
         }
     }

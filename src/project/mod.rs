@@ -88,7 +88,7 @@ impl Project {
         let project_directory = load_context
             .path()
             .parent()
-            .ok_or(ldtk_import_error!("Unable to get project_directory!"))?
+            .ok_or_else(|| ldtk_import_error!("Unable to get project_directory!"))?
             .path()
             .to_path_buf();
 
@@ -129,21 +129,21 @@ impl Project {
             IidMap::from([(
                 iid,
                 ldtk::World {
-                    default_level_height: project_json.default_level_height.ok_or(
-                        ldtk_import_error!("Missing default_level_height on single world project!"),
-                    )?,
-                    default_level_width: project_json.default_level_width.ok_or(
-                        ldtk_import_error!("Missing default_level_width on single world project!"),
-                    )?,
+                    default_level_height: project_json.default_level_height.ok_or_else(|| {
+                        ldtk_import_error!("Missing default_level_height on single world project!")
+                    })?,
+                    default_level_width: project_json.default_level_width.ok_or_else(|| {
+                        ldtk_import_error!("Missing default_level_width on single world project!")
+                    })?,
                     identifier: "World".to_string(),
                     iid: project_json.iid,
                     levels: project_json.levels,
-                    world_grid_height: project_json.world_grid_height.ok_or(ldtk_import_error!(
-                        "Missing world_grid_height on single world project!"
-                    ))?,
-                    world_grid_width: project_json.world_grid_width.ok_or(ldtk_import_error!(
-                        "Missing world_grid_width on single world project!"
-                    ))?,
+                    world_grid_height: project_json.world_grid_height.ok_or_else(|| {
+                        ldtk_import_error!("Missing world_grid_height on single world project!")
+                    })?,
+                    world_grid_width: project_json.world_grid_width.ok_or_else(|| {
+                        ldtk_import_error!("Missing world_grid_width on single world project!")
+                    })?,
                     world_layout: project_json.world_layout.clone(),
                 },
             )])

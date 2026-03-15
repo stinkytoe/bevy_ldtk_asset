@@ -114,22 +114,19 @@ impl LevelBackground {
                 let crop_size = (value.crop_rect[2], value.crop_rect[3]).into();
                 (crop_corner, crop_size)
             })
-            .ok_or(ldtk_import_error!(
-                "Bad value for crop! given: {:?}",
-                value.crop_rect
-            ))?;
+            .ok_or_else(|| {
+                ldtk_import_error!("Bad value for crop! given: {:?}", value.crop_rect)
+            })?;
         let scale = (value.scale.len() == 2)
             .then(|| (value.scale[0], value.scale[1]).into())
-            .ok_or(ldtk_import_error!(
-                "Bad value for scale! given: {:?}",
-                value.crop_rect
-            ))?;
+            .ok_or_else(|| {
+                ldtk_import_error!("Bad value for scale! given: {:?}", value.crop_rect)
+            })?;
         let corner = (value.top_left_px.len() == 2)
             .then(|| (value.top_left_px[0], value.top_left_px[1]).into())
-            .ok_or(ldtk_import_error!(
-                "Bad value for corner! given: {:?}",
-                value.crop_rect
-            ))?;
+            .ok_or_else(|| {
+                ldtk_import_error!("Bad value for corner! given: {:?}", value.crop_rect)
+            })?;
 
         Ok(Self {
             image,
@@ -259,7 +256,7 @@ impl Level {
 
         let location = (level_json.world_x, level_json.world_y).into();
 
-        let layer_instances = level_json.layer_instances.ok_or(ldtk_import_error!(
+        let layer_instances = level_json.layer_instances.ok_or_else(|| ldtk_import_error!(
             "layer_instances is None? Are we opening the local layer definition instead of the external one?"
         ))?;
 

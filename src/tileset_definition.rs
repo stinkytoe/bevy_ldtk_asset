@@ -92,7 +92,7 @@ impl TilesetDefinition {
             .map(|rel_path| {
                 tileset_definition_images
                     .get(&rel_path)
-                    .ok_or(ldtk_import_error!("Bad rel path! {rel_path}"))
+                    .ok_or_else(|| ldtk_import_error!("Bad rel path! {rel_path}"))
             })
             .transpose()?
             .cloned();

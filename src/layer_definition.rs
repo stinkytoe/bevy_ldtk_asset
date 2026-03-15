@@ -113,7 +113,7 @@ impl LayerDefinition {
             .map(|tileset_def_uid| {
                 tileset_definitions
                     .get(&tileset_def_uid)
-                    .ok_or(ldtk_import_error!("Bad uid! {tileset_def_uid}"))
+                    .ok_or_else(|| ldtk_import_error!("Bad uid! {tileset_def_uid}"))
             })
             .transpose()?
             .cloned();

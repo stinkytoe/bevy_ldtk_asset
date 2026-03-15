@@ -43,16 +43,17 @@ impl TileInstance {
         };
         let offset = (value.px.len() == 2)
             .then(|| (value.px[0], value.px[1]).into())
-            .ok_or(ldtk_import_error!(
-                "Bad px vector in LDtk tile instance! given: {:?}",
-                value.px
-            ))?;
+            .ok_or_else(|| {
+                ldtk_import_error!("Bad px vector in LDtk tile instance! given: {:?}", value.px)
+            })?;
         let source = (value.src.len() == 2)
             .then(|| (value.src[0], value.src[1]).into())
-            .ok_or(ldtk_import_error!(
-                "Bad src vector in LDtk tile instance! given: {:?}",
-                value.px
-            ))?;
+            .ok_or_else(|| {
+                ldtk_import_error!(
+                    "Bad src vector in LDtk tile instance! given: {:?}",
+                    value.px
+                )
+            })?;
 
         Ok(Self {
             opacity,
