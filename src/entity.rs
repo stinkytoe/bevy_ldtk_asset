@@ -26,8 +26,6 @@ use crate::tileset_rectangle::TilesetRectangle;
 use crate::{ldtk, ldtk_import_error};
 
 /// An asset representing an [LDtk Entity Instance](https://ldtk.io/json/#ldtk-EntityInstanceJson).
-///
-/// See [crate::asset_labels] for a description of the label format.
 #[derive(Debug, Asset, Reflect)]
 pub struct EntityInstance {
     /// The identifier for this specific entity.
@@ -70,7 +68,7 @@ pub struct EntityInstance {
     /// Note: this does not nesessarily correlate with the size of the entity's visualization, if
     /// it defines one.
     pub size: I64Vec2,
-    /// The entity's location in the space defined by its containing [crate::layer::Layer].
+    /// The entity's location in the space defined by its containing [crate::layer::LayerInstance].
     pub location: I64Vec2,
 }
 

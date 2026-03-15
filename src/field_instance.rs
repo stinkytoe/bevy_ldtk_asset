@@ -1,7 +1,7 @@
 //! A field instance is a field value attached to certain assets.
 //!
 //! A vector of field instances can be attached to any of:
-//! * [crate::entity::Entity]
+//! * [crate::entity::EntityInstance]
 //! * [crate::entity_definition::EntityDefinition]
 //! * [crate::level::Level]
 //!
@@ -324,8 +324,8 @@ impl FieldInstanceType {
 /// An individual field instance value.
 ///
 /// Typically, this will be stored in a collection in either an
-/// [crate::entity::Entity] or a [crate::level::Level], and be associated with that particular
-/// asset.
+/// [crate::entity::EntityInstance] or a [crate::level::Level], and be associated
+/// with that particular asset.
 ///
 /// Note: Optional field instance values which have not been given a value are not exported by
 /// this plugin. If the field is required by LDtk, but not supplied, then the LDtk editor will

@@ -85,7 +85,7 @@ impl Neighbour {
 
 /// The background of the level. This is to be drawn below the associated layers.
 /// [LevelBackground::crop_corner], and [LevelBackground::crop_size] represent the region inside of
-/// the image that should be cropped out for use in the visualization of the [Layer].
+/// the image that should be cropped out for use in the visualization of the [LayerInstance].
 ///
 /// [LevelBackground::corner] is relative to the top left corner of the level, and
 /// [LevelBackground::scale] is a scale factor which should be applied to the visualiztion.
@@ -147,7 +147,7 @@ impl LevelBackground {
 pub struct Level {
     /// The background color. This should represent a rectangle exactly the size and location of the
     /// [Level], represented by [Level::location] and [Level::size]. It should be drawn 'behind'
-    /// this level's associated [crate::layer::Layer]s, if any.
+    /// this level's associated [crate::layer::LayerInstance]s, if any.
     pub bg_color: Color,
     /// A list of [Neighbour]s, representing adjacent levels.
     pub neighbours: Vec<Neighbour>,
@@ -174,10 +174,11 @@ pub struct Level {
     ///
     /// This is in LDtk's coordinate space.
     pub location: I64Vec2,
-    /// Handles to all of the associated [Layer] instances, indexed by that layer's [Iid].
+    /// Handles to all of the associated [LayerInstance]s, indexed by that layer's [Iid].
     ///
-    /// NOTE: There is no meaning to the order within this field. If the order of the layers is
-    /// needed, the [Layer::index] field represents the order of  the layer within the set.
+    /// NOTE: There is no meaning to the order of the objects within this field.
+    /// If the order of the layers is needed, the [LayerInstance::index] field
+    /// represents the order of  the layer within the set.
     pub layers: IidMap<Handle<LayerInstance>>,
     /// The unique index of this level.
     ///

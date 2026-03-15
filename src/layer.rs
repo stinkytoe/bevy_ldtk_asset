@@ -27,12 +27,14 @@ use crate::tile_instance::TileInstance;
 use crate::tileset_definition::TilesetDefinition;
 use crate::uid::Uid;
 
-/// A layer instance which contains [Entity] children.
+/// A layer instance which contains [crate::entity::EntityInstance] assets
+/// as children.
 ///
 /// See [LayerType].
 #[derive(Debug, Reflect)]
 pub struct EntitiesLayer {
-    /// Handles pointing to the [Entity] instances which belong to this layer.
+    /// Handles pointing to the [crate::entity::EntityInstance] instances which
+    /// belong to this layer.
     pub entities: IidMap<Handle<EntityInstance>>,
 }
 
@@ -192,13 +194,12 @@ impl TilesLayer {
     }
 }
 
-/// The type of the [Layer] instance, defining what it contains.
-///
-/// In LDtk, layers can be of one of four types: `Entities`, `Tiles`, `IntGrid`, or `AutoLayer`.
+/// The type of the [LayerInstance], defining what it contains.
 #[derive(Debug, Reflect)]
 pub enum LayerType {
-    /// This layer will contain zero or more child [Entity]s, and no int grid, tiles, or
-    /// other visualization fields. Represented by [EntitiesLayer].
+    /// This layer will contain zero or more child [crate::entity::EntityInstance]s,
+    /// and no int grid, tiles, or other visualization fields.
+    /// Represented by [EntitiesLayer].
     Entities(EntitiesLayer),
     /// This layer will contain a vec of [TileInstance]s. Represented by
     /// [TilesLayer], but with the [TilesLayer::int_grid] field empty.

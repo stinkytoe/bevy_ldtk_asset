@@ -12,7 +12,7 @@ use crate::result::LdtkResult;
 use crate::tileset_definition::TilesetDefinition;
 use crate::uid::UidMap;
 
-/// The visualization for an [crate::entity::Entity] asset.
+/// The visualization for an [crate::entity::EntityInstance] asset.
 /// This can also be stored in [crate::field_instance::FieldInstance]s for reference.
 ///
 /// The Anchor and underlying tile set are defined in the entity instance.

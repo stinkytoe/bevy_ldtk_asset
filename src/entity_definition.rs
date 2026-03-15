@@ -122,7 +122,7 @@ impl TileRenderMode {
 pub struct EntityDefinition {
     /// The identifier for this definition.
     ///
-    /// Unlike [crate::entity::Entity] instances, the identifier for the definition is unique.
+    /// Unlike [crate::entity::EntityInstance] instances, the identifier for the definition is unique.
     pub identifier: String,
     /// Base color for the entity.
     pub color: Color,
@@ -138,7 +138,7 @@ pub struct EntityDefinition {
     ///
     /// Potentially an icon or portrait representation?
     pub ui_tile: Option<TilesetRectangle>,
-    /// The render mode for an [crate::entity::Entity] instance's visualization.
+    /// The render mode for an [crate::entity::EntityInstance] visualization.
     pub render_mode: TileRenderMode,
 }
 

@@ -5,8 +5,8 @@ use bevy_asset::{Asset, Handle};
 use crate::{field_instance::FieldInstance, iid::Iid};
 
 /// Trait representing the assets which would exist in an LDtk project world, such as
-/// [crate::project::Project], [crate::world::World], [crate::level::Level], [crate::layer::Layer],
-/// and [crate::entity::Entity].
+/// [crate::project::Project], [crate::world::World], [crate::level::Level],
+/// [crate::layer::LayerInstance], and [crate::entity::EntityInstance].
 #[allow(missing_docs)]
 pub trait LdtkAsset: Asset {
     fn get_identifier(&self) -> &str;
@@ -17,8 +17,8 @@ pub trait LdtkAsset: Asset {
 ///
 /// * [crate::project::Project]s contain [crate::world::World]s
 /// * [crate::world::World]s contain [crate::level::Level]s
-/// * [crate::level::Level]s contain [crate::layer::Layer]s
-/// * [crate::layer::Layer]s contain [crate::entity::Entity]s
+/// * [crate::level::Level]s contain [crate::layer::LayerInstance]s
+/// * [crate::layer::LayerInstance]s contain [crate::entity::EntityInstance]s
 pub trait LdtkAssetWithChildren<ChildAsset: LdtkAsset>: LdtkAsset {
     #[allow(missing_docs)]
     fn get_children(&self) -> impl Iterator<Item = &Handle<ChildAsset>>;
@@ -31,7 +31,7 @@ pub trait LdtkAssetWithFieldInstances: LdtkAsset {
 }
 
 /// Trait representing assets with a `tags` field. This is a Vec of strings allowing the user to
-/// organize [crate::entity::Entity], [crate::tileset_definition::TilesetDefinition], and
+/// organize [crate::entity::EntityInstance], [crate::tileset_definition::TilesetDefinition], and
 /// [crate::enum_definition::EnumDefinition] instances.
 #[allow(missing_docs)]
 pub trait LdtkAssetWithTags: Asset {

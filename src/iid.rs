@@ -20,8 +20,8 @@ pub use uuid::uuid as iid;
 /// A re-export of the [uuid::Uuid] type.
 pub use uuid::Uuid as Iid;
 
-/// A [bevy_utils::HashMap] indexed by an [Iid], for convenience.
+/// A [bevy_platform::collections::HashMap] indexed by an [Iid], for convenience.
 pub type IidMap<T> = HashMap<Iid, T>;
 
-/// A [bevy_utils::HashSet] of [Iid]s, for convenience.
+/// A [bevy_platform::collections::HashSet] of [Iid]s, for convenience.
 pub type IidSet = HashSet<Iid>;
