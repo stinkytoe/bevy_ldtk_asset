@@ -52,7 +52,7 @@ No components, systems (except for debug output), events, resources, etc are pro
 
 ### Conventions
 
-When possible, we will convert items to a Bevy compatible format.
+When possible, we will convert LDtk items to a Bevy compatible format.
 
 - Fields describing a color will be stored as a [bevy color](https://docs.rs/bevy/latest/bevy/color/enum.Color.html)
 - If the field describes a location in space, we will use an [I64Vec2](https://docs.rs/bevy/latest/bevy/math/struct.Vec2.html)
@@ -60,10 +60,11 @@ When possible, we will convert items to a Bevy compatible format.
   is positive down. Implementers will need to take care to invert the y-axis when
   creating components in Bevy's world space, such as the translation vector in a
   [Transform](https://docs.rs/bevy/latest/bevy/prelude/struct.Transform.html) Component.
-  - The `z` component is not represented, but `LayerInstance`s and `LevelInstance`s both contain an `index` field which can be 
-  used to derive one.
+  - The `z` component is not represented, but `LayerInstance` contains an `index` field 
+  of type `usize` which can be used to derive one. Higher indices represent the layer 
+  being `above` previous layers.
   - This behavior changed in `v0.6.0`.
-- If the field describes a location within an image, we will use a [I64Vec2](https://docs.rs/bevy/latest/bevy/math/struct.I64Vec2.html)
+- If the field describes a location within an image, we will use an [I64Vec2](https://docs.rs/bevy/latest/bevy/math/struct.I64Vec2.html)
   - The convention of y-axis being positive down is used here, to match the
   convention of LDtk, bevy_image, WGSL, and most image formats.
 - Images will be stored as a `Handle<Image>`
@@ -77,7 +78,7 @@ When possible, we will convert items to a Bevy compatible format.
   These are being phased out of LDtk, and will be removed here as well in the future.
   See [here](https://ldtk.io/docs/game-dev/json-overview/unique-identifiers/#important-future-deprecation-of-integer-uids).
 - LDtk pivot fields are converted to and stored as Bevy [Anchor](https://docs.rs/bevy/latest/bevy/sprite/enum.Anchor.html)
-  fields
+  fields.
 
 ## Assets
 
@@ -295,6 +296,11 @@ stinkytoe
 
 ## Version History
 
+- 0.10.1:
+  - Memory management improvements
+  - Improved readability
+  - Added doc test to CI
+  - Added clippy::nursery to lints
 - 0.10.0:
   - Release for Bevy 0.18
 - 0.9.0:
@@ -355,6 +361,7 @@ stinkytoe
 
 | bevy_ldtk_asset | bevy        | LDtk  |
 | :-------------: | :---------: | :---: |
+| 0.10.1          | 0.18        | 1.5.3 |
 | 0.10.0          | 0.18        | 1.5.3 |
 | 0.9.0           | 0.17        | 1.5.3 |
 | 0.8.0           | 0.17        | 1.5.3 |
