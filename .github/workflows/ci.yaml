@@ -60,3 +60,14 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
       - name: Cargo test
         run: cargo test
+
+  doc: 
+    name: Documentation check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+      - name: Install stable toolchain
+        uses: dtolnay/rust-toolchain@stable
+      - name: Cargo doc # Check for doc errors
+        run: cargo doc --no-deps
