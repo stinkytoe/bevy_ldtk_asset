@@ -4,7 +4,7 @@ use bevy_sprite::Anchor;
 use crate::ldtk_import_error;
 use crate::result::LdtkResult;
 
-pub(crate) fn bevy_anchor_from_ldtk(pivot: &[f64]) -> LdtkResult<Anchor> {
+pub fn bevy_anchor_from_ldtk(pivot: &[f64]) -> LdtkResult<Anchor> {
     (pivot.len() == 2)
         .then(|| match (pivot[0] as f32, pivot[1] as f32) {
             (0.0, 0.0) => Anchor::TOP_LEFT,
@@ -18,7 +18,7 @@ pub(crate) fn bevy_anchor_from_ldtk(pivot: &[f64]) -> LdtkResult<Anchor> {
             (1.0, 1.0) => Anchor::BOTTOM_RIGHT,
             (x, y) => Anchor::from(Vec2::new(x - 0.5, 0.5 - y)),
         })
-        .ok_or(ldtk_import_error!(
-            "Unable to parse pivot input to bevy Anchor! given: {pivot:?}",
-        ))
+        .ok_or_else(|| {
+            ldtk_import_error!("Unable to parse pivot input to bevy Anchor! given: {pivot:?}",)
+        })
 }

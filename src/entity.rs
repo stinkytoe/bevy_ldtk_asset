@@ -83,10 +83,9 @@ impl EntityInstance {
 
         let grid = (entity_instance_json.grid.len() == 2)
             .then(|| (entity_instance_json.grid[0], entity_instance_json.grid[1]).into())
-            .ok_or(ldtk_import_error!(
-                "Bad value for grid! given: {:?}",
-                entity_instance_json.grid
-            ))?;
+            .ok_or_else(|| {
+                ldtk_import_error!("Bad value for grid! given: {:?}", entity_instance_json.grid)
+            })?;
 
         let anchor = bevy_anchor_from_ldtk(&entity_instance_json.pivot)?;
 
@@ -114,10 +113,12 @@ impl EntityInstance {
             .read()?
             .entity_definitions
             .get(&entity_instance_json.def_uid)
-            .ok_or(ldtk_import_error!(
-                "bad entity definition uid! given: {}",
-                entity_instance_json.def_uid
-            ))?
+            .ok_or_else(|| {
+                ldtk_import_error!(
+                    "bad entity definition uid! given: {}",
+                    entity_instance_json.def_uid
+                )
+            })?
             .clone();
 
         let field_instances_iter = entity_instance_json
@@ -143,10 +144,12 @@ impl EntityInstance {
 
         let location = (entity_instance_json.px.len() == 2)
             .then(|| (entity_instance_json.px[0], entity_instance_json.px[1]).into())
-            .ok_or(ldtk_import_error!(
-                "Unable to parse I64Vec2 from entity px field! given: {:?}",
-                entity_instance_json.grid
-            ))?;
+            .ok_or_else(|| {
+                ldtk_import_error!(
+                    "Unable to parse I64Vec2 from entity px field! given: {:?}",
+                    entity_instance_json.grid
+                )
+            })?;
 
         Ok(Self {
             identifier,

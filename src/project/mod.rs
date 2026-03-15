@@ -76,7 +76,7 @@ impl Project {
     ) -> LdtkResult<Self> {
         let iid: Iid = project_json.iid.clone().try_into()?;
 
-        let ldtk_version = project_json.json_version.clone();
+        let ldtk_version = project_json.json_version;
         if ldtk_version != Self::SUPPORTED_VERSION {
             return Err(ldtk_import_error!(
                 "Bad LDtk JSON version! expected: {} given: {}",

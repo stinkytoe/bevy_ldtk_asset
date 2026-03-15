@@ -6,7 +6,7 @@ use crate::project::Project;
 use crate::result::LdtkResult;
 
 #[derive(Default, Reflect)]
-pub(crate) struct ProjectLoader;
+pub struct ProjectLoader;
 
 impl AssetLoader for ProjectLoader {
     type Asset = Project;

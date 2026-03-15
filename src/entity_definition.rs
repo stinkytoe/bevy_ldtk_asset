@@ -41,7 +41,7 @@ impl NineSlice {
                 down: nine_slice[2],
                 left: nine_slice[3],
             })
-            .ok_or(ldtk_import_error!("bad nine_slice array! {nine_slice:?}"))
+            .ok_or_else(|| ldtk_import_error!("bad nine_slice array! {nine_slice:?}"))
     }
 }
 
@@ -65,35 +65,40 @@ impl TileRenderMode {
     pub(crate) fn new(value: &ldtk::TileRenderMode, nine_slice: &[i64]) -> LdtkResult<Self> {
         match value {
             ldtk::TileRenderMode::Cover => {
-                nine_slice
-                    .is_empty()
-                    .then_some(Self::Cover)
-                    .ok_or(ldtk_import_error!(
+                nine_slice.is_empty().then_some(Self::Cover).ok_or_else(|| {
+                    ldtk_import_error!(
                         "tile_render_mode with non-empty nine_slice array of type: {:?}!",
                         value
-                    ))
+                    )
+                })
             }
             ldtk::TileRenderMode::FitInside => nine_slice
                 .is_empty()
                 .then_some(Self::FitInside)
-                .ok_or(ldtk_import_error!(
-                    "tile_render_mode with non-empty nine_slice array of type: {:?}!",
-                    value
-                )),
+                .ok_or_else(|| {
+                    ldtk_import_error!(
+                        "tile_render_mode with non-empty nine_slice array of type: {:?}!",
+                        value
+                    )
+                }),
             ldtk::TileRenderMode::FullSizeCropped => nine_slice
                 .is_empty()
                 .then_some(Self::FullSizeCropped)
-                .ok_or(ldtk_import_error!(
-                    "tile_render_mode with non-empty nine_slice array of type: {:?}!",
-                    value
-                )),
+                .ok_or_else(|| {
+                    ldtk_import_error!(
+                        "tile_render_mode with non-empty nine_slice array of type: {:?}!",
+                        value
+                    )
+                }),
             ldtk::TileRenderMode::FullSizeUncropped => nine_slice
                 .is_empty()
                 .then_some(Self::FullSizeUncropped)
-                .ok_or(ldtk_import_error!(
-                    "tile_render_mode with non-empty nine_slice array of type: {:?}!",
-                    value
-                )),
+                .ok_or_else(|| {
+                    ldtk_import_error!(
+                        "tile_render_mode with non-empty nine_slice array of type: {:?}!",
+                        value
+                    )
+                }),
             ldtk::TileRenderMode::Repeat => {
                 nine_slice
                     .is_empty()
