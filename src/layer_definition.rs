@@ -30,12 +30,12 @@ pub enum LayerDefinitionType {
 }
 
 impl LayerDefinitionType {
-    pub(crate) async fn new(ldtk_type: &str) -> LdtkResult<LayerDefinitionType> {
+    pub(crate) async fn new(ldtk_type: &str) -> LdtkResult<Self> {
         Ok(match ldtk_type {
-            "IntGrid" => LayerDefinitionType::IntGrid,
-            "Entities" => LayerDefinitionType::Entities,
-            "Tiles" => LayerDefinitionType::Tiles,
-            "AutoLayer" => LayerDefinitionType::Autolayer,
+            "IntGrid" => Self::IntGrid,
+            "Entities" => Self::Entities,
+            "Tiles" => Self::Tiles,
+            "AutoLayer" => Self::Autolayer,
             _ => {
                 return Err(ldtk_import_error!(
                     "Could not build LayerDefinitionType from input! given: {ldtk_type}"
@@ -118,7 +118,7 @@ impl LayerDefinition {
             .transpose()?
             .cloned();
 
-        Ok(LayerDefinition {
+        Ok(Self {
             layer_definition_type,
             auto_source_layer_def_uid,
             display_opacity,

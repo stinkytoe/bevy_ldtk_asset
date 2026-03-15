@@ -129,7 +129,7 @@ impl TilesLayer {
         layer_instance_json: ldtk::LayerInstance,
         project_context: Arc<RwLock<ProjectContext>>,
         load_context: Arc<Mutex<&mut LoadContext<'_>>>,
-    ) -> LdtkResult<TilesLayer> {
+    ) -> LdtkResult<Self> {
         // Check that the entities array is empty.
         if !layer_instance_json.entity_instances.is_empty() {
             Err(ldtk_import_error!("Entities layer with Tile data!"))?;
@@ -219,30 +219,30 @@ pub enum LayerType {
 impl LayerType {
     /// Returns `true` if it is a [LayerType::Tiles], [LayerType::IntGrid], or [LayerType::AutoLayer] type,
     /// but `false` for [LayerType::Entities].
-    pub fn is_tiles_layer(&self) -> bool {
+    pub const fn is_tiles_layer(&self) -> bool {
         !matches!(self, Self::Entities(_))
     }
 
     /// Returns `true` if it is a [LayerType::Entities] type,
     /// but `false` for [LayerType::Tiles], [LayerType::IntGrid], or [LayerType::AutoLayer].
-    pub fn is_entities_layer(&self) -> bool {
+    pub const fn is_entities_layer(&self) -> bool {
         matches!(self, Self::Entities(_))
     }
 
     /// Returns `Some(TilesLayer)` for [LayerType::Tiles], [LayerType::IntGrid], or [LayerType::AutoLayer],
     /// or `None` for [LayerType::Entities].
-    pub fn get_tiles_layer(&self) -> Option<&TilesLayer> {
+    pub const fn get_tiles_layer(&self) -> Option<&TilesLayer> {
         match self {
-            LayerType::Entities(_) => None,
-            LayerType::IntGrid(tiles_layer)
-            | LayerType::Tiles(tiles_layer)
-            | LayerType::AutoLayer(tiles_layer) => Some(tiles_layer),
+            Self::Entities(_) => None,
+            Self::IntGrid(tiles_layer)
+            | Self::Tiles(tiles_layer)
+            | Self::AutoLayer(tiles_layer) => Some(tiles_layer),
         }
     }
 
     /// Returns `Some(EntitiesLayer)` for [LayerType::Entities],
     /// or `None` for [LayerType::Tiles], [LayerType::IntGrid], or [LayerType::AutoLayer].
-    pub fn get_entities_layer(&self) -> Option<&EntitiesLayer> {
+    pub const fn get_entities_layer(&self) -> Option<&EntitiesLayer> {
         if let Self::Entities(entities_layer) = self {
             Some(entities_layer)
         } else {

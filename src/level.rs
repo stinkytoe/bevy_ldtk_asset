@@ -84,6 +84,7 @@ impl Neighbour {
 }
 
 /// The background of the level. This is to be drawn below the associated layers.
+///
 /// [LevelBackground::crop_corner], and [LevelBackground::crop_size] represent the region inside of
 /// the image that should be cropped out for use in the visualization of the [LayerInstance].
 ///

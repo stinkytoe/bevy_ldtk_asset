@@ -176,7 +176,7 @@ impl FieldInstanceType {
                     &project_context.read()?.project_directory,
                     serde_json::from_value::<String>(value.clone())?,
                 )
-                .to_path_buf(),
+                ,
             )),
             "Float" => Ok(Self::Float(serde_json::from_value::<f64>(value.clone())?)),
             "Int" => Ok(Self::Int(serde_json::from_value::<i64>(value.clone())?)),
@@ -374,70 +374,70 @@ macro_rules! is_type {
 
 #[allow(missing_docs)]
 impl FieldInstance {
-    pub fn is_array_int(&self) -> bool {
+    pub const fn is_array_int(&self) -> bool {
         is_type!(self, FieldInstanceType::ArrayInt)
     }
 
-    pub fn is_array_enum(&self) -> bool {
+    pub const fn is_array_enum(&self) -> bool {
         is_type!(self, FieldInstanceType::ArrayEnum)
     }
 
-    pub fn is_array_string(&self) -> bool {
+    pub const fn is_array_string(&self) -> bool {
         is_type!(self, FieldInstanceType::ArrayString)
     }
 
-    pub fn is_array_point(&self) -> bool {
+    pub const fn is_array_point(&self) -> bool {
         is_type!(self, FieldInstanceType::ArrayPoint)
     }
 
-    pub fn is_array_tile(&self) -> bool {
+    pub const fn is_array_tile(&self) -> bool {
         is_type!(self, FieldInstanceType::ArrayTile)
     }
 
-    pub fn is_bool(&self) -> bool {
+    pub const fn is_bool(&self) -> bool {
         is_type!(self, FieldInstanceType::Bool)
     }
 
-    pub fn is_color(&self) -> bool {
+    pub const fn is_color(&self) -> bool {
         is_type!(self, FieldInstanceType::Color)
     }
 
-    pub fn is_entity_ref(&self) -> bool {
+    pub const fn is_entity_ref(&self) -> bool {
         is_type!(self, FieldInstanceType::EntityRef)
     }
 
-    pub fn is_enum(&self) -> bool {
+    pub const fn is_enum(&self) -> bool {
         is_type!(self, FieldInstanceType::Enum)
     }
 
-    pub fn is_file_path(&self) -> bool {
+    pub const fn is_file_path(&self) -> bool {
         is_type!(self, FieldInstanceType::FilePath)
     }
 
-    pub fn is_float(&self) -> bool {
+    pub const fn is_float(&self) -> bool {
         is_type!(self, FieldInstanceType::Float)
     }
 
-    pub fn is_int(&self) -> bool {
+    pub const fn is_int(&self) -> bool {
         is_type!(self, FieldInstanceType::Int)
     }
 
-    pub fn is_point(&self) -> bool {
+    pub const fn is_point(&self) -> bool {
         is_type!(self, FieldInstanceType::Point)
     }
 
-    pub fn is_string(&self) -> bool {
+    pub const fn is_string(&self) -> bool {
         is_type!(self, FieldInstanceType::String)
     }
 
-    pub fn is_tile(&self) -> bool {
+    pub const fn is_tile(&self) -> bool {
         is_type!(self, FieldInstanceType::Tile)
     }
 }
 
 macro_rules! get_by_type {
     ( $fn_name:ident, $layer_instance_type:path, $ret:path) => {
-        pub fn $fn_name(&self) -> Option<&$ret> {
+        pub const fn $fn_name(&self) -> Option<&$ret> {
             if let $layer_instance_type(inner) = &self.field_instance_type {
                 Some(inner)
             } else {

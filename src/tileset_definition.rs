@@ -101,7 +101,7 @@ impl TilesetDefinition {
         let tags_source_enum_uid = value.tags_source_enum_uid;
         let tile_grid_pixel_size = value.tile_grid_size;
 
-        Ok(TilesetDefinition {
+        Ok(Self {
             identifier,
             tile_grid_size,
             custom_data,

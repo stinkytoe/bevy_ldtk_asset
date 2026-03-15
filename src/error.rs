@@ -32,7 +32,7 @@ pub enum LdtkError {
 
 impl<T> From<PoisonError<T>> for LdtkError {
     fn from(_value: PoisonError<T>) -> Self {
-        LdtkError::PoisonError
+        Self::PoisonError
     }
 }
 
